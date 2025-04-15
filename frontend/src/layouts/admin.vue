@@ -3,7 +3,7 @@
 
     <div class="container-fluid mt-3">
         <div class="row">
-            <div class="col-sm-3 d-none d-sm-flex">
+            <div class="col-sm-2 d-none d-sm-flex">
                 <a-list bordered style="width: 100%;">
                     <TheMenu />
                     <template #header>
@@ -12,7 +12,7 @@
                 </a-list>
             </div>
 
-            <div class="col-12 col-sm-9">
+            <div class="col-12 col-sm-10 bg-right bg-gradient pb-3">
                 <router-view></router-view>
             </div>
         </div>
@@ -30,3 +30,11 @@ export default {
     }
 }
 </script>
+
+<style>
+
+.bg-right {
+    background-color: rgba(74, 72, 72, 0.174);
+}
+
+</style>

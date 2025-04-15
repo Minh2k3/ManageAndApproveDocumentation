@@ -1,8 +1,16 @@
 const admin = [
     {
         path: '/admin',
+        name: 'admin',
+        redirect: '/admin/dashboard',
         component: () => import('../layouts/admin.vue'),
         children: [
+            // Quản lý Dashboard
+            {
+                path: 'dashboard',
+                name: 'admin-dashboard',
+                component: () => import('../pages/admin/dashboard/index.vue'),
+            },
             // Quản lý Users
             {
                 path: 'users',
