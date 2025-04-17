@@ -35,6 +35,13 @@ const admin = [
                 path: "settings",
                 name: "admin-settings",
                 component: () => import('../pages/admin/settings/index.vue')
+            },
+
+            // Quản lý Documents
+            {
+                path: "documents",
+                name: "admin-documents",
+                component: () => import('../pages/admin/documents/index.vue')
             }
         ]
     }

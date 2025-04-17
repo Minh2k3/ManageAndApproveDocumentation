@@ -16,19 +16,19 @@
                         <div class="col-12 justify-content-center d-flex mb-1 align-items-center">
                             <a-avatar shape="square" :size="50" style="background-color: transparent;">
                                 <template #icon>
-                                    <img src="../assets/images/logo_tlu.png" alt="logo_tlu"
+                                    <img src="@/assets/images/logo_tlu.png" alt="logo_tlu"
                                         style="width: 100%; height: 100%; object-fit: contain;">
                                 </template>
                             </a-avatar>
                             <a-avatar shape="square" :size="50" style="background-color: transparent;" class="mx-3">
                                 <template #icon>
-                                    <img src="../assets/images/logo_dtn.png" alt="logo_dtn"
+                                    <img src="@/assets/images/logo_dtn.png" alt="logo_dtn"
                                         style="width: 100%; height: 100%; object-fit: contain;">
                                 </template>
                             </a-avatar>
                             <a-avatar shape="square" :size="45" style="background-color: transparent;">
                                 <template #icon>
-                                    <img src="../assets/images/logo_hsv.png" alt="logo_hsv"
+                                    <img src="@/assets/images/logo_hsv.png" alt="logo_hsv"
                                         style="width: 100%; height: 100%; object-fit: contain;">
                                 </template>
                             </a-avatar>
@@ -296,7 +296,7 @@
 import { MailOutlined } from "@ant-design/icons-vue";
 import { defineComponent, ref, reactive, toRefs } from "vue";
 import axios from "axios";
-import bgImage from '../assets/images/NMT.jpg';
+import bgImage from '@/assets/images/NMT.jpg';
 export default defineComponent({
     components: {
         MailOutlined,

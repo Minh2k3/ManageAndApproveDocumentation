@@ -1,15 +1,6 @@
 <template>
     <a-card title="" style="width: 100%">
-        <h2 class="fw-bold mb-5">Quản Lý Người Dùng</h2>
-        <div class="row mb-3">
-            <div class="col-12 align-items-center justify-content-end d-flex">
-                <a-button type="primary">
-                   <router-link :to="{name: 'admin-users-create' }" class="text-white">
-                    <i class="fa-solid fa-plus"></i>
-                   </router-link>
-                </a-button>
-            </div>
-        </div>
+        <h2 class="fw-bold mb-3">Quản Lý Văn Bản</h2>
         <div class="row mb-3">
             <div class="col-12">
                 <div class="row g-2">
@@ -98,7 +89,7 @@ import { defineComponent, ref } from "vue";
 import { useMenu } from "../../../stores/use-menu.js";
 export default defineComponent ({
     setup() {
-        useMenu().onSelectedKeys(["admin-users"]);
+        useMenu().onSelectedKeys(["admin-documents"]);
 
         const users = ref([]);
         const columns = [

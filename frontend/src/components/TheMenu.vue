@@ -20,6 +20,14 @@
           </router-link>
       </a-menu-item>
 
+      <a-menu-item key="admin-documents">
+          <router-link :to="{ name: 'admin-documents'}" title="Quản lý văn bản">
+              <span class="fs-6 d-inline-flex align-items-center">
+                <FileOutlined class="me-2"/>Quản lý văn bản
+              </span>
+          </router-link>
+      </a-menu-item>
+
       <a-menu-item key="admin-roles">
           <router-link :to="{ name: 'admin-roles'}" title="Quản lý vai trò">
               <span class="fs-6 d-inline-flex align-items-center"><TagOutlined class="me-2" />Quản lý vai trò</span>
@@ -35,7 +43,7 @@
 </template>
 
 <script>
-import { UserOutlined, TagOutlined, SettingOutlined, HomeOutlined  } from '@ant-design/icons-vue';
+import { UserOutlined, TagOutlined, SettingOutlined, HomeOutlined, FileOutlined  } from '@ant-design/icons-vue';
 import { defineComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useMenu } from '../stores/use-menu.js';
@@ -45,6 +53,7 @@ export default defineComponent({
       UserOutlined,
       TagOutlined,
       SettingOutlined,
+      FileOutlined,
   },
   setup() {
     const store = useMenu();

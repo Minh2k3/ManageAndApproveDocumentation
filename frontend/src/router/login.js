@@ -2,7 +2,7 @@ const login = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('../layouts/login.vue'),
+        component: () => import('../pages/dashboard/login/index.vue'),
     }
 ];
 
