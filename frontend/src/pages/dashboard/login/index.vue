@@ -1,6 +1,13 @@
 <template>
     <div class="container-fluid vh-100 overflow-hidden" style="background-color: aquamarine;">
-
+        <div class="position-absolute top-0 end-0 m-3">
+            <router-link to="/" class="text-decoration-none">
+                <a-button type="primary" class="d-flex align-items-center">
+                    <HomeOutlined class="me-1" />
+                    Trang chủ
+                </a-button>
+            </router-link>
+        </div>
         <div class="row h-100">
             <!-- Cột trái -->
             <div class="d-sm-flex col-sm-6 d-none">
@@ -48,9 +55,8 @@
             </div>
 
             <!-- Cột phải -->
-            <div class="col-12 col-sm-6 d-flex justify-content-center rounded-start-5 align-items-center"
-                style="background-color: #f8f9fa;">
-                <div class="row w-100">
+            <div class="col-12 col-sm-6 d-flex rounded-start-5 " style="background-color: #f8f9fa;">
+                <div class="row w-100 h-100 justify-content-center align-items-center">
                     <div class="col-12">
                         <!-- Nội dung cột giữa -->
                         <div class="row">
@@ -173,7 +179,6 @@
                                 </router-link>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -182,11 +187,12 @@
 </template>
 
 <script>
-import { MailOutlined } from "@ant-design/icons-vue";
+import { HomeOutlined, MailOutlined } from "@ant-design/icons-vue";
 
 export default {
     components: {
         MailOutlined,
+        HomeOutlined,
     },
 };
 </script>

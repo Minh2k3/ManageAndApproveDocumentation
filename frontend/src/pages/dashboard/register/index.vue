@@ -1,6 +1,14 @@
 <template>
     <div 
         class="container-fluid vh-100 overflow-hidden">
+        <div class="position-absolute top-0 end-0 m-3">
+            <router-link to="/" class="text-decoration-none">
+                <a-button type="primary" class="d-flex align-items-center">
+                    <HomeOutlined class="me-1" />
+                    Trang chủ
+                </a-button>
+            </router-link>
+        </div>
         <div class="row h-100">
             <!-- Cột trái -->
             <div class="d-sm-flex col-sm-6 d-none " :style="{      
