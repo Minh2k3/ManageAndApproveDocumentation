@@ -5,11 +5,11 @@
                 <div class="d-flex align-items-center">
                     <img src="../assets/images/logo_tlu.png" alt="Logo ĐH Thủy Lợi" class="me-2"
                         style="height: 40px; width: 40px;" />
-                    <h1 class="h4 mb-0 fw-bold">ĐH THỦY LỢI</h1>
+                    <span class="fs-4 mb-0 fw-bold">ĐH THỦY LỢI</span>
                 </div>
                 <nav class="d-none d-md-flex">
-                    <router-link to="/" class="text-white mx-3 text-decoration-none fw-medium">Trang chủ</router-link>
-                    <router-link to="/" class="text-white mx-3 text-decoration-none">Giới thiệu</router-link>
+                    <router-link to="#" class="text-white mx-3 text-decoration-none fw-medium">Trang chủ</router-link>
+                    <router-link to="#" class="text-white mx-3 text-decoration-none">Giới thiệu</router-link>
                     <a href="#features" @click.prevent="scrollToFeatures" class="text-white mx-3
                         text-decoration-none">Tính năng</a>
                     <a href="#process-flow" @click.prevent="scrollToProcessFlow" class="text-white mx-3

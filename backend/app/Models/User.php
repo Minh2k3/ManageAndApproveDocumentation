@@ -45,4 +45,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class, 'user_department_roles')
+            ->withPivot('role_id', 'created_at', 'ended_at');
+    }
+    
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_department_roles')
+            ->withPivot('department_id', 'created_at', 'ended_at');
+    }
 }

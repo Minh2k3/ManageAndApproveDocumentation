@@ -138,32 +138,35 @@
 
                         <div class="row justify-content-center mt-3">
                             <div class="col-sm-4">
-                                <div class="col-12 col-sm-6 text-start align-self-center">
+                                <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Đơn vị</span>
+                                        <span class="fw-bold">Phòng/Khoa/Đơn vị</span>
                                     </label>
                                 </div>
                                 <div class="col-12 col-sm-12 mt-1">
-                                    <div class="d-flex">
+                                    <div class="d-flex align-items-center">
                                         <a-select 
-                                        show-search placeholder="Phòng ban" 
+                                        v-model:value="selectedDepartment"
+                                        show-search 
+                                        placeholder="Phòng/Khoa/Đơn vị" 
                                         style="width: 100%"
                                         :options="departments" 
                                         :filter-option="filterOption" 
                                         allow-clear
                                         :list-height="96"
                                         ></a-select>
-
+                                        
+                                        <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlock của trường">
+                                            <QuestionCircleOutlined 
+                                                class="ms-2 text-primary"
+                                                style="font-size: 18px; cursor: pointer;"
+                                                @click="showRequestNewDepartmentModal"
+                                            />
+                                        </a-tooltip>
                                     </div>
 
                                     <div class="w-100"></div>
-
-                                    <!-- <small
-                                    v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                    {{ errors.password[0] }}
-                                </small> -->
                                 </div>
                             </div>
 
@@ -171,29 +174,24 @@
                                 <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Chức vụ</span>
+                                        <span class="fw-bold">Vai trò</span>
                                     </label>
                                 </div>
                                 <div class="col-12 col-sm-12 mt-1">
                                     <div class="d-flex">
                                         <a-select 
-                                        show-search placeholder="Chức vụ" 
+                                        v-model:value="selectedRole"
+                                        show-search 
+                                        placeholder="Vai trò" 
                                         style="width: 100%"
                                         :options="roles" 
                                         :filter-option="filterOption" 
                                         allow-clear
                                         :list-height="96"
                                         ></a-select>
-
                                     </div>
 
                                     <div class="w-100"></div>
-
-                                    <!-- <small
-                                    v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                    {{ errors.password[0] }}
-                                </small> -->
                                 </div>
                             </div>
                         </div>
@@ -212,12 +210,6 @@
                                         allow-clear />
 
                                     <div class="w-100"></div>
-
-                                    <!-- <small
-                                    v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                    {{ errors.password[0] }}
-                                </small> -->
                                 </div>
                             </div>
                         </div>
@@ -236,12 +228,6 @@
                                         allow-clear />
 
                                     <div class="w-100"></div>
-
-                                    <!-- <small
-                                    v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                    {{ errors.password[0] }}
-                                </small> -->
                                 </div>
                             </div>
                         </div>
@@ -297,51 +283,94 @@
                 </div>
             </div>
         </div>
+        
     </div>
 </template>
 
 <script>
-import { MailOutlined } from "@ant-design/icons-vue";
+import { MailOutlined, QuestionCircleOutlined, HomeOutlined } from "@ant-design/icons-vue";
 import { defineComponent, ref, reactive, toRefs } from "vue";
 import axios from "axios";
 import bgImage from '@/assets/images/NMT.jpg';
+import { message } from 'ant-design-vue';
+
 export default defineComponent({
     components: {
         MailOutlined,
+        QuestionCircleOutlined,
+        HomeOutlined
     },
     
     setup() {
-
-        const departments = ref([
-            { label: "Đoàn trường", value: "Đoàn trường" },
-            { label: "Khoa CNTT", value: "Khoa CNTT" },
-            { label: "Khoa Điện - Điện tử", value: "Khoa Điện - Điện tử" },
-            { label: "Trung tâm Đào tạo Quốc tế", value: "Trung tâm Đào tạo Quốc tế" },
-            { label: "Hội sinh viên", value: "HSV"},
-            { label: "Khoa KTQL", value: "KTQL"},
-            { label: "Khoa Cơ khí", value: "Cơ khí"},
-            { label: "Khoa Công trình", value: "Công trình"},
-        ]);
-
-        const roles = ref([
-            { label: "Bí thư", value: "Bí thư" },
-            { label: "Phó Bí thư", value: "Phó Bí thư" },
-            { label: "Chủ tịch", value: "Chủ tịch" },
-            { label: "Phó Chủ tịch", value: "Phó Chủ tịch" },
-            { label: "Ủy viên", value: "Ủy viên" },
-            { label: "Sinh viên", value: "Sinh viên" },
-        ]);
-
+        // Thông tin form đăng ký
+        const name = ref('');
+        const email = ref('');
+        const password = ref('');
+        const password_confirmation = ref('');
         const ok = ref(false);
+        const selectedDepartment = ref(null);
+        const selectedRole = ref(null);
+        
+        // Danh sách phòng ban và vai trò
+        const departments = ref([]);
+        const roles = ref([]);
+
+        // Hàm lọc cho select box
+        const filterOption = (input, option) => {
+            return option.label.toLowerCase().includes(input.toLowerCase());
+        };
+
+        // Hàm hiển thị modal yêu cầu thêm phòng ban mới
+        let lastRequestTime = 0;
+
+        const showRequestNewDepartmentModal = () => {
+            const now = Date.now();
+
+            if (now - lastRequestTime >= 6666) {
+                lastRequestTime = now;
+                message.info("Vui lòng gửi email yêu cầu thêm phòng ban mới đến admin qua tài khoản Outlook của trường.");
+            } else {
+                console.log("Thông báo này đang trong thời gian cooldown");
+            }
+        };
+
+        const getUsersRegister = () => {
+            axios.get("http://127.0.0.1:8000/api/users/create")
+                .then((response) => {
+                    departments.value = response.data.users_department;
+                    roles.value = response.data.users_role;
+                    console.log(departments.value);
+                    console.log(roles.value);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        };
+
+        // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
+        getUsersRegister();
 
         return {
+            // Form đăng ký
+            name,
+            email,
+            password,
+            password_confirmation,
             departments,
             roles,
             ok,
             bgImage,
+            selectedDepartment,
+            selectedRole,
+            filterOption,
+            showRequestNewDepartmentModal,
         }
     }
 });
 </script>
 
-<style></style>
+<style>
+.ant-tooltip {
+    max-width: 300px;
+}
+</style>
