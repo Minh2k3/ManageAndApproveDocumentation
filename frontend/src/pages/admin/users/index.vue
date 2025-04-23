@@ -59,13 +59,10 @@
                         class="w-100"
                         />
                     </div>
-                    <!-- Nút tạo -->
                     <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
-                        <router-link :to="{ name: 'admin-users-create' }">
                         <a-button type="primary" class="w-100 w-md-auto">
                             <i class="fa-solid fa-filter "></i>
                         </a-button>
-                        </router-link>
                     </div>
                     </div>
                 </div>
@@ -95,7 +92,7 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import { useMenu } from "../../../stores/use-menu.js";
+import { useMenu } from "@/stores/use-menu.js";
 export default defineComponent ({
     setup() {
         useMenu().onSelectedKeys(["admin-users"]);

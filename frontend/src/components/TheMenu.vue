@@ -1,66 +1,135 @@
 <template>
-    <a-menu
-      v-model:openKeys="openKeys"
-      v-model:selectedKeys="selectedKeys"
-      mode="inline"
-    >
-      <a-menu-item menu-item key="admin-dashboard">
-          <router-link :to="{ name: 'admin-dashboard'}" title="Bảng điều khiển">
-              <span class="fs-6 d-inline-flex align-items-center" >
-                <HomeOutlined class="me-2"/>Bảng điều khiển
-              </span>
-          </router-link>
-      </a-menu-item>
+	<a-menu v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
+		<a-menu-item menu-item key="admin-dashboard">
+			<router-link :to="{ name: 'admin-dashboard' }" title="Quản lý chung">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<HomeOutlined class="me-2" />Quản lý chung
+				</span>
+			</router-link>
+		</a-menu-item>
 
-      <a-menu-item key="admin-users">
-          <router-link :to="{ name: 'admin-users'}" title="Quản lý người dùng">
-              <span class="fs-6 d-inline-flex align-items-center">
-                <UserOutlined class="me-2"/>Quản lý người dùng
-              </span>
-          </router-link>
-      </a-menu-item>
+		<a-sub-menu key="admin-users">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<UserOutlined class="me-2" /> Quản lý người dùng
+				</span>
+			</template>
 
-      <a-menu-item key="admin-documents">
-          <router-link :to="{ name: 'admin-documents'}" title="Quản lý văn bản">
-              <span class="fs-6 d-inline-flex align-items-center">
-                <FileOutlined class="me-2"/>Quản lý văn bản
-              </span>
-          </router-link>
-      </a-menu-item>
+			<a-menu-item key="admin-users-list">
+				<router-link :to="{ name: 'admin-users' }">Danh sách người dùng</router-link>
+			</a-menu-item>
 
-      <a-menu-item key="admin-roles">
-          <router-link :to="{ name: 'admin-roles'}" title="Quản lý vai trò">
-              <span class="fs-6 d-inline-flex align-items-center"><TagOutlined class="me-2" />Quản lý vai trò</span>
-          </router-link>
-      </a-menu-item>
+			<a-menu-item key="admin-users-create">
+				<router-link :to="{ name: 'admin-users-create' }">Thêm người dùng</router-link>
+			</a-menu-item>
+		</a-sub-menu>
 
-      <a-menu-item key="admin-settings">
-          <router-link :to="{ name: 'admin-settings'}" title="Cài đặt">
-              <span class="fs-6 d-inline-flex align-items-center"><SettingOutlined class="me-2" />Cài đặt</span>
-          </router-link>
-      </a-menu-item>
-  </a-menu>
+		<a-sub-menu key="admin-documents">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<FileOutlined class="me-2" /> Quản lý văn bản
+				</span>
+			</template>
+
+			<a-menu-item key="admin-documents-all">
+				<router-link :to="{ name: 'admin-documents' }">Tất cả văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-documents-type">
+				<router-link :to="{ name: 'admin-documents-type' }">Loại văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-documents-template">
+				<router-link :to="{ name: 'admin-documents-template' }">Mẫu văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-documents-history">
+				<router-link :to="{ name: 'admin-documents-history' }">Lịch sử văn bản</router-link>
+			</a-menu-item>
+		</a-sub-menu>
+
+
+		<!-- <a-menu-item key="admin-roles">
+			<router-link :to="{ name: 'admin-roles' }" title="Quản lý vai trò">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<TagOutlined class="me-2" />Quản lý vai trò
+				</span>
+			</router-link>
+		</a-menu-item> -->
+
+		<a-sub-menu key="admin-roles">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<TagOutlined class="me-2" /> Quản lý vai trò
+				</span>
+			</template>
+
+			<a-menu-item key="admin-roles-all">
+				<router-link :to="{ name: 'admin-roles' }">Vai trò</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-roles-permissions">
+				<router-link :to="{ name: 'admin-roles-permissions' }">Quyền hạn</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-roles-make_permission">
+				<router-link :to="{ name: 'admin-roles-make_permission' }">Gán quyền</router-link>
+			</a-menu-item>
+		</a-sub-menu>
+
+		<a-sub-menu key="admin-approval-flows">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<BranchesOutlined class="me-2" /> Luồng phê duyệt
+				</span>
+			</template>
+
+			<a-menu-item key="approval-flows-template">
+				<router-link :to="{ name: 'admin-approval-flows-template' }">Mẫu luồng phê duyệt</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="approval-flows-create">
+				<router-link :to="{ name: 'admin-approval-flows-create' }">Tạo luồng mới</router-link>
+			</a-menu-item>
+		</a-sub-menu>
+
+		<a-menu-item key="admin-settings">
+			<router-link :to="{ name: 'admin-settings' }" title="Cài đặt">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<SettingOutlined class="me-2" />Cài đặt
+				</span>
+			</router-link>
+		</a-menu-item>
+	</a-menu>
 </template>
 
 <script>
-import { UserOutlined, TagOutlined, SettingOutlined, HomeOutlined, FileOutlined  } from '@ant-design/icons-vue';
+import { UserOutlined, 
+		TagOutlined, 
+		SettingOutlined, 
+		HomeOutlined, 
+		FileOutlined, 
+		InteractionOutlined,
+		BranchesOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useMenu } from '../stores/use-menu.js';
+import { useMenu } from '@/stores/use-menu.js';
 export default defineComponent({
-  components: {
-      HomeOutlined,
-      UserOutlined,
-      TagOutlined,
-      SettingOutlined,
-      FileOutlined,
-  },
-  setup() {
-    const store = useMenu();
+	components: {
+		HomeOutlined,
+		UserOutlined,
+		TagOutlined,
+		SettingOutlined,
+		FileOutlined,
+		InteractionOutlined,
+		BranchesOutlined
+	},
+	setup() {
+		const store = useMenu();
 
-    return {
-      ...storeToRefs(store),
-    };
-  }
+		return {
+			...storeToRefs(store),
+		};
+	}
 });
 </script>

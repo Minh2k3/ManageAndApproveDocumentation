@@ -149,8 +149,8 @@
 
 <script>
 import { defineComponent } from 'vue';
-import FeatureCard from '../components/FeatureCard.vue';
-import ProcessFlow from '../components/ProcessFlow.vue';
+import FeatureCard from '@/components/FeatureCard.vue';
+import ProcessFlow from '@/components/ProcessFlow.vue';
 
 export default defineComponent({
     name: 'App',

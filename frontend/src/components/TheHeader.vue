@@ -1,13 +1,13 @@
 <template>
     <div class="container-fluid">
-        <div class="row" style="background-color: #0c713d; padding: 1rem;">
+        <div class="row" style="background-color: #007cba; padding: 1rem;">
             <div class="col-1 d-flex d-sm-none align-items-center justify-content-center">
                 <span @click="showDrawer()"><i class="fa-solid fa-indent fs-1"></i></span>
             </div>
 
             <div class="col-10 col-sm-9 d-flex align-items-center justify-content-center justify-content-sm-start">
-                <img src="../assets/vue.svg" alt="logo" height="32" width="34">
-                <span class="d-none d-sm-flex text-white ms-3 me-3 fs-3">QUẢN TRỊ HỆ THỐNG</span>
+                <img src="../assets/images/logo_tlu.svg" alt="logo" height="32" width="34">
+                <span class="d-none d-sm-flex text-white ms-3 me-3 fs-4">QUẢN TRỊ HỆ THỐNG</span>
             </div>
 
             <div class="col-sm-3 d-none d-sm-flex align-items-center justify-content-sm-end">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-    import TheMenu from '../components/TheMenu.vue';
+    import TheMenu from '@/components/TheMenu.vue';
     import { ref } from 'vue';
 
     const visible = ref(false);

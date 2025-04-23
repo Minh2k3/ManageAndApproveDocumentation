@@ -1,6 +1,6 @@
 <template>
     <a-card title="" style="width: 100%">
-        <h2 class="fw-bold mb-3">Quản Lý Văn Bản</h2>
+        <h2 class="fw-bold mb-3">Mẫu Văn Bản</h2>
         <div class="row mb-3">
             <div class="col-12">
                 <div class="row g-2">
@@ -89,120 +89,11 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
-import { useMenu } from "@/stores/use-menu.js";
-export default defineComponent ({
+import { useMenu } from '@/stores/use-menu.js';
+export default {
     setup() {
-        useMenu().onSelectedKeys(["admin-documents"]);
+        useMenu().onSelectedKeys(["admin-documents-template"]);
 
-        const users = ref([]);
-        const documents = ref([
-            {
-                id: 1,
-                name: "Văn bản mẫu 1",
-                type_id: 1,
-                type: "Đề xuất",
-                creator: "LCĐ Khoa CNTT",
-                status_id: 1, 
-                status: "Đã duyệt",
-            }, 
-            {
-                id: 2,
-                name: "Văn bản mẫu 2",
-                type_id: 2,
-                type: "Kiến nghị",
-                creator: "LCĐ Khoa CNTT",
-                status_id: 2, 
-                status: "Chờ duyệt",
-            },
-            {
-                id: 3,
-                name: "Văn bản mẫu 3",
-                type_id: 3,
-                type: "Đơn xin tổ chức",
-                creator: "Sinh viên Trần Minh",
-                status_id: 1, 
-                status: "Đã duyệt",
-            },
-            {
-                id: 4,
-                name: "Văn bản mẫu 4",
-                type_id: 1,
-                type: "Đề xuất",
-                creator: "Sinh viên Nguyễn Văn A",
-                status_id: 2, 
-                status: "Chờ duyệt",
-            },
-            {
-                id: 5,
-                name: "Văn bản mẫu 5",
-                type_id: 2,
-                type: "Kiến nghị",
-                creator: "Sinh viên Nguyễn Văn B",
-                status_id: 1, 
-                status: "Đã duyệt",
-            },
-        ]);
-        const columns = [
-            {
-                title: "#",
-                key: "index",
-                fixed: "left",
-                width: 50,
-            }, 
-            {
-                title: "Văn bản",
-                dataIndex: "name",
-                key: "name",
-                fixed: "left",
-                width: 250,
-            },
-            {
-                title: "Loại",
-                dataIndex: "type",
-                key: "type",
-            },
-            {
-                title: "Đề xuất",
-                dataIndex: "creator",
-                key: "creator",
-            },
-            {
-                title: "Trạng thái",
-                dataIndex: "status",
-                key: "status",
-                width: 150,
-                align: "center",
-            },
-            {
-                title: "Thao tác",
-                key: "action",
-                fixed: "right",
-            }
-        ]
-
-        // const getUsers = () => {
-        //     axios
-        //         .get('http://127.0.0.1:8000/api/users')
-        //         .then(function (response) {
-        //             users.value = response.data.data;
-        //         })
-        //         .catch(function (error) {
-        //             // xử trí khi bị lỗi
-        //             console.log(error);
-        //         })
-        //         .finally(function () {
-        //             // luôn luôn được thực thi
-        //         });
-        //     };
-        
-        // getUsers();
-
-        return {
-            users,
-            documents,
-            columns,
-        };
     },
-});
+}
 </script>

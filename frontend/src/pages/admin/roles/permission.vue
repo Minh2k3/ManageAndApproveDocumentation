@@ -1,13 +1,12 @@
 <template>
-    Đây là trang cai dat
+    Đây là trang quyền hạn
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
 export default {
     setup() {
-        useMenu().onSelectedKeys(["admin-settings"]);
-
+        useMenu().onSelectedKeys(["admin-roles-permission"]);
     },
 }
 </script>

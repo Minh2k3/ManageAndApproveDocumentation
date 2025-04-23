@@ -1,12 +1,12 @@
 <template>
-    Đây là trang cai dat
+    Đây là trang thêm mới luồng phê duyệt
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
 export default {
     setup() {
-        useMenu().onSelectedKeys(["admin-settings"]);
+        useMenu().onSelectedKeys(["admin-approval-flows-create"]);
 
     },
 }

@@ -257,7 +257,7 @@
 
 <script>
 import { defineComponent, ref, reactive, toRefs } from "vue";
-import { useMenu } from "../../../stores/use-menu.js";
+import { useMenu } from "@/stores/use-menu.js";
 import axios from "axios";
 export default defineComponent({
     setup() {
