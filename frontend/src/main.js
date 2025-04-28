@@ -19,7 +19,8 @@ import {
     message, 
     Card, 
     Table, 
-    Avatar } from 'ant-design-vue'
+    Avatar,
+    Pagination } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
 import 'ant-design-vue/dist/reset.css';
@@ -43,6 +44,7 @@ app.use(Avatar)
 app.use(Select)
 app.use(Form)
 app.use(Input)
+app.use(Pagination)
 app.mount('#app')
 
 app.config.globalProperties.$message = message
