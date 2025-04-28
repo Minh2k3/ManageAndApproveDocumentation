@@ -10,6 +10,11 @@ import App from './App.vue'
 import { 
     Select,
     Checkbox,
+    Radio,
+    RadioGroup,
+    RadioButton,
+    DatePicker,
+    TimePicker,
     Form,
     Input,
     Menu, 
@@ -17,6 +22,7 @@ import {
     Drawer, 
     Button, 
     message, 
+    Upload,
     Card, 
     Table, 
     Avatar,
@@ -43,8 +49,14 @@ app.use(Card)
 app.use(Avatar)
 app.use(Select)
 app.use(Form)
+app.use(Upload)
 app.use(Input)
 app.use(Pagination)
+app.use(Radio)
+app.use(RadioGroup)
+app.use(RadioButton)
+app.use(DatePicker)
+app.use(TimePicker)
 app.mount('#app')
 
 app.config.globalProperties.$message = message
