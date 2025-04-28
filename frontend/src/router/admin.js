@@ -68,6 +68,11 @@ const admin = [
                 name: "admin-documents-type",
                 component: () => import('@/pages/admin/documents/type.vue')
             },
+            {
+                path: "documents/detail",
+                name: "admin-documents-detail",
+                component: () => import('@/pages/admin/documents/detail.vue')
+            },
 
             // Quản lý Approval-Flows
             {

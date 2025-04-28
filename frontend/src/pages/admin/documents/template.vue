@@ -39,17 +39,6 @@
                         class="w-100"
                         />
                     </div>
-                    <div class="col-6 col-md-3">
-                        <a-select
-                        v-model:value="department_id"
-                        show-search
-                        placeholder="Đơn vị đề xuất"
-                        :options="documents_creator"
-                        :filter-option="filterOption"
-                        allow-clear
-                        class="w-100"
-                        />
-                    </div>
                     <!-- Nút tạo -->
                     <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
                         <a-button type="primary" class="w-100 w-md-auto">
@@ -64,7 +53,7 @@
 
         <div class="row">
             <div class="col-12">
-                <a-table :dataSource="documents" :columns="columns" :scroll="{ x: 576 }" bordered>
+                <a-table :dataSource="document_templates" :columns="columns" :scroll="{ x: 576 }" bordered>
                     <template #bodyCell="{ column, index, record }">
                     <template v-if="column.key === 'index'">
                         <span>{{ index + 1 }}</span>
@@ -76,11 +65,6 @@
                         <span v-if="record.type_id == 3" class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.type }}</span>
                     </template>
 
-                    <template v-if="column.key === 'status'">
-                        <span v-if="record.status_id == 1" class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.status }}</span>
-                        <span v-if="record.status_id == 2" class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.status }}</span>
-                    </template>
-
                     </template>
                 </a-table>
             </div>
@@ -89,11 +73,99 @@
 </template>
 
 <script>
+import { defineComponent, ref } from "vue";
 import { useMenu } from '@/stores/use-menu.js';
-export default {
+export default defineComponent({
     setup() {
         useMenu().onSelectedKeys(["admin-documents-template"]);
 
+        const document_templates = ref([
+            {
+                id: 1,
+                name: "Văn bản 1",
+                type: "Đề xuất",
+                description: "Mô tả văn bản 1",
+                created_by: "Nguyễn Văn A",
+                type_id: 1,
+            }, 
+            {
+                id: 2,
+                name: "Văn bản 2",
+                type: "Báo cáo",
+                description: "Mô tả văn bản 2",
+                created_by: "Nguyễn Văn B",
+                type_id: 2,
+            },
+            {
+                id: 3,
+                name: "Văn bản 3",
+                type: "Thông báo",
+                description: "Mô tả văn bản 3",
+                created_by: "Nguyễn Văn C",
+                type_id: 3,
+            },
+            {
+                id: 4,
+                name: "Văn bản 4",
+                type: "Đề xuất",
+                description: "Mô tả văn bản 4",
+                created_by: "Nguyễn Văn D",
+                type_id: 1,
+            },
+            {
+                id: 5,
+                name: "Văn bản 5",
+                type: "Báo cáo",
+                description: "Mô tả văn bản 5",
+                created_by: "Nguyễn Văn E",
+                type_id: 2,
+            },
+        ]);
+        const columns = [
+            {
+                title: "#",
+                key: "index",
+                fixed: "left",
+                width: 50,
+                align: "center",
+            },
+            {
+                title: "Tên văn bản",
+                dataIndex: "name",
+                key: "name",
+                fixed: "left",
+                width: 200,
+            },
+            {
+                title: "Loại văn bản",
+                dataIndex: "type",
+                key: "type",
+                fixed: "left",
+                width: 200,
+            },
+            {
+                title: "Mô tả",
+                dataIndex: "description",
+                key: "description",
+            },
+            {
+                title: "Người tạo",
+                dataIndex: "created_by",
+                key: "created_by",
+                width: 200,
+                align: "center",
+            },
+            {
+                title: "Thao tác",
+                key: "action",
+                fixed: "right",
+                width: 100,
+            }
+        ]
+        return {
+            document_templates,
+            columns,
+        };
     },
-}
+});
 </script>

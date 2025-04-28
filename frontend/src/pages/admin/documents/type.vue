@@ -13,13 +13,6 @@
                         class="w-100"
                         />
                     </div>
-                    <div class="col-2 col-md-2 align-items-center justify-content-end d-flex">
-                        <a-button type="primary">
-                        <router-link :to="{name: 'admin-documents-type' }" class="text-white">
-                            <i class="fa-solid fa-plus"></i>
-                        </router-link>
-                        </a-button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -59,6 +52,7 @@ export default defineComponent({
         
         const document_types = ref([
             {
+                id: 1,
                 type_id: 1,
                 type: "Biên bản",
                 description: "Biên bản họp",
@@ -67,6 +61,7 @@ export default defineComponent({
                 status: "Đang sử dụng",
             },
             {
+                id: 2,
                 type_id: 2,
                 type: "Hợp đồng",
                 description: "Hợp đồng lao động",
@@ -75,6 +70,7 @@ export default defineComponent({
                 status: "Ngừng sử dụng",
             },
             {
+                id: 3,
                 type_id: 3,
                 type: "Quyết định",
                 description: "Quyết định bổ nhiệm",
@@ -83,6 +79,7 @@ export default defineComponent({
                 status: "Đang sử dụng",
             },
             {
+                id: 4,
                 type_id: 4,
                 type: "Thông báo",
                 description: "Thông báo nghỉ lễ",

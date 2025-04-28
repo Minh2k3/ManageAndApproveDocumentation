@@ -1,5 +1,6 @@
 <template>
-	<a-menu v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
+	<!-- admin menu -->
+	<a-menu v-if="role === 'admin'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="admin-dashboard">
 			<router-link :to="{ name: 'admin-dashboard' }" title="Quản lý chung">
 				<span class="fs-6 d-inline-flex align-items-center">
@@ -101,19 +102,82 @@
 			</router-link>
 		</a-menu-item>
 	</a-menu>
+
+	<!-- creator menu -->
+	<a-menu v-if="role === 'creator'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
+		<a-menu-item menu-item key="creator-dashboard">
+			<router-link :to="{ name: 'creator-dashboard' }" title="Tin tức">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<HomeOutlined class="me-2" />Tin tức
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-sub-menu key="creator-documents">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<FileOutlined class="me-2" /> Văn bản của tôi nè
+				</span>
+			</template>
+
+			<a-menu-item key="creator-documents-all">
+				<router-link :to="{ name: 'creator-documents' }">Tất cả văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="creator-documents-create">
+				<router-link :to="{ name: 'creator-documents-create' }">Thêm văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="creator-documents-history">
+				<router-link :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="creator-documents-detail" :disabled="!isDetailPage" :selectable="isDetailPage">
+				Chi tiết văn bản
+			</a-menu-item>
+		</a-sub-menu>
+
+		<a-menu-item key="creator-documents-template">
+			<router-link :to="{ name: 'creator-documents-template' }">
+				<span>
+					<i class="fa-solid fa-file me-2"></i>Văn bản mẫu
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-menu-item key="creator-signatures">
+			<router-link :to="{ name: 'creator-signatures' }">
+				<span>
+					<i class="fa-solid fa-signature me-2"></i>Chữ ký của tớ
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-menu-item key="creator-settings">
+			<router-link :to="{ name: 'creator-settings' }" title="Cài đặt">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<SettingOutlined class="me-2" />Cài đặt
+				</span>
+			</router-link>
+		</a-menu-item>
+	</a-menu>
 </template>
 
 <script>
-import { UserOutlined, 
-		TagOutlined, 
-		SettingOutlined, 
-		HomeOutlined, 
-		FileOutlined, 
-		InteractionOutlined,
-		BranchesOutlined } from '@ant-design/icons-vue';
-import { defineComponent } from 'vue';
+import {
+	UserOutlined,
+	TagOutlined,
+	SettingOutlined,
+	HomeOutlined,
+	FileOutlined,
+	InteractionOutlined,
+	BranchesOutlined
+} from '@ant-design/icons-vue';
+import { defineComponent, ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useMenu } from '@/stores/use-menu.js';
+import { useAuth } from '@/stores/use-auth.js';
+import { useRoute } from 'vue-router';
 export default defineComponent({
 	components: {
 		HomeOutlined,
@@ -126,9 +190,19 @@ export default defineComponent({
 	},
 	setup() {
 		const store = useMenu();
+		const auth = useAuth();
+		const { role } = storeToRefs(auth);
+
+		const route = useRoute();
+
+		const isDetailPage = computed(() => {
+			return route.name === 'creator-documents-detail';
+		});
 
 		return {
 			...storeToRefs(store),
+			role,
+			isDetailPage,
 		};
 	}
 });
