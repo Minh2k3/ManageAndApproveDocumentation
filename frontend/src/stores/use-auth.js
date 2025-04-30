@@ -1,27 +1,30 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 export const useAuth = defineStore('auth', () => {
-  // Thông tin người dùng đăng nhập
-  const user = ref(null) // chứa object { id, name, role, ... }
+    // Thông tin người dùng đăng nhập
+    const user = ref(null) // chứa object { id, name, role, ... }
+    const role = ref('admin') // chứa string 'admin' hoặc 'user'
 
-  // Login giả lập
-  function login(mockUser) {
-    user.value = mockUser
-  }
+    function login(mockUser) {
+        user.value = mockUser
+        role.value = mockUser?.role || 'admin'  // Đồng bộ
+    }
 
-  // Logout
-  function logout() {
-    user.value = null
-  }
+    function logout() {
+        user.value = null
+        role.value = 'admin'
+    }
 
-  // Trả về vai trò hiện tại
-  const role = computed(() => user.value?.role || 'creator')
+    // Nếu muốn tự động đồng bộ user.role → role
+    watch(user, (newVal) => {
+        role.value = newVal?.role || 'admin'
+    })
 
-  return {
-    user,
-    role,
-    login,
-    logout
-  }
+    return {
+        user,
+        role,
+        login,
+        logout
+    }
 })

@@ -161,6 +161,74 @@
 			</router-link>
 		</a-menu-item>
 	</a-menu>
+
+	<!-- approver menu -->
+	<a-menu v-if="role === 'approver'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
+		<a-menu-item menu-item key="approver-dashboard">
+			<router-link :to="{ name: 'approver-dashboard' }" title="Tin tức">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<HomeOutlined class="me-2" />Tin tức
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-sub-menu key="approver-documents">
+			<template #title>
+				<span class="fs-6 d-inline-flex align-items-center">
+					<FileOutlined class="me-2" /> Văn bản của tôi nè
+				</span>
+			</template>
+
+			<a-menu-item key="approver-documents-all">
+				<router-link :to="{ name: 'approver-documents' }">Tất cả văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="approver-documents-create">
+				<router-link :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPage" :selectable="isDetailPage">
+				Chi tiết văn bản
+			</a-menu-item>
+		</a-sub-menu>
+
+		<a-menu-item key="approver-signatures">
+			<router-link :to="{ name: 'approver-signatures' }">
+				<span>
+					<i class="fa-solid fa-signature me-2"></i>Chữ ký của tớ
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-menu-item key="approver-settings">
+			<router-link :to="{ name: 'approver-settings' }" title="Cài đặt">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<SettingOutlined class="me-2" />Cài đặt
+				</span>
+			</router-link>
+		</a-menu-item>
+	</a-menu>
+
+	<!-- select menu -->
+	<a-menu :selectedKeys="[role]" @click="onMenuClick" mode="inline">
+		<a-menu-item key="admin">
+			<span class="fs-6 d-inline-flex align-items-center">
+				<HomeOutlined class="me-2" />Admin
+			</span>
+		</a-menu-item>
+
+		<a-menu-item key="creator">
+			<span class="fs-6 d-inline-flex align-items-center">
+				<HomeOutlined class="me-2" />Creator
+			</span>
+		</a-menu-item>
+
+		<a-menu-item key="approver">
+			<span class="fs-6 d-inline-flex align-items-center">
+				<HomeOutlined class="me-2" />Approver
+			</span>
+		</a-menu-item>
+	</a-menu>
 </template>
 
 <script>
@@ -199,10 +267,16 @@ export default defineComponent({
 			return route.name === 'creator-documents-detail';
 		});
 
+		function onMenuClick({ key }) {
+			console.log('Đã bấm' + key);
+			auth.role = key;
+		}
+
 		return {
 			...storeToRefs(store),
 			role,
 			isDetailPage,
+			onMenuClick,
 		};
 	}
 });

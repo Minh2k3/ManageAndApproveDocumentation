@@ -15,6 +15,7 @@ import {
     RadioButton,
     DatePicker,
     TimePicker,
+    Tooltip,
     Form,
     Input,
     Menu, 
@@ -44,6 +45,7 @@ app.use(Checkbox)
 app.use(Table)
 app.use(Drawer)
 app.use(List)
+app.use(Tooltip)
 app.use(Menu)
 app.use(Card)
 app.use(Avatar)
