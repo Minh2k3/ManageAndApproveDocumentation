@@ -1,5 +1,6 @@
 <template>
     Đây là trang chung của người phê duyệt.
+    
 </template>
 
 <script>
