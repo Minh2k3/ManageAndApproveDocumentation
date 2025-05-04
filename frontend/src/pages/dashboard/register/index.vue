@@ -1,7 +1,7 @@
 <template>
     <div 
-        class="container-fluid vh-100 overflow-hidden">
-        <div class="position-absolute top-0 end-0 m-3">
+        class="container-fluid vh-100 overflow-hidden backGradient">
+        <div class="position-absolute top-0 end-0 mt-sm-5 me-sm-3">
             <router-link to="/" class="text-decoration-none">
                 <a-button type="primary" class="d-flex align-items-center">
                     <HomeOutlined class="me-1" />
@@ -9,14 +9,14 @@
                 </a-button>
             </router-link>
         </div>
-        <div class="row h-100">
+        <div class="row h-100 py-3">
             <!-- Cột trái -->
-            <div class="d-sm-flex col-sm-6 d-none " :style="{      
-                    backgroundImage: `url(${bgImage})`,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'top',
-                    height: '100vh',
+            <div class="d-sm-flex col-sm-5 d-none" :style="{      
+                    // backgroundImage: `url(${bgImage})`,
+                    // backgroundSize: 'contain',
+                    // backgroundRepeat: 'no-repeat',
+                    // backgroundPosition: 'top',
+                    // height: '100vh',
                 }"
             >
                 <div class="col-12">
@@ -56,14 +56,14 @@
 
                     <div class="row h-100 ">
                         <div class="d-flex align-items-center">
-                            <h1 class="fs-1">Hệ Thống Quản Lý và Phê Duyệt Văn Bản Điện Tử</h1>
+                            <h1 class="fs-1" style="color: #005baa;">Hệ Thống Quản Lý và Phê Duyệt Văn Bản Điện Tử</h1>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Cột phải -->
-            <div class="col-12 col-sm-6 d-flex justify-content-center rounded-start-5 align-items-center"
+            <div class="col-12 col-sm-7 d-flex justify-content-center rounded-start-5 align-items-center"
                 style="background-color: #f8f9fa;">
                 <div class="row w-100">
                     <div class="col-12">
@@ -82,7 +82,7 @@
                         </div>
 
                         <div class="row justify-content-center ">
-                            <div class="col-sm-7">
+                            <div class="col-sm-4">
                                 <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
@@ -106,10 +106,9 @@
                                 </small> -->
                                 </div>
                             </div>
-                        </div>
+                        
 
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-7">
+                            <div class="col-sm-4 mt-sm-0 mt-3">
                                 <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
@@ -137,7 +136,7 @@
                         </div>
 
                         <div class="row justify-content-center mt-3">
-                            <div class="col-sm-4">
+                            <div class="col-sm-5">
                                 <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
@@ -198,7 +197,7 @@
 
                         <!-- Mật khẩu -->
                         <div class="row justify-content-center mt-3">
-                            <div class="col-sm-7">
+                            <div class="col-sm-4">
                                 <div class="col-12 col-sm-7 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
@@ -212,12 +211,9 @@
                                     <div class="w-100"></div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Xác nhận mật khẩu -->
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-7">
-                                <div class="col-12 col-sm-7 text-start align-self-center">
+                            <div class="col-sm-4 mt-sm-0 mt-3">
+                                <div class="col-12 col-sm-12 text-start align-self-center">
                                     <label>
                                         <span class="text-danger me-1">*</span>
                                         <span class="fw-bold">Xác nhận mật khẩu</span>
@@ -261,9 +257,13 @@
                         <div class="row justify-content-center mt-3">
                             <div class="col-12 col-sm-6 justify-content-center">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-primary rounded-3 p-2" type="button" style="background-color: #0d6efd;
-                                    border-color: #0d6efd;
-                                    color: #ffffff;">
+                                    <button class="btn btn-primary rounded-3 py-2 my-button" 
+                                        type="button" 
+                                        style="background-color: #0d6efd;
+                                            border-color: #0d6efd;
+                                            color: #ffffff;"
+                                        @click="register"
+                                    >
                                         Đăng ký
                                     </button>
                                 </div>
@@ -290,9 +290,10 @@
 <script>
 import { MailOutlined, QuestionCircleOutlined, HomeOutlined } from "@ant-design/icons-vue";
 import { defineComponent, ref, reactive, toRefs } from "vue";
-import axios from "axios";
+import { useRoute, useRouter } from "vue-router";
 import bgImage from '@/assets/images/NMT.jpg';
 import { message } from 'ant-design-vue';
+import axios from 'axios';
 
 export default defineComponent({
     components: {
@@ -302,6 +303,8 @@ export default defineComponent({
     },
     
     setup() {
+        const router = useRouter();
+
         // Thông tin form đăng ký
         const name = ref('');
         const email = ref('');
@@ -328,17 +331,20 @@ export default defineComponent({
 
             if (now - lastRequestTime >= 6666) {
                 lastRequestTime = now;
-                message.info("Vui lòng gửi email yêu cầu thêm phòng ban mới đến admin qua tài khoản Outlook của trường.");
+                message.info("Vui lòng gửi email yêu cầu thêm phòng ban mới đến địa chỉ ThayDungDepTrai@gmail.com!");
             } else {
                 console.log("Thông báo này đang trong thời gian cooldown");
             }
         };
 
         const getUsersRegister = () => {
-            axios.get("http://127.0.0.1:8000/api/users/create")
+            console.log("Fetching users register options...");
+            axios
+                .get("/api/register-options")
                 .then((response) => {
-                    departments.value = response.data.users_department;
-                    roles.value = response.data.users_role;
+                    console.log("Response:", response.data);
+                    departments.value = response.data.departments;
+                    roles.value = response.data.roles;
                     console.log(departments.value);
                     console.log(roles.value);
                 })
@@ -349,6 +355,80 @@ export default defineComponent({
 
         // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
         getUsersRegister();
+
+
+        axios.defaults.withCredentials = true; // Đảm bảo rằng cookie được gửi cùng với yêu cầu
+        axios.defaults.withXSRFToken = true; // Đảm bảo rằng CSRF token được gửi cùng với yêu cầu
+        axios.defaults.baseURL = "http://127.0.0.1:8000"; // Đặt base URL cho axios
+        axios.interceptors.request.use(config => {
+            const token = document.head.querySelector('meta[name="csrf-token"]')?.content;
+            if (token) {
+                config.headers['X-CSRF-TOKEN'] = token;
+            }
+            return config;
+        });
+
+        const register = () => {
+
+            console.log("Đăng ký với thông tin:", {
+                name: name.value,
+                email: email.value,
+                password: password.value,
+                password_confirmation: password_confirmation.value,
+                department_id: selectedDepartment.value,
+                role_id: selectedRole.value
+            });
+
+            // Kiểm tra xem người dùng đã đồng ý với điều khoản chưa
+            if (!ok.value) {
+                message.error("Vui lòng đồng ý với các điều khoản và chính sách của hệ thống!");
+                return;
+            }
+
+            if (!name.value || !email.value || !password.value || !password_confirmation.value) {
+                message.error("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+            if (password.value !== password_confirmation.value) {
+                message.error("Mật khẩu không khớp!");
+                return;
+            }
+            if (!selectedDepartment.value) {
+                message.error("Vui lòng chọn phòng ban!");
+                return;
+            }
+            if (!selectedRole.value) {
+                message.error("Vui lòng chọn vai trò!");
+                return;
+            }
+
+            axios.get("/sanctum/csrf-cookie").then(() => {
+                // Gửi yêu cầu đăng ký đến API
+                axios.post("/api/register", {
+                    name: name.value,
+                    email: email.value,
+                    password: password.value,
+                    password_confirmation: password_confirmation.value,
+                    department_id: selectedDepartment.value,
+                    role_id: selectedRole.value
+                })
+                .then(response => {
+                    console.log("Đăng ký thành công:", response.data);
+                    message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
+                    // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
+                    router.push({ name: "login" });
+                })
+                .catch((error) => {
+                    if (error.response && error.response.status === 422) {
+                        console.log("Lỗi validate:", error.response.data.errors);
+                        alert("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
+                    } else {
+                        console.error("Lỗi khác:", error);
+                        message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
+                    }
+                });
+            });
+        };        
 
         return {
             // Form đăng ký
@@ -364,6 +444,7 @@ export default defineComponent({
             selectedRole,
             filterOption,
             showRequestNewDepartmentModal,
+            register,
         }
     }
 });
@@ -372,5 +453,26 @@ export default defineComponent({
 <style>
 .ant-tooltip {
     max-width: 300px;
+}
+
+.backGradient {
+    background: #003a69;
+    background: linear-gradient(-45deg, rgba(0, 58, 105, 1) 0%, rgba(67, 146, 186, 1) 28%, rgba(40, 182, 222, 1) 67%, rgba(0, 238, 255, 1) 100%);
+}
+
+.my-button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.my-button:hover {
+  background-color: #59b54b; /* đậm hơn */
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.my-button:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 </style>

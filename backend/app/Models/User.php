@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
+        'sex',
+        'status',
     ];
 
     /**
@@ -46,15 +50,49 @@ class User extends Authenticatable
         ];
     }
 
-    public function departments()
-    {
-        return $this->belongsToMany(Department::class, 'user_department_roles')
-            ->withPivot('role_id', 'created_at', 'ended_at');
-    }
-    
+    // Relationships
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'user_department_roles')
-            ->withPivot('department_id', 'created_at', 'ended_at');
+        return $this->belongsToMany(Role::class, 'role_of_department_names', 'user_id', 'role_id')
+                    ->withPivot('department_id', 'role')
+                    ->withTimestamps();
     }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class, 'role_of_department_names', 'user_id', 'department_id')
+                    ->withPivot('role_id', 'role')
+                    ->withTimestamps();
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'creator_id');
+    }
+
+    public function documentComments()
+    {
+        return $this->hasMany(DocumentComment::class);
+    }
+
+    public function documentSignatures()
+    {
+        return $this->hasMany(DocumentSignature::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'receiver_id');
+    }
+
+    public function adminRole()
+    {
+        return $this->hasOne(Admin::class);
+    }
+
+    public function templates()
+    {
+        return $this->hasMany(TemplateUser::class);
+    }
+
 }

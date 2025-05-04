@@ -187,7 +187,7 @@
 				<router-link :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
-			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPage" :selectable="isDetailPage">
+			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPageApprover" :selectable="isDetailPageApprover">
 				Chi tiết văn bản
 			</a-menu-item>
 		</a-sub-menu>
@@ -267,6 +267,10 @@ export default defineComponent({
 			return route.name === 'creator-documents-detail';
 		});
 
+		const isDetailPageApprover = computed(() => {
+			return route.name === 'approver-documents-detail';
+		});
+
 		function onMenuClick({ key }) {
 			console.log('Đã bấm' + key);
 			auth.role = key;
@@ -276,6 +280,7 @@ export default defineComponent({
 			...storeToRefs(store),
 			role,
 			isDetailPage,
+			isDetailPageApprover,
 			onMenuClick,
 		};
 	}

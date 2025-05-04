@@ -99,7 +99,13 @@
                                 <span>{{ column.title }}</span>
                             </a-tooltip>
                         </template>
+                        <template v-else-if="column.key === 'updated_at'">
+                            <a-tooltip title="Sắp xếp theo ngày cập nhật">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
                     </template>
+
                     <template #bodyCell="{ column, index, record }">
                         <template v-if="column.key === 'index'">
                             <span>{{ index + 1 }}</span>
@@ -233,7 +239,7 @@ export default defineComponent({
                 key: 'status',
                 dataIndex: 'status',
                 width: 150,
-                sorter: (a, b) => a.type.localeCompare(b.type),
+                sorter: (a, b) => a.status_id - b.status_id,
                 sortDirections: ['ascend', 'descend'],
             },
             {
@@ -241,7 +247,7 @@ export default defineComponent({
                 key: 'created_at',
                 dataIndex: 'created_at',
                 width: 150,
-                sorter: (a, b) => a.type.localeCompare(b.type),
+                sorter: (a, b) => a.created_at.localeCompare(b.created_at),
                 sortDirections: ['ascend', 'descend'],
             },
             {
@@ -249,7 +255,7 @@ export default defineComponent({
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,
-                sorter: (a, b) => a.type.localeCompare(b.type),
+                sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
                 sortDirections: ['ascend', 'descend'],
             },
         ];
