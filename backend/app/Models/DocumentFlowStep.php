@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DocumentFlow;
+use App\Models\Department;
 
 class DocumentFlowStep extends Model
 {

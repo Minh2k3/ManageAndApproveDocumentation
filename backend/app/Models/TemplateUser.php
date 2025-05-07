@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\NonAdmin;
 
 class TemplateUser extends Model
 {
@@ -21,9 +22,9 @@ class TemplateUser extends Model
     ];
 
     // Relationships
-    public function user()
+    public function nonAdmin()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(NonAdmin::class);
     }
 
     public function template()

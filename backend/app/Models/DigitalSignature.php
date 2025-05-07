@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\NonAdmin;
 
 class DigitalSignature extends Model
 {
@@ -16,6 +17,6 @@ class DigitalSignature extends Model
     // Relationships
     public function nonAdmin()
     {
-        return $this->hasOne(NonAdmin::class, 'signature_id');
+        return $this->belongsTo(NonAdmin::class);
     }
 }

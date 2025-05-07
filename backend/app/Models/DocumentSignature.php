@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\NonAdmin;
+use App\Models\DocumentVersion;
 
 class DocumentSignature extends Model
 {
@@ -28,6 +30,6 @@ class DocumentSignature extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(NonAdmin::class);
     }
 }

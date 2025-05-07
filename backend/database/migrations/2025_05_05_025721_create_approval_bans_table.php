@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('non_admins');
             $table->foreignId('banned_by')->constrained('admins');
+            $table->string('reason')->nullable();
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
         });

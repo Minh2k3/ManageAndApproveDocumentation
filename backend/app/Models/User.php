@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use App\Models\NonAdmin;
+use App\Models\Admin;
+use App\Models\DocumentTemplate;
+use App\Models\Notification;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,9 +25,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'avatar',
-        'sex',
-        'status',
     ];
 
     /**
@@ -50,34 +50,9 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationships
-    public function roles()
+    public function nonAdmin()
     {
-        return $this->belongsToMany(Role::class, 'role_of_department_names', 'user_id', 'role_id')
-                    ->withPivot('department_id', 'role')
-                    ->withTimestamps();
-    }
-
-    public function departments()
-    {
-        return $this->belongsToMany(Department::class, 'role_of_department_names', 'user_id', 'department_id')
-                    ->withPivot('role_id', 'role')
-                    ->withTimestamps();
-    }
-
-    public function documents()
-    {
-        return $this->hasMany(Document::class, 'creator_id');
-    }
-
-    public function documentComments()
-    {
-        return $this->hasMany(DocumentComment::class);
-    }
-
-    public function documentSignatures()
-    {
-        return $this->hasMany(DocumentSignature::class);
+        return $this->hasMany(NonAdmin::class);
     }
 
     public function notifications()
@@ -85,14 +60,15 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class, 'receiver_id');
     }
 
-    public function adminRole()
+    public function admin()
     {
-        return $this->hasOne(Admin::class);
+        return $this->hasMany(Admin::class);
     }
 
-    public function templates()
+    public function documentTemplates()
     {
-        return $this->hasMany(TemplateUser::class);
+        return $this->hasMany(DocumentTemplate::class);
     }
+
 
 }

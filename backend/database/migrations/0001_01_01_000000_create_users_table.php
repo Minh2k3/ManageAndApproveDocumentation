@@ -15,12 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->boolean('email_verified')->default(false);
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('phone')->nullable();
             $table->string('password');
-            $table->rememberToken();
             $table->string('avatar')->nullable();
             $table->enum('sex', ['male', 'female'])->nullable();
-            $table->enum('status', ['pending', 'active', 'banned']);
+            $table->boolean('is_admin')->default(false);
+            $table->enum('status', ['inactive', 'pending', 'active', 'banned'])->default('inactive')
+                ->comment('Trạng thái tài khoản, inactive: chưa kích hoạt, pending: đang chờ duyệt, active: đã kích hoạt, banned: bị cấm');
+            $table->string('verification_token')->nullable();
+            $table->timestamp('verification_token_expiry')->nullable();
+            $table->integer('verification_resent_count')->default(0);
+            $table->timestamp('last_verification_resent_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
             $table->comment('Lưu thông tin người dùng');
         });

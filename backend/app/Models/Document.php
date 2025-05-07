@@ -3,12 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\DocumentType;
+use App\Models\DocumentFlow;
+use App\Models\NonAdmin;
+use App\Models\DocumentVersion;
+/**
+ * Document Model
+ *
+ * This model represents a document in the system.
+ * It contains information about the document's title, description, type, creator,
+ * and whether it is public or not.
+ */
 
 class Document extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'title',
         'description',
@@ -30,7 +38,7 @@ class Document extends Model
 
     public function creator()
     {
-        return $this->belongsTo(User::class, 'creator_id');
+        return $this->belongsTo(NonAdmin::class, 'creator_id');
     }
 
     public function flow()
@@ -41,15 +49,5 @@ class Document extends Model
     public function versions()
     {
         return $this->hasMany(DocumentVersion::class);
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(DocumentComment::class, 'document_version_id');
-    }
-
-    public function signatures()
-    {
-        return $this->hasMany(DocumentSignature::class, 'document_version_id');
     }
 }

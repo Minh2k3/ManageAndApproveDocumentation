@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('digital_signatures', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('non_admin_id')->constrained('non_admins')->onDelete('cascade');
             $table->string('public_key');
             $table->string('private_key');
             $table->timestamps();

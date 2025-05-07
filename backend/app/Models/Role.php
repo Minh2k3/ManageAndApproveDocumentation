@@ -3,12 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\NonAdmin;
 
 class Role extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'description',
@@ -16,17 +14,10 @@ class Role extends Model
     ];
 
     // Relationships
-    public function users()
+    public function nonAdmins()
     {
-        return $this->belongsToMany(User::class, 'role_of_department_names', 'role_id', 'user_id')
-                    ->withPivot('department_id', 'role')
-                    ->withTimestamps();
+        return $this->hasMany(NonAdmin::class);
     }
 
-    public function departments()
-    {
-        return $this->belongsToMany(Department::class, 'role_of_department_names', 'role_id', 'department_id')
-                    ->withPivot('user_id', 'role')
-                    ->withTimestamps();
-    }
+
 }

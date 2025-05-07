@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('role_id')->constrained('roles');
             $table->foreignId('department_id')->constrained('departments')->comment('Mỗi người dùng có thể thuộc nhiều đơn vị, nhưng chỉ lưu đơn vị mà người dùng có quyền lớn nhất');
-            $table->foreignId('signature_id')->nullable()->constrained('digital_signatures');
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('document_type_id')->constrained('document_types');
-            $table->foreignId('granted_by')->constrained('users');
+            $table->foreignId('granted_by')->constrained('users')->nullable();
             $table->timestamps();
             $table->timestamp('ended_at')->nullable();
             $table->unique(['user_id', 'document_type_id']);

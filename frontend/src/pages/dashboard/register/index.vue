@@ -93,10 +93,7 @@
                                 <div class="w-100"></div>
 
                                 <div class="col-12 col-sm-12 mt-1">
-                                    <a-input v-model:value="name" placeholder="Trần Tuấn Minh" allow-clear :class="{
-                                        'input-danger': firstFieldError === 'name'
-                                    }" />
-
+                                    <a-input v-model:value="name" placeholder="Trần Tuấn Minh" allow-clear/>
                                     <div class="w-100"></div>
                                     <!-- 
                                 <small 
@@ -119,10 +116,7 @@
                                 <div class="w-100"></div>
 
                                 <div class="col-12 col-sm-12 mt-1">
-                                    <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear
-                                        :class="{
-                                            'input-danger': firstFieldError === 'email'
-                                        }" />
+                                    <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear/>
 
                                     <div class="w-100"></div>
                                     <!-- 
@@ -289,11 +283,12 @@
 
 <script>
 import { MailOutlined, QuestionCircleOutlined, HomeOutlined } from "@ant-design/icons-vue";
-import { defineComponent, ref, reactive, toRefs } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { defineComponent, ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
 import bgImage from '@/assets/images/NMT.jpg';
 import { message } from 'ant-design-vue';
-import axios from 'axios';
+import axiosInstance from '@/lib/axios.js';
+import axios from "axios";
 
 export default defineComponent({
     components: {
@@ -337,36 +332,37 @@ export default defineComponent({
             }
         };
 
-        const getUsersRegister = () => {
-            console.log("Fetching users register options...");
-            axios
-                .get("/api/register-options")
-                .then((response) => {
-                    console.log("Response:", response.data);
-                    departments.value = response.data.departments;
-                    roles.value = response.data.roles;
-                    console.log(departments.value);
-                    console.log(roles.value);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
+        const getUsersRegister = async () => {
+            console.log("Đang lấy dữ liệu từ API...");
+            await axios.get("sanctum/csrf-cookie", {
+                withCredentials: true,
+            });
+            try {
+                await axiosInstance
+                    .get("api/register-options", {
+                        withCredentials: true,
+                    })
+                    .then((response) => {
+                        console.log("Response:", response.data);
+                        departments.value = response.data.departments;
+                        roles.value = response.data.roles;
+                        console.log(departments.value);
+                        console.log(roles.value);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu:", error);
+            }
         };
 
         // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
-        getUsersRegister();
-
-
-        axios.defaults.withCredentials = true; // Đảm bảo rằng cookie được gửi cùng với yêu cầu
-        axios.defaults.withXSRFToken = true; // Đảm bảo rằng CSRF token được gửi cùng với yêu cầu
-        axios.defaults.baseURL = "http://127.0.0.1:8000"; // Đặt base URL cho axios
-        axios.interceptors.request.use(config => {
-            const token = document.head.querySelector('meta[name="csrf-token"]')?.content;
-            if (token) {
-                config.headers['X-CSRF-TOKEN'] = token;
-            }
-            return config;
+        onMounted(() => {
+            getUsersRegister();
         });
+
+        const validateFrontend = ref(false);
 
         const register = () => {
 
@@ -379,56 +375,129 @@ export default defineComponent({
                 role_id: selectedRole.value
             });
 
-            // Kiểm tra xem người dùng đã đồng ý với điều khoản chưa
-            if (!ok.value) {
-                message.error("Vui lòng đồng ý với các điều khoản và chính sách của hệ thống!");
+
+            if (!name.value.trim()) {
+                message.error("Vui lòng nhập họ và tên!");
+                validateFrontend.value = false;
                 return;
             }
 
-            if (!name.value || !email.value || !password.value || !password_confirmation.value) {
-                message.error("Vui lòng điền đầy đủ thông tin!");
+            if (!email.value.trim()) {
+                message.error("Vui lòng nhập email!");
+                validateFrontend.value = false;
                 return;
             }
+
+            // if (!/^[^@]+@(e\.tlu\.edu\.vn|tlu\.edu\.vn)$/.test(email.value)) {
+            //     message.error("Email không hợp lệ. Vui lòng nhập email trường Thủy Lợi.");
+            //     validateFrontend.value = false;
+            //     return;
+            // }
+
+            if (selectedDepartment.value === null) {
+                message.error("Phòng ban không được để trống.");
+                validateFrontend.value = false;
+                return;
+            }
+
+            if (selectedRole.value === null) {
+                message.error("Vai trò không được để trống.");
+                validateFrontend.value = false;
+                return;
+            }
+
+            if (!password.value.trim()) {
+                message.error("Mật khẩu không được để trống.");
+                validateFrontend.value = false;
+                return;
+            }
+
+            // if (!/(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])/.test(password.value)) {
+            //     message.error("Mật khẩu phải gồm chữ, số và ký tự đặc biệt.");
+            //     validateFrontend.value = false;
+            //     return;
+            // }
+
             if (password.value !== password_confirmation.value) {
                 message.error("Mật khẩu không khớp!");
+                validateFrontend.value = false;
                 return;
             }
-            if (!selectedDepartment.value) {
-                message.error("Vui lòng chọn phòng ban!");
+            
+            if (!ok.value) {
+                message.error("Vui lòng đồng ý với các điều khoản và chính sách của hệ thống!");
+                validateFrontend.value = false;
                 return;
             }
-            if (!selectedRole.value) {
-                message.error("Vui lòng chọn vai trò!");
-                return;
-            }
+            
 
-            axios.get("/sanctum/csrf-cookie").then(() => {
-                // Gửi yêu cầu đăng ký đến API
-                axios.post("/api/register", {
+            validateFrontend.value = true;
+            //     // Gửi yêu cầu đăng ký đến API
+            //     axios.post("/api/register", {
+            //         name: name.value,
+            //         email: email.value,
+            //         password: password.value,
+            //         password_confirmation: password_confirmation.value,
+            //         department_id: selectedDepartment.value,
+            //         role_id: selectedRole.value
+            //     })
+            //     .then(response => {
+            //         console.log("Đăng ký thành công:", response.data);
+            //         message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
+            //         // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
+            //         router.push({ name: "login" });
+            //     })
+            //     .catch((error) => {
+            //         if (error.response && error.response.status === 422) {
+            //             console.log("Lỗi validate:", error.response.data.errors);
+            //             alert("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
+            //         } else {
+            //             console.error("Lỗi khác:", error);
+            //             message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.message));
+            //         }
+            //     });
+            // });
+        };       
+
+        watch(validateFrontend, (newValue) => {
+            if (newValue) {
+                console.log("Đăng ký người dùng mới");
+                registerUser();
+                validateFrontend.value = false;
+            }
+        });
+        
+        const registerUser = async () => {
+            console.log("Đăng ký người dùng mới");
+            await axiosInstance.get("sanctum/csrf-cookie");
+            try {
+                const response = await axiosInstance.post("api/register", {
                     name: name.value,
                     email: email.value,
                     password: password.value,
                     password_confirmation: password_confirmation.value,
                     department_id: selectedDepartment.value,
                     role_id: selectedRole.value
-                })
-                .then(response => {
-                    console.log("Đăng ký thành công:", response.data);
-                    message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
-                    // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
-                    router.push({ name: "login" });
-                })
-                .catch((error) => {
-                    if (error.response && error.response.status === 422) {
-                        console.log("Lỗi validate:", error.response.data.errors);
-                        alert("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
-                    } else {
-                        console.error("Lỗi khác:", error);
-                        message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
-                    }
+                }, {
+                    withCredentials: true,
                 });
-            });
-        };        
+                console.log("Đăng ký thành công:", response.data);
+                validateFrontend.value = false;
+                message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
+                // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
+                router.push({ name: "login" });
+            } catch (error) {
+                if (error.response && error.response.status === 422) {
+                    console.log("Lỗi validate:", error.response.data.errors);
+                    alert("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
+                } else {
+                    console.error("Lỗi khác:", error);
+                    message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.message));
+                }
+            }
+        }
+        
+        
 
         return {
             // Form đăng ký

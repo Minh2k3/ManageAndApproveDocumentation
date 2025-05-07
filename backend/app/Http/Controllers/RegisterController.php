@@ -28,10 +28,15 @@ class RegisterController extends Controller
             )
             ->get();
 
-        return response()->json([
-            'departments' => $departments,
-            'roles' => $roles,
-        ]);
+        return response()
+                    ->json([
+                        'departments' => $departments,
+                        'roles' => $roles,
+                    ])
+                    ->header('Access-Control-Allow-Origin', 'http://localhost:5173')
+                    ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                    ->header('Access-Control-Allow-Headers', 'Content-Type, X-CSRF-TOKEN')
+                    ->header('Access-Control-Allow-Credentials', 'true');
     }
 
     public function register(Request $request)

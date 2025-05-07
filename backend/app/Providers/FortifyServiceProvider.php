@@ -2,18 +2,22 @@
 
 namespace App\Providers;
 
+use Laravel\Fortify\Fortify;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use Laravel\Fortify\Contracts\RegisterResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Validation\ValidationException;
-use Laravel\Fortify\Fortify;
 use App\Models\User;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -23,7 +27,16 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->instance(RegisterResponse::class, new class implements 
+        RegisterResponse {
+            public function toResponse($request)
+            {
+                return response()->json([
+                    'message' => 'Đăng ký thành công',
+                    'status' => 'success',
+                ], status: 201);
+            }
+        });
     }
 
     /**
@@ -56,6 +69,12 @@ class FortifyServiceProvider extends ServiceProvider
             throw ValidationException::withMessages([
                 Fortify::username() => [__('Thông tin đăng nhập không đúng.')],
             ]);
+
+            if (! $user->hasVerifiedEmail()) {
+                throw ValidationException::withMessages([
+                    Fortify::username() => [__('Bạn chưa xác minh email. Vui lòng kiểm tra hộp thư.')],
+                ]);
+            }
         });
 
         // Giới hạn rate login
@@ -65,6 +84,10 @@ class FortifyServiceProvider extends ServiceProvider
             );
             return Limit::perMinute(5)->by($throttleKey);
         });
+
+        // Xác thực email chuyển về trang đăng nhập của VueJS
+        
+
 
     }
 }
