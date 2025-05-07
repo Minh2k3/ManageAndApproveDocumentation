@@ -19,9 +19,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone')->nullable();
             $table->string('password');
+            $table->foreignId('role_id')->constrained();
+            $table->foreignId('signature_id')->nullable()->constrained('digital_signatures')->nullOnDelete();
             $table->string('avatar')->nullable();
             $table->enum('sex', ['male', 'female'])->nullable();
-            $table->boolean('is_admin')->default(false);
             $table->enum('status', ['inactive', 'pending', 'active', 'banned'])->default('inactive')
                 ->comment('Trạng thái tài khoản, inactive: chưa kích hoạt, pending: đang chờ duyệt, active: đã kích hoạt, banned: bị cấm');
             $table->string('verification_token')->nullable();

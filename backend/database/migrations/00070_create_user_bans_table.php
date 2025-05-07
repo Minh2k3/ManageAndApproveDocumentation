@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('approval_bans', function (Blueprint $table) {
+        Schema::create('user_bans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('non_admins');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('banned_by')->constrained('admins');
-            $table->string('reason')->nullable();
+            $table->text('reason');
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
         });
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('approval_bans');
+        Schema::dropIfExists('user_bans');
     }
 };

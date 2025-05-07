@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_flows', function (Blueprint $table) {
+        Schema::create('document_flow_steps', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_template')->default(false);
+            $table->foreignId('document_flow_id')->constrained()->cascadeOnDelete();
+            $table->integer('step');
+            $table->foreignId('department_id')->constrained();
+            $table->enum('status', ['pending', 'in_review', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('document_flows');
+        Schema::dropIfExists('document_flow_steps');
     }
 };

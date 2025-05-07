@@ -3,20 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\NonAdmin;
+use App\Models\User;
 
 class DigitalSignature extends Model
 {
-    protected $table = 'digital_signatures';
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'public_key',
         'private_key',
     ];
 
-    // Relationships
-    public function nonAdmin()
+    /**
+     * Get the user that owns the digital signature.
+     */
+    public function user()
     {
-        return $this->belongsTo(NonAdmin::class);
+        return $this->hasOne(User::class, 'signature_id');
     }
 }

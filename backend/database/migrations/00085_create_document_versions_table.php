@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('document_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('document_id')->constrained('documents');
-            $table->unsignedInteger('version');
+            $table->foreignId('document_id')->constrained()->cascadeOnDelete();
+            $table->integer('version');
             $table->string('file_path');
             $table->string('file_name');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->nullable();
+            $table->enum('status', ['draft', 'in_review', 'approved', 'rejected'])->default('draft');
             $table->timestamp('created_at');
+            
+            $table->unique(['document_id', 'version']);
         });
     }
 

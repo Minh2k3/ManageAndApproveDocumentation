@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('template_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('non_admins');
-            $table->foreignId('template_id')->constrained('document_templates');
-            $table->unsignedInteger('count')->default(0);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('template_id')->constrained('document_templates')->cascadeOnDelete();
+            $table->integer('count')->default(0);
             $table->boolean('is_liked')->default(false);
             $table->timestamps();
+            
             $table->unique(['user_id', 'template_id']);
         });
     }

@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\NonAdmin;
 use App\Models\DocumentType;
-use App\Models\User;
+use App\Models\Approver;
 
 /**
  * ApprovalPermission Model
@@ -17,29 +15,49 @@ use App\Models\User;
 
 class ApprovalPermission extends Model
 {
-    use HasFactory;
 
-    protected $table = 'approval_permissions';
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'user_id',
         'document_type_id',
-        'granted_by',
+        'created_at',
+        'ended_at',
     ];
 
-    // Relationships
-    public function user()
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'ended_at' => 'datetime',
+    ];
+
+    /**
+     * Get the approver that owns the permission.
+     */
+    public function approver()
     {
-        return $this->belongsTo(NonAdmin::class);
+        return $this->belongsTo(Approver::class, 'user_id');
     }
 
+    /**
+     * Get the document type that the permission is for.
+     */
     public function documentType()
     {
         return $this->belongsTo(DocumentType::class);
-    }
-
-    public function grantedBy()
-    {
-        return $this->belongsTo(User::class, 'granted_by');
     }
 }

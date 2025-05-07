@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('notification_category_id')->constrained();
             $table->foreignId('receiver_id')->constrained('users');
             $table->string('title');
-            $table->text('content')->nullable();
+            $table->text('content');
             $table->boolean('is_read')->default(false);
             $table->timestamp('created_at');
         });

@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\DocumentVersion;
+use App\Models\Admin;
 
-class DocumentComment extends Model
+class UserBan extends Model
 {
 
     /**
@@ -23,9 +23,10 @@ class DocumentComment extends Model
      */
     protected $fillable = [
         'user_id',
-        'document_version_id',
-        'comment',
-        'created_at',
+        'banned_by',
+        'reason',
+        'started_at',
+        'ended_at',
     ];
 
     /**
@@ -34,11 +35,12 @@ class DocumentComment extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'created_at' => 'datetime',
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
     ];
 
     /**
-     * Get the user that made the comment.
+     * Get the user that was banned.
      */
     public function user()
     {
@@ -46,10 +48,10 @@ class DocumentComment extends Model
     }
 
     /**
-     * Get the document version that the comment belongs to.
+     * Get the admin that banned the user.
      */
-    public function documentVersion()
+    public function admin()
     {
-        return $this->belongsTo(DocumentVersion::class);
+        return $this->belongsTo(Admin::class, 'banned_by');
     }
 }

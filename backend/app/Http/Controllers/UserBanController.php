@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApprovalBan;
+use App\Models\UserBan;
 use Illuminate\Http\Request;
 
-class ApprovalBanController extends Controller
+class UserBanController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class ApprovalBanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ApprovalBan $approvalBan)
+    public function show(UserBan $userBan)
     {
         //
     }
@@ -42,7 +42,7 @@ class ApprovalBanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ApprovalBan $approvalBan)
+    public function edit(UserBan $userBan)
     {
         //
     }
@@ -50,7 +50,7 @@ class ApprovalBanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ApprovalBan $approvalBan)
+    public function update(Request $request, UserBan $userBan)
     {
         //
     }
@@ -58,7 +58,7 @@ class ApprovalBanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ApprovalBan $approvalBan)
+    public function destroy(UserBan $userBan)
     {
         //
     }

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('approval_permissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('document_type_id')->constrained('document_types');
-            $table->foreignId('granted_by')->constrained('users')->nullable();
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained('approvers')->cascadeOnDelete();
+            $table->foreignId('document_type_id')->constrained()->cascadeOnDelete();
+            $table->timestamp('created_at');
             $table->timestamp('ended_at')->nullable();
+            
             $table->unique(['user_id', 'document_type_id']);
             $table->comment('Trưởng đơn vị phân quyền ký văn bản cho thành viên trong đơn vị');
         });

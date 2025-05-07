@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('document_signatures', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('document_version_id')->constrained();
-            $table->foreignId('user_id')->constrained('non_admins');
+            $table->foreignId('document_version_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('approver_id')->constrained('approvers');
             $table->timestamp('signed_at');
             $table->text('signature_text')->nullable();
-            $table->enum('status', ['pending', 'signed', 'rejected']);
         });
     }
 

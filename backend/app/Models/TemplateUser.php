@@ -3,12 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\NonAdmin;
 
 class TemplateUser extends Model
 {
-    protected $table = 'templates_user';
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'templates_users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'user_id',
         'template_id',
@@ -16,19 +26,13 @@ class TemplateUser extends Model
         'is_liked',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'count' => 'integer',
         'is_liked' => 'boolean',
     ];
-
-    // Relationships
-    public function nonAdmin()
-    {
-        return $this->belongsTo(NonAdmin::class);
-    }
-
-    public function template()
-    {
-        return $this->belongsTo(DocumentTemplate::class, 'template_id');
-    }
 }

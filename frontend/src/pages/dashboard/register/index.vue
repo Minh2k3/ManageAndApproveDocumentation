@@ -173,11 +173,11 @@
                                 <div class="col-12 col-sm-12 mt-1">
                                     <div class="d-flex">
                                         <a-select 
-                                        v-model:value="selectedRole"
+                                        v-model:value="selectedRoll"
                                         show-search 
                                         placeholder="Vai trò" 
                                         style="width: 100%"
-                                        :options="roles" 
+                                        :options="rolls" 
                                         :filter-option="filterOption" 
                                         allow-clear
                                         :list-height="96"
@@ -307,11 +307,11 @@ export default defineComponent({
         const password_confirmation = ref('');
         const ok = ref(false);
         const selectedDepartment = ref(null);
-        const selectedRole = ref(null);
+        const selectedRoll = ref(null);
         
         // Danh sách phòng ban và vai trò
         const departments = ref([]);
-        const roles = ref([]);
+        const rolls = ref([]);
 
         // Hàm lọc cho select box
         const filterOption = (input, option) => {
@@ -345,9 +345,9 @@ export default defineComponent({
                     .then((response) => {
                         console.log("Response:", response.data);
                         departments.value = response.data.departments;
-                        roles.value = response.data.roles;
+                        rolls.value = response.data.rolls;
                         console.log(departments.value);
-                        console.log(roles.value);
+                        console.log(rolls.value);
                     })
                     .catch((error) => {
                         console.error(error);
@@ -360,6 +360,7 @@ export default defineComponent({
         // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
         onMounted(() => {
             getUsersRegister();
+            console.log("Đã gọi hàm getUsersRegister()");
         });
 
         const validateFrontend = ref(false);
@@ -372,7 +373,7 @@ export default defineComponent({
                 password: password.value,
                 password_confirmation: password_confirmation.value,
                 department_id: selectedDepartment.value,
-                role_id: selectedRole.value
+                roll_at_department_id: selectedRoll.value
             });
 
 
@@ -400,7 +401,7 @@ export default defineComponent({
                 return;
             }
 
-            if (selectedRole.value === null) {
+            if (selectedRoll.value === null) {
                 message.error("Vai trò không được để trống.");
                 validateFrontend.value = false;
                 return;
@@ -439,7 +440,7 @@ export default defineComponent({
             //         password: password.value,
             //         password_confirmation: password_confirmation.value,
             //         department_id: selectedDepartment.value,
-            //         role_id: selectedRole.value
+            //         roll_id: selectedRoll.value
             //     })
             //     .then(response => {
             //         console.log("Đăng ký thành công:", response.data);
@@ -477,7 +478,7 @@ export default defineComponent({
                     password: password.value,
                     password_confirmation: password_confirmation.value,
                     department_id: selectedDepartment.value,
-                    role_id: selectedRole.value
+                    roll_at_department_id: selectedRoll.value
                 }, {
                     withCredentials: true,
                 });
@@ -498,7 +499,6 @@ export default defineComponent({
         }
         
         
-
         return {
             // Form đăng ký
             name,
@@ -506,11 +506,11 @@ export default defineComponent({
             password,
             password_confirmation,
             departments,
-            roles,
+            rolls,
             ok,
             bgImage,
             selectedDepartment,
-            selectedRole,
+            selectedRoll,
             filterOption,
             showRequestNewDepartmentModal,
             register,

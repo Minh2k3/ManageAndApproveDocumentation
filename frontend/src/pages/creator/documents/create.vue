@@ -134,7 +134,7 @@
                         </div>
                     </div>
 
-                    <div class="col-12 col-sm mt-3 mt-sm-0">
+                    <div class="col-12 col-sm-3 mt-3 mt-sm-0">
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex justify-content-sm-center align-items-center">
                             <span class="text-center me-2">Hoặc</span>

@@ -38,3 +38,14 @@ Route::post('/login', [CustomAuthenticatedSessionController::class, 'store']);
 RateLimiter::for('api', function (Request $request) {
     return Limit::perMinute(60)->by($request->ip());
 });
+
+// Document Flow 
+Route::get('/document-flows', [DocumentFlowController::class, 'index'])
+    ->middleware('auth:sanctum')
+    ->name('document-flows.index');
+
+Route::get('/document-flows/{documentFlow}', [DocumentFlowController::class, 'show'])
+    ->middleware('auth:sanctum')
+    ->name('document-flows.show');
+
+    

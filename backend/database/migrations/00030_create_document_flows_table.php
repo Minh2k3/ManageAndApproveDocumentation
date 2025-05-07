@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('digital_signatures', function (Blueprint $table) {
+        Schema::create('document_flows', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('non_admin_id')->constrained('non_admins')->onDelete('cascade');
-            $table->string('public_key');
-            $table->string('private_key');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true)->comment('Is this template being used');
+            $table->boolean('is_template')->default(false)->comment('Check if this flow is a template flow');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('digital_signatures');
+        Schema::dropIfExists('document_flows');
     }
 };

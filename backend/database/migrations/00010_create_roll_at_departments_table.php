@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('roll_at_departments', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->text('description')->nullable();
-            $table->unsignedInteger('level')
-                ->default(10)
-                ->comment('roll in department, 1 is highest');
+            $table->integer('level')->comment('Lưu trình tự của các chức vụ trong đơn vị, từ 1 đến n, 1 là chức vụ cao nhất');
             $table->timestamps();
-            $table->comment('Lưu thông tin về các chức vụ có thể có trong hệ thống');
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('roll_at_departments');
     }
 };

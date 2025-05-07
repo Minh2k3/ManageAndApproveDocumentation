@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_flow_steps', function (Blueprint $table) {
+        Schema::create('documents', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->foreignId('document_type_id')->constrained();
+            $table->foreignId('creator_id')->constrained('creators');
             $table->foreignId('document_flow_id')->constrained();
-            $table->unsignedInteger('step');
-            $table->foreignId('department_id')->constrained();
-            $table->timestamp('signed_at')->nullable();
+            $table->boolean('is_public')->default(false)->comment('Check if this document can display for everyone');
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('document_flow_steps');
+        Schema::dropIfExists('documents');
     }
 };

@@ -62,4 +62,13 @@ class DocumentFlowStepController extends Controller
     {
         //
     }
+
+    /**
+     * Get all step of a document flow
+     */
+    public function getStepsByDocumentFlowId($documentFlowId)
+    {
+        $steps = DocumentFlowStep::where('document_flow_id', $documentFlowId)->get();
+        return response()->json($steps);
+    }
 }

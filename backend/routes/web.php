@@ -4,25 +4,30 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
-    if (! URL::hasValidSignature($request)) {
-        return response()->json(['message' => 'Invalid or expired verification link.'], 403);
+    // Kiểm tra chữ ký hợp lệ
+    if (!URL::hasValidSignature($request)) {
+        return redirect(env('FRONTEND_URL') . '/login?status=invalid-link');
     }
 
-    $user = \App\Models\User::findOrFail($request->route('id'));
+    // Lấy user theo ID
+    $user = User::findOrFail($request->route('id'));
 
-    if (! $user->hasVerifiedEmail()) {
+    // Kiểm tra xem email đã xác thực chưa
+    if (!$user->hasVerifiedEmail()) {
         $user->markEmailAsVerified();
         event(new Verified($user));
+        return redirect(env('FRONTEND_URL') . '/login?status=verified');
     }
 
-    // Redirect về trang frontend nếu muốn
-    return redirect(env('FRONTEND_URL') . '/login');
+    // Nếu đã xác thực từ trước
+    return redirect(env('FRONTEND_URL') . '/login?status=already-verified');
 })->middleware(['signed'])->name('verification.verify');
 
 // require __DIR__.'/auth.php';

@@ -21,7 +21,7 @@ class RegisterController extends Controller
             )
             ->get();
 
-        $roles = \DB::table('roles')
+        $rolls = \DB::table('roll_at_departments')
             ->select(
                 'id as value',
                 'name as label'
@@ -31,12 +31,8 @@ class RegisterController extends Controller
         return response()
                     ->json([
                         'departments' => $departments,
-                        'roles' => $roles,
-                    ])
-                    ->header('Access-Control-Allow-Origin', 'http://localhost:5173')
-                    ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-                    ->header('Access-Control-Allow-Headers', 'Content-Type, X-CSRF-TOKEN')
-                    ->header('Access-Control-Allow-Credentials', 'true');
+                        'rolls' => $rolls,
+                    ]);
     }
 
     public function register(Request $request)

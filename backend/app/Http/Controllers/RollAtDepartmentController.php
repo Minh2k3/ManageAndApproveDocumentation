@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DocumentFlow;
+use App\Models\RollAtDepartment;
 use Illuminate\Http\Request;
 
-class DocumentFlowController extends Controller
+class RollAtDepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $documentFlows = DocumentFlow::all();
-        return response()->json($documentFlows);
+        //
     }
 
     /**
@@ -29,26 +28,21 @@ class DocumentFlowController extends Controller
      */
     public function store(Request $request)
     {
-        
+        //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(RollAtDepartment $rollAtDepartment)
     {
-        $documentFlow = DocumentFlow::find($id);
-        if ($documentFlow) {
-            return response()->json($documentFlow);
-        } else {
-            return response()->json(['message' => 'Document Flow not found'], 404);
-        }
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DocumentFlow $documentFlow)
+    public function edit(RollAtDepartment $rollAtDepartment)
     {
         //
     }
@@ -56,7 +50,7 @@ class DocumentFlowController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, DocumentFlow $documentFlow)
+    public function update(Request $request, RollAtDepartment $rollAtDepartment)
     {
         //
     }
@@ -64,7 +58,7 @@ class DocumentFlowController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DocumentFlow $documentFlow)
+    public function destroy(RollAtDepartment $rollAtDepartment)
     {
         //
     }

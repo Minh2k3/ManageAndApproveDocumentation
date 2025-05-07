@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('document_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('non_admins');
-            $table->foreignId('document_version_id')->constrained();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('document_version_id')->constrained()->cascadeOnDelete();
             $table->text('comment');
             $table->timestamp('created_at');
         });

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NonAdmin;
+use App\Models\Creator;
 use Illuminate\Http\Request;
 
-class NonAdminController extends Controller
+class CreatorController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class NonAdminController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(NonAdmin $nonAdmin)
+    public function show(Creator $creator)
     {
         //
     }
@@ -42,7 +42,7 @@ class NonAdminController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(NonAdmin $nonAdmin)
+    public function edit(Creator $creator)
     {
         //
     }
@@ -50,7 +50,7 @@ class NonAdminController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, NonAdmin $nonAdmin)
+    public function update(Request $request, Creator $creator)
     {
         //
     }
@@ -58,7 +58,7 @@ class NonAdminController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(NonAdmin $nonAdmin)
+    public function destroy(Creator $creator)
     {
         //
     }

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('position')->nullable()->comment('where this department situated in');
             $table->boolean('can_approve')->default(false)->comment('check if this department has approval permission or not');
             $table->timestamps();
-            $table->comment('Lưu thông tin phòng ban, đơn vị');
         });
     }
 

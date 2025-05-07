@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documents', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->enum('name', ['admin', 'approver', 'creator']);
             $table->text('description')->nullable();
-            $table->foreignId('type_id')->constrained('document_types');
-            $table->foreignId('creator_id')->constrained('non_admins');
-            $table->foreignId('document_flow_id')->constrained();
-            $table->boolean('is_public')->default(false);
             $table->timestamps();
+            $table->comment('Lưu thông tin về các chức vụ có thể có trong hệ thống');
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documents');
+        Schema::dropIfExists('roles');
     }
 };

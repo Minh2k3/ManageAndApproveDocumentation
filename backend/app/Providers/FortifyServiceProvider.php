@@ -84,9 +84,11 @@ class FortifyServiceProvider extends ServiceProvider
             );
             return Limit::perMinute(5)->by($throttleKey);
         });
-
-        // Xác thực email chuyển về trang đăng nhập của VueJS
-        
+    
+        // Override route xác thực email
+        \Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, '__invoke'])
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('verification.verify');
 
 
     }

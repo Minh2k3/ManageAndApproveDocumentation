@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RoleOfDepartmentName;
+use App\Models\Approver;
 use Illuminate\Http\Request;
 
-class RoleOfDepartmentNameController extends Controller
+class ApproverController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class RoleOfDepartmentNameController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RoleOfDepartmentName $roleOfDepartmentName)
+    public function show(Approver $approver)
     {
         //
     }
@@ -42,7 +42,7 @@ class RoleOfDepartmentNameController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RoleOfDepartmentName $roleOfDepartmentName)
+    public function edit(Approver $approver)
     {
         //
     }
@@ -50,7 +50,7 @@ class RoleOfDepartmentNameController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RoleOfDepartmentName $roleOfDepartmentName)
+    public function update(Request $request, Approver $approver)
     {
         //
     }
@@ -58,7 +58,7 @@ class RoleOfDepartmentNameController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RoleOfDepartmentName $roleOfDepartmentName)
+    public function destroy(Approver $approver)
     {
         //
     }
