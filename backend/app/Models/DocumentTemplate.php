@@ -8,7 +8,6 @@ use App\Models\DocumentType;
 
 class DocumentTemplate extends Model
 {
-    use HasFactory;
 
     /**
      * The attributes that are mass assignable.

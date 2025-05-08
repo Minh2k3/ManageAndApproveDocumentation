@@ -12,7 +12,16 @@ class DocumentTypeController extends Controller
      */
     public function index()
     {
-        //
+        $documentTypes = \DB::table('document_types')
+            ->select(
+                'id as value',
+                'name as label'
+            )
+            ->get();
+    
+        return response()->json([
+            'document_types' => $documentTypes,
+        ])->setStatusCode(200, 'Document types retrieved successfully.');
     }
 
     /**

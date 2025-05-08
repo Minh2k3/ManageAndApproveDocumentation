@@ -12,8 +12,17 @@ class DocumentFlowController extends Controller
      */
     public function index()
     {
-        $documentFlows = DocumentFlow::all();
-        return response()->json($documentFlows);
+        $documentFlows = \DB::table('document_flows')
+            ->select(
+                'id as value',
+                'name as label',
+            )
+            ->where('is_active', true)
+            ->where('is_template', true)
+            ->get();
+        return response()->json([
+            'document_flow_templates' => $documentFlows,
+        ])->setStatusCode(200, 'Document flows retrieved successfully.');
     }
 
     /**

@@ -12,7 +12,8 @@ class DocumentFlowStepController extends Controller
      */
     public function index()
     {
-        //
+        $documentFlowSteps = DocumentFlowStep::all();
+        return response()->json($documentFlowSteps);
     }
 
     /**
@@ -68,7 +69,15 @@ class DocumentFlowStepController extends Controller
      */
     public function getStepsByDocumentFlowId($documentFlowId)
     {
-        $steps = DocumentFlowStep::where('document_flow_id', $documentFlowId)->get();
-        return response()->json($steps);
+        $steps = DocumentFlowStep::where('document_flow_id', $documentFlowId)
+        ->select(
+            'document_flow_id',
+            'step',
+            'department_id',
+        )
+        ->get();
+        return response()->json([
+            'document_flow_steps' => $steps,
+        ])->setStatusCode(200, 'Document flow steps retrieved successfully.');
     }
 }

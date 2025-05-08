@@ -150,58 +150,95 @@
 
                 <div class="row mt-3" v-if="document_flow_id">
                     <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5>Cấp {{ step.step }}:</h5>
-                        </div>
-
                         <div class="row mb-2">
-                            <div class="col-md-3 col-12 d-flex align-items-center">
-                                <label class="mb-0">Đơn vị:</label>
-                            </div>
-                            <div class="col-md-8 col-10">
-                                <a-select v-model:value="step.department_id" style="width: 100%" :options="departments"
-                                    placeholder="Chọn đơn vị" disabled />
-                            </div>
-                            <div class="col-md col">
-                                <a-tooltip title="Không thể thêm khi sử dụng luồng mẫu">
-                                    <span>
-                                        <a-button type="primary" disabled
-                                            class="text-center align-self-center bg-success">
-                                            <template #icon>
-                                                <PlusCircleOutlined />
-                                            </template>
-                                        </a-button>
-                                    </span>
-                                </a-tooltip>
-                            </div>
-                        </div>
+                            <div class="col-md-11 col-12">
+                                <div class="row my-2">
+                                    <div
+                                        class="col-md-11 col-10 d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fs-6 fw-bold">Cấp duyệt {{ step.step }}:</span>
+                                    </div>
+                                </div>
 
-                        <div class="row">
-                            <div class="col-md-3 col-12 d-flex align-items-center">
-                                <label class="mb-0">Người duyệt:</label>
+                                <div class="row my-2">
+                                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                        <div class="row">
+                                            <div class="col-12 d-flex align-items-center mb-1">
+                                                <label class="mb-md-0 mb-1">Đơn vị:</label>
+                                            </div>
+                                            <div class="col-12">
+                                                <a-select v-model:value="step.department_id" style="width: 100%"
+                                                    :options="departments" placeholder="Chọn đơn vị" allowClear />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="row">
+                                            <div class="col-12 d-flex align-items-center mb-1">
+                                                <label class="mb-1 mb-md-0">Người duyệt:</label>
+                                            </div>
+                                            <div class="col-12">
+                                                <a-select v-model:value="step.approver_id" style="width: 100%"
+                                                    :options="getApproversByDepartment(step.department_id)"
+                                                    placeholder="Chọn người duyệt" allowClear />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+
+
+                                </div>
                             </div>
-                            <div class="col-md-8 col-10">
-                                <a-select v-model:value="step.approver_id" style="width: 100%"
-                                    :options="getApproversByDepartment(step.department_id)"
-                                    placeholder="Chọn người duyệt" />
-                            </div>
+
                             <div class="col-md col">
-                                <a-tooltip title="Không thể xóa khi sử dụng luồng mẫu">
-                                    <span>
-                                        <a-button type="primary" disabled
-                                            class="text-center align-self-center bg-danger">
-                                            <template #icon>
-                                                <MinusCircleOutlined />
-                                            </template>
-                                        </a-button>
-                                    </span>
-                                </a-tooltip>
+                                <div class="row">
+                                    <div class="col-md col mb-md-2">
+                                        <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center justify-content-md-center">
+                                            <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0">
+                                                <span>
+                                                    <a-button type="primary"
+                                                        :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
+                                                        @click="addStep(step.step, index)"
+                                                        class="text-center align-self-center bg-success">
+                                                        <template #icon>
+                                                            <PlusCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+
+                                            <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0">
+                                                <span>
+                                                    <a-button type="primary"
+                                                        :disabled="!step.department_id || !step.approver_id"
+                                                        @click="addSameStep(step.step, index)"
+                                                        class="text-center align-self-center bg-warning">
+                                                        <template #icon>
+                                                            <DownCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+
+                                            <a-tooltip title="Xóa cấp duyệt này">
+                                                <span>
+                                                    <a-button type="primary" :disabled="current_flow_step.length <= 1"
+                                                        @click="removeStep(index)"
+                                                        class="text-center align-self-center bg-danger">
+                                                        <template #icon>
+                                                            <MinusCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mt-3" v-else>
+                <!-- <div class="row mt-3" v-else>
                     <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
                         <div class="row mb-2">
                             <div class="col-md-11 col-10 d-flex justify-content-between align-items-center mb-2">
@@ -269,19 +306,107 @@
                             </div>
                         </div>
                     </div>
+                </div> -->
+
+                <div class="row mt-3" v-else>
+                    <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
+                        <div class="row mb-2">
+                            <div class="col-md-11 col-12">
+                                <div class="row my-2">
+                                    <div
+                                        class="col-md-11 col-10 d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fs-6 fw-bold">Cấp duyệt {{ step.step }}:</span>
+                                    </div>
+                                </div>
+
+                                <div class="row my-2">
+                                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                        <div class="row">
+                                            <div class="col-12 d-flex align-items-center mb-1">
+                                                <label class="mb-md-0 mb-1">Đơn vị:</label>
+                                            </div>
+                                            <div class="col-12">
+                                                <a-select v-model:value="step.department_id" style="width: 100%"
+                                                    :options="departments" placeholder="Chọn đơn vị" allowClear />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="row">
+                                            <div class="col-12 d-flex align-items-center mb-1">
+                                                <label class="mb-1 mb-md-0">Người duyệt:</label>
+                                            </div>
+                                            <div class="col-12">
+                                                <a-select v-model:value="step.approver_id" style="width: 100%"
+                                                    :options="getApproversByDepartment(step.department_id)"
+                                                    placeholder="Chọn người duyệt" allowClear />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+
+
+                                </div>
+                            </div>
+
+                            <div class="col-md col">
+                                <div class="row">
+                                    <div class="col-md col mb-md-2">
+                                        <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center justify-content-md-center">
+                                            <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0">
+                                                <span>
+                                                    <a-button type="primary"
+                                                        :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
+                                                        @click="addStep(step.step, index)"
+                                                        class="text-center align-self-center bg-success">
+                                                        <template #icon>
+                                                            <PlusCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+
+                                            <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0">
+                                                <span>
+                                                    <a-button type="primary"
+                                                        :disabled="!step.department_id || !step.approver_id"
+                                                        @click="addSameStep(step.step, index)"
+                                                        class="text-center align-self-center bg-warning">
+                                                        <template #icon>
+                                                            <DownCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+
+                                            <a-tooltip title="Xóa cấp duyệt này">
+                                                <span>
+                                                    <a-button type="primary" :disabled="current_flow_step.length <= 1"
+                                                        @click="removeStep(index)"
+                                                        class="text-center align-self-center bg-danger">
+                                                        <template #icon>
+                                                            <MinusCircleOutlined />
+                                                        </template>
+                                                    </a-button>
+                                                </span>
+                                            </a-tooltip>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row mt-1">
                     <div class="col d-flex justify-content-end align-items-center">
-                        <a-tooltip 
-                            v-if="current_flow_step.length > 1 && document_flow_id === null"
+                        <a-tooltip v-if="current_flow_step.length > 1 && document_flow_id === null"
                             title="Xóa toàn bộ cấp duyệt">
                             <span>
-                                <a-button type="primary" 
-                                    @click="createNewWorkflow" 
+                                <a-button type="primary" @click="createNewWorkflow"
                                     class="text-center align-self-center bg-danger">
                                     <template #icon>
-                                        <CloseCircleOutlined class="me-2"/> 
+                                        <CloseCircleOutlined class="me-2" />
                                     </template>
                                     Xóa toàn bộ
                                 </a-button>
@@ -297,18 +422,20 @@
 </template>
 
 <script>
-import { useMenu } from '@/stores/use-menu.js';
-import { ref, defineComponent, computed, reactive, watch } from 'vue';
-import { 
-    UploadOutlined, 
-    PlusCircleOutlined, 
-    DownCircleOutlined, 
-    MinusCircleOutlined, 
+import { ref, defineComponent, computed, reactive, watch, onMounted } from 'vue';
+import {
+    UploadOutlined,
+    PlusCircleOutlined,
+    DownCircleOutlined,
+    MinusCircleOutlined,
     SaveOutlined,
     CloseCircleOutlined,
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-export default defineComponent ({
+import axiosInstance from '@/lib/axios.js';
+import { useMenu } from '@/stores/use-menu.js';
+import { useDocumentStore } from '@/stores/creator/document-store.js';
+export default defineComponent({
     components: {
         UploadOutlined,
         PlusCircleOutlined,
@@ -320,14 +447,18 @@ export default defineComponent ({
 
     setup() {
         useMenu().onSelectedKeys(["creator-documents-create"]);
+        const documentStore = useDocumentStore();
 
         const documentName = ref('');
-        const documentType = ref(null);
-        const documentTypes = ref([
-            { value: 'type1', label: 'Loại 1' },
-            { value: 'type2', label: 'Loại 2' },
-            { value: 'type3', label: 'Loại 3' },
-        ]);
+        let documentType = ref([]);
+        let documentTypes = ref([]);
+        let document_flows = ref([]);
+        onMounted(async () => {
+            await documentStore.fetchDocumentTypes();
+            documentTypes.value = documentStore.document_types;
+            await documentStore.fetchDocumentFlowTemplates();
+            document_flows.value = documentStore.document_flow_templates;
+        });
 
         const documentPublic = ref(1); // 1: Có, 2: Không
 
@@ -383,17 +514,13 @@ export default defineComponent ({
         const department_id = ref(null);
         const approver_id = ref(null);
 
-        const document_flows = ref([
-            { value: 1, label: 'LCĐ Khoa -> Đoàn TN -> P7' },
-            { value: 2, label: 'HSV -> P7' },
-            { value: 3, label: 'Khoa -> ĐTN -> P7' },
-        ]);
+        // const document_flows = computed(() => documentStore.document_flow_templates);
 
-        const document_flow_steps = ref([
-            { document_flow_id: 1, step: 1, department_id: 1 },        
-            { document_flow_id: 1, step: 2, department_id: 1 }, 
+        let document_flow_steps = ref([
+            { document_flow_id: 1, step: 1, department_id: 1 },
+            { document_flow_id: 1, step: 2, department_id: 1 },
             { document_flow_id: 1, step: 2, department_id: 2 },
-            { document_flow_id: 1, step: 3, department_id: 1 }, 
+            { document_flow_id: 1, step: 3, department_id: 1 },
             { document_flow_id: 2, step: 1, department_id: 3 },
             { document_flow_id: 2, step: 2, department_id: 1 },
             { document_flow_id: 2, step: 3, department_id: 2 },
@@ -444,17 +571,33 @@ export default defineComponent ({
             current_flow_step.value = document_flow_steps.value.filter((step) => step.document_flow_id === document_flow_id.value);
         }
 
+        const isUseTemplate = ref(false);
         watch(document_flow_id, () => {
             getCurrentFlowStep();
+            isUseTemplate.value = true;
         });
 
+        // watch(isUseTemplate, (newValue) => {
+        //     if (newValue) {
+        //         console.log("Luồng mẫu đã chọn: " + document_flow_id.value);
+        //         onMounted(() => {
+        //             document_flow_steps.value = documentStore.document_flow_steps(document_flow_id.value);
+        //         });
+        //         document_flow_steps = computed(() => documentStore.document_flow_steps(document_flow_id.value));
+        //     }
+        // });
 
         function createNewWorkflow() {
             // 1. Reset luồng mẫu đã chọn
-            document_flow_id.value = null;
-
-            // 2. Chuyển sang chế độ tạo mới (nếu có flag)
-            isCreatingNew.value = true;
+            current_flow_step.value = [
+                {
+                    step: 1,
+                    department_id: null,
+                    approver_id: null,
+                },
+            ];
+            document_flow_id.value = null; // reset luồng mẫu đã chọn
+            isUseTemplate.value = false; // Đặt lại trạng thái sử dụng mẫu
         }
 
         function getApproversByDepartment(departmentId) {
@@ -557,6 +700,6 @@ export default defineComponent ({
 
 <style>
 select {
-  min-width: 200px;
+    min-width: 200px;
 }
 </style>

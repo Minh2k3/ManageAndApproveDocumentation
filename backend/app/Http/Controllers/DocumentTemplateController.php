@@ -12,7 +12,15 @@ class DocumentTemplateController extends Controller
      */
     public function index()
     {
-        //
+        $documentTemplates = \DB::table('document_templates')
+            ->select(
+                'id as value',
+                'name as label',
+            )
+            ->get();
+        return response()->json([
+            'document_template_templates' => $documentTemplates,
+        ])->setStatusCode(200, 'Document templates retrieved successfully.');
     }
 
     /**
