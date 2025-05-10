@@ -12,7 +12,16 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        //
+        $departments = \DB::table('departments')
+            ->select(
+                'id as value',
+                'name as label',
+            )
+            ->get();
+
+        return response()->json([
+            'departments' => $departments,
+        ])->setStatusCode(200, 'Department retrieved successfully.');
     }
 
     /**
@@ -61,5 +70,20 @@ class DepartmentController extends Controller
     public function destroy(Department $department)
     {
         //
+    }
+
+    public function getDepartmentsCanApprove()
+    {
+        $departments = \DB::table('departments')
+            ->select(
+                'id as value',
+                'name as label',
+            )
+            ->where('can_approve', 1)
+            ->get();
+
+        return response()->json([
+            'departments' => $departments,
+        ])->setStatusCode(200, 'Department retrieved successfully.');
     }
 }

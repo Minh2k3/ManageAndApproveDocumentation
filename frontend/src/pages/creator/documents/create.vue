@@ -167,7 +167,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <a-select v-model:value="step.department_id" style="width: 100%"
-                                                    :options="departments" placeholder="Chọn đơn vị" allowClear />
+                                                    :options="departments" placeholder="Chọn đơn vị" disabled />
                                             </div>
                                         </div>
                                     </div>
@@ -422,7 +422,7 @@
 </template>
 
 <script>
-import { ref, defineComponent, computed, reactive, watch, onMounted } from 'vue';
+import { ref, defineComponent, computed, reactive, watch, onMounted, nextTick } from 'vue';
 import {
     UploadOutlined,
     PlusCircleOutlined,
@@ -435,6 +435,8 @@ import { message } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
 import { useMenu } from '@/stores/use-menu.js';
 import { useDocumentStore } from '@/stores/creator/document-store.js';
+import { useDepartmentStore } from '@/stores/creator/department-store.js';
+import { useApproverStore } from '@/stores/approver/approver-store.js';
 export default defineComponent({
     components: {
         UploadOutlined,
@@ -448,16 +450,45 @@ export default defineComponent({
     setup() {
         useMenu().onSelectedKeys(["creator-documents-create"]);
         const documentStore = useDocumentStore();
+        const departmentStore = useDepartmentStore();
+        const approverStore = useApproverStore();
 
         const documentName = ref('');
         let documentType = ref([]);
         let documentTypes = ref([]);
         let document_flows = ref([]);
+        let approver = ref([
+            { value: 1, label: 'Thầy Võ Tá Hoàng - BT LCD', department_id: 1 },
+            { value: 2, label: 'Thầy Nguyễn Đình Trình - PP7', department_id: 1 },
+            { value: 3, label: 'Anh Nguyễn Minh Tuấn - CT HSV', department_id: 1 },
+            { value: 4, label: 'Cô Nguyễn Thu Nga - BT ĐTN', department_id: 2 },
+            { value: 5, label: 'Chị Nguyễn Thị Hương - TP', department_id: 2 },
+            { value: 6, label: 'Chị Lê Phương Thảo - PP7', department_id: 2 },
+            { value: 7, label: 'Chị Phan Thị Trang Nhung - PCT HSV', department_id: 3 },
+            { value: 8, label: 'Chị Chu Ngọc Thúy - PCT HSV', department_id: 3 },
+            { value: 9, label: 'Thầy Đặng Ngọc Duyên - PBT ĐTN', department_id: 3 }
+        ]);
+
+        let departments = ref([
+            { value: 1, label: 'Khoa CNTT' },
+            { value: 2, label: 'Khoa Điện tử Viễn thông' },
+            { value: 3, label: 'Khoa Cơ khí' },
+        ]);
+
         onMounted(async () => {
             await documentStore.fetchDocumentTypes();
             documentTypes.value = documentStore.document_types;
+
             await documentStore.fetchDocumentFlowTemplates();
             document_flows.value = documentStore.document_flow_templates;
+
+            await approverStore.fetchApproversWithRoll();
+            approver.value = approverStore.approvers_with_roll;
+            console.log("Approvers: " + JSON.stringify(approver.value, null, 2));
+
+            await departmentStore.fetchDepartmentsCanApprove();
+            departments.value = departmentStore.departments_can_approve;
+            console.log("Departments: " + JSON.stringify(departments.value, null, 2));
         });
 
         const documentPublic = ref(1); // 1: Có, 2: Không
@@ -529,26 +560,9 @@ export default defineComponent({
             { document_flow_id: 3, step: 2, department_id: 3 },
             { document_flow_id: 3, step: 3, department_id: 2 },
         ]);
+        // console.log("Document_flow_step: " + JSON.stringify(document_flow_steps.value, null, 2));
 
-        const approver = ref([
-            { value: 1, label: 'Thầy Võ Tá Hoàng - BT LCD', department_id: 1 },
-            { value: 2, label: 'Thầy Nguyễn Đình Trình - PP7', department_id: 1 },
-            { value: 3, label: 'Anh Nguyễn Minh Tuấn - CT HSV', department_id: 1 },
-            { value: 4, label: 'Cô Nguyễn Thu Nga - BT ĐTN', department_id: 2 },
-            { value: 5, label: 'Chị Nguyễn Thị Hương - TP', department_id: 2 },
-            { value: 6, label: 'Chị Lê Phương Thảo - PP7', department_id: 2 },
-            { value: 7, label: 'Chị Phan Thị Trang Nhung - PCT HSV', department_id: 3 },
-            { value: 8, label: 'Chị Chu Ngọc Thúy - PCT HSV', department_id: 3 },
-            { value: 9, label: 'Thầy Đặng Ngọc Duyên - PBT ĐTN', department_id: 3 }
-        ]);
-
-        const departments = ref([
-            { value: 1, label: 'Khoa CNTT' },
-            { value: 2, label: 'Khoa Điện tử Viễn thông' },
-            { value: 3, label: 'Khoa Cơ khí' },
-        ]);
-
-        const current_flow_step = ref([
+        let current_flow_step = ref([
             {
                 step: 1,
                 department_id: null,
@@ -556,7 +570,23 @@ export default defineComponent({
             },
         ]);
 
-        function getCurrentFlowStep() {
+        // function getCurrentFlowStep() {
+        //     if (!document_flow_id.value) {
+        //         current_flow_step.value = [
+        //             {
+        //                 step: 1,
+        //                 department_id: null,
+        //                 approver_id: null,
+        //             },
+        //         ];
+        //         return;
+        //     }
+
+        //     current_flow_step.value = document_flow_steps.value.filter((step) => step.document_flow_id === document_flow_id.value);
+        // }
+
+        const isUseTemplate = ref(false);
+        watch(document_flow_id, () => {
             if (!document_flow_id.value) {
                 current_flow_step.value = [
                     {
@@ -567,25 +597,46 @@ export default defineComponent({
                 ];
                 return;
             }
-
-            current_flow_step.value = document_flow_steps.value.filter((step) => step.document_flow_id === document_flow_id.value);
-        }
-
-        const isUseTemplate = ref(false);
-        watch(document_flow_id, () => {
-            getCurrentFlowStep();
             isUseTemplate.value = true;
         });
 
-        // watch(isUseTemplate, (newValue) => {
-        //     if (newValue) {
-        //         console.log("Luồng mẫu đã chọn: " + document_flow_id.value);
-        //         onMounted(() => {
-        //             document_flow_steps.value = documentStore.document_flow_steps(document_flow_id.value);
-        //         });
-        //         document_flow_steps = computed(() => documentStore.document_flow_steps(document_flow_id.value));
-        //     }
-        // });
+        async function getCurrentFlowSteps(documentFlowId) {
+            console.log("Đang lấy dữ liệu từ API...");
+            try {
+                const response = await axiosInstance.get(`api/document-flow-steps/${documentFlowId}/`, {
+                    withCredentials: true,
+                });
+
+                console.log("Response:", response.data);
+
+                // Kiểm tra nếu response trả về đúng cấu trúc
+                if (response.data.document_flow_steps) {
+                    document_flow_steps.value = response.data.document_flow_steps.map(step => ({
+                        step: step.step,
+                        department_id: step.department_id,
+                        approver_id: null,
+                    }));
+                    console.log("Đã cập nhật document_flow_steps:", document_flow_steps.value);
+                } else {
+                    console.error("Dữ liệu trả về không có document_flow_steps:", response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu:", error);
+            }
+        };
+
+        watch(isUseTemplate, async (newValue) => {
+            if (newValue) {
+                console.log("Luồng mẫu đã chọn: " + document_flow_id.value);
+                await getCurrentFlowSteps(document_flow_id.value);
+                console.log("document_flow_steps: " + JSON.stringify(document_flow_steps.value, null, 2));
+                current_flow_step.value = [...document_flow_steps.value];
+                console.log("current_flow_step: " + JSON.stringify(current_flow_step.value, null, 2));
+                // console.log("Trước: " + isUseTemplate.value);
+                isUseTemplate.value = false; // Đặt lại trạng thái sử dụng mẫu
+                // console.log("Sau: " + isUseTemplate.value);
+            }
+        });
 
         function createNewWorkflow() {
             // 1. Reset luồng mẫu đã chọn
@@ -606,7 +657,7 @@ export default defineComponent({
             return approver_of_department.value.map(item => ({ value: item.value, label: item.label }));
         }
 
-        function onDepartmentChange(step, index) {
+        function onDepartmentChange(step) {
             step.approver_id = null; // reset người duyệt nếu đổi đơn vị
         }
 
@@ -654,12 +705,21 @@ export default defineComponent({
         }
 
         function removeStep(index) {
+            const curStep = current_flow_step.value[index].step; 
             current_flow_step.value.splice(index, 1); // Xóa phần tử tại index
 
             // Cập nhật lại số thứ tự các bước
-            current_flow_step.value.forEach((step, i) => {
-                step.step = i + 1;
-            });
+            // current_flow_step.value.forEach((step, i) => {
+            //     step.step = i + 1;
+            // });
+
+            for (let i = index; i < current_flow_step.value.length; ++i) {
+                if (current_flow_step.value[i].step == curStep) {
+                    break;
+                } else {
+                    current_flow_step.value[i].step -= 1;
+                }
+            }
         }
 
         return {
@@ -682,7 +742,7 @@ export default defineComponent({
             current_flow_step,
             approver,
             departments,
-            getCurrentFlowStep,
+            // getCurrentFlowStep,
             department_id,
             approver_id,
             getApproversByDepartment,

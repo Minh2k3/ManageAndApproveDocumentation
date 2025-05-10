@@ -15,7 +15,7 @@ export const useDocumentStore = defineStore("document", () => {
         try {
             const response = await axiosInstance.get("/api/document-types");
             if (response.data) {
-                console.log("response.data", response.data);
+                console.log("response document types: ", response.data);
                 // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 document_types.value = response.data.document_types;
             }
@@ -69,15 +69,12 @@ export const useDocumentStore = defineStore("document", () => {
         try {
             const response = await axiosInstance.get(`api/document-flow-steps/${documentFlowId}/`);
             if (response.data) {
-                // console.log("response.data", response.data);
-                const format_data = response.data.map((item) => ({
-                    document_flow_id: item.document_flow_id,
-                    step: item.step,
-                    department_id: item.department_id,
+                console.log("Document_flow_step: " + JSON.stringify(response.data, null, 2));
+                document_flow_steps.value = response.data.map(step => ({
+                    document_flow_id: step.document_flow_id,
+                    step: step.step,
+                    department_id: step.department_id,
                 }));
-                console.log("format_data", format_data);
-
-                document_flow_steps.value = format_data;
             }
         } catch (error) {
             console.error("Error fetching document flow steps:", error);

@@ -12,10 +12,9 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 
 // User Controllers
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin;
-use App\Http\Controllers\Creator;
-use App\Http\Controllers\Approver;
-
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CreatorController;
+use App\Http\Controllers\ApproverController;
 
 // Document Controllers
 use App\Http\Controllers\DocumentController;
@@ -24,6 +23,9 @@ use App\Http\Controllers\DocumentFlowStepController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\DocumentVersionController;
+
+// Other Controllers
+use App\Http\Controllers\DepartmentController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -94,3 +96,20 @@ Route::get('/document-types', [DocumentTypeController::class, 'index'])
 // Document Template
 Route::get('/document-templates', [DocumentTemplateController::class, 'index'])
     ->name('document-templates.index');
+
+
+// Approver 
+Route::get('/approvers', [ApproverController::class, 'index'])
+    ->name('approvers.index');
+
+Route::get('/approvers/with_roll', [ApproverController::class, 'getApproverWithRoll'])
+    ->name('approvers.getApproverWithRoll');
+
+
+// Department
+Route::get('/departments', [DepartmentController::class, 'index'])
+    ->name('departments.index');
+
+Route::get('/departments/can_approve', [DepartmentController::class, 'getDepartmentsCanApprove'])
+    ->name('departments.getDepartmentsCanApprove');
+
