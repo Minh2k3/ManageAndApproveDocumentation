@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('version');
             $table->string('file_path');
             $table->string('file_name');
-            $table->enum('status', ['draft', 'in_review', 'approved', 'rejected'])->default('draft');
+            $table->enum('status', ['in_review', 'approved', 'rejected'])->default('in_review');
             $table->timestamp('created_at');
             
             $table->unique(['document_id', 'version']);

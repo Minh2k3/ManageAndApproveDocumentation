@@ -3,7 +3,7 @@
         <!-- Header section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 fw-bold">Đề Xuất Văn Bản</h1>
+                <h1 class="h3 fw-bold">Đề xuất văn bản</h1>
                 <p class="text-secondary">Thêm văn bản và tạo luồng phê duyệt</p>
             </div>
         </div>
@@ -126,6 +126,7 @@
                     </div>
                 </div>
 
+                <!-- Phần chọn luồng mẫu hay tự tạo -->
                 <div class="row mt-3">
                     <div class="col col-sm-3 text-start mb-2 mb-sm-0 align-self-center ps-3">
                         <label>
@@ -155,10 +156,11 @@
                     </div>
                 </div>
 
+                <!-- Phần form luồng phê duyệt theo mẫu -->
                 <div class="row mt-3" v-if="document_flow_id">
                     <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
                         <div class="row mb-2">
-                            <div class="col-md-11 col-12">
+                            <div class="col-12">
                                 <div class="row my-2">
                                     <div
                                         class="col-md-11 col-10 d-flex justify-content-between align-items-center mb-2">
@@ -174,23 +176,40 @@
                                             </div>
                                             <div class="col-12">
                                                 <a-select 
-                                                    v-if="step.department_id > 1"
                                                     v-model:value="step.department_id" 
                                                     style="width: 100%"
                                                     :options="departments" 
                                                     placeholder="Chọn đơn vị" 
                                                     @change="handleDepartmentChange(step)" 
-                                                    disabled 
+                                                    :disabled="step.multichoice === 0"
                                                 />
-                                                <a-select 
-                                                    v-if="step.department_id === 1"
+                                                <!-- <a-select 
+                                                    v-if="step.department_id == 1"
                                                     v-model:value="step.department_id" 
                                                     style="width: 100%"
                                                     :options="departments" 
-                                                    placeholder="Chọn đơn vị" 
+                                                    placeholder="Chọn khoa phù hợp" 
                                                     @change="handleDepartmentChange(step)" 
                                                     allow-clear 
                                                 />
+                                                <a-select 
+                                                    v-if="step.department_id == 2"
+                                                    v-model:value="step.department_id" 
+                                                    style="width: 100%"
+                                                    :options="departments" 
+                                                    placeholder="Chọn LCĐ khoa phù hợp" 
+                                                    @change="handleDepartmentChange(step)" 
+                                                    allow-clear
+                                                />
+                                                <a-select 
+                                                    v-if="step.department_id == 3"
+                                                    v-model:value="step.department_id" 
+                                                    style="width: 100%"
+                                                    :options="departments" 
+                                                    placeholder="Chọn LCH khoa phù hợp" 
+                                                    @change="handleDepartmentChange(step)" 
+                                                    allow-clear
+                                                /> -->
                                             </div>
                                         </div>
                                     </div>
@@ -200,16 +219,20 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select v-model:value="step.approver_id" style="width: 100%"
+                                                <a-select 
+                                                    v-model:value="step.approver_id" 
+                                                    style="width: 100%"
                                                     :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" allowClear />
+                                                    placeholder="Chọn người duyệt" 
+                                                    allowClear 
+                                                />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md col">
+                            <!-- <div class="col-md col">
                                 <div class="row">
                                     <div class="col-md col mb-md-2">
                                         <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center justify-content-md-center">
@@ -253,81 +276,13 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
+
                         </div>
                     </div>
                 </div>
 
-                <!-- <div class="row mt-3" v-else>
-                    <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
-                        <div class="row mb-2">
-                            <div class="col-md-11 col-10 d-flex justify-content-between align-items-center mb-2">
-                                <span class="fs-6 fw-bold">Cấp duyệt {{ step.step }}:</span>
-                            </div>
-                            <div class="col-md col">
-                                <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại">
-                                    <span>
-                                        <a-button type="primary"
-                                            :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
-                                            @click="addStep(step.step, index)"
-                                            class="text-center align-self-center bg-success">
-                                            <template #icon>
-                                                <PlusCircleOutlined />
-                                            </template>
-                                        </a-button>
-                                    </span>
-                                </a-tooltip>
-                            </div>
-                        </div>
-
-                        <div class="row mb-2">
-                            <div class="col-md-3 col-12 d-flex align-items-center">
-                                <label class="mb-0">Đơn vị:</label>
-                            </div>
-                            <div class="col-md-8 col-10">
-                                <a-select v-model:value="step.department_id" style="width: 100%" :options="departments"
-                                    placeholder="Chọn đơn vị" allowClear />
-                            </div>
-                            <div class="col-md col">
-                                <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại">
-                                    <span>
-                                        <a-button type="primary" :disabled="!step.department_id || !step.approver_id"
-                                            @click="addSameStep(step.step, index)"
-                                            class="text-center align-self-center bg-warning">
-                                            <template #icon>
-                                                <DownCircleOutlined />
-                                            </template>
-                                        </a-button>
-                                    </span>
-                                </a-tooltip>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-3 col-12 d-flex align-items-center">
-                                <label class="mb-0">Người duyệt:</label>
-                            </div>
-                            <div class="col-md-8 col-10">
-                                <a-select v-model:value="step.approver_id" style="width: 100%"
-                                    :options="getApproversByDepartment(step.department_id)"
-                                    placeholder="Chọn người duyệt" allowClear />
-                            </div>
-                            <div class="col-md col">
-                                <a-tooltip title="Xóa cấp duyệt này">
-                                    <span>
-                                        <a-button type="primary" :disabled="current_flow_step.length <= 1"
-                                            @click="removeStep(index)" class="text-center align-self-center bg-danger">
-                                            <template #icon>
-                                                <MinusCircleOutlined />
-                                            </template>
-                                        </a-button>
-                                    </span>
-                                </a-tooltip>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-
+                <!-- Phần form luồng phê duyệt tự tạo -->
                 <div class="row mt-3" v-else>
                     <div v-for="(step, index) in current_flow_step" :key="index" class="mb-4 p-3 border rounded">
                         <div class="row mb-2">
@@ -363,9 +318,14 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select v-model:value="step.approver_id" style="width: 100%"
+                                                <a-select 
+                                                    v-model:value="step.approver_id" 
+                                                    style="width: 100%"
                                                     :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" allowClear />
+                                                    placeholder="Chọn người duyệt" 
+                                                    allowClear 
+                                                    :disabled="step.department_id === null"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -424,6 +384,7 @@
                     </div>
                 </div>
 
+                <!-- Phần xóa toàn bộ luồng -->
                 <div class="row mt-1">
                     <div class="col d-flex justify-content-end align-items-center">
                         <a-tooltip v-if="current_flow_step.length > 1 && document_flow_id === null"
@@ -636,6 +597,7 @@ export default defineComponent({
         let current_flow_step = ref([
             {
                 step: 1,
+                multichoice: false,
                 department_id: null,
                 approver_id: null,
             },
@@ -662,6 +624,7 @@ export default defineComponent({
                 current_flow_step.value = [
                     {
                         step: 1,
+                        multichoice: false,
                         department_id: null,
                         approver_id: null,
                     },
@@ -685,6 +648,7 @@ export default defineComponent({
                 if (response.data.document_flow_steps) {
                     document_flow_steps.value = response.data.document_flow_steps.map(step => ({
                         step: step.step,
+                        multichoice: step.multichoice,
                         department_id: step.department_id,
                         approver_id: null,
                     }));
@@ -733,6 +697,7 @@ export default defineComponent({
         // Hàm reset lại người phê duyệt khi chọn đơn vị
         function handleDepartmentChange(step) {
             step.approver_id = null;
+            console.log("multichoice: " + step.multichoice);
         }
 
         // Hàm linh tinh

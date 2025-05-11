@@ -73,6 +73,7 @@ export const useDocumentStore = defineStore("document", () => {
                 document_flow_steps.value = response.data.map(step => ({
                     document_flow_id: step.document_flow_id,
                     step: step.step,
+                    multichoice: step.multichoice,
                     department_id: step.department_id,
                 }));
             }

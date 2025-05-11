@@ -26,6 +26,7 @@ class Document extends Model
     protected $fillable = [
         'title',
         'description',
+        'file_path',
         'document_type_id',
         'creator_id',
         'document_flow_id',

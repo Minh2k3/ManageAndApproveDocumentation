@@ -17,7 +17,7 @@ class RegisterController extends Controller
         $departments = \DB::table('departments')
             ->select(
                 'id as value',
-                 'name as label'
+                'name as label'
             )
             ->get();
 

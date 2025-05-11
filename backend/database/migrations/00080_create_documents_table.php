@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->string('file_path');
             $table->foreignId('document_type_id')->constrained();
             $table->foreignId('creator_id')->constrained('creators');
             $table->foreignId('document_flow_id')->constrained()->nullable();

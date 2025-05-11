@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('document_flow_id')->constrained()->cascadeOnDelete();
             $table->integer('step');
             $table->foreignId('department_id')->constrained()->nullable();
+            $table->boolean('multichoice')->default(false);
             $table->enum('status', ['pending', 'in_review', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });

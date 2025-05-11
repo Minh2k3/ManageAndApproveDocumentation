@@ -334,9 +334,9 @@ export default defineComponent({
 
         const getUsersRegister = async () => {
             console.log("Đang lấy dữ liệu từ API...");
-            await axios.get("sanctum/csrf-cookie", {
-                withCredentials: true,
-            });
+            // await axios.get("sanctum/csrf-cookie", {
+            //     withCredentials: true,
+            // });
             try {
                 await axiosInstance
                     .get("api/register-options", {

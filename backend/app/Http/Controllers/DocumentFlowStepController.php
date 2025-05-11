@@ -73,6 +73,7 @@ class DocumentFlowStepController extends Controller
         ->select(
             'document_flow_id',
             'step',
+            'multichoice',
             'department_id',
         )
         ->get();
