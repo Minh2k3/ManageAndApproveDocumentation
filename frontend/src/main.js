@@ -27,7 +27,9 @@ import {
     Card, 
     Table, 
     Avatar,
-    Pagination } from 'ant-design-vue'
+    Pagination,
+    Modal,
+} from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
 import 'ant-design-vue/dist/reset.css';
@@ -38,6 +40,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const app = createApp(App)
 const pinia = createPinia()
+app.config.globalProperties.$message = message
 app.use(pinia)
 app.use(router)
 app.use(Button)
@@ -59,6 +62,6 @@ app.use(RadioGroup)
 app.use(RadioButton)
 app.use(DatePicker)
 app.use(TimePicker)
+app.use(Modal)
+app.use(message)
 app.mount('#app')
-
-app.config.globalProperties.$message = message

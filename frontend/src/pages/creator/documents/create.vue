@@ -174,12 +174,22 @@
                                             </div>
                                             <div class="col-12">
                                                 <a-select 
+                                                    v-if="step.department_id > 1"
                                                     v-model:value="step.department_id" 
                                                     style="width: 100%"
                                                     :options="departments" 
                                                     placeholder="Chọn đơn vị" 
                                                     @change="handleDepartmentChange(step)" 
                                                     disabled 
+                                                />
+                                                <a-select 
+                                                    v-if="step.department_id === 1"
+                                                    v-model:value="step.department_id" 
+                                                    style="width: 100%"
+                                                    :options="departments" 
+                                                    placeholder="Chọn đơn vị" 
+                                                    @change="handleDepartmentChange(step)" 
+                                                    allow-clear 
                                                 />
                                             </div>
                                         </div>
@@ -471,7 +481,15 @@
 </template>
 
 <script>
-import { ref, defineComponent, computed, reactive, watch, onMounted } from 'vue';
+import { ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode 
+} from 'vue';
+
 import {
     UploadOutlined,
     PlusCircleOutlined,
@@ -479,13 +497,21 @@ import {
     MinusCircleOutlined,
     SaveOutlined,
     CloseCircleOutlined,
+    ExclamationCircleOutlined,
 } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
+
+import { message, Modal } from 'ant-design-vue';
+
 import axiosInstance from '@/lib/axios.js';
+
 import { useMenu } from '@/stores/use-menu.js';
+
 import { useDocumentStore } from '@/stores/creator/document-store.js';
+
 import { useDepartmentStore } from '@/stores/creator/department-store.js';
+
 import { useApproverStore } from '@/stores/approver/approver-store.js';
+
 export default defineComponent({
     components: {
         UploadOutlined,
@@ -645,6 +671,7 @@ export default defineComponent({
             isUseTemplate.value = true;
         });
 
+        // Hàm lấy ra các bước phê duyệt trong luồng mẫu
         async function getCurrentFlowSteps(documentFlowId) {
             console.log("Đang lấy dữ liệu từ API...");
             try {
@@ -683,6 +710,7 @@ export default defineComponent({
             }
         });
 
+        // Hàm tạo luồng phê duyệt mới khi người dùng chọn "Tạo luồng mới"
         function createNewWorkflow() {
             current_flow_step.value = [
                 {
@@ -702,6 +730,7 @@ export default defineComponent({
             return approver_of_department.value.map(item => ({ value: item.value, label: item.label }));
         }
 
+        // Hàm reset lại người phê duyệt khi chọn đơn vị
         function handleDepartmentChange(step) {
             step.approver_id = null;
         }
@@ -790,17 +819,81 @@ export default defineComponent({
             return true;
         }
 
+        // Hàm xác nhận gửi yêu cầu phê duyệt
+        function showConfirmSendRequest() {
+            Modal.confirm({
+                title: 'Bạn có chắc chắn gửi phê duyệt văn bản này?',
+                icon: createVNode(ExclamationCircleOutlined),
+                content: createVNode(
+                    'div',
+                    {
+                        style: 'color:red;',
+                    },
+                    // 'Some descriptions',
+                ),
+                onOk() {
+                    message.success('Đã gửi yêu cầu phê duyệt');
+                },
+                onCancel() {
+                    return;
+                },
+                
+            });
+        };
+
         // Hàm xử lý gửi yêu cầu phê duyệt
         function handleSendRequest() {
             if (validateSendRequest()) {
-                console.log("gửi yêu cầu");
-                message.success("Gửi thành công!");
+                showConfirmSendRequest();
             }
         }
 
+        // Validate cho lưu nháp: Yêu cầu phải điền đủ ở phần form văn bản
+        function validateSaveDraft() {
+            if (!documentName.value.trim()) {
+                message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
+                return false;
+            }
+
+            if (documentType.value === null) {
+                message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
+                return false;
+            }
+
+            if (fileList.value.length === 0) {
+                message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Hàm xác nhận lưu nháp
+        function showConfirmSaveDraft() {
+            Modal.confirm({
+                title: 'Bạn có chắc chắn lưu nháp văn bản này?',
+                icon: createVNode(ExclamationCircleOutlined),
+                content: createVNode(
+                    'div',
+                    {
+                        style: 'color:red;',
+                    },
+                ),
+                onOk() {
+                    message.success('Đã lưu bản nháp');
+                },
+                onCancel() {
+                    return;
+                },
+                
+            });
+        };
+
         // Hàm xử lý lưu nháp
         function handleSaveDraft() {
-            console.log("Lưu nháp");
+            if (validateSaveDraft()) {
+                showConfirmSaveDraft();
+            }
         }
 
         return {

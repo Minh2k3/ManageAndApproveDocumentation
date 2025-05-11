@@ -12,7 +12,10 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        //
+        $documents = Document::all();
+        return response()->json([
+            'documents' => $documents,
+        ]);
     }
 
     /**
@@ -28,7 +31,7 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**

@@ -1,6 +1,4 @@
 <template>
-    Đây là trang quản lý văn bản của người phê duyệt.
-
     <a-card title="" style="width: 100%">
         <h2 class="fw-bold mb-3">Quản Lý Văn Bản</h2>
         <div class="row my-3">

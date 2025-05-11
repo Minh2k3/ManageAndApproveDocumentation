@@ -29,7 +29,7 @@ class ApprovalPermission extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+        'roll_at_department_id',
         'document_type_id',
         'created_at',
         'ended_at',

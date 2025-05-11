@@ -17,7 +17,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('document_type_id')->constrained();
             $table->foreignId('creator_id')->constrained('creators');
-            $table->foreignId('document_flow_id')->constrained();
+            $table->foreignId('document_flow_id')->constrained()->nullable();
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->boolean('is_public')->default(false)->comment('Check if this document can display for everyone');
             $table->timestamps();
         });

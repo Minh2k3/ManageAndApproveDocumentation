@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('approval_permissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('approvers')->cascadeOnDelete();
+            $table->foreignId('roll_at_department_id')->constrained()->cascadeOnDelete();
             $table->foreignId('document_type_id')->constrained()->cascadeOnDelete();
             $table->timestamp('created_at');
             $table->timestamp('ended_at')->nullable();
             
-            $table->unique(['user_id', 'document_type_id']);
-            $table->comment('Trưởng đơn vị phân quyền ký văn bản cho thành viên trong đơn vị');
+            $table->unique(['roll_at_department_id', 'document_type_id'], 'approval_perm_unique');
+            $table->comment('Quyền ký văn bản theo chức vụ trong đơn vị và loại văn bản');
         });
     }
 

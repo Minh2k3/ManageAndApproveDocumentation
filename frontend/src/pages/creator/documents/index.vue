@@ -11,8 +11,8 @@
             </div>
         </div>
 
-        <!-- Bảng trạng thái -->
-        <div class="row mb-3">
+                <!-- Bảng trạng thái -->
+                <div class="row mb-3">
             <div v-for="item in statusList" :key="item.key"
                 class="col-5 col-md mb-2 mb-md-0 border rounded-2 mx-2 p-3 cursor-pointer" :style="{
                     backgroundColor: selectedStatus === item.key
@@ -68,7 +68,47 @@
         <!-- Bảng văn bản -->
         <div class="row">
             <div class="col-12">
-                <a-table :dataSource="documents" :columns="columns" :scroll="{ x: 576 }" bordered :customRow="customRow">
+                <a-table 
+                    :dataSource="documents" 
+                    :columns="columns" 
+                    :scroll="{ x: 576 }" 
+                    bordered 
+                    :customRow="customRow"
+                    :showSorterTooltip="false"
+                    :locale="{
+                        triggerDesc: 'Nhấn để sắp xếp giảm dần',
+                        triggerAsc: 'Nhấn để sắp xếp tăng dần',
+                        cancelSort: 'Nhấn để hủy sắp xếp'
+                    }"
+                >
+                    <template #headerCell="{ column }">
+                        <template v-if="column.key === 'name'">
+                            <a-tooltip title="Sắp xếp theo tên văn bản">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'type'">
+                            <a-tooltip title="Sắp xếp theo loại văn bản">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'status'">
+                            <a-tooltip title="Sắp xếp theo trạng thái">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'created_at'">
+                            <a-tooltip title="Sắp xếp theo ngày tạo">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'updated_at'">
+                            <a-tooltip title="Sắp xếp theo ngày cập nhật">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                    </template>
+
                     <template #bodyCell="{ column, index, record }">
                         <template v-if="column.key === 'index'">
                             <span>{{ index + 1 }}</span>
@@ -88,7 +128,7 @@
 
                         <template v-if="column.key === 'status'">
                             <span v-if="record.status_id == 1"
-                                class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.status
+                                class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.status
                                 }}</span>
                             <span v-if="record.status_id == 2"
                                 class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.status
@@ -104,11 +144,11 @@
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, h } from 'vue';
 import { useRouter } from 'vue-router';
 export default defineComponent({
     setup() {
-        useMenu().onSelectedKeys(["creator-documents"]);
+        useMenu().onSelectedKeys(["approver-documents"]);
 
         const documents = ref([
             {
@@ -175,41 +215,51 @@ export default defineComponent({
         ]);
 
         const columns = [
-            {
-                title: 'STT',
-                key: 'index',
-                dataIndex: 'index',
-                width: 50,
-            },   
+            // {
+            //     title: 'STT',
+            //     key: 'index',
+            //     dataIndex: 'index',
+            //     width: 50,
+            // },   
             {
                 title: 'Tên văn bản',
                 key: 'name',
                 dataIndex: 'name',
                 width: 200,
+                sorter: (a, b) => a.name.localeCompare(b.name),
+                sortDirections: ['ascend', 'descend'],
             },
             {
                 title: 'Loại văn bản',
                 key: 'type',
                 dataIndex: 'type',
                 width: 150,
+                sorter: (a, b) => a.type.localeCompare(b.type),
+                sortDirections: ['ascend', 'descend'],
             },
             {
                 title: 'Trạng thái',
                 key: 'status',
                 dataIndex: 'status',
                 width: 150,
+                sorter: (a, b) => a.status_id - b.status_id,
+                sortDirections: ['ascend', 'descend'],
             },
             {
                 title: 'Ngày tạo',
                 key: 'created_at',
                 dataIndex: 'created_at',
                 width: 150,
+                sorter: (a, b) => a.created_at.localeCompare(b.created_at),
+                sortDirections: ['ascend', 'descend'],
             },
             {
                 title: 'Ngày cập nhật',
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,
+                sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
+                sortDirections: ['ascend', 'descend'],
             },
         ];
 
@@ -230,17 +280,14 @@ export default defineComponent({
             documents,
             columns,
             customRow,
-        }
+
+        };
     },
 });
 </script>
 
-<style scoped>
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.bg-primary-subtle {
-    background-color: #dbeafe !important;
+<style>
+.ant-table-column-sorters .ant-tooltip {
+  display: none !important;
 }
 </style>
