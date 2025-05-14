@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Admin;
+use Carbon\Carbon;
 
 class UserBan extends Model
 {
@@ -53,5 +54,17 @@ class UserBan extends Model
     public function admin()
     {
         return $this->belongsTo(Admin::class, 'banned_by');
+    }
+
+    protected $dates = ['started_at', 'ended_at'];
+
+    public function getStartedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getEndedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

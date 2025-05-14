@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\DocumentFlowStep;
+use App\Models\User;
 
 class DocumentFlow extends Model
 {
@@ -17,6 +18,7 @@ class DocumentFlow extends Model
     protected $fillable = [
         'name',
         'description',
+        'created_by',
         'is_active',
         'is_template',
     ];
@@ -45,5 +47,12 @@ class DocumentFlow extends Model
     public function documents()
     {
         return $this->hasMany(Document::class);
+    }
+    /**
+     * Get the user that created the document flow.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

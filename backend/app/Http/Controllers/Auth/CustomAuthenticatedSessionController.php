@@ -24,12 +24,25 @@ class CustomAuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if (! $user->hasVerifiedEmail()) {
+        if (!$user->hasVerifiedEmail()) {
             Auth::logout();
+            return response()->json([
+                'message' => 'Bạn chưa xác minh địa chỉ email. Vui lòng kiểm tra hộp thư.',
+            ], 401);
+        }
 
-            throw ValidationException::withMessages([
-                'email' => ['Bạn chưa xác minh địa chỉ email. Vui lòng kiểm tra hộp thư.'],
-            ]);
+        if ($user->status === 'pending') {
+            Auth::logout();
+            return response()->json([
+                'message' => 'Tài khoản của bạn chưa được duyệt!'
+            ], 402);
+        }
+
+        if ($user->status === 'banned') {
+            Auth::logout();
+            return response()->json([
+                'message' => 'Tài khoản của bạn đang bị cấm!'
+            ], 402);
         }
 
         $request->session()->regenerate();

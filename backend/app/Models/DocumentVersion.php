@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\DocumentComment;
 use App\Models\DocumentSignature;
+use Carbon\Carbon;
 
 class DocumentVersion extends Model
 {
@@ -26,7 +27,6 @@ class DocumentVersion extends Model
         'document_id',
         'version',
         'file_path',
-        'file_name',
         'status',
         'created_at',
     ];
@@ -63,5 +63,12 @@ class DocumentVersion extends Model
     public function signatures()
     {
         return $this->hasMany(DocumentSignature::class);
+    }
+
+    protected $dates = ['created_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

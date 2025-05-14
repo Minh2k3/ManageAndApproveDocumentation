@@ -261,14 +261,7 @@ export default defineComponent({
                 console.log(user.id);
                 router.push({ name: authStore.role });
             } catch (error) {
-                console.log("Đăng nhập thất bại");
-                if (error.response && error.response.status === 422) {
-                    console.log("Lỗi validate:", error.response.data.errors);
-                    alert("Đăng nhập thất bại: " + JSON.stringify(error.response.data.errors));
-                } else {
-                    console.error("Lỗi khác:", error);
-                    message.error("Đăng nhập thất bại: " + JSON.stringify(error.response?.data?.message || error.message));
-                }
+                // message.error("Đăng nhập thất bại: " + JSON.stringify(error.response?.data?.message || error.message));
             }
         };
 

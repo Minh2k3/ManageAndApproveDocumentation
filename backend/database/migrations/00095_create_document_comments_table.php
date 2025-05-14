@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('document_version_id')->constrained()->cascadeOnDelete();
             $table->text('comment');
             $table->timestamp('created_at');
+
+            $table->unique(['user_id', 'document_version_id', 'created_at'], 'unique_user_document_comment');
         });
     }
 

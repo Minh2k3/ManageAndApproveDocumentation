@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('document_id')->constrained()->cascadeOnDelete();
             $table->integer('version');
             $table->string('file_path');
-            $table->string('file_name');
+            // $table->string('file_name');
             $table->enum('status', ['in_review', 'approved', 'rejected'])->default('in_review');
             $table->timestamp('created_at');
             

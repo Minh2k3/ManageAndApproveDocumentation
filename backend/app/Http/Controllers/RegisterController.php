@@ -196,6 +196,7 @@ class RegisterController extends Controller
             $user->status = "pending";
             $user->verification_token = null;
             $user->verification_token_expiry = null;
+            $user->status = 'pending';
             $user->save();
             
             \DB::commit();

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Document;
 use App\Models\RollAtDepartment;
+use Carbon\Carbon;
 
 class Creator extends Model
 {
@@ -22,6 +23,15 @@ class Creator extends Model
         'roll_at_department_id',
         'created_at',
         'updated_at',
+    ];
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime', 
     ];
 
     /**
@@ -54,5 +64,17 @@ class Creator extends Model
     public function rollAtDepartment()
     {
         return $this->belongsTo(RollAtDepartment::class);
+    }
+
+    protected $dates = ['created_at', 'updated_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

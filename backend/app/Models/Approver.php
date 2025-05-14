@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\ApprovalPermission;
 use App\Models\DocumentSignature;
 use App\Models\RollAtDepartment;
+use Carbon\Carbon;
 
 class Approver extends Model
 {
@@ -23,6 +24,15 @@ class Approver extends Model
         'roll_at_department_id',
         'created_at',
         'updated_at',
+    ];
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime', 
     ];
 
     /**
@@ -63,5 +73,17 @@ class Approver extends Model
     public function rollAtDepartment()
     {
         return $this->belongsTo(RollAtDepartment::class, 'roll_at_department_id');
+    }
+
+    protected $dates = ['created_at', 'updated_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

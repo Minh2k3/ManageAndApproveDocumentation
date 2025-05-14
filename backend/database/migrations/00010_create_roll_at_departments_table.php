@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('roll_at_departments', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->text('description')->nullable();
             $table->integer('level')->comment('Lưu trình tự của các chức vụ trong đơn vị, từ 1 đến n, 1 là chức vụ cao nhất');
             $table->timestamps();

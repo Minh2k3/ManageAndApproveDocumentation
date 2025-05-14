@@ -13,6 +13,9 @@ use App\Models\DocumentVersion;
 use App\Models\DocumentFlow;
 use App\Models\DocumentFlowStep;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
 class DocumentController extends Controller
 {
     /**
@@ -74,13 +77,55 @@ class DocumentController extends Controller
         //
     }
 
-    public function getDocumentByCreator(Request $request)
+    public function getDocumentsByCreator($id)
     {
-        $id = $request->input('id');
-        $documents = Document::where('creator_id', $id)->get();
+        $documents = Document::where('created_by', $id)
+            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->select(
+                'documents.id as id',
+                'documents.title as title',
+                'documents.description as description',
+                'documents.file_path as file_path',
+                'documents.status as status',
+                'documents.created_at as created_at',
+                'documents.updated_at as updated_at',
+                'document_types.name as type'
+            )
+            ->get();
 
         return response()->json([
             'documents' => $documents,
+        ]);
+    }
+
+    public function storeDraftDocument(Request $request)
+    {
+        $pdfPath = $request->file('file_path')->storeAs(
+            '', // Thư mục con (rỗng vì đã set trong filesystems.php)
+            Str::uuid() . '.' . $request->file('pdf_file')->getClientOriginalExtension(),
+            'public'
+        );
+
+        try {
+            $document = Document::create([
+                'title' => $request->input('title'),
+                'description' => $request->input('description'),
+                'file_path' => $pdfPath,
+                'document_type_id' => $request->input('document_type_id'),
+                'created_by' => auth()->user()->id,
+                'document_flow_id' => null, 
+                'status' => 0,
+                'is_public' => false,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Không thể lưu nháp vì ' . $e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => 'Bản nháp đã được lưu thành công.',
+            'document' => $document,
         ]);
     }
 }

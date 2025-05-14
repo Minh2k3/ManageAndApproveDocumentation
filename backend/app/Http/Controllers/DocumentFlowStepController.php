@@ -29,7 +29,12 @@ class DocumentFlowStepController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $documentFlowStep = DocumentFlowStep::create($request->all());
+
+        return response()->json([
+            'message' => 'Document flow step created successfully.',
+            'document_flow_step' => $documentFlowStep,
+        ])->setStatusCode(201, 'Document flow step created successfully.');
     }
 
     /**

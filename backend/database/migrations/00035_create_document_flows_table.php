@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->boolean('is_active')->default(true)->comment('Is this template being used');
             $table->boolean('is_template')->default(false)->comment('Check if this flow is a template flow');
             $table->timestamps();

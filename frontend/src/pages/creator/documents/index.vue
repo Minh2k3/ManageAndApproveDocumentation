@@ -127,92 +127,148 @@
                         </template>
 
                         <template v-if="column.key === 'status'">
-                            <span v-if="record.status_id == 1"
-                                class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.status
-                                }}</span>
-                            <span v-if="record.status_id == 2"
-                                class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.status
-                                }}</span>
+                            <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
+                            <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                            <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
+                            <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
                         </template>
-
                     </template>
                 </a-table>
             </div>
         </div>
     </a-card>
+
+    <a-modal
+        v-model:visible="detailVisible"
+        title="Chi tiết văn bản"
+        width="600px"
+        >
+        <p><strong>Tiêu đề:</strong> {{ selectedDocument.title }}</p>
+        <p><strong>Mô tả:</strong> {{ selectedDocument.description }}</p>
+        <p><strong>Loại văn bản:</strong> {{ selectedDocument.type }}</p>
+        <p><strong>Trạng thái:</strong> {{ selectedDocument.status }}</p>
+        <p><strong>Ngày tạo:</strong> {{ selectedDocument.created_at }}</p>
+        <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
+        <p><strong>File:</strong> 
+            <a :href="`http://localhost:8000/${selectedDocument.file_path}`" target="_blank">
+                Xem tệp
+            </a>
+        </p>
+
+        <template #footer>
+            <a-button @click="detailVisible = false">Đóng</a-button>
+            <a-button type="primary" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+        </template>
+    </a-modal>
+
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
-import { ref, defineComponent, h } from 'vue';
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode,
+    h 
+} from 'vue';
 import { useRouter } from 'vue-router';
+import { useDocumentStore } from '@/stores/creator/document-store.js';
+import { message, Modal } from 'ant-design-vue';
+import { useAuth } from '@/stores/use-auth.js';
+
 export default defineComponent({
     setup() {
+        const authStore = useAuth();
+        const user = authStore.user;
+
+        const detailVisible = ref(false);
+        const selectedDocument = ref({});
+        const viewDetail = (document) => {
+            selectedDocument.value = document;
+            detailVisible.value = true;
+            console.log(selectedDocument.value.id);
+        };
+
+
+
         useMenu().onSelectedKeys(["approver-documents"]);
+        const documentStore = useDocumentStore();
+        let documents = ref([]);
 
-        const documents = ref([
-            {
-                id: 1,
-                name: 'Văn bản 1',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-01',
-                updated_at: '2023-10-01',
-            },
-            {
-                id: 2,
-                name: 'Văn bản 2',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-02',
-                updated_at: '2023-10-02',
-            }, 
-            {
-                id: 3,
-                name: 'Văn bản 3',
-                type_id: 3,
-                type: 'Văn bản nội bộ',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-03',
-                updated_at: '2023-10-03',
-            },
-            {
-                id: 4,
-                name: 'Văn bản 4',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-04',
-                updated_at: '2023-10-04',
-            },
-            {
-                id: 5,
-                name: 'Văn bản 5',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-05',
-                updated_at: '2023-10-05',
-            },
-            {
-                id: 6,
-                name: 'Văn bản 6',
-                type_id: 3,
-                type: 'Văn bản nội bộ',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-06',
-                updated_at: '2023-10-06',
-            },
+        onMounted(async () => {
+            await documentStore.fetchDocuments(user.id);
+            documents.value = documentStore.documents;
+        });
 
-        ]);
+
+
+        // documents = ref([
+        //     {
+        //         id: 1,
+        //         name: 'Văn bản 1',
+        //         type_id: 1,
+        //         type: 'Văn bản đi',
+        //         status_id: 1,
+        //         status: 'Đã duyệt',
+        //         created_at: '2023-10-01',
+        //         updated_at: '2023-10-01',
+        //     },
+        //     {
+        //         id: 2,
+        //         name: 'Văn bản 2',
+        //         type_id: 2,
+        //         type: 'Văn bản đến',
+        //         status_id: 2,
+        //         status: 'Chờ duyệt',
+        //         created_at: '2023-10-02',
+        //         updated_at: '2023-10-02',
+        //     }, 
+        //     {
+        //         id: 3,
+        //         name: 'Văn bản 3',
+        //         type_id: 3,
+        //         type: 'Văn bản nội bộ',
+        //         status_id: 1,
+        //         status: 'Đã duyệt',
+        //         created_at: '2023-10-03',
+        //         updated_at: '2023-10-03',
+        //     },
+        //     {
+        //         id: 4,
+        //         name: 'Văn bản 4',
+        //         type_id: 1,
+        //         type: 'Văn bản đi',
+        //         status_id: 2,
+        //         status: 'Chờ duyệt',
+        //         created_at: '2023-10-04',
+        //         updated_at: '2023-10-04',
+        //     },
+        //     {
+        //         id: 5,
+        //         name: 'Văn bản 5',
+        //         type_id: 2,
+        //         type: 'Văn bản đến',
+        //         status_id: 1,
+        //         status: 'Đã duyệt',
+        //         created_at: '2023-10-05',
+        //         updated_at: '2023-10-05',
+        //     },
+        //     {
+        //         id: 6,
+        //         name: 'Văn bản 6',
+        //         type_id: 3,
+        //         type: 'Văn bản nội bộ',
+        //         status_id: 1,
+        //         status: 'Đã duyệt',
+        //         created_at: '2023-10-06',
+        //         updated_at: '2023-10-06',
+        //     },
+
+        // ]);
 
         const columns = [
             // {
@@ -223,11 +279,14 @@ export default defineComponent({
             // },   
             {
                 title: 'Tên văn bản',
-                key: 'name',
-                dataIndex: 'name',
+                key: 'title',
+                dataIndex: 'title',
                 width: 200,
                 sorter: (a, b) => a.name.localeCompare(b.name),
                 sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
             },
             {
                 title: 'Loại văn bản',
@@ -236,14 +295,18 @@ export default defineComponent({
                 width: 150,
                 sorter: (a, b) => a.type.localeCompare(b.type),
                 sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
             },
             {
                 title: 'Trạng thái',
                 key: 'status',
                 dataIndex: 'status',
-                width: 150,
+                width: 120,
                 sorter: (a, b) => a.status_id - b.status_id,
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
             {
                 title: 'Ngày tạo',
@@ -252,6 +315,7 @@ export default defineComponent({
                 width: 150,
                 sorter: (a, b) => a.created_at.localeCompare(b.created_at),
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
             {
                 title: 'Ngày cập nhật',
@@ -260,15 +324,26 @@ export default defineComponent({
                 width: 150,
                 sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
+            {
+                title: "Thao tác",
+                key: "action",
+                responsive: ["xxl"],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            }
         ];
 
         const router = useRouter();
 
+        // Hàm xem chi tiết văn bản khi click vào dòng
         const customRow = (record) => {
             return {
                 onClick: () => {
-                    router.push(`documents/${record.id}`);
+                    viewDetail(record);
+                    // router.push(`documents/${record.id}`);
                 },
                 style: {
                     cursor: 'pointer'
@@ -276,11 +351,19 @@ export default defineComponent({
             };
         };
 
+        // Hàm điều hướng đến trang sửa văn bản
+        const goToEditPage = (id) => {
+            router.push(`documents/${id}`);
+        };
+
         return {
             documents,
             columns,
             customRow,
-
+            viewDetail,
+            detailVisible,
+            selectedDocument,
+            goToEditPage,
         };
     },
 });

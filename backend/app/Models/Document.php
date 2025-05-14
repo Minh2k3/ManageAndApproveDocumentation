@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentType;
 use App\Models\DocumentFlow;
 use App\Models\DocumentVersion;
-use App\Models\Creator;
+use App\Models\User;
+use Carbon\Carbon;
 /**
  * Document Model
  *
@@ -28,7 +29,7 @@ class Document extends Model
         'description',
         'file_path',
         'document_type_id',
-        'creator_id',
+        'created_by',
         'document_flow_id',
         'status',
         'is_public',
@@ -43,6 +44,8 @@ class Document extends Model
      */
     protected $casts = [
         'is_public' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -58,7 +61,7 @@ class Document extends Model
      */
     public function creator()
     {
-        return $this->belongsTo(Creator::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -83,5 +86,17 @@ class Document extends Model
     public function latestVersion()
     {
         return $this->hasOne(DocumentVersion::class)->latest('version');
+    }
+
+    protected $dates = ['created_at', 'updated_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

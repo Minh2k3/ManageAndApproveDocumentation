@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Approver;
 use App\Models\Creator;
 use App\Models\DocumentFlowStep;
+use Carbon\Carbon;
 
 class Department extends Model
 {
@@ -34,6 +35,8 @@ class Department extends Model
      */
     protected $casts = [
         'can_approve' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -58,5 +61,17 @@ class Department extends Model
     public function documentFlowSteps()
     {
         return $this->hasMany(DocumentFlowStep::class);
+    }
+
+    protected $dates = ['created_at', 'updated_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

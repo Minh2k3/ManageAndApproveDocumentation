@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\DocumentVersion;
+use Carbon\Carbon;
 
 class DocumentComment extends Model
 {
@@ -51,5 +52,12 @@ class DocumentComment extends Model
     public function documentVersion()
     {
         return $this->belongsTo(DocumentVersion::class);
+    }
+
+    protected $dates = ['created_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

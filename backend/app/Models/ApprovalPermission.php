@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentType;
 use App\Models\Approver;
+use Carbon\Carbon;
 
 /**
  * ApprovalPermission Model
@@ -59,5 +60,17 @@ class ApprovalPermission extends Model
     public function documentType()
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    protected $dates = ['created_at', 'ended_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getEndedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

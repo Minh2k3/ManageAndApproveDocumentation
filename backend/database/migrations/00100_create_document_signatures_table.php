@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('approver_id')->constrained('approvers');
             $table->timestamp('signed_at');
             $table->text('signature_text')->nullable();
+
+            $table->unique(['document_version_id', 'approver_id'], 'unique_document_version_approver_signature');
         });
     }
 

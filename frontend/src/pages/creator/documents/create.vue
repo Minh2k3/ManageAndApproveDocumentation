@@ -26,7 +26,7 @@
                         </label>
                     </div>
                     <div class="col-sm-10">
-                        <a-input v-model:value="documentName" placeholder="Văn bản số 1" allow-clear />
+                        <a-input v-model:value="document_name" placeholder="Văn bản số 1" allow-clear />
 
                         <div class="w-100"></div>
 
@@ -50,7 +50,7 @@
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex">
                             <a-select v-model:value="documentType" show-search placeholder="Loại" style="width: 100%"
-                                :options="documentTypes" :filter-option="filterOption" allow-clear></a-select>
+                                :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
                         </div>
 
                         <!-- Lỗi nằm dưới hàng mới -->
@@ -442,7 +442,8 @@
 </template>
 
 <script>
-import { ref, 
+import { 
+    ref, 
     defineComponent, 
     computed, 
     reactive, 
@@ -473,6 +474,8 @@ import { useDepartmentStore } from '@/stores/creator/department-store.js';
 
 import { useApproverStore } from '@/stores/approver/approver-store.js';
 
+import { useAuth } from '@/stores/use-auth.js';
+
 export default defineComponent({
     components: {
         UploadOutlined,
@@ -484,14 +487,17 @@ export default defineComponent({
     },
 
     setup() {
+        const authStore = useAuth();
+        const user = authStore.user;
+
         useMenu().onSelectedKeys(["creator-documents-create"]);
         const documentStore = useDocumentStore();
         const departmentStore = useDepartmentStore();
         const approverStore = useApproverStore();
 
-        const documentName = ref('');
+        const document_name = ref('');
         const documentType = ref(null);
-        let documentTypes = ref([]);
+        let listDocumentTypes = ref([]);
         const documentPublic = ref(1); // 1: Có, 2: Không
         let document_flows = ref([]);
         let approver = ref([
@@ -513,8 +519,8 @@ export default defineComponent({
         ]);
 
         onMounted(async () => {
-            await documentStore.fetchDocumentTypes();
-            documentTypes.value = documentStore.document_types;
+            await documentStore.fetchlistDocumentTypes();
+            listDocumentTypes.value = documentStore.document_types;
 
             await documentStore.fetchDocumentFlowTemplates();
             document_flows.value = documentStore.document_flow_templates;
@@ -761,7 +767,7 @@ export default defineComponent({
 
         // Validate cho gửi yêu cầu
         function validateSendRequest() {
-            if (!documentName.value.trim()) {
+            if (!document_name.value.trim()) {
                 message.error("Hãy điền tên văn bản!");
                 return false;
             }
@@ -815,7 +821,7 @@ export default defineComponent({
 
         // Validate cho lưu nháp: Yêu cầu phải điền đủ ở phần form văn bản
         function validateSaveDraft() {
-            if (!documentName.value.trim()) {
+            if (!document_name.value.trim()) {
                 message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
                 return false;
             }
@@ -833,6 +839,14 @@ export default defineComponent({
             return true;
         }
 
+        function saveDraft() {
+            if (current_flow_step.value.length === 0) {
+
+            } else {
+
+            }
+        }
+
         // Hàm xác nhận lưu nháp
         function showConfirmSaveDraft() {
             Modal.confirm({
@@ -845,6 +859,7 @@ export default defineComponent({
                     },
                 ),
                 onOk() {
+                    saveDraft();
                     message.success('Đã lưu bản nháp');
                 },
                 onCancel() {
@@ -861,28 +876,31 @@ export default defineComponent({
         }
 
         return {
-            documentName,
+            // Form Value
+            document_name,
             documentType,
-            documentTypes,
+            fileList,
+            current_flow_step,
+
+            // Form Options
+            listDocumentTypes,
             documentPublic,
             headers,
-            fileList,
-            handleChange,
-            beforeUpload,
-            handleCustomRequest,
-            handlePreview,
-
-            filterOption,
             document_flows,
             document_flow_id,
             documentDescription,
             document_flow_steps,
-            current_flow_step,
             approver,
             departments,
-            // getCurrentFlowStep,
             department_id,
             approver_id,
+
+            // Form Functions
+            handleChange,
+            beforeUpload,
+            handleCustomRequest,
+            handlePreview,
+            filterOption,
             getApproversByDepartment,
             handleDepartmentChange,
             createNewWorkflow,
@@ -890,10 +908,8 @@ export default defineComponent({
             checkIfAfterHasSameStep,
             addSameStep,
             removeStep,
-
             handleSendRequest,
             handleSaveDraft,
-
         };
     },
 });

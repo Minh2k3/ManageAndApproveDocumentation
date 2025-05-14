@@ -9,6 +9,7 @@ export const useDocumentStore = defineStore("document", () => {
     const document_templates = ref([])
     const template_user = ref([])
     const document_flow_steps = ref([])
+    const documents = ref([])
 
     // Actions
     async function fetchDocumentTypes() {
@@ -82,6 +83,19 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
+    async function fetchDocuments(id) {
+        try {
+            const response = await axiosInstance.get(`api/creators/${id}/documents`);
+            if (response.data) {
+                console.log("response.data", response.data);
+                documents.value = response.data.documents;
+            }
+        }
+        catch (error) {
+            console.error("Error fetching documents:", error);
+        }
+    }
+
     // fetch all
     async function fetchAll() {
         await fetchDocumentTypes();
@@ -95,10 +109,12 @@ export const useDocumentStore = defineStore("document", () => {
         document_templates,
         template_user,
         document_flow_steps,
+        documents,
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
         fetchDocumentTemplates,
         fetchTemplateUser,
         fetchDocumentFlowSteps,
+        fetchDocuments,
     };
 });

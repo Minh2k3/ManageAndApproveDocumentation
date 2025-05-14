@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\UserBan;
+use Carbon\Carbon;
 
 class Admin extends Model
 {
@@ -18,6 +19,15 @@ class Admin extends Model
         'user_id',
         'created_at',
         'updated_at',
+    ];
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime', 
     ];
 
     /**
@@ -34,5 +44,17 @@ class Admin extends Model
     public function bannedUsers()
     {
         return $this->hasMany(UserBan::class, 'banned_by');
+    }
+
+    protected $dates = ['created_at', 'updated_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

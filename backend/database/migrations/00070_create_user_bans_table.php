@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('banned_by')->constrained('admins');
-            $table->text('reason');
+            $table->text('reason')->nullable();
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
         });

@@ -17,6 +17,7 @@ use App\Models\UserBan;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Approver;
 use App\Models\Creator;
+use Carbon\Carbon;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -65,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
         'status' => 'string',
         'sex' => 'string',
+        'email_verified' => 'boolean',
+        'verification_token_expiry' => 'datetime',
+        'last_verification_resent_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -197,5 +203,32 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isPending()
     {
         return $this->status === 'pending';
+    }
+
+    protected $dates = ['created_at', 'updated_at', 'email_verified_at', 'verification_token_expiry', 'last_verification_resent_at'];
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getEmailVerifiedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getVerificationTokenExpiryAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getLastVerificationResentAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', ['admin', 'approver', 'creator']);
+            $table->enum('name', ['admin', 'approver', 'creator'])->unique();
             $table->text('description')->nullable();
             $table->timestamps();
             $table->comment('Lưu thông tin về các chức vụ có thể có trong hệ thống');

@@ -38,7 +38,12 @@ class DocumentFlowController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $documentFlow = DocumentFlow::create($request->all());
+
+        return response()->json([
+            'message' => 'Document flow created successfully.',
+            'document_flow' => $documentFlow,
+        ])->setStatusCode(201, 'Document flow created successfully.');
     }
 
     /**
