@@ -44,6 +44,15 @@
 <script setup>
     import TheMenu from '@/components/TheMenu.vue';
     import { ref } from 'vue';
+    import { useRoute } from 'vue-router';
+    import { useAuth } from '@/stores/use-auth';
+
+    const authStore = useAuth();
+    const user = ref(authStore.user);
+    const role = ref(authStore.role);
+
+    console.log(user.value);
+    console.log(role.value);
 
     const visible = ref(false);
     const visible_user = ref(false);

@@ -2,11 +2,12 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Laravel\Fortify\Rules\PasswordValidationRules;
+use App\Models\User;
 use App\Models\Department;
 use App\Models\Approver;
 use App\Models\Creator;
@@ -37,8 +38,11 @@ class CreateNewUser implements CreatesNewUsers
             ->where('id', $input['department_id'])
             ->first();
             
+        $roll = \DB::table('roll_at_departments')
+            ->where('id', $input['roll_at_department_id'])
+            ->first();
         // Xác định role_id dựa trên thuộc tính can_approve
-        $role_id = $department->can_approve ? 3 : 2; // 3: Approver, 2: Creator
+        $role_id = ($department->can_approve && $roll->level <= 5) ? 3 : 2; // 3: Approver, 2: Creator
 
         $roll_id = $input['roll_at_department_id'];
 
@@ -74,6 +78,10 @@ class CreateNewUser implements CreatesNewUsers
             ]);
         }
 
-        return $user;
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User created successfully',
+            'user' => $user,
+        ], 201);
     }
 }

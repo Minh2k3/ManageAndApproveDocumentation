@@ -91,89 +91,94 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-center ">
-                            <div class="col-sm-6">
-                                <div class="text-start align-self-center">
-                                    <label>
-                                        <span>Email</span>
-                                    </label>
-                                </div>
-
-                                <div class="w-100"></div>
-
-                                <div class="mt-1">
-                                    <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear
-                                        :class="{
-                                            'input-danger': firstFieldError === 'email'
-                                        }" />
-
-                                    <div class="w-100"></div>
-                                    <!-- 
-                                <small 
-                                    v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                    class="text-danger">
-                                        {{ errors.status_id[0] }}
-                                </small> -->
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Mật khẩu -->
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-6">
-                                <div class="text-start align-self-center">
-                                    <label>
-                                        <span>Mật khẩu</span>
-                                    </label>
-                                </div>
-                                <div class="mt-1">
-                                    <a-input-password v-model:value="password" placeholder="abcILoveYou123"
-                                        allow-clear />
+                        <form @submit.prevent="login">
+                            <!-- Email -->
+                            <div class="row justify-content-center ">
+                                <div class="col-sm-6">
+                                    <div class="text-start align-self-center">
+                                        <label>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
 
                                     <div class="w-100"></div>
 
-                                    <!-- <small
-                                    v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                    {{ errors.password[0] }}
-                                </small> -->
-                                </div>
-                            </div>
-                        </div>
+                                    <div class="mt-1">
+                                        <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear
+                                            :class="{
+                                                'input-danger': firstFieldError === 'email'
+                                            }" />
 
-                        <div class="row justify-content-center mt-2">
-                            <div class="col-sm-6">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <!-- Checkbox ghi nhớ -->
-                                    <div>
-                                        <a-checkbox v-model:checked="rememberMe">Ghi nhớ đăng nhập</a-checkbox>
-                                    </div>
-                                    <!-- Quên mật khẩu -->
-                                    <div>
-                                        <a href="#" class="text-decoration-none text-primary small fst-italic">Quên mật
-                                            khẩu?</a>
+                                        <div class="w-100"></div>
+                                        <!-- 
+                                    <small 
+                                        v-if="errors.status_id && firstFieldError === 'status_id'" 
+                                        class="text-danger">
+                                            {{ errors.status_id[0] }}
+                                    </small> -->
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-12 col-sm-6 justify-content-center">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary p-2 my-button" type="button" style="background-color: #0d6efd;
-                                        border-color: #0d6efd;
-                                        color: #ffffff;
-                                        "
-                                        @click="login"  
-                                        @keyup.enter="login"
-                                    >
-                                        Đăng nhập
-                                    </button>
+                            </div>
+
+                            <!-- Mật khẩu -->
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-sm-6">
+                                    <div class="text-start align-self-center">
+                                        <label>
+                                            <span>Mật khẩu</span>
+                                        </label>
+                                    </div>
+                                    <div class="mt-1">
+                                        <a-input-password v-model:value="password" placeholder="abcILoveYou123"
+                                            allow-clear />
+
+                                        <div class="w-100"></div>
+
+                                        <!-- <small
+                                        v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
+                                        class="text-danger">
+                                        {{ errors.password[0] }}
+                                    </small> -->
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
+                            <div class="row justify-content-center mt-2">
+                                <div class="col-sm-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <!-- Checkbox ghi nhớ -->
+                                        <div>
+                                            <a-checkbox v-model:checked="rememberMe">Ghi nhớ đăng nhập</a-checkbox>
+                                        </div>
+                                        <!-- Quên mật khẩu -->
+                                        <div>
+                                            <a href="#" class="text-decoration-none text-primary small fst-italic">Quên mật
+                                                khẩu?</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-12 col-sm-6 justify-content-center">
+                                    <div class="d-grid gap-2">
+                                        <button 
+                                            class="btn btn-primary p-2 my-button" 
+                                            type="button" 
+                                            style="
+                                                background-color: #0d6efd;
+                                                border-color: #0d6efd;
+                                                color: #ffffff;
+                                            "
+                                            @click="login"
+                                        >
+                                            Đăng nhập
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         <div class="row mt-4">
                             <div class="col-12 justify-content-center d-flex">
                                 <span class="text-center text-secondary mx-2">Chưa có tài khoản?</span>
@@ -195,6 +200,7 @@ import { defineComponent, ref, watch } from "vue";
 import { message } from 'ant-design-vue';
 import { useRouter } from "vue-router";
 import axiosInstance from "@/lib/axios.js";
+import { useAuth } from "@/stores/use-auth.js";
 
 export default defineComponent({
     components: {
@@ -204,12 +210,15 @@ export default defineComponent({
 
     setup() {
         const router = useRouter();
+        const authStore = useAuth();
 
         const email = ref("");
         const password = ref("");
         const rememberMe = ref(false);
 
         const validateForm = ref(false);
+
+        console.log("user", email.value);
 
         const login = () => {
             if (email.value === "" || password.value === "") {
@@ -231,41 +240,26 @@ export default defineComponent({
         });
 
         const loginUser = async () => {
-            console.log("Đăng nhập");
-
-            // Lấy CSRF cookie trước (để Fortify hoạt động)
             await axiosInstance.get("/sanctum/csrf-cookie");
 
             try {
                 // Gửi thông tin đăng nhập
-                const response = await axiosInstance.post("/api/login", {
-                    email: email.value,
-                    password: password.value,
-                }, {
-                    withCredentials: true
-                });
+                const result = await authStore.login({ email: email.value, password: password.value });
+                if (result.status === 'error') {
+                    message.error(result.message);
+                }
 
-                console.log("Đăng nhập thành công:", response.data);
                 validateForm.value = false;
-                message.success("Đăng nhập thành công!");
 
-                // ✅ Chắc chắn đăng nhập thành công thì mới gọi API /user
+                // Chắc chắn đăng nhập thành công thì mới gọi API /user
                 const userResponse = await axiosInstance.get("api/user", {
                     withCredentials: true
                 });
-
+                message.success("Đăng nhập thành công!");
                 console.log("Thông tin người dùng:", userResponse.data);
                 const user = userResponse.data;
                 console.log(user.id);
-                if (user.is_admin) {
-                    router.push({ name: "admin" });
-                } else {
-                    router.push({ name: "creator" });
-                }
-
-                // Tùy theo logic, có thể lưu vào store, localStorage hoặc chuyển trang
-                // router.push({ name: "dashboard" });
-
+                router.push({ name: authStore.role });
             } catch (error) {
                 console.log("Đăng nhập thất bại");
                 if (error.response && error.response.status === 422) {

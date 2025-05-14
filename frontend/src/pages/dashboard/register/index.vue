@@ -147,7 +147,7 @@
                                         :options="departments" 
                                         :filter-option="filterOption" 
                                         allow-clear
-                                        :list-height="96"
+                                        :list-height="160"
                                         ></a-select>
                                         
                                         <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlock của trường">
@@ -180,7 +180,7 @@
                                         :options="rolls" 
                                         :filter-option="filterOption" 
                                         allow-clear
-                                        :list-height="96"
+                                        :list-height="160"
                                         ></a-select>
                                     </div>
 
@@ -288,7 +288,6 @@ import { useRouter } from "vue-router";
 import bgImage from '@/assets/images/NMT.jpg';
 import { message } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
-import axios from "axios";
 
 export default defineComponent({
     components: {
@@ -334,9 +333,7 @@ export default defineComponent({
 
         const getUsersRegister = async () => {
             console.log("Đang lấy dữ liệu từ API...");
-            // await axios.get("sanctum/csrf-cookie", {
-            //     withCredentials: true,
-            // });
+            await axiosInstance.get("sanctum/csrf-cookie");
             try {
                 await axiosInstance
                     .get("api/register-options", {
@@ -470,7 +467,7 @@ export default defineComponent({
         
         const registerUser = async () => {
             console.log("Đăng ký người dùng mới");
-            await axiosInstance.get("sanctum/csrf-cookie");
+            // await axiosInstance.get("sanctum/csrf-cookie");
             try {
                 const response = await axiosInstance.post("api/register", {
                     name: name.value,
@@ -479,8 +476,6 @@ export default defineComponent({
                     password_confirmation: password_confirmation.value,
                     department_id: selectedDepartment.value,
                     roll_at_department_id: selectedRoll.value
-                }, {
-                    withCredentials: true,
                 });
                 console.log("Đăng ký thành công:", response.data);
                 validateFrontend.value = false;

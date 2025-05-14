@@ -10,12 +10,13 @@ const axiosInstance = axios.create({
     }
 });
 
+// Lấy CSRF token từ cookie nếu có
 axiosInstance.interceptors.request.use(config => {
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1')
-    if (token) {
-      config.headers['X-XSRF-TOKEN'] = token
+    const csrfToken = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    if (csrfToken) {
+        config.headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken[1]);
     }
-    return config
-  })
+    return config;
+}, error => Promise.reject(error));
 
 export default axiosInstance;

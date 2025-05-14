@@ -1,46 +1,64 @@
-import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+// src/stores/useAuth.js
 
-export const useAuth = defineStore('auth', () => {
-    // Thông tin người dùng đăng nhập
-    const user = ref(null) // chứa object { id, name, role, ... }
-    const role = ref('guest') // chứa string 'admin' hoặc 'user'
-    // if (user.value === 'admin') {
-    //     role.value = 'admin'
-    // } else if (user.value.role === 'approver') {
-    //     role.value = 'approver'
-    // } else {
-    //     role.value = 'creator'
-    // }
+import { defineStore } from 'pinia';
+import axiosInstance from '@/lib/axios';
 
-    function login(mockUser) {
-        user.value = mockUser
-        role.value = mockUser?.role || 'guest'  // Đồng bộ
-    }
+export const useAuth = defineStore('auth', {
+    state: () => ({
+        user: null,
+        role: null,
+        isAuthenticated: false,
+    }),
 
-    function logout() {
-        user.value = null
-        role.value = 'admin'
-    }
+    actions: {
+        async login(credentials) {
+            try {
+                const response = await axiosInstance.post('/api/login', credentials);
+                this.user = response.data.user;
+                if (this.user.role_id === 1) {
+                    this.role = 'admin';
+                } else if (this.user.role_id === 2) {
+                    this.role = 'creator';
+                } else if (this.user.role_id === 3) {
+                    this.role = 'approver';
+                }
+                this.isAuthenticated = true;
+                return { status: 'success' };
+            } catch (error) {
+                console.error(error);
+                return { status: 'error', message: error.response?.data?.message || 'Login failed' };
+            }
+        },
 
-    // Nếu muốn tự động đồng bộ user.role → role
-    watch(user, (newVal) => {
-        role.value = newVal?.role || 'guest'
-    })
+        async logout() {
+            // await axiosInstance.get("/sanctum/csrf-cookie");
+            try {
+                await axiosInstance.post('/api/logout');
+                this.$reset();
+                document.cookie = "XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                window.location.href = '/login';
+            } catch (error) {
+                console.error(error);
+            }
+        },
 
-    const isAdmin = computed(() => role.value === 'admin')
-    const isApprover = computed(() => role.value === 'approver')
-    const isCreator = computed(() => role.value === 'creator')
-    const isGuest = computed(() => role.value === 'guest')
-
-    return {
-        user,
-        role,
-        login,
-        logout,
-        isAdmin,
-        isApprover,
-        isCreator,
-        isGuest
-    }
-})
+        async fetchUser() {
+            try {
+                const response = await axiosInstance.get('/api/user');
+                this.user = response.data;
+                if (this.user.role_id === 1) {
+                    this.role = 'admin';
+                } else if (this.user.role_id === 2) {
+                    this.role = 'creator';
+                } else if (this.user.role_id === 3) {
+                    this.role = 'approver';
+                }
+                this.isAuthenticated = true;
+            } catch (error) {
+                this.user = null;
+                this.role = null;
+                this.isAuthenticated = false;
+            }
+        }
+    },
+});

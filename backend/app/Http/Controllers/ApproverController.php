@@ -83,6 +83,7 @@ class ApproverController extends Controller
                 \DB::raw("CONCAT(users.name, ' - ', roll_at_departments.name) as label"),
                 'approvers.department_id',
             )
+            ->where('users.status', '=', 'active')
             ->get();
         return response()->json([
             'approvers' => $approvers,

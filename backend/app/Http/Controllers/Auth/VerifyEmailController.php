@@ -12,7 +12,7 @@ class VerifyEmailController
     public function __invoke(Request $request)
     {
         if (!URL::hasValidSignature($request)) {
-            return response()->json(['message' => 'Invalid or expired verification link.'], 403);
+            return redirect(env('FRONTEND_URL') . '/verified_email?status=unknown');
         }
 
         $user = User::findOrFail($request->route('id'));
@@ -20,9 +20,9 @@ class VerifyEmailController
         if (!$user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
             event(new Verified($user));
-            return redirect(env('FRONTEND_URL') . '/login?status=verified');
+            return redirect(env('FRONTEND_URL') . '/verified_email?status=verified');
         }
 
-        return redirect(env('FRONTEND_URL') . '/login?status=already_verified');
+        return redirect(env('FRONTEND_URL') . '/verified_email?status=already_verified');
     }
 }

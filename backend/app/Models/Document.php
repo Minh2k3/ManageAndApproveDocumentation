@@ -32,6 +32,8 @@ class Document extends Model
         'document_flow_id',
         'status',
         'is_public',
+        'created_at',
+        'updated_at',
     ];
 
     /**

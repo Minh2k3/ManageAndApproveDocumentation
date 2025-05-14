@@ -23,6 +23,8 @@ class Department extends Model
         'phone_number',
         'position',
         'can_approve',
+        'created_at',
+        'updated_at',
     ];
 
     /**

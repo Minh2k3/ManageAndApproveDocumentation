@@ -6,7 +6,7 @@ use App\Models\User;
 // Auth Controllers
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\CustomAuthenticatedSessionController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 
@@ -44,8 +44,10 @@ Route::get(uri: '/users', action: function (Request $request): Collection {
 Route::get('/register-options', [RegisterController::class, 'getFormOptions'])
     ->name('register.form-options');
 
-// Route::post('/register', [RegisterController::class, 'register'])->middleware('guest');
+Route::post('/register', [RegisterController::class, 'register']);
 
+Route::get('/verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])
+    ->name('verification.verify');
 
 // Route::get('user/{identifier}', [UserController::class, 'show'])
 //     ->middleware('auth:sanctum')
@@ -55,11 +57,32 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json($request->user());
 });
 
-Route::post('/login', [CustomAuthenticatedSessionController::class, 'store']);
+Route::post('/login', [CustomAuthenticatedSessionController::class, 'store'])
+    ->name('login');
+
+Route::middleware('auth:sanctum')->post('/logout', [LogoutController::class, 'logout']);
 
 RateLimiter::for('api', function (Request $request) {
     return Limit::perMinute(60)->by($request->ip());
 });
+
+// User api
+// User
+Route::get('/users', [UserController::class, 'getUsers'])
+    // ->middleware('auth:sanctum')
+    ->name('users.index');
+
+Route::post('/users/active', [UserController::class, 'activeUser'])
+    ->middleware('auth:sanctum')
+    ->name('users.active');
+
+Route::post('/users/banned', [UserController::class, 'bannedUser'])
+    ->middleware('auth:sanctum')
+    ->name('users.banned');
+
+Route::post('/users/unban', [UserController::class, 'unbanUser'])
+    ->middleware('auth:sanctum')
+    ->name('users.unban');
 
 // Document api
 // Document
@@ -112,4 +135,3 @@ Route::get('/departments', [DepartmentController::class, 'index'])
 
 Route::get('/departments/can_approve', [DepartmentController::class, 'getDepartmentsCanApprove'])
     ->name('departments.getDepartmentsCanApprove');
-

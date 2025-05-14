@@ -15,6 +15,7 @@ class DigitalSignature extends Model
     protected $fillable = [
         'public_key',
         'private_key',
+        
     ];
 
     /**

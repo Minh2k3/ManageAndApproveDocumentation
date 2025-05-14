@@ -5,6 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use Illuminate\Http\Request;
 
+use App\Models\User;
+use App\Models\Department;
+use App\Models\DocumentType;
+use App\Models\DocumentTemplate;
+use App\Models\DocumentVersion;
+use App\Models\DocumentFlow;
+use App\Models\DocumentFlowStep;
+
 class DocumentController extends Controller
 {
     /**
@@ -64,5 +72,15 @@ class DocumentController extends Controller
     public function destroy(Document $document)
     {
         //
+    }
+
+    public function getDocumentByCreator(Request $request)
+    {
+        $id = $request->input('id');
+        $documents = Document::where('creator_id', $id)->get();
+
+        return response()->json([
+            'documents' => $documents,
+        ]);
     }
 }

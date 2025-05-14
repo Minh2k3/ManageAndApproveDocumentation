@@ -209,23 +209,10 @@
 		</a-menu-item>
 	</a-menu>
 
-	<!-- select menu -->
-	<a-menu :selectedKeys="[role]" @click="onMenuClick" mode="inline">
-		<a-menu-item key="admin">
+	<a-menu v-model:selectedKeys="selectedKeys" mode="inline">
+		<a-menu-item key="logout" @click="handleLogout">
 			<span class="fs-6 d-inline-flex align-items-center">
-				<HomeOutlined class="me-2" />Admin
-			</span>
-		</a-menu-item>
-
-		<a-menu-item key="creator">
-			<span class="fs-6 d-inline-flex align-items-center">
-				<HomeOutlined class="me-2" />Creator
-			</span>
-		</a-menu-item>
-
-		<a-menu-item key="approver">
-			<span class="fs-6 d-inline-flex align-items-center">
-				<HomeOutlined class="me-2" />Approver
+				<i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
 			</span>
 		</a-menu-item>
 	</a-menu>
@@ -239,9 +226,16 @@ import {
 	HomeOutlined,
 	FileOutlined,
 	InteractionOutlined,
-	BranchesOutlined
+	BranchesOutlined,
+	ExclamationCircleOutlined
 } from '@ant-design/icons-vue';
-import { defineComponent, ref, computed } from 'vue';
+
+import { 
+	Modal, 
+	message 
+} from 'ant-design-vue';
+
+import { defineComponent, ref, computed, createVNode } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useMenu } from '@/stores/use-menu.js';
 import { useAuth } from '@/stores/use-auth.js';
@@ -254,12 +248,13 @@ export default defineComponent({
 		SettingOutlined,
 		FileOutlined,
 		InteractionOutlined,
-		BranchesOutlined
+		BranchesOutlined,
+		ExclamationCircleOutlined
 	},
 	setup() {
 		const store = useMenu();
 		const auth = useAuth();
-		const { role } = storeToRefs(auth);
+		const role = ref(auth.role);
 
 		const route = useRoute();
 
@@ -276,12 +271,39 @@ export default defineComponent({
 			auth.role = key;
 		}
 
+        // Hàm xác nhận đăng xuất
+        function showConfirmLogout() {
+            Modal.confirm({
+                title: 'Bạn có chắc chắn đăng xuất không?',
+                icon: createVNode(ExclamationCircleOutlined),
+                content: createVNode(
+                    'div',
+                    {
+                        style: 'color:red;',
+                    },
+                ),
+                onOk() {
+					auth.logout();
+                    message.success('Đăng xuất thành công');
+                },
+                onCancel() {
+                    return;
+                },
+            });
+        };
+
+		// Hàm xử lý sự kiện đăng xuất
+		function handleLogout() {
+			showConfirmLogout();
+		}
+
 		return {
 			...storeToRefs(store),
 			role,
 			isDetailPage,
 			isDetailPageApprover,
 			onMenuClick,
+			handleLogout,
 		};
 	}
 });
