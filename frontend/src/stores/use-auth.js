@@ -7,6 +7,7 @@ export const useAuth = defineStore('auth', {
     state: () => ({
         user: null,
         role: null,
+        roll: null,
         isAuthenticated: false,
     }),
 
@@ -17,8 +18,10 @@ export const useAuth = defineStore('auth', {
                 this.user = response.data.user;
                 if (this.user.role_id === 1) {
                     this.role = 'admin';
+                    this.roll = 'Admin';
                 } else if (this.user.role_id === 2) {
                     this.role = 'creator';
+                    
                 } else if (this.user.role_id === 3) {
                     this.role = 'approver';
                 }
@@ -48,6 +51,7 @@ export const useAuth = defineStore('auth', {
                 this.user = response.data;
                 if (this.user.role_id === 1) {
                     this.role = 'admin';
+                    this.roll = 'Admin';
                 } else if (this.user.role_id === 2) {
                     this.role = 'creator';
                 } else if (this.user.role_id === 3) {
@@ -57,6 +61,7 @@ export const useAuth = defineStore('auth', {
             } catch (error) {
                 this.user = null;
                 this.role = null;
+                this.roll = null;
                 this.isAuthenticated = false;
             }
         }

@@ -5,13 +5,31 @@
                 <span @click="showDrawer()"><i class="fa-solid fa-indent fs-1"></i></span>
             </div>
 
-            <div class="col-10 col-sm-9 d-flex align-items-center justify-content-center justify-content-sm-start">
+            <div class="col-10 col-sm-6 d-flex align-items-center justify-content-center justify-content-sm-start">
                 <img src="../assets/images/logo_tlu.svg" alt="logo" height="32" width="34">
                 <span class="d-none d-sm-flex text-white ms-3 me-3 fs-4">QUẢN TRỊ HỆ THỐNG</span>
             </div>
 
-            <div class="col-sm-3 d-none d-sm-flex align-items-center justify-content-sm-end">
-                <span class="d-none d-sm-flex text-white ms-3 me-3 fs-5">ADMIN</span>
+            <div class="col-sm-6 d-none d-sm-flex align-items-center justify-content-sm-end">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle text-capitalize" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ user_name }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header row d-flex align-items-center">
+                            <div class="col-3"><i class="fa-solid fa-user me-2"></i></div>
+                            <div class="col-9">
+                                <div class="row fs-6">{{ user_name }}</div>
+                                <div class="row text-capitalize">{{ role }}</div>
+                            </div>
+                            
+                        </h6></li>
+                        <li><a class="dropdown-item" href="#">Thông báo</a></li>
+                        <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
             </div>
 
             <div class="col-1 d-flex d-sm-none align-items-center justify-content-center">
@@ -48,8 +66,10 @@
     import { useAuth } from '@/stores/use-auth';
 
     const authStore = useAuth();
-    const user = ref(authStore.user);
-    const role = ref(authStore.role);
+    const user = authStore.user;
+    const role = authStore.role;
+
+    const user_name = user.name;
 
     console.log(user.value);
     console.log(role.value);

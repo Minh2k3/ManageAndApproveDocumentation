@@ -35,8 +35,9 @@ import './static/fontawesome-free-6.7.2-web/css/all.min.css'
 import 'ant-design-vue/dist/reset.css';
 import 'bootstrap/dist/css/bootstrap-grid.min.css'
 import 'bootstrap/dist/css/bootstrap-utilities.min.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-
 
 const app = createApp(App)
 const pinia = createPinia()
