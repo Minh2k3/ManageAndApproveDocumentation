@@ -192,7 +192,7 @@ class RegisterController extends Controller
         \DB::beginTransaction();
         try {
             $user->email_verified = true;
-            $user->email_verified_at = now(); // Thêm timestamp xác thực
+            $user->email_verified_at = now();
             $user->status = "pending";
             $user->verification_token = null;
             $user->verification_token_expiry = null;

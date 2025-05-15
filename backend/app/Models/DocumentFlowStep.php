@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentFlow;
 use App\Models\Department;
+use App\Models\Approver;
 
 class DocumentFlowStep extends Model
 {
@@ -18,6 +19,7 @@ class DocumentFlowStep extends Model
         'document_flow_id',
         'step',
         'department_id',
+        'approver_id',
         'status',
     ];
 
@@ -44,5 +46,13 @@ class DocumentFlowStep extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get the approver for this step.
+     */
+    public function approver()
+    {
+        return $this->belongsTo(Approver::class);
     }
 }

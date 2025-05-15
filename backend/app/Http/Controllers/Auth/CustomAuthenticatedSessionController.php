@@ -24,7 +24,7 @@ class CustomAuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->hasVerifiedEmail()) {
+        if (!$user->email_verified) {
             Auth::logout();
             return response()->json([
                 'message' => 'Bạn chưa xác minh địa chỉ email. Vui lòng kiểm tra hộp thư.',

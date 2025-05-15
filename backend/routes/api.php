@@ -98,7 +98,7 @@ Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocuments
     ->middleware('auth:sanctum')
     ->name('documents.getDocumentsByCreator');
 
-Route::post('/documents', [DocumentController::class, 'storeDraftDocument'])
+Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeDraftDocument');
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('file_path');
             $table->foreignId('document_type_id')->constrained();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
-            $table->foreignId('document_flow_id')->constrained()->nullable();
+            $table->foreignId('document_flow_id')->nullable()->constrained();
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->boolean('is_public')->default(false)->comment('Check if this document can display for everyone');
             $table->timestamps();

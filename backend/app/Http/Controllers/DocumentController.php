@@ -91,6 +91,7 @@ class DocumentController extends Controller
                 'documents.updated_at as updated_at',
                 'document_types.name as type'
             )
+            ->orderBy('documents.created_at', 'desc')
             ->get();
 
         return response()->json([
@@ -100,32 +101,70 @@ class DocumentController extends Controller
 
     public function storeDraftDocument(Request $request)
     {
-        $pdfPath = $request->file('file_path')->storeAs(
-            '', // Thư mục con (rỗng vì đã set trong filesystems.php)
-            Str::uuid() . '.' . $request->file('pdf_file')->getClientOriginalExtension(),
-            'public'
-        );
+        // $pdfPath = $request->file('upload_files')->storeAs(
+        //     '', // Thư mục con (rỗng vì đã set trong filesystems.php)
+        //     Str::uuid() . '.' . $request->file('pdf_file')->getClientOriginalExtension(),
+        //     'public'
+        // );
+
+        $pdfPath = "Hello.txt";
+
+        $document = $request['document'];
+        $document_flow = $request['document_flow'];
+        $document_flow_step = $document_flow['current_flow_step'];
+
+        \DB::beginTransaction();
 
         try {
-            $document = Document::create([
-                'title' => $request->input('title'),
-                'description' => $request->input('description'),
-                'file_path' => $pdfPath,
-                'document_type_id' => $request->input('document_type_id'),
-                'created_by' => auth()->user()->id,
-                'document_flow_id' => null, 
-                'status' => 0,
-                'is_public' => false,
+            $new_document_flow = DocumentFlow::create([
+                'name' => $document_flow['document_flow_name'],
+                'created_by' => $document_flow['created_by'],
+                'is_active' => false,
+                'is_template' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+
+            if (count($document_flow_step) == 1 && $document_flow_step[0]['department_id'] == null) {
+
+            } else {
+                $document_flow_id = $new_document_flow['id'];
+                foreach ($document_flow_step as $step) {
+                    DocumentFlowStep::create([
+                        'document_flow_id' => $document_flow_id,
+                        'step' => $step['step'],
+                        'department_id' => $step['department_id'],
+                        'approver_id' => $step['approver_id'],
+                        'multichoice' => $step['multichoice'],
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            Document::create([
+                'title' => $document['title'],
+                'description' => $document['description'],
+                'file_path' => $pdfPath,
+                'document_type_id' => $document['document_type_id'],
+                'created_by' => $document['created_by'],
+                'document_flow_id' => $new_document_flow['id'],
+                'status' => 'draft',
+                'is_public' => $document['is_public'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            \DB::commit();
         } catch (\Exception $e) {
+            \DB::rollBack();
             return response()->json([
-                'message' => 'Không thể lưu nháp vì ' . $e->getMessage(),
+                'message' => 'Lỗi khi lưu bản nháp: ' . $e->getMessage(),
             ], 500);
         }
 
         return response()->json([
             'message' => 'Bản nháp đã được lưu thành công.',
-            'document' => $document,
         ]);
     }
 }

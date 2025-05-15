@@ -49,7 +49,7 @@
                     <div class="col-sm-4">
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex">
-                            <a-select v-model:value="documentType" show-search placeholder="Loại" style="width: 100%"
+                            <a-select v-model:value="document_type" show-search placeholder="Loại" style="width: 100%"
                                 :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
                         </div>
 
@@ -63,7 +63,7 @@
                     <div class="col align-self-center mt-3 mt-sm-0">
                         <div class="row align-items-center justify-content-sm-end">
                             <span class="col text-start text-sm-end">Hiển thị công khai:</span>
-                            <a-radio-group v-model:value="documentPublic" class="col">
+                            <a-radio-group v-model:value="document_public" class="col">
                                 <a-radio :value="1">Có</a-radio>
                                 <a-radio :value="2">Không</a-radio>
                             </a-radio-group>
@@ -79,7 +79,7 @@
                         </label>
                     </div>
                     <div class="col-sm-10   ">
-                        <a-textarea placeholder="Mô tả đơn giản" v-model:value="documentDescription" show-count
+                        <a-textarea placeholder="Mô tả đơn giản" v-model:value="document_description" show-count
                             :maxlength="1000" />
 
                         <div class="w-100"></div>
@@ -96,7 +96,7 @@
                     </div>
                     <div class="col-sm-10">
                         <a-upload 
-                            v-model:file-list="fileList" 
+                            v-model:file-list="upload_files" 
                             name="file" 
                             accept=".pdf" 
                             :headers="headers"
@@ -137,7 +137,7 @@
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex">
                             <a-select v-model:value="document_flow_id" show-search placeholder="Luồng mẫu"
-                                style="width: 100%" :options="document_flows" :filter-option="filterOption" allow-clear>
+                                style="width: 100%" :options="listDocumentFlows" :filter-option="filterOption" allow-clear>
                             </a-select>
                         </div>
                     </div>
@@ -178,38 +178,11 @@
                                                 <a-select 
                                                     v-model:value="step.department_id" 
                                                     style="width: 100%"
-                                                    :options="departments" 
+                                                    :options="listDepartments" 
                                                     placeholder="Chọn đơn vị" 
                                                     @change="handleDepartmentChange(step)" 
                                                     :disabled="step.multichoice === 0"
                                                 />
-                                                <!-- <a-select 
-                                                    v-if="step.department_id == 1"
-                                                    v-model:value="step.department_id" 
-                                                    style="width: 100%"
-                                                    :options="departments" 
-                                                    placeholder="Chọn khoa phù hợp" 
-                                                    @change="handleDepartmentChange(step)" 
-                                                    allow-clear 
-                                                />
-                                                <a-select 
-                                                    v-if="step.department_id == 2"
-                                                    v-model:value="step.department_id" 
-                                                    style="width: 100%"
-                                                    :options="departments" 
-                                                    placeholder="Chọn LCĐ khoa phù hợp" 
-                                                    @change="handleDepartmentChange(step)" 
-                                                    allow-clear
-                                                />
-                                                <a-select 
-                                                    v-if="step.department_id == 3"
-                                                    v-model:value="step.department_id" 
-                                                    style="width: 100%"
-                                                    :options="departments" 
-                                                    placeholder="Chọn LCH khoa phù hợp" 
-                                                    @change="handleDepartmentChange(step)" 
-                                                    allow-clear
-                                                /> -->
                                             </div>
                                         </div>
                                     </div>
@@ -231,53 +204,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- <div class="col-md col">
-                                <div class="row">
-                                    <div class="col-md col mb-md-2">
-                                        <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center justify-content-md-center">
-                                            <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0">
-                                                <span>
-                                                    <a-button type="primary"
-                                                        :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
-                                                        @click="addStep(step.step, index)"
-                                                        class="text-center align-self-center bg-success">
-                                                        <template #icon>
-                                                            <PlusCircleOutlined />
-                                                        </template>
-                                                    </a-button>
-                                                </span>
-                                            </a-tooltip>
-
-                                            <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0">
-                                                <span>
-                                                    <a-button type="primary"
-                                                        :disabled="!step.department_id || !step.approver_id"
-                                                        @click="addSameStep(step.step, index)"
-                                                        class="text-center align-self-center bg-warning">
-                                                        <template #icon>
-                                                            <DownCircleOutlined />
-                                                        </template>
-                                                    </a-button>
-                                                </span>
-                                            </a-tooltip>
-
-                                            <a-tooltip title="Xóa cấp duyệt này">
-                                                <span>
-                                                    <a-button type="primary" :disabled="current_flow_step.length <= 1"
-                                                        @click="removeStep(index)"
-                                                        class="text-center align-self-center bg-danger">
-                                                        <template #icon>
-                                                            <MinusCircleOutlined />
-                                                        </template>
-                                                    </a-button>
-                                                </span>
-                                            </a-tooltip>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
-
                         </div>
                     </div>
                 </div>
@@ -304,7 +230,7 @@
                                                 <a-select 
                                                     v-model:value="step.department_id" 
                                                     style="width: 100%"
-                                                    :options="departments" 
+                                                    :options="listDepartmentsForNewFlow" 
                                                     placeholder="Chọn đơn vị" 
                                                     @change="handleDepartmentChange(step)" 
                                                     allowClear 
@@ -329,9 +255,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-
-
                                 </div>
                             </div>
 
@@ -476,6 +399,8 @@ import { useApproverStore } from '@/stores/approver/approver-store.js';
 
 import { useAuth } from '@/stores/use-auth.js';
 
+import { useRouter } from 'vue-router';
+
 export default defineComponent({
     components: {
         UploadOutlined,
@@ -487,6 +412,10 @@ export default defineComponent({
     },
 
     setup() {
+        // Router
+        const router = useRouter();
+
+        // Store
         const authStore = useAuth();
         const user = authStore.user;
 
@@ -495,63 +424,55 @@ export default defineComponent({
         const departmentStore = useDepartmentStore();
         const approverStore = useApproverStore();
 
+        // Form Value
         const document_name = ref('');
-        const documentType = ref(null);
+        const document_type = ref(null);
+        const document_public = ref(1);
+        const upload_files = ref([]);
+
+        // Form Options
         let listDocumentTypes = ref([]);
-        const documentPublic = ref(1); // 1: Có, 2: Không
-        let document_flows = ref([]);
-        let approver = ref([
-            { value: 1, label: 'Thầy Võ Tá Hoàng - BT LCD', department_id: 1 },
-            { value: 2, label: 'Thầy Nguyễn Đình Trình - PP7', department_id: 1 },
-            { value: 3, label: 'Anh Nguyễn Minh Tuấn - CT HSV', department_id: 1 },
-            { value: 4, label: 'Cô Nguyễn Thu Nga - BT ĐTN', department_id: 2 },
-            { value: 5, label: 'Chị Nguyễn Thị Hương - TP', department_id: 2 },
-            { value: 6, label: 'Chị Lê Phương Thảo - PP7', department_id: 2 },
-            { value: 7, label: 'Chị Phan Thị Trang Nhung - PCT HSV', department_id: 3 },
-            { value: 8, label: 'Chị Chu Ngọc Thúy - PCT HSV', department_id: 3 },
-            { value: 9, label: 'Thầy Đặng Ngọc Duyên - PBT ĐTN', department_id: 3 }
-        ]);
-
-        let departments = ref([
-            { value: 1, label: 'Khoa CNTT' },
-            { value: 2, label: 'Khoa Điện tử Viễn thông' },
-            { value: 3, label: 'Khoa Cơ khí' },
-        ]);
-
+        let listDocumentFlows = ref([]);
+        let listApprovers = ref([]);
+        let listDepartments = ref([]);
         onMounted(async () => {
-            await documentStore.fetchlistDocumentTypes();
+            await documentStore.fetchDocumentTypes();
             listDocumentTypes.value = documentStore.document_types;
 
             await documentStore.fetchDocumentFlowTemplates();
-            document_flows.value = documentStore.document_flow_templates;
+            listDocumentFlows.value = documentStore.document_flow_templates;
 
             await approverStore.fetchApproversWithRoll();
-            approver.value = approverStore.approvers_with_roll;
+            listApprovers.value = approverStore.approvers_with_roll;
             // console.log("Approvers: " + JSON.stringify(approver.value, null, 2));
 
             await departmentStore.fetchDepartmentsCanApprove();
-            departments.value = departmentStore.departments_can_approve;
-            // console.log("Departments: " + JSON.stringify(departments.value, null, 2));
+            listDepartments.value = departmentStore.departments_can_approve;
+            // console.log("Departments: " + JSON.stringify(listDepartments.value, null, 2));
+            // console.log("Departments: " + JSON.stringify(listDepartmentsForNewFlow.value, null, 2));
         });
 
-        const fileList = ref([]);
+        const listDepartmentsForNewFlow = computed(() => {
+            return listDepartments.value.slice(3);
+        });
+
         const headers = {
             authorization: 'authorization-text',
         };
 
         function handleChange(info) {
-            fileList.value = [...info.fileList];
+            upload_files.value = [...info.upload_files];
             if (info.file.status === 'done') {
                 message.success(`${info.file.name} upload thành công.`);
             } else if (info.file.status === 'error') {
                 message.error(`${info.file.name} upload thất bại.`);
             }
-            console.log(fileList);
+            console.log(upload_files);
         }
 
         function handleCustomRequest({ onSuccess }) {
             setTimeout(() => {
-                onSuccess('ok'); // Giả vờ thành công để fileList cập nhật
+                onSuccess('ok'); // Giả vờ thành công để upload_files cập nhật
             }, 0);
         }
 
@@ -581,23 +502,11 @@ export default defineComponent({
         };
 
         const document_flow_id = ref(null);
-        const documentDescription = ref('');
+        const document_description = ref('');
         const department_id = ref(null);
         const approver_id = ref(null);
 
-        let document_flow_steps = ref([
-            { document_flow_id: 1, step: 1, department_id: 1 },
-            { document_flow_id: 1, step: 2, department_id: 1 },
-            { document_flow_id: 1, step: 2, department_id: 2 },
-            { document_flow_id: 1, step: 3, department_id: 1 },
-            { document_flow_id: 2, step: 1, department_id: 3 },
-            { document_flow_id: 2, step: 2, department_id: 1 },
-            { document_flow_id: 2, step: 3, department_id: 2 },
-            { document_flow_id: 3, step: 1, department_id: 1 },
-            { document_flow_id: 3, step: 2, department_id: 3 },
-            { document_flow_id: 3, step: 2, department_id: 3 },
-            { document_flow_id: 3, step: 3, department_id: 2 },
-        ]);
+        let document_flow_steps = ref([]);
         // console.log("Document_flow_step: " + JSON.stringify(document_flow_steps.value, null, 2));
 
         let current_flow_step = ref([
@@ -608,21 +517,6 @@ export default defineComponent({
                 approver_id: null,
             },
         ]);
-
-        // function getCurrentFlowStep() {
-        //     if (!document_flow_id.value) {
-        //         current_flow_step.value = [
-        //             {
-        //                 step: 1,
-        //                 department_id: null,
-        //                 approver_id: null,
-        //             },
-        //         ];
-        //         return;
-        //     }
-
-        //     current_flow_step.value = document_flow_steps.value.filter((step) => step.document_flow_id === document_flow_id.value);
-        // }
 
         const isUseTemplate = ref(false);
         watch(document_flow_id, () => {
@@ -696,7 +590,7 @@ export default defineComponent({
         // Hàm lấy ra các người phê duyệt trong một đơn vị
         function getApproversByDepartment(departmentId) {
             if (!departmentId) return [];
-            const approver_of_department = ref(approver.value.filter(item => item.department_id === departmentId));
+            const approver_of_department = ref(listApprovers.value.filter(item => item.department_id === departmentId));
             return approver_of_department.value.map(item => ({ value: item.value, label: item.label }));
         }
 
@@ -772,12 +666,12 @@ export default defineComponent({
                 return false;
             }
 
-            if (documentType.value === null) {
+            if (document_type.value === null) {
                 message.error("Không được để trống");
                 return false;
             }
 
-            if (fileList.value.length === 0) {
+            if (upload_files.value.length === 0) {
                 message.error("Chưa có văn bản đưa lên");
                 return false;
             }
@@ -826,12 +720,12 @@ export default defineComponent({
                 return false;
             }
 
-            if (documentType.value === null) {
+            if (document_type.value === null) {
                 message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
                 return false;
             }
 
-            if (fileList.value.length === 0) {
+            if (upload_files.value.length === 0) {
                 message.error("Không thể lưu nháp khi chưa đủ thông tin văn bản");
                 return false;
             }
@@ -839,12 +733,31 @@ export default defineComponent({
             return true;
         }
 
-        function saveDraft() {
-            if (current_flow_step.value.length === 0) {
-
-            } else {
-
+        async function saveDraft() {
+            const documentData = {
+                title: document_name.value,
+                document_type_id: document_type.value,
+                description: document_description.value,
+                upload_files: upload_files.value,
+                created_by: user.id,
+                is_public: document_public.value,
             }
+
+            const documentFlowData = {
+                document_flow_name: "Luồng phê duyệt cho '" + document_name.value + "' của " + user.name + " - " + new Date().toLocaleString(),
+                created_by: user.id,
+                current_flow_step: current_flow_step.value,
+            }
+            const draftData = {
+                document: documentData,
+                document_flow: documentFlowData,
+            };
+
+            console.log("Draft data: " + JSON.stringify(draftData, null, 2));
+            // console.log(draftData.document_flow.current_flow_step);
+            await axiosInstance.post('/api/documents/draft', draftData);
+            message.success("Lưu nháp thành công");
+            router.push({ name: 'creator-documents' });
         }
 
         // Hàm xác nhận lưu nháp
@@ -860,7 +773,7 @@ export default defineComponent({
                 ),
                 onOk() {
                     saveDraft();
-                    message.success('Đã lưu bản nháp');
+                    // message.success('Đã lưu bản nháp');
                 },
                 onCancel() {
                     return;
@@ -878,20 +791,24 @@ export default defineComponent({
         return {
             // Form Value
             document_name,
-            documentType,
-            fileList,
+            document_type,
+            document_public,
+            document_description,
+            upload_files,
             current_flow_step,
 
             // Form Options
             listDocumentTypes,
-            documentPublic,
+            listApprovers,
+            listDepartments,
+            listDepartmentsForNewFlow,
+            listDocumentFlows,
+
             headers,
-            document_flows,
+
+            // Current Form Value
             document_flow_id,
-            documentDescription,
             document_flow_steps,
-            approver,
-            departments,
             department_id,
             approver_id,
 

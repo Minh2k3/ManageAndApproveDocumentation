@@ -193,8 +193,6 @@ export default defineComponent({
             console.log(selectedDocument.value.id);
         };
 
-
-
         useMenu().onSelectedKeys(["approver-documents"]);
         const documentStore = useDocumentStore();
         let documents = ref([]);
@@ -343,7 +341,6 @@ export default defineComponent({
             return {
                 onClick: () => {
                     viewDetail(record);
-                    // router.push(`documents/${record.id}`);
                 },
                 style: {
                     cursor: 'pointer'

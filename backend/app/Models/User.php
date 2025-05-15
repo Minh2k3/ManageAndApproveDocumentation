@@ -217,18 +217,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 
-    public function getEmailVerifiedAtAttribute($value)
-    {
-        return Carbon::parse($value)->format('H:i:s d/m/Y');
-    }
+    // public function getEmailVerifiedAtAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
+    // }
 
-    public function getVerificationTokenExpiryAttribute($value)
-    {
-        return Carbon::parse($value)->format('H:i:s d/m/Y');
-    }
+    // public function getVerificationTokenExpiryAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
+    // }
 
-    public function getLastVerificationResentAtAttribute($value)
-    {
-        return Carbon::parse($value)->format('H:i:s d/m/Y');
-    }
+    // public function getLastVerificationResentAtAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
+    // }
 }
