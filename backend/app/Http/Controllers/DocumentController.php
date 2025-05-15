@@ -167,4 +167,73 @@ class DocumentController extends Controller
             'message' => 'Bản nháp đã được lưu thành công.',
         ]);
     }
+
+    public function storeRequestDocument(Request $request)
+    {
+        $pdfPath = "test.pdf";
+
+        $document = $request['document'];
+        $document_flow = $request['document_flow'];
+        $document_flow_step = $document_flow['current_flow_step'];
+
+        \DB::beginTransaction();
+
+        try {
+            $new_document_flow = DocumentFlow::create([
+                'name' => $document_flow['document_flow_name'],
+                'created_by' => $document_flow['created_by'],
+                'is_active' => false,
+                'is_template' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $document_flow_id = $new_document_flow['id'];
+            foreach ($document_flow_step as $step) {
+                $status = ($step['step'] == 1) ? 'in_review' : 'pending';
+
+                DocumentFlowStep::create([
+                    'document_flow_id' => $document_flow_id,
+                    'step' => $step['step'],
+                    'department_id' => $step['department_id'],
+                    'approver_id' => $step['approver_id'],
+                    'multichoice' => $step['multichoice'],
+                    'status' => $status,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $new_document = Document::create([
+                'title' => $document['title'],
+                'description' => $document['description'],
+                'file_path' => $pdfPath,
+                'document_type_id' => $document['document_type_id'],
+                'created_by' => $document['created_by'],
+                'document_flow_id' => $new_document_flow['id'],
+                'status' => 'pending',
+                'is_public' => $document['is_public'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DocumentVersion::create([
+                'document_id' => $new_document['id'],
+                'version' => 1,
+                'file_path' => $pdfPath,
+                'created_at' => now(),
+            ]);
+
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi lưu bản nháp: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => 'Bản nháp đã được lưu thành công.',
+        ]);
+    }
 }

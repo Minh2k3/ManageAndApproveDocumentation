@@ -684,6 +684,32 @@ export default defineComponent({
             return true;
         }
 
+        async function sendRequest() {
+            const documentData = {
+                title: document_name.value,
+                document_type_id: document_type.value,
+                description: document_description.value,
+                upload_files: upload_files.value,
+                created_by: user.id,
+                is_public: document_public.value,
+            }
+
+            const documentFlowData = {
+                document_flow_name: "Luồng phê duyệt cho '" + document_name.value + "' của " + user.name + " - " + new Date().toLocaleString(),
+                created_by: user.id,
+                current_flow_step: current_flow_step.value,
+            }
+
+            const requestData = {
+                document: documentData,
+                document_flow: documentFlowData,
+            };
+
+            await axiosInstance.post('/api/documents/request', requestData);
+            message.success("Gửi yêu cầu phê duyệt thành công");
+            router.push({ name: 'creator-documents' });
+        }
+
         // Hàm xác nhận gửi yêu cầu phê duyệt
         function showConfirmSendRequest() {
             Modal.confirm({
@@ -697,7 +723,7 @@ export default defineComponent({
                     // 'Some descriptions',
                 ),
                 onOk() {
-                    message.success('Đã gửi yêu cầu phê duyệt');
+                    sendRequest();
                 },
                 onCancel() {
                     return;
@@ -706,7 +732,7 @@ export default defineComponent({
             });
         };
 
-        // Hàm xử lý gửi yêu cầu phê duyệt
+        // Hàm bắt sự kiện gửi yêu cầu phê duyệt
         function handleSendRequest() {
             if (validateSendRequest()) {
                 showConfirmSendRequest();
@@ -733,6 +759,7 @@ export default defineComponent({
             return true;
         }
 
+        // Hàm xử lý lưu nháp
         async function saveDraft() {
             const documentData = {
                 title: document_name.value,
@@ -748,6 +775,7 @@ export default defineComponent({
                 created_by: user.id,
                 current_flow_step: current_flow_step.value,
             }
+
             const draftData = {
                 document: documentData,
                 document_flow: documentFlowData,
@@ -773,7 +801,6 @@ export default defineComponent({
                 ),
                 onOk() {
                     saveDraft();
-                    // message.success('Đã lưu bản nháp');
                 },
                 onCancel() {
                     return;
@@ -781,7 +808,7 @@ export default defineComponent({
             });
         };
 
-        // Hàm xử lý lưu nháp
+        // Hàm bắt sự kiện lưu nháp
         function handleSaveDraft() {
             if (validateSaveDraft()) {
                 showConfirmSaveDraft();
