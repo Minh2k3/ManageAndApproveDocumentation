@@ -10,16 +10,16 @@
 <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
     <div class="text-center">
         @if (request()->get('status') === 'verified')
-            <h1 class="text-success">Email Verified Successfully!</h1>
-            <p>Your email has been successfully verified. You can now access all the features of our platform.</p>
+            <h1 class="text-success">Xác thực email thành công!</h1>
+            <p>Bạn đã hoàn tất xác thực tài khoản của mình. Giờ thì hãy trải nghiệm hệ thống của chúng tôi nhé.</p>
             <a href="http://localhost:5173/login" class="btn btn-primary mt-4">Go to Login</a>
         @elseif (request()->get('status') === 'already_verified')
-            <h1 class="text-warning">Email Already Verified</h1>
-            <p>Your email has already been verified. You can proceed to login.</p>
+            <h1 class="text-warning">Bạn đã xác thực email trước đó</h1>
+            <p>Tài khoản của bạn đã được xác thực từ trước. Hãy đăng nhập để sử dụng.</p>
             <a href="http://localhost:5173/login" class="btn btn-primary mt-4">Go to Login</a>
         @elseif (request()->get('status') === 'expired') 
-            <h1 class="text-danger">Verification Link Expired</h1>
-            <p>The verification link has expired. Please request a new verification email.</p>
+            <h1 class="text-danger">Liên kết xác thực đã hết hạn</h1>
+            <p>Liên kết xác thực tài khoản của bạn đã quá hạn. Vui lòng nhập lại email để nhận liên kết mới.</p>
             <form action="{{ route('verification.resend') }}" method="POST" class="resend-form">
                 @csrf
                 <div class="mb-3 row d-flex justify-content-between align-items-center">
@@ -38,12 +38,12 @@
                 </button>
             </form>
         @elseif (request()->get('status') === 'not_found')
-            <h1 class="text-danger">Email Not Found</h1>
-            <p>The email address you provided is not associated with any account. Please check and try again.</p>
+            <h1 class="text-danger">Không tìm thấy tài khoản của bạn</h1>
+            <p>Email của bạn không kết nối tới tài khoản nào. Vui lòng kiểm tra và thử lại.</p>
             <a href="http://localhost:5173/login" class="btn btn-primary mt-4">Go to Login</a>
         @else
             <h1 class="text-danger">Invalid Status</h1>
-            <p>Something went wrong. Please try again.</p>
+            <p>Có lỗi xảy ra. Vui lòng thử lại.</p>
             <a href="http://localhost:5173" class="btn btn-primary mt-4">Go to Dashboard</a>
         @endif
 

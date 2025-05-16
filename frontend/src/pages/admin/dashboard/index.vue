@@ -1,13 +1,13 @@
 <template>
     <div class="col-12">
         <div class="row justify-content-around mt-2">
-            <div class="bg-light col-sm col-9 border border-2 border-dark rounded-3 p-2 mx-2">
+            <div class="bg-light col-lg col-9 border border-2 border-dark rounded-3 p-2 mx-2">
                 <div class="row mt-1">
-                    <div class="col col-sm d-flex d-sm-flex justify-content-between">
+                    <div class="col col-lg d-flex d-lg-flex justify-content-between">
                         <div class="d-flex align-items-center justify-content-start">
-                            <span class="fw-bold fs-4">Tổng số người dùng</span>
+                            <span class="fw-bold fs-5">Tổng số người dùng</span>
                         </div>
-                        <div class="col-sm-3 col d-flex d-sm-flex align-items-center justify-content-center">
+                        <div class="col-lg-3 col d-flex d-lg-flex align-items-center justify-content-center">
                             <i class="fa-solid fa-users" style="color: #00ff11; font-size: 3rem;"></i>
                         </div>
 
@@ -15,24 +15,24 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-sm-12">
-                        <span class="fs-1 fw-bold ">100</span>
+                    <div class="col-lg-12">
+                        <span class="fs-1 fw-bold ">{{ number_of_users }}</span>
                     </div>
                 </div>
                 <div class="row mt-1">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-5 text-success">+12% so với tháng trước</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-light col-sm col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-sm-0 mt-3">
+            <div class="bg-light col-lg col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
-                    <div class="col col-sm d-flex d-sm-flex justify-content-between">
+                    <div class="col col-lg d-flex d-lg-flex justify-content-between">
                         <div class="d-flex align-items-center justify-content-start">
-                            <span class="fw-bold fs-4">Tổng số văn bản</span>
+                            <span class="fw-bold fs-5">Tổng số văn bản</span>
                         </div>
-                        <div class="col-sm-3 col d-flex d-sm-flex align-items-center justify-content-center">
+                        <div class="col-lg-3 col d-flex d-lg-flex align-items-center justify-content-center">
                             <i class="fa-solid fa-file-invoice" style="color: #74C0FC; font-size: 3rem;"></i>
                         </div>
 
@@ -40,24 +40,24 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-sm-12">
-                        <span class="fs-1 fw-bold ">200</span>
+                    <div class="col-lg-12">
+                        <span class="fs-1 fw-bold ">{{ number_of_documents }}</span>
                     </div>
                 </div>
                 <div class="row mt-1">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-5 text-success">+12% so với tháng trước</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-light col-sm col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-sm-0 mt-3">
+            <div class="bg-light col-lg col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
-                    <div class="col col-sm d-flex d-sm-flex">
+                    <div class="col col-lg d-flex d-lg-flex">
                         <div class="d-flex align-items-center justify-content-start">
-                            <span class="fw-bold fs-4">Vai trò & Quyền hạn</span>
+                            <span class="fw-bold fs-5">Vai trò & Quyền hạn</span>
                         </div>
-                        <div class="col-sm-3 col d-flex d-sm-flex align-items-center justify-content-end">
+                        <div class="col-lg-3 col d-flex d-lg-flex align-items-center justify-content-end">
                             <i class="fa-solid fa-shield-halved fs-1" style="color: #B197FC;"></i>
                         </div>
 
@@ -65,24 +65,24 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-1 fw-bold ">6</span>
                     </div>
                 </div>
                 <div class="row mt-1">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-5 text-success">+2 vai trò mới</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-light col-sm col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-sm-0 mt-3">
+            <div class="bg-light col-lg col-9 border border-2 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
-                    <div class="col col-sm d-flex d-sm-flex">
+                    <div class="col col-lg d-flex d-lg-flex">
                         <div class="d-flex align-items-center justify-content-start">
-                            <span class="fw-bold fs-4">Luồng phê duyệt</span>
+                            <span class="fw-bold fs-5">Luồng phê duyệt</span>
                         </div>
-                        <div class="col-sm-3 col d-flex d-sm-flex align-items-center justify-content-end">
+                        <div class="col-lg-3 col d-flex d-lg-flex align-items-center justify-content-end">
                             <i class="fa-solid fa-code-branch fs-1" style="color: #ff7300;"></i>
                         </div>
 
@@ -90,12 +90,12 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-1 fw-bold ">10</span>
                     </div>
                 </div>
                 <div class="row mt-1">
-                    <div class="col-sm-12">
+                    <div class="col-lg-12">
                         <span class="fs-5 text-success">+1 luồng mới</span>
                     </div>
                 </div>
@@ -103,22 +103,23 @@
         </div>
 
         <div class="row mt-2 justify-content-around">
-            <div class="bg-light col-sm-8 col-9 col-md border border-2 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
+            <!-- Hoạt động hệ thống -->
+            <div class="bg-light col-xxl col-9 col-lg border border-2 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
                 <div class="row">
-                    <span class="fs-2 fw-bold">Hoạt Động Hệ Thống</span>
+                    <span class="fs-4 fw-bold">Hoạt Động Hệ Thống</span>
                 </div>
                 <div class="row mt-1">
                     <span class="text-secondary">Các hoạt động gần đây trên hệ thống</span>
                 </div>
                 <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-1 col-1 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
                             <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
                             <span class="fw-bold">Nguyễn Văn A</span>
                             <span class="text-secondary">Đã tạo một văn bản mới</span>
@@ -127,14 +128,14 @@
                 </div>
 
                 <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-1 col-1 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
                             <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
                             <span class="fw-bold">Nguyễn Văn A</span>
                             <span class="text-secondary">Đã tạo một văn bản mới</span>
@@ -143,14 +144,14 @@
                 </div>
 
                 <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-1 col-1 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
                             <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
                             <span class="fw-bold">Nguyễn Văn A</span>
                             <span class="text-secondary">Đã tạo một văn bản mới</span>
@@ -159,14 +160,14 @@
                 </div>
 
                 <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-1 col-1 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
                             <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
                             <span class="fw-bold">Nguyễn Văn A</span>
                             <span class="text-secondary">Đã tạo một văn bản mới</span>
@@ -175,14 +176,14 @@
                 </div>
 
                 <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-1 col-1 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
                             <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
                             <span class="fw-bold">Nguyễn Văn A</span>
                             <span class="text-secondary">Đã tạo một văn bản mới</span>
@@ -192,126 +193,50 @@
 
             </div>
 
-            <div class="bg-light col-sm col-9 col-md border border-2 border-dark rounded-3 p-2 mx-2 mt-3 mt-sm-0">
+            <!-- Người dùng mới -->
+            <div class="bg-light col-xxl col-9 col-lg border border-2 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
                 <div class="row">
-                    <span class="fs-2 fw-bold">Người Dùng Mới</span>
+                    <span class="fs-4 fw-bold">Người Dùng Mới</span>
                 </div>
                 <div class="row mt-1">
                     <span class="text-secondary">Người dùng mới đăng ký</span>
                 </div>
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-2 col-2 d-flex d-sm-flex justify-content-center align-items-center px-0">
+                
+                <div v-for="(user, index) in new_registered_users" 
+                    :key="index"
+                    class="row border border-1 border-dark mt-3 p-2 mx-1"
+                    >
+
+                    <!-- Avatar -->
+                    <div class="col-lg-2 col-2 d-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
+                        <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
+                    <!-- Name & Email -->
+                    <div class="col-lg col align-items-center d-flex">
                         <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">2151062831@e.tlu.edu.vn</span>
+                        <span class="fw-bold">{{ user.name }}</span>
+                        <span class="text-secondary">{{ user.email }}</span>
                         </div>
                     </div>
 
-                    <div class="col-sm-2 col-2 align-items-center d-flex d-sm-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
-                        style="background-color: #81FF90; color: #009938;">
-                        <span class="text-center">Hoạt động</span>
+                    <!-- Status -->
+                    <div class="col-lg-3 col-2 align-items-center d-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
+                        :style="getStatusStyle(user.status)">
+                        <span class="text-center">{{ getStatusText(user.status) }}</span>
                     </div>
                 </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-2 col-2 d-flex d-sm-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn B</span>
-                            <span class="text-secondary">2151062831@e.tlu.edu.vn</span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2 col-2 align-items-center d-flex d-sm-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
-                        style="background-color: #81FF90; color: #009938;">
-                        <span class="text-center">Hoạt động</span>
-                    </div>
-                </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-2 col-2 d-flex d-sm-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">2151062831@e.tlu.edu.vn</span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2 col-2 align-items-center d-flex d-sm-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
-                        style="background-color: #FFF781; color: #C47900;">
-                        <span class="text-center">Chờ duyệt</span>
-                    </div>
-                </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-2 col-2 d-flex d-sm-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">2151062831@e.tlu.edu.vn</span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2 col-2 align-items-center d-flex d-sm-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
-                        style="background-color: #81FF90; color: #009938;">
-                        <span class="text-center">Hoạt động</span>
-                    </div>
-                </div>
-
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-sm-2 col-2 d-flex d-sm-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-sm col align-items-center d-flex d-sm-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">2151062831@e.tlu.edu.vn</span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2 col-2 align-items-center d-flex d-sm-flex border border-1 border-dark rounded-2 p-1 justify-content-center"
-                        style="background-color: #FFA581; color: #DF0000;">
-                        <span class="text-center">Tạm cấm</span>
-                    </div>
-                </div>
-
             </div>
         </div>
 
         <div class="row mt-2 justify-content-around">
-            <div class="bg-light col-sm-6 col-9 col-md border border-2 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
+            <!-- Thống kê văn bản -->
+            <div class="bg-light col-xl-8 col-9 col-lg border border-2 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
                 <div class="row">
-                    <span class="fs-2 fw-bold">Thống Kê Văn Bản</span>
+                    <span class="fs-4 fw-bold">Thống Kê Văn Bản</span>
                 </div>
                 <div class="row mt-1">
                     <span class="text-secondary">Thống kê văn bản theo trạng thái</span>
@@ -320,21 +245,26 @@
                     <div class="mb-4">
                         <div class="row align-items-center mb-3">
                             <!-- Label -->
-                            <div class="col-sm-3 text-sm-end text-start">
-                                <strong>Đã phê duyệt</strong>
+                            <div class="col-lg-3 text-lg-end text-start">
+                                <strong class="text-size-document">Đã phê duyệt</strong>
                             </div>
 
                             <!-- Progress bar -->
-                            <div class="col-sm-7">
-                                <div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="65"
+                            <div class="col-lg-7">
+                                <div class="progress" role="progressbar" aria-label="Success example" 
+                                    :aria-valuenow="number_of_documents_by_status.get('approved').percentage"
                                     aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-success" style="width: 65%; height: 1.2rem;"></div>
+                                    <div class="progress-bar bg-success" 
+                                        :style="{
+                                            width: number_of_documents_by_status.get('approved').percentage + '%',
+                                            height: '1.2rem'
+                                        }"></div>
                                 </div>
                             </div>
 
                             <!-- Percentage -->
-                            <div class="col-sm-2 text-sm-start text-end">
-                                <span class="fw-semibold">65%</span>
+                            <div class="col-lg-2 text-lg-start text-end">
+                                <span class="fw-semibold">{{ number_of_documents_by_status.get("approved").percentage }} %</span>
                             </div>
                         </div>
 
@@ -343,21 +273,26 @@
                     <div class="mb-4">
                         <div class="row align-items-center mb-3">
                             <!-- Label -->
-                            <div class="col-sm-3 text-sm-end text-start">
-                                <strong>Đang chờ duyệt</strong>
+                            <div class="col-lg-3 text-lg-end text-start">
+                                <strong class="text-size-document">Đang chờ duyệt</strong>
                             </div>
 
                             <!-- Progress bar -->
-                            <div class="col-sm-7">
-                                <div class="progress" role="progressbar" aria-label="Loading" aria-valuenow="25"
+                            <div class="col-lg-7">
+                                <div class="progress" role="progressbar" aria-label="Success example" 
+                                    :aria-valuenow="number_of_documents_by_status.get('pending').percentage"
                                     aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-warning" style="width: 25%; height: 1.2rem;"></div>
+                                    <div class="progress-bar bg-info" 
+                                        :style="{
+                                            width: number_of_documents_by_status.get('pending').percentage + '%',
+                                            height: '1.2rem'
+                                        }"></div>
                                 </div>
                             </div>
 
                             <!-- Percentage -->
-                            <div class="col-sm-2 text-sm-start text-end">
-                                <span class="fw-semibold">25%</span>
+                            <div class="col-lg-2 text-lg-start text-end">
+                                <span class="fw-semibold">{{ number_of_documents_by_status.get("pending").percentage }} %</span>
                             </div>
                         </div>
                     </div>
@@ -365,21 +300,26 @@
                     <div class="mb-4">
                         <div class="row align-items-center mb-3">
                             <!-- Label -->
-                            <div class="col-sm-3 text-sm-end text-start">
-                                <strong>Từ chối duyệt</strong>
+                            <div class="col-lg-3 text-lg-end text-start">
+                                <strong class="text-size-document">Từ chối duyệt</strong>
                             </div>
 
                             <!-- Progress bar -->
-                            <div class="col-sm-7">
-                                <div class="progress" role="progressbar" aria-label="Reject" aria-valuenow="5"
+                            <div class="col-lg-7">
+                                <div class="progress" role="progressbar" aria-label="Success example" 
+                                    :aria-valuenow="number_of_documents_by_status.get('reject').percentage"
                                     aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-danger" style="width: 5%; height: 1.2rem;"></div>
+                                    <div class="progress-bar bg-danger" 
+                                        :style="{
+                                            width: number_of_documents_by_status.get('reject').percentage + '%',
+                                            height: '1.2rem'
+                                        }"></div>
                                 </div>
                             </div>
 
                             <!-- Percentage -->
-                            <div class="col-sm-2 text-sm-start text-end">
-                                <span class="fw-semibold">5%</span>
+                            <div class="col-lg-2 text-lg-start text-end">
+                                <span class="fw-semibold">{{ number_of_documents_by_status.get("reject").percentage }} %</span>
                             </div>
                         </div>
                     </div>
@@ -387,31 +327,36 @@
                     <div>
                         <div class="row align-items-center mb-3">
                             <!-- Label -->
-                            <div class="col-sm-3 text-sm-end text-start">
-                                <strong>Bản nháp</strong>
+                            <div class="col-lg-3 text-lg-end text-start">
+                                <strong class="text-size-document">Bản nháp</strong>
                             </div>
 
                             <!-- Progress bar -->
-                            <div class="col-sm-7">
-                                <div class="progress" role="progressbar" aria-label="draft" aria-valuenow="5"
+                            <div class="col-lg-7">
+                                <div class="progress" role="progressbar" aria-label="Success example" 
+                                    :aria-valuenow="number_of_documents_by_status.get('draft').percentage"
                                     aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar"
-                                        style="width: 5%; height: 1.2rem; background-color: #8c8c8c;"></div>
+                                    <div class="progress-bar bg-secondary" 
+                                        :style="{
+                                            width: number_of_documents_by_status.get('draft').percentage + '%',
+                                            height: '1.2rem'
+                                        }"></div>
                                 </div>
                             </div>
 
                             <!-- Percentage -->
-                            <div class="col-sm-2 text-sm-start text-end">
-                                <span class="fw-semibold">65%</span>
+                            <div class="col-lg-2 text-lg-start text-end">
+                                <span class="fw-semibold">{{ number_of_documents_by_status.get("draft").percentage }} %</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-light col-sm col-9 col-md border border-2 border-dark rounded-3 p-2 mx-2 mt-3 mt-sm-0">
+            <!-- Thống kê truy cập -->
+            <div class="bg-light col-xl col-9 col-lg-5 border border-2 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
                 <div class="row">
-                    <span class="fs-2 fw-bold">Thống Kê Truy Cập</span>
+                    <span class="fs-4 fw-bold">Thống Kê Truy Cập</span>
                 </div>
                 <div class="row mt-1">
                     <span class="text-secondary">Số lượng truy cập trong 7 ngày qua</span>
@@ -430,12 +375,27 @@
 </template>
 
 <script>
-import { defineComponent, ref, reactive, toRefs } from "vue";
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode,
+    h 
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from "@/stores/admin/user-store";
+import { useAuth } from '@/stores/use-auth';
 import { useMenu } from '@/stores/use-menu.js';
+import { useDocumentStore } from "@/stores/admin/document-store";
 import avatarUrl from '@/assets/images/Cosette.jpg';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+
+
 export default defineComponent({
 
     name: "BarChart",
@@ -474,10 +434,117 @@ export default defineComponent({
 
     setup() {
 
+        const router = useRouter();
+        const userStore = useUserStore();
+        const authStore = useAuth();
+        const documentStore = useDocumentStore();
+
+        const users = ref([]);
+        const documents = ref([]);
+        onMounted(async () => {
+            await userStore.fetchAll();
+            users.value = userStore.users;
+
+            await documentStore.fetchAll();
+            documents.value = documentStore.documents;
+        });
+
+        const number_of_users = computed(() => users.value.length);
+        const number_of_documents = computed(() => documents.value.length);
+
+        const number_of_documents_by_status = computed(() => {
+        const total = number_of_documents.value;
+
+        const counts = documents.value.reduce((acc, doc) => {
+            if (acc.has(doc.status)) {
+            acc.set(doc.status, acc.get(doc.status) + 1);
+            } else {
+            acc.set(doc.status, 1); // nếu có status lạ
+            }
+            return acc;
+        }, new Map([
+            ["approved", 0],
+            ["reject", 0],
+            ["pending", 0],
+            ["draft", 0]
+        ]));
+
+        // Thêm phần trăm
+        const result = new Map();
+        for (const [status, count] of counts.entries()) {
+            const percentage = total > 0 ? ((count / total) * 100).toFixed(2) : "0.00";
+            result.set(status, {
+            count,
+            percentage: Number(percentage) // hoặc để chuỗi nếu muốn "45.23%"
+            });
+        }
+
+        return result;
+        });
+
+        const new_registered_users = computed(() => {
+            return [...users.value]
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 5)
+                .map(user => ({
+                    name: user.name,
+                    avatar: user.avatar,
+                    email: user.email,
+                    status: user.status,
+                })
+            );
+        });
+        console.log(new_registered_users.value);
+        const getStatusStyle = (status) => {
+            switch (status) {
+                case 'active':
+                return {
+                    backgroundColor: '#81FF90',
+                    color: '#009938',
+                };
+                case 'banned':
+                return {
+                    backgroundColor: '#FFD1D1',
+                    color: '#B10000',
+                };
+                case 'pending':
+                return {
+                    backgroundColor: '#FFF781',
+                    color: '#C47900',
+                };
+                default:
+                return {
+                    backgroundColor: '#E0E0E0',
+                    color: '#333',
+                };
+            }
+        };
+
+        const getStatusText = (status) => {
+            switch (status) {
+                case 'active':
+                    return 'Hoạt động';
+                case 'banned':
+                    return 'Tạm cấm';
+                case 'pending':
+                    return 'Chờ duyệt';
+                default:
+                    return 'Chưa kích hoạt';
+            }
+        };
+
+
         useMenu().onSelectedKeys(["admin-dashboard"]);
 
         return {
             avatarUrl,
+            number_of_users,
+            number_of_documents,
+            new_registered_users,
+            number_of_documents_by_status,
+
+            getStatusStyle,
+            getStatusText,
         }
     },
 
@@ -490,5 +557,9 @@ export default defineComponent({
   position: relative;
   width: 100%;
   min-height: 300px;
+}
+
+.text-size-document {
+  font-size:0.8rem;
 }
 </style>

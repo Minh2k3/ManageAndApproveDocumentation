@@ -35,7 +35,13 @@ class UserController extends Controller
                 \DB::raw("CONCAT(roll_at_departments.name, ' - ', departments.name) as roll"),
                 'users.email as email',
                 'users.status as status',
+                'users.created_at as created_at',
+                'users.updated_at as updated_at',
+                'users.avatar as avatar',
+                'users.phone as phone',
+                'users.sex as sex',
             )
+            ->orderBy('users.updated_at', 'desc')
             ->get();
 
         $creators = \DB::table('creators')
@@ -48,12 +54,18 @@ class UserController extends Controller
                 'users.email as email',
                 \DB::raw("CONCAT(roll_at_departments.name, ' - ', departments.name) as roll"),
                 'users.status as status',
+                                'users.created_at as created_at',
+                'users.updated_at as updated_at',
+                'users.avatar as avatar',
+                'users.phone as phone',
+                'users.sex as sex',
             )
+            ->orderBy('users.updated_at', 'desc')
             ->get();
 
-        $activeUsers = $approvers->merge($creators)->unique('id')->values();
+        $active_users = $approvers->merge($creators)->unique('id')->values();
         return response()->json([
-            'active_users' => $activeUsers,
+            'active_users' => $active_users,
         ]);
     }
 
@@ -89,4 +101,6 @@ class UserController extends Controller
         }
         return response()->json(['message' => 'User not found.'], 404);
     }
+
+
 }

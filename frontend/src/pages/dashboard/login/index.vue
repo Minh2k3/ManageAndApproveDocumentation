@@ -75,9 +75,8 @@
                         <div class="row justify-content-center mt-3">
                             <div class="col-8 col-sm-6 justify-content-center">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-primary p-2" type="button">
-                                        <MailOutlined class="me-2" style="color: blue;" />
-                                        Đăng nhập với Outlock
+                                    <button class="btn btn-primary" type="button">
+                                        <span class="text-center"><i class="bi bi-envelope me-2"></i>Đăng nhập với Outlock</span>
                                     </button>
                                 </div>
                             </div>
@@ -182,8 +181,8 @@
                         <div class="row mt-4">
                             <div class="col-12 justify-content-center d-flex">
                                 <span class="text-center text-secondary mx-2">Chưa có tài khoản?</span>
-                                <router-link :to="{ name: 'register' }">
-                                    <span class="text-center text-secondary fst-italic">Đăng ký</span>
+                                <router-link :to="{ name: 'register' }" class="text-decoration-none">
+                                    <span class="text-center text-primary fst-italic">Đăng ký</span>
                                 </router-link>
                             </div>
                         </div>

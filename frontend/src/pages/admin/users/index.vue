@@ -14,12 +14,12 @@
             <div class="col-12">
                 <div class="row g-2">
                 <!-- Tìm kiếm -->
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 align-items-center">
                     <a-input-search
-                    placeholder="Tìm kiếm"
-                    allow-clear
-                    enter-button
-                    class="w-100"
+                        placeholder="Tìm kiếm"
+                        allow-clear
+                        enter-button
+                        class="w-100"
                     />
                 </div>
 
@@ -60,7 +60,7 @@
                         />
                     </div>
                     <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
-                        <a-button type="primary" class="w-100 w-md-auto">
+                        <a-button type="primary" class="">
                             <i class="fa-solid fa-filter "></i>
                         </a-button>
                     </div>
@@ -178,26 +178,43 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode,
+    h 
+} from 'vue';
+import { useRouter } from 'vue-router';
 import { Modal, message } from "ant-design-vue";
 import { useMenu } from "@/stores/use-menu.js";
 import axiosInstance from "@/lib/axios.js";
+import { useUserStore } from "@/stores/admin/user-store";
+
 export default defineComponent ({
     setup() {
+        const userStore = useUserStore();
+        const router = useRouter();
         useMenu().onSelectedKeys(["admin-users"]);
+        // useMenu().onOpenKeys(["admin"]);
 
-        const users = ref([]);
+        let users = ref([]);
         const columns = [
-            // {
-            //     title: "#",
-            //     key: "index",
-            //     fixed: "left",
-            // }, 
             {
                 title: "Họ tên",
                 dataIndex: "name",
                 key: "name",
                 width: 200,
+                sorter: (a, b) => {
+                    const nameA = a.name.split(' ').slice(-1).join(' ');
+                    const nameB = b.name.split(' ').slice(-1).join(' ');
+
+                    return nameA.localeCompare(nameB); // Sắp xếp theo tên
+                },
+                sortDirections: ['ascend', 'descend'],
                 customHeaderCell: () => {
                     return { style: { textAlign: 'center' } };
                 }
@@ -224,6 +241,16 @@ export default defineComponent ({
                 dataIndex: "status",
                 key: "status",
                 width: 150,
+                sorter: (a, b) => {
+                    const statusOrder = {
+                        'active': 1,
+                        'banned': 2,
+                        'pending': 3,
+                        'inactive': 4
+                    };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                },
+                sortDirections: ['ascend', 'descend'],                
                 align: "center",
             },
             {
@@ -236,24 +263,30 @@ export default defineComponent ({
             }
         ]
 
-        const getUsers = () => {
-            axios
-                .get('http://127.0.0.1:8000/api/users')
-                .then(function (response) {
-                    users.value = response.data.active_users;
-                    console.log(users.value);
-                })
-                .catch(function (error) {
-                    // xử trí khi bị lỗi
-                    console.log(error);
-                    message.error("Có lỗi xảy ra trong quá trình lấy danh sách người dùng");
-                })
-                .finally(function () {
-                    // luôn luôn được thực thi
-                });
-            };
+        onMounted(async () => {
+            await userStore.fetchUsers();
+            users.value = userStore.users;
+            // console.log(users.value);
+        });
+
+        // const getUsers = () => {
+        //     axios
+        //         .get('http://127.0.0.1:8000/api/users')
+        //         .then(function (response) {
+        //             users.value = response.data.active_users;
+        //             console.log(users.value);
+        //         })
+        //         .catch(function (error) {
+        //             // xử trí khi bị lỗi
+        //             console.log(error);
+        //             message.error("Có lỗi xảy ra trong quá trình lấy danh sách người dùng");
+        //         })
+        //         .finally(function () {
+        //             // luôn luôn được thực thi
+        //         });
+        //     };
         
-        getUsers();
+        // getUsers();
 
         const viewDetail = (user) => {
             console.log("Chi tiết:", user);
@@ -276,7 +309,10 @@ export default defineComponent ({
                             })
                         message.success(`Đã kích hoạt ${user.name}!`);
                     }
-                    getUsers();
+                    const index = users.value.findIndex(u => u.id === user.id);
+                    if (index !== -1) {
+                        users.value[index].status = (action === 'ban' ? 'banned' : 'active');
+                    }
                 },
                 onCancel() {},
             });
@@ -290,8 +326,11 @@ export default defineComponent ({
                         .post('/api/users/unban', {
                             id: user.id,
                         })
+                    const index = users.value.findIndex(u => u.id === user.id);
+                    if (index !== -1) {
+                        users.value[index].status = 'active';
+                    }
                     message.success(`Bỏ cám thành công!`);
-                    getUsers();
                 },
                 onCancel() {},
             });
@@ -300,7 +339,6 @@ export default defineComponent ({
         return {
             users,
             columns,
-            getUsers,
             viewDetail,
             showConfirm,
             showConfirmUnban,

@@ -27,7 +27,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (!authStore.isAuthenticated) {
-        if (to.path !== '/login' && to.path !== '/register') {
+        if (to.path !== '/login' && to.path !== '/register' && to.path !== '/dashboard') {
             return next('/login');
         }
     }

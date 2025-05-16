@@ -2,7 +2,7 @@
 	<!-- admin menu -->
 	<a-menu v-if="role === 'admin'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="admin-dashboard">
-			<router-link :to="{ name: 'admin-dashboard' }" title="Quản lý chung">
+			<router-link  class="text-decoration-none" :to="{ name: 'admin-dashboard' }" title="Quản lý chung">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Quản lý chung
 				</span>
@@ -17,11 +17,11 @@
 			</template>
 
 			<a-menu-item key="admin-users-list">
-				<router-link :to="{ name: 'admin-users' }">Danh sách người dùng</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-users' }">Danh sách người dùng</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-users-create">
-				<router-link :to="{ name: 'admin-users-create' }">Thêm người dùng</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-users-create' }">Thêm người dùng</router-link>
 			</a-menu-item>
 		</a-sub-menu>
 
@@ -33,25 +33,25 @@
 			</template>
 
 			<a-menu-item key="admin-documents-all">
-				<router-link :to="{ name: 'admin-documents' }">Tất cả văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents' }">Tất cả văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-documents-type">
-				<router-link :to="{ name: 'admin-documents-type' }">Loại văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-type' }">Loại văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-documents-template">
-				<router-link :to="{ name: 'admin-documents-template' }">Mẫu văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-template' }">Mẫu văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-documents-history">
-				<router-link :to="{ name: 'admin-documents-history' }">Lịch sử văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-history' }">Lịch sử văn bản</router-link>
 			</a-menu-item>
 		</a-sub-menu>
 
 
 		<!-- <a-menu-item key="admin-roles">
-			<router-link :to="{ name: 'admin-roles' }" title="Quản lý vai trò">
+			<router-link  class="text-decoration-none" :to="{ name: 'admin-roles' }" title="Quản lý vai trò">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<TagOutlined class="me-2" />Quản lý vai trò
 				</span>
@@ -66,15 +66,15 @@
 			</template>
 
 			<a-menu-item key="admin-roles-all">
-				<router-link :to="{ name: 'admin-roles' }">Vai trò</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-roles' }">Vai trò</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-roles-permissions">
-				<router-link :to="{ name: 'admin-roles-permissions' }">Quyền hạn</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-roles-permissions' }">Quyền hạn</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-roles-make_permission">
-				<router-link :to="{ name: 'admin-roles-make_permission' }">Gán quyền</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-roles-make_permission' }">Gán quyền</router-link>
 			</a-menu-item>
 		</a-sub-menu>
 
@@ -86,16 +86,16 @@
 			</template>
 
 			<a-menu-item key="approval-flows-template">
-				<router-link :to="{ name: 'admin-approval-flows-template' }">Mẫu luồng phê duyệt</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-approval-flows-template' }">Mẫu luồng phê duyệt</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="approval-flows-create">
-				<router-link :to="{ name: 'admin-approval-flows-create' }">Tạo luồng mới</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-approval-flows-create' }">Tạo luồng mới</router-link>
 			</a-menu-item>
 		</a-sub-menu>
 
 		<a-menu-item key="admin-settings">
-			<router-link :to="{ name: 'admin-settings' }" title="Cài đặt">
+			<router-link  class="text-decoration-none" :to="{ name: 'admin-settings' }" title="Cài đặt">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
@@ -106,7 +106,7 @@
 	<!-- creator menu -->
 	<a-menu v-if="role === 'creator'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="creator-dashboard">
-			<router-link :to="{ name: 'creator-dashboard' }" title="Tin tức">
+			<router-link  class="text-decoration-none" :to="{ name: 'creator-dashboard' }" title="Tin tức">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Tin tức
 				</span>
@@ -121,15 +121,15 @@
 			</template>
 
 			<a-menu-item key="creator-documents-all">
-				<router-link :to="{ name: 'creator-documents' }">Tất cả văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents' }">Tất cả văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="creator-documents-create">
-				<router-link :to="{ name: 'creator-documents-create' }">Thêm văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="creator-documents-history">
-				<router-link :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="creator-documents-detail" :disabled="!isDetailPage" :selectable="isDetailPage">
@@ -138,7 +138,7 @@
 		</a-sub-menu>
 
 		<a-menu-item key="creator-documents-template">
-			<router-link :to="{ name: 'creator-documents-template' }">
+			<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-template' }">
 				<span>
 					<i class="fa-solid fa-file me-2"></i>Văn bản mẫu
 				</span>
@@ -146,7 +146,7 @@
 		</a-menu-item>
 
 		<a-menu-item key="creator-signatures">
-			<router-link :to="{ name: 'creator-signatures' }">
+			<router-link  class="text-decoration-none" :to="{ name: 'creator-signatures' }">
 				<span>
 					<i class="fa-solid fa-signature me-2"></i>Chữ ký của tớ
 				</span>
@@ -154,7 +154,7 @@
 		</a-menu-item>
 
 		<a-menu-item key="creator-settings">
-			<router-link :to="{ name: 'creator-settings' }" title="Cài đặt">
+			<router-link  class="text-decoration-none" :to="{ name: 'creator-settings' }" title="Cài đặt">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
@@ -165,7 +165,7 @@
 	<!-- approver menu -->
 	<a-menu v-if="role === 'approver'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="approver-dashboard">
-			<router-link :to="{ name: 'approver-dashboard' }" title="Tin tức">
+			<router-link  class="text-decoration-none" :to="{ name: 'approver-dashboard' }" title="Tin tức">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Tin tức
 				</span>
@@ -180,11 +180,11 @@
 			</template>
 
 			<a-menu-item key="approver-documents-all">
-				<router-link :to="{ name: 'approver-documents' }">Tất cả văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'approver-documents' }">Tất cả văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="approver-documents-create">
-				<router-link :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPageApprover" :selectable="isDetailPageApprover">
@@ -193,7 +193,7 @@
 		</a-sub-menu>
 
 		<a-menu-item key="approver-signatures">
-			<router-link :to="{ name: 'approver-signatures' }">
+			<router-link  class="text-decoration-none" :to="{ name: 'approver-signatures' }">
 				<span>
 					<i class="fa-solid fa-signature me-2"></i>Chữ ký của tớ
 				</span>
@@ -201,7 +201,7 @@
 		</a-menu-item>
 
 		<a-menu-item key="approver-settings">
-			<router-link :to="{ name: 'approver-settings' }" title="Cài đặt">
+			<router-link  class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
 				<span class="fs-6 d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>

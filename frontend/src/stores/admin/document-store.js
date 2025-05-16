@@ -7,7 +7,6 @@ export const useDocumentStore = defineStore("document", () => {
     const document_types = ref([])
     const document_flow_templates = ref([])
     const document_templates = ref([])
-    const template_user = ref([])
     const document_flow_steps = ref([])
     const documents = ref([])
 
@@ -51,21 +50,6 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchTemplateUser(userId) {
-        try {
-            const response = await axiosInstance.get(`api/template-user/${userId}/`);
-            template_user.value = response.data;
-            if (response.data) {
-                this.template_user = response.data;
-            } else {
-                this.template_user = null;
-            }
-        }
-        catch (error) {
-            console.error("Error fetching template user:", error);
-        }
-    }
-
     async function fetchDocumentFlowSteps(documentFlowId) {
         try {
             const response = await axiosInstance.get(`api/document-flow-steps/${documentFlowId}/`);
@@ -83,9 +67,9 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocuments(id) {
+    async function fetchDocuments() {
         try {
-            const response = await axiosInstance.get(`api/creators/${id}/documents`);
+            const response = await axiosInstance.get(`api/documents`);
             if (response.data) {
                 console.log("response.data", response.data);
                 documents.value = response.data.documents;
@@ -96,37 +80,26 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    function reset() {
-        document_types.value = []
-        document_flow_templates.value = []
-        document_templates.value = []
-        template_user.value = []
-        document_flow_steps.value = []
-        documents.value = []
-    }
-
     // fetch all
     async function fetchAll() {
         await fetchDocumentTypes();
         await fetchDocumentFlowTemplates();
         await fetchDocumentTemplates();
+        await fetchDocuments();
     }
 
     return {
         document_types,
         document_flow_templates,
         document_templates,
-        template_user,
         document_flow_steps,
         documents,
-
+        
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
         fetchDocumentTemplates,
-        fetchTemplateUser,
         fetchDocumentFlowSteps,
         fetchDocuments,
         fetchAll,
-        reset,
     };
 });

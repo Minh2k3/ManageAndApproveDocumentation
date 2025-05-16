@@ -87,7 +87,7 @@ Route::post('/users/unban', [UserController::class, 'unbanUser'])
 // Document api
 // Document
 Route::get('/documents', [DocumentController::class, 'index'])
-    ->middleware('auth:sanctum')
+    // ->middleware('auth:sanctum')
     ->name('documents.index');
 
 Route::get('/documents/{document}', [DocumentController::class, 'show'])

@@ -27,7 +27,7 @@
                         <li><a class="dropdown-item" href="#">Thông báo</a></li>
                         <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="handleLogout"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             </div>
@@ -61,19 +61,26 @@
 
 <script setup>
     import TheMenu from '@/components/TheMenu.vue';
-    import { ref } from 'vue';
+    import { 
+        ref, 
+        createVNode,
+    } from 'vue';
     import { useRoute } from 'vue-router';
     import { useAuth } from '@/stores/use-auth';
+    import { 
+        Modal, 
+        message 
+    } from 'ant-design-vue';
+    import {
+        ExclamationCircleOutlined
+    } from '@ant-design/icons-vue';
 
+    const route = useRoute();
     const authStore = useAuth();
     const user = authStore.user;
     const role = authStore.role;
 
     const user_name = user.name;
-
-    console.log(user.value);
-    console.log(role.value);
-
     const visible = ref(false);
     const visible_user = ref(false);
     const direction = ref("left");
@@ -92,4 +99,30 @@
         visible_user.value = true;
         direction.value = "right";
     };
+
+    // Hàm xác nhận đăng xuất
+    function showConfirmLogout() {
+        Modal.confirm({
+            title: 'Bạn có chắc chắn đăng xuất không?',
+            icon: createVNode(ExclamationCircleOutlined),
+            content: createVNode(
+                'div',
+                {
+                    style: 'color:red;',
+                },
+            ),
+            onOk() {
+                authStore.logout();
+                message.success('Đăng xuất thành công');
+            },
+            onCancel() {
+                return;
+            },
+        });
+    };
+
+    // Hàm xử lý sự kiện đăng xuất
+    function handleLogout() {
+        showConfirmLogout();
+    }
 </script>

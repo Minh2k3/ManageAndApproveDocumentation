@@ -23,7 +23,7 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        $documents = Document::all();
+        $documents = Document::withCount('versions')->get();
         return response()->json([
             'documents' => $documents,
         ]);

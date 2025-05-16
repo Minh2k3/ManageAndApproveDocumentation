@@ -3,6 +3,13 @@
 import { defineStore } from 'pinia';
 import axiosInstance from '@/lib/axios';
 
+// Stores of Admin
+import { useUserStore as useAdminUserStore } from './admin/user-store';
+import {useDocumentStore as useAdminDocumentStore} from './admin/document-store';
+
+// Stores of Creator
+import {useDocumentStore as useCreatorDocumentStore} from './creator/document-store';
+
 export const useAuth = defineStore('auth', {
     state: () => ({
         user: null,
@@ -38,6 +45,20 @@ export const useAuth = defineStore('auth', {
             try {
                 await axiosInstance.post('/api/logout');
                 this.$reset();
+
+                // Stores of Admin
+                const adminDocumentStore = useAdminDocumentStore();
+                adminDocumentStore.$reset();
+                const adminUserStore = useAdminUserStore();
+                adminUserStore.$reset();
+
+                // Stores of Creator
+                const creatorDocumentStore = useCreatorDocumentStore();
+                creatorDocumentStore.$reset();
+
+                // Stores of Approver
+
+
                 document.cookie = "XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.href = '/login';
             } catch (error) {

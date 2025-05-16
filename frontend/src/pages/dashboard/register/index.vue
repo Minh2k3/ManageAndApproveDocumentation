@@ -238,10 +238,10 @@
                                             <span class="fw-bold fst-italic">Tôi đồng ý với các điều khoản và chính sách của hệ thống</span>
                                         </div>
                                         <div class="w-100"></div>
-                                        <div class="d-flex pt-2">
+                                        <div class="d-flex pt-2 align-items-center">
                                             <span class="text-secondary">Chi tiết điều khoản xem tại</span>
                                             &nbsp;
-                                            <a href="#" class="text-decoration-none text-primary small fst-italic">đây</a>
+                                            <a href="#" class="text-decoration-none text-primary fst-italic">đây</a>
                                         </div>
                                     </div>
                                 
@@ -267,8 +267,8 @@
                         <div class="row mt-4">
                             <div class="col-12 justify-content-center d-flex">
                                 <span class="text-center text-secondary mx-2">Đã có tài khoản?</span>
-                                <router-link :to="{ name: 'login' }">
-                                    <span class="text-center text-secondary fst-italic">Đăng nhập</span>
+                                <router-link :to="{ name: 'login' }" class="text-decoration-none">
+                                    <span class="text-center text-primary fst-italic">Đăng nhập</span>
                                 </router-link>
                             </div>
                         </div>
@@ -282,12 +282,22 @@
 </template>
 
 <script>
-import { MailOutlined, QuestionCircleOutlined, HomeOutlined } from "@ant-design/icons-vue";
-import { defineComponent, ref, onMounted, watch } from "vue";
+import { 
+    MailOutlined, 
+    QuestionCircleOutlined, 
+    HomeOutlined
+} from "@ant-design/icons-vue";
+
+import { defineComponent, 
+    ref, 
+    onMounted,
+    watch 
+} from "vue";
 import { useRouter } from "vue-router";
 import bgImage from '@/assets/images/NMT.jpg';
 import { message } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
+import { useRegisterStore } from "@/stores/use-register";
 
 export default defineComponent({
     components: {
@@ -298,6 +308,7 @@ export default defineComponent({
     
     setup() {
         const router = useRouter();
+        const useRegister = useRegisterStore();
 
         // Thông tin form đăng ký
         const name = ref('');
@@ -355,8 +366,11 @@ export default defineComponent({
         };
 
         // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
-        onMounted(() => {
-            getUsersRegister();
+        onMounted(async () => {
+            // getUsersRegister();
+            await useRegister.fetchRegisterForm();
+            departments.value = useRegister.departments;
+            rolls.value = useRegister.rolls;
             console.log("Đã gọi hàm getUsersRegister()");
         });
 
