@@ -4,18 +4,17 @@ import axiosInstance from '@/lib/axios';
 import { useAuth } from '@/stores/use-auth';
 
 export const useNotificationStore = defineStore("notification", () => { 
-    const authStore = useAuth();
     const notifications = ref([]);
     const isFetched = ref(false);
     
-    async function fetchNotification(force = false) {
+    async function fetchNotifications(user_id, force = false) {
         if (isFetched.value && !force) {
             return;
         }
 
         try {
             await axiosInstance
-                .get("api/user/{}")
+                .get(`api/notifications/${user_id}`)
                 .then((response) => {
                     console.log("Response:", response.data);
                     notifications.value = response.data.notifications;
@@ -31,17 +30,15 @@ export const useNotificationStore = defineStore("notification", () => {
 
 
     function reset() {
-        departments.value = [];
-        rolls.value = [];
+        notifications.value = [];
         isFetched.value = false;
     }
 
     return {
-        departments,
-        rolls,
+        notifications,
         isFetched,
-        
-        fetchRegisterForm,
-        reset,
+
+        fetchNotifications,
+        reset
     };
 });

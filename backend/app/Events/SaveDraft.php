@@ -14,6 +14,8 @@ use App\Models\User;
 use App\Models\Document;
 use App\Models\Notification;
 
+use Illuminate\Support\Facades\Log;
+
 class SaveDraft implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
@@ -30,6 +32,12 @@ class SaveDraft implements ShouldBroadcast
         $this->user = $user;
         $this->notification = $notification;
         $this->document_id = $document_id;
+
+        Log::info('Sending notification', [
+            'user' => $user->id,
+            'notification_id' => $notification->id,
+            'document_id' => $document_id,
+        ]);
     }
 
     /**

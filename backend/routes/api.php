@@ -26,6 +26,7 @@ use App\Http\Controllers\DocumentVersionController;
 
 // Other Controllers
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\NotificationController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -150,3 +151,16 @@ Route::get('/departments', [DepartmentController::class, 'index'])
 
 Route::get('/departments/can_approve', [DepartmentController::class, 'getDepartmentsCanApprove'])
     ->name('departments.getDepartmentsCanApprove');
+
+// Notification
+Route::get('/notifications/{user_id}', [NotificationController::class, 'getAllNotificationsByUserId'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.getAllNotificationsByUserId');
+
+Route::post('/notifications/{id}', [NotificationController::class, 'markAsRead'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.markAsRead');
+
+Route::post('/notifications/{user_id}', [NotificationController::class, 'markAllAsRead'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.markAllAsRead');

@@ -12,6 +12,7 @@ use App\Models\DocumentTemplate;
 use App\Models\DocumentVersion;
 use App\Models\DocumentFlow;
 use App\Models\DocumentFlowStep;
+use App\Models\Notification;
 
 use App\Notifications\SaveDraft;
 use App\Events\SaveDraft as SaveDraftEvent;
@@ -153,18 +154,18 @@ class DocumentController extends Controller
             ]);
 
             $user = auth()->user();
-            $admins = User::where('role', 'admin')->get();
+            $admins = User::where('role_id', '1')->get();
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 1,
-                    'receiver_id' => $admin->id,
+                    'receiver_id' => $admin['id'],
                     'title' => "Lưu nháp văn bản",
-                    'content' => $user->name . ' đã lưu bản nháp tài liệu ' . $new_document->title,
+                    'content' => $user['name'] . ' đã lưu bản nháp tài liệu ' . $new_document['title'],
                     'is_read' => false,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                broadcast(new SaveDraftEvent($admin, $notification, $new_document->id));
+                broadcast(new SaveDraftEvent($admin, $notification, $new_document['id']));
             }
 
             \DB::commit();
@@ -178,6 +179,8 @@ class DocumentController extends Controller
         return response()->json([
             'message' => 'Bản nháp đã được lưu thành công.',
             'id' => $new_document['id'],
+            'admins' => $admins,
+            'user' => $user,
         ]);
     }
 

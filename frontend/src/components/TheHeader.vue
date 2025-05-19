@@ -86,9 +86,13 @@
     import { 
         ref, 
         createVNode,
+        onMounted,
+        onUnmounted,
     } from 'vue';
     import { useRoute } from 'vue-router';
     import { useAuth } from '@/stores/use-auth';
+    import { useNotificationStore } from '@/stores/use-notification';
+
     import { 
         Modal, 
         message 
@@ -99,6 +103,7 @@
 
     const route = useRoute();
     const authStore = useAuth();
+    const notificationStore = useNotificationStore();
     const user = authStore.user;
     const role = authStore.role;
 
@@ -107,26 +112,13 @@
     const visible_user = ref(false);
     const direction = ref("left");
 
-    const notifications = ref([
-        { id: 1, content: 'Thông báo 1' },
-        { id: 2, content: 'Thông báo 2' },
-        { id: 3, content: 'Thông báo 3' },
-    ]);
+    const notifications = ref([]);
 
-    const loadNotifications = () => {
-        window.Echo.channel('user.' + this.user.id) 
-                .listen('new-notification', (event) => {
-                const notification = {
-                    id: event.notification.id,
-                    content: event.notification.content,
-                    document_id: event.document_id,
-                };
-
-                this.notifications.push(notification);
-                this.unreadMessagesCount++;
-                });
-    }
-    loadNotifications();
+    // Hàm linh tinh
+    function playSound() {
+        const audio = new Audio('/sounds/meow.mp3'); // đảm bảo đường dẫn đúng
+        audio.play();
+    }    
 
     const unreadMessagesCount = ref(3);
     const showNotifications = ref(false);
@@ -138,6 +130,42 @@
         unreadMessagesCount.value--;
         notifications.value = notifications.value.filter(n => n.id !== notificationId);
     }
+
+    async function fetchNotifications(force = false) {
+      await notificationStore.fetchNotifications(user.id, force = false);
+      notifications.value = notificationStore.notifications.filter(notification => notification.is_read === false);
+      unreadMessagesCount.value = notifications.value.length;
+    };
+
+    // Fetch thông báo ban đầu khi component được mounted
+    onMounted(async () => {
+      await fetchNotifications();
+      
+      // Thiết lập interval để fetch lại mỗi 1 phút (60000 ms)
+      const intervalId = setInterval(fetchNotifications(true), 300000); // Mỗi 1 phút
+
+      // Dọn dẹp interval khi component bị unmounted
+      onUnmounted(() => {
+        clearInterval(intervalId); // Dừng interval khi component bị hủy
+      });
+    });
+
+    // const loadNotifications = () => {
+    //     window.Echo.channel('user.' + user.id) 
+    //         .listen('.new-notification', (event) => {
+    //             console.log(event);
+    //             const notification = {
+    //                 id: event.notification.id,
+    //                 content: event.notification.content,
+    //             };
+
+    //             notifications.push(notification);
+    //             unreadMessagesCount++;
+    //             playSound();
+    //         }
+    //     );
+    // }
+    // loadNotifications();
 
     const showDrawer = () => {
         visible.value = true;

@@ -390,6 +390,7 @@ import { useUserStore } from "@/stores/admin/user-store";
 import { useAuth } from '@/stores/use-auth';
 import { useMenu } from '@/stores/use-menu.js';
 import { useDocumentStore } from "@/stores/admin/document-store";
+import { useNotificationStore } from '@/stores/use-notification';
 import avatarUrl from '@/assets/images/Cosette.jpg';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
@@ -438,15 +439,21 @@ export default defineComponent({
         const userStore = useUserStore();
         const authStore = useAuth();
         const documentStore = useDocumentStore();
+        const notificationStore = useNotificationStore();
 
         const users = ref([]);
         const documents = ref([]);
+        const notifications = ref([]);
         onMounted(async () => {
             await userStore.fetchAll();
             users.value = userStore.users;
 
             await documentStore.fetchAll();
             documents.value = documentStore.documents;
+
+            await notificationStore.fetchNotifications(authStore.user.id);
+            // console.log(notificationStore.notifications);
+            notifications.value = notificationStore.notifications;
         });
 
         const number_of_users = computed(() => users.value.length);
@@ -474,9 +481,10 @@ export default defineComponent({
         for (const [status, count] of counts.entries()) {
             const percentage = total > 0 ? ((count / total) * 100).toFixed(2) : "0.00";
             result.set(status, {
-            count,
-            percentage: Number(percentage) // hoặc để chuỗi nếu muốn "45.23%"
-            });
+                count,
+                percentage: Number(percentage) // hoặc để chuỗi nếu muốn "45.23%"
+                }
+            );
         }
 
         return result;
