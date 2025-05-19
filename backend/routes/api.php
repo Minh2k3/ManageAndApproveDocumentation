@@ -106,6 +106,10 @@ Route::post('/documents/request', [DocumentController::class, 'storeRequestDocum
     // ->middleware('auth:sanctum')
     ->name('documents.storeRequestDocument');
 
+Route::post('/documents/upload-file', [DocumentController::class, 'uploadFile'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.uploadFile');
+
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');

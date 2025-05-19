@@ -101,22 +101,34 @@
                         <h3 class="h5 fw-bold mb-3">ĐH Thủy Lợi</h3>
                         <p class="mb-3">Hệ thống quản lý và phê duyệt văn bản điện tử tích hợp chữ ký số</p>
                         <div class="d-flex gap-3">
-                            <a href="#" class="text-white text-decoration-none">Facebook</a>
-                            <a href="#" class="text-white text-decoration-none">Twitter</a>
-                            <a href="#" class="text-white text-decoration-none">LinkedIn</a>
+                            <a href="https://www.facebook.com/TranMinhTM7" class="text-white text-decoration-none" target="_blank" rel="noopener noreferrer">Facebook</a>
+                            <a href="https://www.youtube.com/@Himakevolution" class="text-white text-decoration-none" target="_blank" rel="noopener noreferrer">Youtube</a>
+                            <a href="https://www.instagram.com/himakevolution/" class="text-white text-decoration-none" target="_blank" rel="noopener noreferrer">Instagram</a>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <h3 class="h5 fw-bold mb-3">Liên Kết</h3>
                         <ul class="list-unstyled">
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Trang
-                                    chủ</router-link></li>
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Giới
-                                    thiệu</router-link></li>
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Tính
-                                    năng</router-link></li>
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Liên
-                                    hệ</router-link></li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Trang chủ
+                                </router-link>
+                            </li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Giới thiệu
+                                </router-link>
+                            </li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Tính năng
+                                </router-link>
+                            </li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Liên hệ
+                                </router-link>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-3">

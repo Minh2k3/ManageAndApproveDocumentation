@@ -113,6 +113,14 @@
 			</router-link>
 		</a-menu-item>
 
+		<a-menu-item menu-item key="creator-notification">
+			<router-link  class="text-decoration-none" :to="{ name: 'creator-notification' }" title="Thông báo">
+				<span class="fs-6 d-inline-flex align-items-center">
+					<NotificationOutlined class="me-2" />Thông báo
+				</span>
+			</router-link>
+		</a-menu-item>
+
 		<a-sub-menu key="creator-documents">
 			<template #title>
 				<span class="fs-6 d-inline-flex align-items-center">
@@ -227,7 +235,8 @@ import {
 	FileOutlined,
 	InteractionOutlined,
 	BranchesOutlined,
-	ExclamationCircleOutlined
+	ExclamationCircleOutlined,
+	NotificationOutlined,
 } from '@ant-design/icons-vue';
 
 import { 
@@ -249,7 +258,8 @@ export default defineComponent({
 		FileOutlined,
 		InteractionOutlined,
 		BranchesOutlined,
-		ExclamationCircleOutlined
+		ExclamationCircleOutlined,
+		NotificationOutlined,
 	},
 	setup() {
 		const store = useMenu();

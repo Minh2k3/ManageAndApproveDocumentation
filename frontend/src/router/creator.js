@@ -11,6 +11,11 @@ const creator = [
                 name: 'creator-dashboard',
                 component: () => import('@/pages/creator/dashboard/index.vue'),
             },
+            {
+                path: 'notification',
+                name: 'creator-notification',
+                component: () => import('@/pages/creator/dashboard/notification.vue'),
+            },
 
             // Quản lý Settings
             {

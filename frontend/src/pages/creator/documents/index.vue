@@ -4,15 +4,14 @@
         <div class="row my-3">
             <div class="d-flex justify-content-end align-items-center">
                 <a-button type="primary" class="col-6 col-sm-4">
-                    <router-link to=documents/create>
+                    <router-link class="text-decoration-none" to=documents/create >
                         <i class="fa-solid fa-add  me-2"></i>Tạo văn bản mới
                     </router-link>
                 </a-button>
             </div>
         </div>
-
-                <!-- Bảng trạng thái -->
-                <div class="row mb-3">
+            <!-- Bảng trạng thái -->
+            <div class="row mb-3">
             <div v-for="item in statusList" :key="item.key"
                 class="col-5 col-md mb-2 mb-md-0 border rounded-2 mx-2 p-3 cursor-pointer" :style="{
                     backgroundColor: selectedStatus === item.key
@@ -143,17 +142,32 @@
         title="Chi tiết văn bản"
         width="600px"
         >
-        <p><strong>Tiêu đề:</strong> {{ selectedDocument.title }}</p>
-        <p><strong>Mô tả:</strong> {{ selectedDocument.description }}</p>
-        <p><strong>Loại văn bản:</strong> {{ selectedDocument.type }}</p>
-        <p><strong>Trạng thái:</strong> {{ selectedDocument.status }}</p>
-        <p><strong>Ngày tạo:</strong> {{ selectedDocument.created_at }}</p>
-        <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
-        <p><strong>File:</strong> 
-            <a :href="`http://localhost:8000/${selectedDocument.file_path}`" target="_blank">
-                Xem tệp
-            </a>
-        </p>
+        <div>
+            <h5>📄 Thông tin văn bản</h5>
+            <p><strong>Tiêu đề:</strong> {{ selectedDocument.title }}</p>
+            <p><strong>Mô tả:</strong> {{ selectedDocument.description }}</p>
+            <p><strong>Loại văn bản:</strong> {{ selectedDocument.type }}</p>
+            <p><strong>Ngày tạo:</strong> {{ selectedDocument.created_at }}</p>
+            <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
+            <p>
+                <strong>Tệp:</strong>
+                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank">
+                    Xem tệp
+                </a>
+            </p>
+
+            <a-divider />
+
+            <h5>📌 Luồng phê duyệt</h5>
+            <!-- <ol v-if="document_flow_steps.value.length > 1 || document_flow_steps.value[0].department_id !== null">
+            <li v-for="step in document_flow_steps" :key="step.step">
+                Bước {{ step.step }}:
+                {{ step.department_name }} -
+                {{ step.approver_name }} <span v-if="step.multichoice">(Cùng cấp)</span>
+            </li>
+            </ol> -->
+            <!-- <p v-else class="text-muted fst-italic">Chưa thiết lập luồng phê duyệt</p> -->
+        </div>
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
@@ -182,6 +196,8 @@ import { useAuth } from '@/stores/use-auth.js';
 
 export default defineComponent({
     setup() {
+        useMenu().onSelectedKeys(["approver-documents"]);
+
         const authStore = useAuth();
         const user = authStore.user;
 
@@ -193,94 +209,30 @@ export default defineComponent({
             console.log(selectedDocument.value.id);
         };
 
-        useMenu().onSelectedKeys(["approver-documents"]);
         const documentStore = useDocumentStore();
         let documents = ref([]);
+        let document_flow_steps = ref([]);
+        watch(selectedDocument, async (newDocument) => {
+            if (newDocument) {
+                await documentStore.fetchDocumentFlowSteps(newDocument.id);
+                document_flow_steps.value = documentStore.document_flow_steps.filter(step => step.document_id === newDocument.id);
+            } else {
+                document_flow_steps.value = [];
+            }
+        });
 
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents;
         });
 
-
-
-        // documents = ref([
-        //     {
-        //         id: 1,
-        //         name: 'Văn bản 1',
-        //         type_id: 1,
-        //         type: 'Văn bản đi',
-        //         status_id: 1,
-        //         status: 'Đã duyệt',
-        //         created_at: '2023-10-01',
-        //         updated_at: '2023-10-01',
-        //     },
-        //     {
-        //         id: 2,
-        //         name: 'Văn bản 2',
-        //         type_id: 2,
-        //         type: 'Văn bản đến',
-        //         status_id: 2,
-        //         status: 'Chờ duyệt',
-        //         created_at: '2023-10-02',
-        //         updated_at: '2023-10-02',
-        //     }, 
-        //     {
-        //         id: 3,
-        //         name: 'Văn bản 3',
-        //         type_id: 3,
-        //         type: 'Văn bản nội bộ',
-        //         status_id: 1,
-        //         status: 'Đã duyệt',
-        //         created_at: '2023-10-03',
-        //         updated_at: '2023-10-03',
-        //     },
-        //     {
-        //         id: 4,
-        //         name: 'Văn bản 4',
-        //         type_id: 1,
-        //         type: 'Văn bản đi',
-        //         status_id: 2,
-        //         status: 'Chờ duyệt',
-        //         created_at: '2023-10-04',
-        //         updated_at: '2023-10-04',
-        //     },
-        //     {
-        //         id: 5,
-        //         name: 'Văn bản 5',
-        //         type_id: 2,
-        //         type: 'Văn bản đến',
-        //         status_id: 1,
-        //         status: 'Đã duyệt',
-        //         created_at: '2023-10-05',
-        //         updated_at: '2023-10-05',
-        //     },
-        //     {
-        //         id: 6,
-        //         name: 'Văn bản 6',
-        //         type_id: 3,
-        //         type: 'Văn bản nội bộ',
-        //         status_id: 1,
-        //         status: 'Đã duyệt',
-        //         created_at: '2023-10-06',
-        //         updated_at: '2023-10-06',
-        //     },
-
-        // ]);
-
-        const columns = [
-            // {
-            //     title: 'STT',
-            //     key: 'index',
-            //     dataIndex: 'index',
-            //     width: 50,
-            // },   
+        const columns = [   
             {
                 title: 'Tên văn bản',
                 key: 'title',
                 dataIndex: 'title',
                 width: 200,
-                sorter: (a, b) => a.name.localeCompare(b.name),
+                sorter: (a, b) => a.title.localeCompare(b.title),
                 sortDirections: ['ascend', 'descend'],
                 customHeaderCell: () => {
                     return { style: { textAlign: 'center' } };
@@ -302,7 +254,15 @@ export default defineComponent({
                 key: 'status',
                 dataIndex: 'status',
                 width: 120,
-                sorter: (a, b) => a.status_id - b.status_id,
+                sorter: (a, b) => {
+                    const statusOrder = {
+                        'draft': 1,
+                        'pending': 2,
+                        'approved': 3,
+                        'rejected': 4
+                    };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                },
                 sortDirections: ['ascend', 'descend'],
                 align: 'center',
             },
@@ -356,10 +316,11 @@ export default defineComponent({
         return {
             documents,
             columns,
-            customRow,
-            viewDetail,
+            document_flow_steps,
             detailVisible,
             selectedDocument,
+            customRow,
+            viewDetail,
             goToEditPage,
         };
     },

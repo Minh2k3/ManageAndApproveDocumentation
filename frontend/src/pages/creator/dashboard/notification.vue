@@ -1,5 +1,5 @@
 <template>
-    Dashboard cho Creator
+    Thông báo cho Creator
 </template>
 
 <script>
@@ -20,19 +20,9 @@ import { message, Modal } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
 export default defineComponent({
     setup() {
-        useMenu().onSelectedKeys(["creator-dashboard"]);
+        useMenu().onSelectedKeys(["creator-notification"]);
         const router = useRouter();
-        const documentStore = useDocumentStore();
-        const auth = useAuth();
 
-        onMounted(async () => {
-            await documentStore.fetchAll(auth.user.id);
-            
-        });
-
-        return {
-
-        }
     },
 });
 </script>

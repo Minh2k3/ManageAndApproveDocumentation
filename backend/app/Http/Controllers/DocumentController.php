@@ -13,8 +13,12 @@ use App\Models\DocumentVersion;
 use App\Models\DocumentFlow;
 use App\Models\DocumentFlowStep;
 
+use App\Notifications\SaveDraft;
+use App\Events\SaveDraft as SaveDraftEvent;
+
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DocumentController extends Controller
 {
@@ -101,14 +105,6 @@ class DocumentController extends Controller
 
     public function storeDraftDocument(Request $request)
     {
-        // $pdfPath = $request->file('upload_files')->storeAs(
-        //     '', // Thư mục con (rỗng vì đã set trong filesystems.php)
-        //     Str::uuid() . '.' . $request->file('pdf_file')->getClientOriginalExtension(),
-        //     'public'
-        // );
-
-        $pdfPath = "Hello.txt";
-
         $document = $request['document'];
         $document_flow = $request['document_flow'];
         $document_flow_step = $document_flow['current_flow_step'];
@@ -120,7 +116,7 @@ class DocumentController extends Controller
                 'name' => $document_flow['document_flow_name'],
                 'created_by' => $document_flow['created_by'],
                 'is_active' => false,
-                'is_template' => true,
+                'is_template' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -143,10 +139,10 @@ class DocumentController extends Controller
                 }
             }
 
-            Document::create([
+            $new_document = Document::create([
                 'title' => $document['title'],
                 'description' => $document['description'],
-                'file_path' => $pdfPath,
+                'file_path' => 'Minh',
                 'document_type_id' => $document['document_type_id'],
                 'created_by' => $document['created_by'],
                 'document_flow_id' => $new_document_flow['id'],
@@ -155,6 +151,22 @@ class DocumentController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            $user = auth()->user();
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $notification = Notification::create([
+                    'notification_category_id' => 1,
+                    'receiver_id' => $admin->id,
+                    'title' => "Lưu nháp văn bản",
+                    'content' => $user->name . ' đã lưu bản nháp tài liệu ' . $new_document->title,
+                    'is_read' => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                broadcast(new SaveDraftEvent($admin, $notification, $new_document->id));
+            }
+
             \DB::commit();
         } catch (\Exception $e) {
             \DB::rollBack();
@@ -165,6 +177,7 @@ class DocumentController extends Controller
 
         return response()->json([
             'message' => 'Bản nháp đã được lưu thành công.',
+            'id' => $new_document['id'],
         ]);
     }
 
@@ -234,6 +247,24 @@ class DocumentController extends Controller
 
         return response()->json([
             'message' => 'Bản nháp đã được lưu thành công.',
+            'id' => $new_document['id'],
+        ]);
+    }
+
+    public function uploadFile(Request $request)
+    {
+        $file = $request->file('upload_file');
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('', $filename, 'public');
+
+        $document = Document::find($request['document_id']);
+        $document->file_path = $filename; 
+        $document->save();
+
+        return response()->json([
+            'message' => 'Upload file thành công',
+            'file_url' => url(`/documents/` . $filename),
+            'file_path' => $filename
         ]);
     }
 }

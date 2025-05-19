@@ -104,7 +104,8 @@
                             :custom-request="handleCustomRequest" 
                             :before-upload="beforeUpload"
                             :max-count="1"
-                            @preview="handlePreview">
+                            @preview="handlePreview"
+                            >
                             <a-button>
                                 <UploadOutlined />
                                 Chọn file PDF
@@ -659,6 +660,26 @@ export default defineComponent({
             }
         }
 
+        // Hàm upload file
+        const handleUploadFile = async ({ file, documentId }) => {
+            try {
+                const formData = new FormData();
+                formData.append('upload_file', file);
+                formData.append('document_id', documentId);
+
+                const res = await axiosInstance.post('/api/documents/upload-file', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                message.success('Upload file thành công');
+                // console.log('Đường dẫn file:', res.data.file_url);
+            } catch (error) {
+                // console.error(error);
+                message.error('Lỗi khi upload file');
+            }
+        };
+
         // Validate cho gửi yêu cầu
         function validateSendRequest() {
             if (!document_name.value.trim()) {
@@ -765,7 +786,6 @@ export default defineComponent({
                 title: document_name.value,
                 document_type_id: document_type.value,
                 description: document_description.value,
-                upload_files: upload_files.value,
                 created_by: user.id,
                 is_public: document_public.value,
             }
@@ -782,10 +802,20 @@ export default defineComponent({
             };
 
             console.log("Draft data: " + JSON.stringify(draftData, null, 2));
-            // console.log(draftData.document_flow.current_flow_step);
-            await axiosInstance.post('/api/documents/draft', draftData);
-            message.success("Lưu nháp thành công");
-            router.push({ name: 'creator-documents' });
+            try {
+                const res = await axiosInstance.post('/api/documents/draft', draftData);
+                console.log(res);
+                const documentId = res.data.id;
+                await handleUploadFile({
+                    file: upload_files.value[0]?.originFileObj,
+                    documentId: documentId,
+                });
+                message.success("Lưu nháp thành công");
+                router.push({ name: 'creator-documents' });
+            } catch (error) {
+                message.error("Lưu nháp thất bại");
+                console.error("Lỗi khi lưu nháp:", error);
+            }
         }
 
         // Hàm xác nhận lưu nháp

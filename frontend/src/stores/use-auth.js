@@ -43,22 +43,21 @@ export const useAuth = defineStore('auth', {
         async logout() {
             // await axiosInstance.get("/sanctum/csrf-cookie");
             try {
+                if (this.role === 'admin') {
+                    const adminDocumentStore = useAdminDocumentStore();
+                    adminDocumentStore.$reset();
+
+                    const adminUserStore = useAdminUserStore();
+                    adminUserStore.$reset();
+                } else if (this.role === 'creator') {
+                    const creatorDocumentStore = useCreatorDocumentStore();
+                    creatorDocumentStore.$reset();
+                } else if (this.role === 'approver') {
+                    // Stores of Approver
+                }
+
                 await axiosInstance.post('/api/logout');
                 this.$reset();
-
-                // Stores of Admin
-                const adminDocumentStore = useAdminDocumentStore();
-                adminDocumentStore.$reset();
-                const adminUserStore = useAdminUserStore();
-                adminUserStore.$reset();
-
-                // Stores of Creator
-                const creatorDocumentStore = useCreatorDocumentStore();
-                creatorDocumentStore.$reset();
-
-                // Stores of Approver
-
-
                 document.cookie = "XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.href = '/login';
             } catch (error) {
