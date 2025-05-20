@@ -55,4 +55,9 @@ class DocumentFlow extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function documentFlowSteps()
+    {
+        return $this->hasMany(DocumentFlowStep::class, 'document_flow_id');
+    }
 }

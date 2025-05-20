@@ -132,40 +132,66 @@
     }
 
     async function fetchNotifications(force = false) {
-      await notificationStore.fetchNotifications(user.id, force = false);
+      await notificationStore.fetchNotifications(user.id, force);
       notifications.value = notificationStore.notifications.filter(notification => notification.is_read === false);
       unreadMessagesCount.value = notifications.value.length;
     };
 
     // Fetch thông báo ban đầu khi component được mounted
     onMounted(async () => {
-      await fetchNotifications();
-      
-      // Thiết lập interval để fetch lại mỗi 1 phút (60000 ms)
-      const intervalId = setInterval(fetchNotifications(true), 300000); // Mỗi 1 phút
+        await fetchNotifications();
+        loadNotifications();
+    //   // Thiết lập interval để fetch lại mỗi 5 phút (300000 ms)
+    //   const intervalId = setInterval(fetchNotifications(true), 300000); // Mỗi 5 phút
 
-      // Dọn dẹp interval khi component bị unmounted
-      onUnmounted(() => {
-        clearInterval(intervalId); // Dừng interval khi component bị hủy
-      });
+    //   // Dọn dẹp interval khi component bị unmounted
+    //   onUnmounted(() => {
+    //     clearInterval(intervalId); // Dừng interval khi component bị hủy
+    //   });
     });
 
-    // const loadNotifications = () => {
-    //     window.Echo.channel('user.' + user.id) 
-    //         .listen('.new-notification', (event) => {
-    //             console.log(event);
-    //             const notification = {
-    //                 id: event.notification.id,
-    //                 content: event.notification.content,
-    //             };
+    const loadNotifications = () => {
+        window.Echo.channel('user.' + user.id) 
+            .listen('.new-notification', (event) => {
+                console.log(event);
+                // const notification = {
+                //     id: event.notification.id,
+                //     content: event.notification.content,
+                // };
 
-    //             notifications.push(notification);
-    //             unreadMessagesCount++;
-    //             playSound();
-    //         }
-    //     );
-    // }
-    // loadNotifications();
+                // notifications.push(notification);
+                // unreadMessagesCount++;
+                playSound();
+            }
+        );
+        // window.Echo.channel('user.' + user.id) 
+        //     .listen('new-notification', (event) => {
+        //         console.log(event);
+        //         // const notification = {
+        //         //     id: event.notification.id,
+        //         //     content: event.notification.content,
+        //         // };
+
+        //         // notifications.push(notification);
+        //         // unreadMessagesCount++;
+        //         playSound();
+        //     }
+        // );
+        // window.Echo.channel('user.' + user.id) 
+        //     .listen('NewNotification', (event) => {
+        //         console.log(event);
+        //         // const notification = {
+        //         //     id: event.notification.id,
+        //         //     content: event.notification.content,
+        //         // };
+
+        //         // notifications.push(notification);
+        //         // unreadMessagesCount++;
+        //         playSound();
+        //     }
+        // );
+    }
+    
 
     const showDrawer = () => {
         visible.value = true;

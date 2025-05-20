@@ -44,4 +44,21 @@ Route::post('/resend-verification-email', [RegisterController::class, 'resendVer
 Route::get('/api/verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])
     ->name('verification.verify');
 
+Route::get('/direct-pusher', function () {
+    $options = [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true
+    ];
+    $pusher = new \Pusher\Pusher(
+        env('PUSHER_APP_KEY'),
+        env('PUSHER_APP_SECRET'),
+        env('PUSHER_APP_ID'),
+        $options
+    );
+
+    $data['message'] = 'Thử nghiệm trực tiếp từ Pusher API';
+    $pusher->trigger('user.16', 'new-notification', $data);
+
+    return "Đã gửi sự kiện trực tiếp qua Pusher API. Kiểm tra Debug Console.";
+});    
 // require __DIR__.'/auth.php';

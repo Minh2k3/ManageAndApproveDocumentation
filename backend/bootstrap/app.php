@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->prependToGroup('global', [
             // \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\LogUserAccess::class,
         ]);
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\CorsMiddleware::class,
+            \App\Http\Middleware\LogUserAccess::class,
             // \App\Http\Middleware\CheckRole::class,
         ]);
 

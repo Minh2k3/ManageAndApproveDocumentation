@@ -27,6 +27,7 @@ use App\Http\Controllers\DocumentVersionController;
 // Other Controllers
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserAccessLogController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -99,6 +100,10 @@ Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocuments
     ->middleware('auth:sanctum')
     ->name('documents.getDocumentsByCreator');
 
+Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.getDocumentsByApprover');
+
 Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeDraftDocument');
@@ -164,3 +169,8 @@ Route::post('/notifications/{id}', [NotificationController::class, 'markAsRead']
 Route::post('/notifications/{user_id}', [NotificationController::class, 'markAllAsRead'])
     // ->middleware('auth:sanctum')
     ->name('notifications.markAllAsRead');
+
+// Statistics
+Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
+    // ->middleware('auth:sanctum')
+    ->name('access-logs.getAccessStats');

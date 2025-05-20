@@ -20,6 +20,8 @@ use App\Events\SaveDraft as SaveDraftEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+
 
 class DocumentController extends Controller
 {
@@ -28,7 +30,24 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        $documents = Document::withCount('versions')->get();
+        $documents = Document::withCount('versions')
+            ->join('users', 'documents.created_by', '=', 'users.id')
+            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->select(
+                'documents.id as id',
+                'documents.title as title',
+                'documents.description as description',
+                'documents.file_path as file_path',
+                'documents.status as status',
+                'documents.created_at as created_at',
+                'documents.updated_at as updated_at',
+                'users.name as creator_name',
+                'users.id as creator_id',
+                'document_types.name as type',
+                'document_types.id as type_id',
+            )
+            ->orderBy('documents.updated_at', 'desc')
+            ->get();
         return response()->json([
             'documents' => $documents,
         ]);
@@ -104,6 +123,36 @@ class DocumentController extends Controller
         ]);
     }
 
+    public function getDocumentsByApprover($id)
+    {
+        $documents_of_me = Document::where('created_by', $id)
+            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->select(
+                'documents.id as id',
+                'documents.title as title',
+                'documents.description as description',
+                'documents.file_path as file_path',
+                'documents.status as status',
+                'documents.created_at as created_at',
+                'documents.updated_at as updated_at',
+                'document_types.name as type'
+            )
+            ->orderBy('documents.created_at', 'desc')
+            ->get();
+        
+        $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($id) {
+                $query->where('approver_id', $id);
+            })
+            ->where('status', '!=', 'draft')
+            ->get();
+
+        $documents = $documents_of_me->merge($documents_need_me)->unique('id')->values();
+
+        return response()->json([
+            'documents' => $documents,
+        ]);
+    }
+
     public function storeDraftDocument(Request $request)
     {
         $document = $request['document'];
@@ -165,10 +214,26 @@ class DocumentController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                broadcast(new SaveDraftEvent($admin, $notification, $new_document['id']));
+                // broadcast(new SaveDraftEvent($admin, $notification, $new_document['id']));
+                $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+                $pusher = new \Pusher\Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    $options
+                );
+
+                // $user_id = $admin['user_id'];
+                $data['notification'] = $notification;
+                $data['document'] = $new_document;
+                // Log::info('Pusher admin: ', $admin);
+                $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
             }
 
-            \DB::commit();
+            // \DB::commit();
         } catch (\Exception $e) {
             \DB::rollBack();
             return response()->json([

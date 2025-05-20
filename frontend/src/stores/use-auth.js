@@ -45,13 +45,13 @@ export const useAuth = defineStore('auth', {
             try {
                 if (this.role === 'admin') {
                     const adminDocumentStore = useAdminDocumentStore();
-                    adminDocumentStore.$reset();
+                    adminDocumentStore.reset();
 
                     const adminUserStore = useAdminUserStore();
-                    adminUserStore.$reset();
+                    adminUserStore.reset();
                 } else if (this.role === 'creator') {
                     const creatorDocumentStore = useCreatorDocumentStore();
-                    creatorDocumentStore.$reset();
+                    creatorDocumentStore.reset();
                 } else if (this.role === 'approver') {
                     // Stores of Approver
                 }

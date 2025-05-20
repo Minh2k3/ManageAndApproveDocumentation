@@ -37,7 +37,7 @@ class DocumentFlowStep extends Model
      */
     public function documentFlow()
     {
-        return $this->belongsTo(DocumentFlow::class);
+        return $this->belongsTo(DocumentFlow::class, 'document_flow_id');
     }
 
     /**

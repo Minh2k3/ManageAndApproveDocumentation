@@ -107,7 +107,7 @@
 	<a-menu v-if="role === 'creator'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="creator-dashboard">
 			<router-link  class="text-decoration-none" :to="{ name: 'creator-dashboard' }" title="Tin tức">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Tin tức
 				</span>
 			</router-link>
@@ -115,7 +115,7 @@
 
 		<a-menu-item menu-item key="creator-notification">
 			<router-link  class="text-decoration-none" :to="{ name: 'creator-notification' }" title="Thông báo">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<NotificationOutlined class="me-2" />Thông báo
 				</span>
 			</router-link>
@@ -123,7 +123,7 @@
 
 		<a-sub-menu key="creator-documents">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<FileOutlined class="me-2" /> Văn bản của tôi nè
 				</span>
 			</template>
@@ -163,7 +163,7 @@
 
 		<a-menu-item key="creator-settings">
 			<router-link  class="text-decoration-none" :to="{ name: 'creator-settings' }" title="Cài đặt">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
 			</router-link>
@@ -219,7 +219,7 @@
 
 	<a-menu v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item key="logout" @click="handleLogout">
-			<span class="fs-6 d-inline-flex align-items-center">
+			<span class="d-inline-flex align-items-center">
 				<i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
 			</span>
 		</a-menu-item>
@@ -292,8 +292,8 @@ export default defineComponent({
                         style: 'color:red;',
                     },
                 ),
-                onOk() {
-					auth.logout();
+                async onOk() {
+					await auth.logout();
                     message.success('Đăng xuất thành công');
                 },
                 onCancel() {
