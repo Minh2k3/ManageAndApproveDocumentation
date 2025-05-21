@@ -329,7 +329,8 @@ class DocumentController extends Controller
             DocumentVersion::create([
                 'document_id' => $new_document['id'],
                 'version' => 1,
-                'file_path' => 'Minh',
+                'document_data' => $new_document,
+                'status' => 'in_review',
                 'created_at' => now(),
             ]);
 
