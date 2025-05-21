@@ -6,17 +6,17 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\NonAdmin;
+// use App\Models\NonAdmin;
 use App\Models\Admin;
 use App\Models\DocumentTemplate;
 use App\Models\Notification;
 use App\Models\DigitalSignature;
-use App\Models\DocumentComment;
+// use App\Models\DocumentComment;
 use App\Models\Role;
 use App\Models\UserBan;
-use Laravel\Sanctum\HasApiTokens;
 use App\Models\Approver;
 use App\Models\Creator;
+use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -147,13 +147,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Notification::class, 'receiver_id');
     }
 
-    /**
-     * Get the comments made by the user.
-     */
-    public function comments()
-    {
-        return $this->hasMany(DocumentComment::class);
-    }
+    // /**
+    //  * Get the comments made by the user.
+    //  */
+    // public function comments()
+    // {
+    //     return $this->hasMany(DocumentComment::class);
+    // }
 
     /**
      * Check if the user is an admin.
@@ -216,19 +216,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
-
-    // public function getEmailVerifiedAtAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
-    // }
-
-    // public function getVerificationTokenExpiryAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
-    // }
-
-    // public function getLastVerificationResentAtAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('H:i:s d/m/Y');
-    // }
 }

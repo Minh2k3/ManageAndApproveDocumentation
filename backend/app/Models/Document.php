@@ -46,6 +46,7 @@ class Document extends Model
         'is_public' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        // 'document_data' => 'array',
     ];
 
     /**

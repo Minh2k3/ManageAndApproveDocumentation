@@ -181,7 +181,7 @@
 	<!-- approver menu -->
 	<a-menu v-if="role === 'approver'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="approver-dashboard">
-			<router-link  class="text-decoration-none" :to="{ name: 'approver-dashboard' }" title="Tin tức">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-dashboard' }" title="Tin tức">
 				<span class="d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Tin tức
 				</span>
@@ -196,20 +196,24 @@
 			</template>
 
 			<a-menu-item key="approver-documents-all">
-				<router-link  class="text-decoration-none" :to="{ name: 'approver-documents' }">Tất cả văn bản</router-link>
+				<router-link class="text-decoration-none" :to="{ name: 'approver-documents' }">Tất cả văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="approver-documents-create">
-				<router-link  class="text-decoration-none" :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
+				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPageApprover" :selectable="isDetailPageApprover">
 				Chi tiết văn bản
 			</a-menu-item>
+
+			<a-menu-item key="approver-documents-approve">
+				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-approve' }">Phê duyệt văn bản</router-link>
+			</a-menu-item>
 		</a-sub-menu>
 
 		<a-menu-item key="approver-signatures">
-			<router-link  class="text-decoration-none" :to="{ name: 'approver-signatures' }">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-signatures' }">
 				<span>
 					<i class="fa-solid fa-signature me-2"></i>Chữ ký của tớ
 				</span>
@@ -217,7 +221,7 @@
 		</a-menu-item>
 
 		<a-menu-item key="approver-settings">
-			<router-link  class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
 				<span class="d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>

@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
-use App\Models\DocumentComment;
-use App\Models\DocumentSignature;
+// use App\Models\DocumentComment;
+// use App\Models\DocumentSignature;
 use Carbon\Carbon;
 
 class DocumentVersion extends Model
@@ -26,9 +26,9 @@ class DocumentVersion extends Model
     protected $fillable = [
         'document_id',
         'version',
-        'file_path',
         'status',
         'created_at',
+        'document_data',
     ];
 
     /**
@@ -49,21 +49,21 @@ class DocumentVersion extends Model
         return $this->belongsTo(Document::class);
     }
 
-    /**
-     * Get the comments for the document version.
-     */
-    public function comments()
-    {
-        return $this->hasMany(DocumentComment::class);
-    }
+    // /**
+    //  * Get the comments for the document version.
+    //  */
+    // public function comments()
+    // {
+    //     return $this->hasMany(DocumentComment::class);
+    // }
 
-    /**
-     * Get the signatures for the document version.
-     */
-    public function signatures()
-    {
-        return $this->hasMany(DocumentSignature::class);
-    }
+    // /**
+    //  * Get the signatures for the document version.
+    //  */
+    // public function signatures()
+    // {
+    //     return $this->hasMany(DocumentSignature::class);
+    // }
 
     protected $dates = ['created_at'];
 

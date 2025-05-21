@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_signatures', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('document_version_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('approver_id')->constrained('approvers');
-            $table->timestamp('signed_at');
-            $table->text('signature_text')->nullable();
+        // Schema::create('document_signatures', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('document_version_id')->constrained()->cascadeOnDelete();
+        //     $table->foreignId('approver_id')->constrained('approvers');
+        //     $table->timestamp('signed_at');
+        //     $table->text('signature_text')->nullable();
 
-            $table->unique(['document_version_id', 'approver_id'], 'unique_document_version_approver_signature');
-        });
+        //     $table->unique(['document_version_id', 'approver_id'], 'unique_document_version_approver_signature');
+        // });
     }
 
     /**

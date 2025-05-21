@@ -64,6 +64,7 @@ class UserController extends Controller
             ->get();
 
         $active_users = $approvers->merge($creators)->unique('id')->values();
+        $active_users = $active_users->sortByDesc('updated_at')->values();
         return response()->json([
             'active_users' => $active_users,
         ]);

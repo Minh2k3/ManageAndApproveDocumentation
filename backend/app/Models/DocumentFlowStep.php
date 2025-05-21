@@ -20,7 +20,13 @@ class DocumentFlowStep extends Model
         'step',
         'department_id',
         'approver_id',
+        'multichoice',
         'status',
+        'decision',
+        'comment',
+        'signed_at',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -30,6 +36,11 @@ class DocumentFlowStep extends Model
      */
     protected $casts = [
         'status' => 'string',
+        'decision' => 'string',
+        'multichoice' => 'boolean',
+        'signed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**

@@ -102,10 +102,13 @@ class DocumentController extends Controller
         //
     }
 
+    // Hàm lấy các văn bản của một người gửi yêu cầu
     public function getDocumentsByCreator($id)
     {
         $documents = Document::where('created_by', $id)
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->leftJoin(\DB::raw('(SELECT document_id, COUNT(*) as version_count FROM document_versions GROUP BY document_id) as version_counts'), 
+                  'documents.id', '=', 'version_counts.document_id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -114,9 +117,10 @@ class DocumentController extends Controller
                 'documents.status as status',
                 'documents.created_at as created_at',
                 'documents.updated_at as updated_at',
-                'document_types.name as type'
+                'document_types.name as type',
+                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count')
             )
-            ->orderBy('documents.created_at', 'desc')
+            ->orderBy('documents.updated_at', 'desc')
             ->get();
 
         return response()->json([
@@ -124,6 +128,7 @@ class DocumentController extends Controller
         ]);
     }
 
+    // Hàm lấy các văn bản liên quan đến một người phê duyệt theo id
     public function getDocumentsByApprover($id)
     {
         $documents_of_me = Document::where('created_by', $id)
@@ -138,22 +143,38 @@ class DocumentController extends Controller
                 'documents.updated_at as updated_at',
                 'document_types.name as type'
             )
-            ->orderBy('documents.created_at', 'desc')
+            ->orderBy('documents.updated_at', 'desc')
             ->get();
         
         $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($id) {
                 $query->where('approver_id', $id);
             })
+            ->join('document_versions', 'document_versions.document_id', '=', 'documents.id')
+            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
             ->where('status', '!=', 'draft')
+            ->select(
+                'documents.id as id',
+                'documents.title as title',
+                'documents.description as description',
+                'documents.status as status',
+                'documents.created_at as created_at',
+                'documents.updated_at as updated_at',
+                'document_types.name as type',
+                'document_versions.file_path as file_path',
+                ''
+            )
+            ->orderBy('documents.updated_at', 'desc')
             ->get();
 
         $documents = $documents_of_me->merge($documents_need_me)->unique('id')->values();
+        $documents = $documents->sortByDesc('updated_at')->values();
 
         return response()->json([
             'documents' => $documents,
         ]);
     }
 
+    // Hàm lưu nháp
     public function storeDraftDocument(Request $request)
     {
         $document = $request['document'];
@@ -203,6 +224,13 @@ class DocumentController extends Controller
                 'updated_at' => now(),
             ]);
 
+            $new_document_version = DocumentVersion::create([
+                'document_id' => $new_document['id'],
+                'version' => 1,
+                'document_data' => $new_document,
+                'created_at' => now(),
+            ]);
+
             $user = auth()->user();
             $admins = User::where('role_id', '1')->get();
             foreach ($admins as $admin) {
@@ -250,6 +278,7 @@ class DocumentController extends Controller
         ]);
     }
 
+    // Hàm gửi yêu cầu phê duyệt
     public function storeRequestDocument(Request $request)
     {
         $document = $request['document'];
@@ -374,28 +403,30 @@ class DocumentController extends Controller
         }
 
         return response()->json([
-            'message' => 'Bản nháp đã được lưu thành công.',
+            'message' => 'Luồng phê duyệt cho tài liệu đã được lưu thành công.',
             'id' => $new_document['id'],
         ]);
     }
 
+    // Hàm xử lý upload file
     public function uploadFile(Request $request)
     {
         $file = $request->file('upload_file');
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path = $file->storeAs('', $filename, 'public');
 
+        // Update file_path cho Document
         $document = Document::find($request['document_id']);
         $document->file_path = $filename; 
-        if ($document['status'] == 'pending') {
-            $document_version = DocumentVersion::where('document_id', $request['document_id'])
-                ->orderBy('version', 'desc')
-                ->first();
-            
-            $document_version->file_path = $filename;
-            $document_version->save();
-        }
         $document->save();
+
+        // Update file_path cho DocumentVersion
+        $document_version = DocumentVersion::where('document_id', $request['document_id'])
+            ->orderBy('version', 'desc')
+            ->first();
+
+        $document_version->document_data = $document;
+        $document_version->save();
 
         return response()->json([
             'message' => 'Upload file thành công',

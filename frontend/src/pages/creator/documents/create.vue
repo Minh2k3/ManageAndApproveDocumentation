@@ -391,13 +391,9 @@ import { message, Modal } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
 
 import { useMenu } from '@/stores/use-menu.js';
-
 import { useDocumentStore } from '@/stores/creator/document-store.js';
-
 import { useDepartmentStore } from '@/stores/creator/department-store.js';
-
 import { useApproverStore } from '@/stores/approver/approver-store.js';
-
 import { useAuth } from '@/stores/use-auth.js';
 
 import { useRouter } from 'vue-router';
@@ -731,18 +727,17 @@ export default defineComponent({
             try {
                 const res = await axiosInstance.post('/api/documents/request', requestData);
                 console.log(res);
-                // const documentId = res.data.id;
-                // await handleUploadFile({
-                //     file: upload_files.value[0]?.originFileObj,
-                //     documentId: documentId,
-                // });
+                const documentId = res.data.id;
+                await handleUploadFile({
+                    file: upload_files.value[0]?.originFileObj,
+                    documentId: documentId,
+                });
                 message.success("Gửi yêu cầu phê duyệt thành công");
                 router.push({ name: 'creator-documents' });    
             } catch (error) {
                 message.error("Gửi yêu cầu phê duyệt thất bại");
                 console.error("Lỗi khi gửi yêu cầu phê duyệt:", error);
             }
-            
         }
 
         // Hàm xác nhận gửi yêu cầu phê duyệt

@@ -139,7 +139,6 @@
 
     <a-modal
         v-model:visible="detailVisible"
-        title="Chi tiết văn bản"
         width="600px"
         >
         <div>
@@ -147,6 +146,7 @@
             <p><strong>Tiêu đề:</strong> {{ selectedDocument.title }}</p>
             <p><strong>Mô tả:</strong> {{ selectedDocument.description }}</p>
             <p><strong>Loại văn bản:</strong> {{ selectedDocument.type }}</p>
+            <p><strong>Số lượng phiên bản:</strong> {{ selectedDocument.version_count }}</p>
             <p><strong>Ngày tạo:</strong> {{ selectedDocument.created_at }}</p>
             <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
             <p>
@@ -158,7 +158,7 @@
 
             <a-divider />
 
-            <h5>📌 Luồng phê duyệt</h5>
+            <!-- <h5>📌 Luồng phê duyệt</h5> -->
             <!-- <ol v-if="document_flow_steps.value.length > 1 || document_flow_steps.value[0].department_id !== null">
             <li v-for="step in document_flow_steps" :key="step.step">
                 Bước {{ step.step }}:
@@ -171,7 +171,7 @@
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button type="primary" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <a-button type="primary" @click="goToEditPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>
 

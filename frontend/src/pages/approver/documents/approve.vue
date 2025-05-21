@@ -4,9 +4,23 @@
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
-export default {
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode 
+} from 'vue';
+
+export default defineComponent ({
     setup() {
         useMenu().onSelectedKeys(["approver-documents-approve"]);
+
+        return {
+            
+        }
     },
-}
+});
 </script>

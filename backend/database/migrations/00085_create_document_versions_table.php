@@ -15,9 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('document_id')->constrained()->cascadeOnDelete();
             $table->integer('version');
-            $table->string('file_path');
-            // $table->string('file_name');
-            $table->enum('status', ['in_review', 'approved', 'rejected'])->default('in_review');
+            $table->json('document_data')->comment('Save informations about document of each version');
+            $table->enum('status', ['draft', 'in_review', 'approved', 'rejected'])->default('draft');
             $table->timestamp('created_at');
             
             $table->unique(['document_id', 'version']);

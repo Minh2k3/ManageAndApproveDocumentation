@@ -35,8 +35,13 @@ const approver = [
                 name: "approver-documents-detail",
                 component: () => import('@/pages/approver/documents/detail.vue')
             },
+            // {
+            //     path: "documents/approve/:id",
+            //     name: "approver-documents-approve-detail",
+            //     component: () => import('@/pages/approver/documents/approve.vue')
+            // },
             {
-                path: "documents/approve/:id",
+                path: "documents/approve",
                 name: "approver-documents-approve",
                 component: () => import('@/pages/approver/documents/approve.vue')
             },
