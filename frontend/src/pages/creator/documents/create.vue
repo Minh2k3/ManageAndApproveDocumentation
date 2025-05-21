@@ -705,12 +705,12 @@ export default defineComponent({
             return true;
         }
 
+        // Hàm xử lý gửi yêu cầu phê duyệt (Hàm gửi thông tin lên server)
         async function sendRequest() {
             const documentData = {
                 title: document_name.value,
                 document_type_id: document_type.value,
                 description: document_description.value,
-                upload_files: upload_files.value,
                 created_by: user.id,
                 is_public: document_public.value,
             }
@@ -726,9 +726,23 @@ export default defineComponent({
                 document_flow: documentFlowData,
             };
 
-            await axiosInstance.post('/api/documents/request', requestData);
-            message.success("Gửi yêu cầu phê duyệt thành công");
-            router.push({ name: 'creator-documents' });
+            console.log("Request data: " + JSON.stringify(requestData, null, 2));
+
+            try {
+                const res = await axiosInstance.post('/api/documents/request', requestData);
+                console.log(res);
+                // const documentId = res.data.id;
+                // await handleUploadFile({
+                //     file: upload_files.value[0]?.originFileObj,
+                //     documentId: documentId,
+                // });
+                message.success("Gửi yêu cầu phê duyệt thành công");
+                router.push({ name: 'creator-documents' });    
+            } catch (error) {
+                message.error("Gửi yêu cầu phê duyệt thất bại");
+                console.error("Lỗi khi gửi yêu cầu phê duyệt:", error);
+            }
+            
         }
 
         // Hàm xác nhận gửi yêu cầu phê duyệt
@@ -780,7 +794,7 @@ export default defineComponent({
             return true;
         }
 
-        // Hàm xử lý lưu nháp
+        // Hàm xử lý lưu nháp (Hàm gửi thông tin lên server)
         async function saveDraft() {
             const documentData = {
                 title: document_name.value,

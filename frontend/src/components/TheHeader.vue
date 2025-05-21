@@ -20,8 +20,9 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header row d-flex align-items-center">
-                            <button>Đánh dấu tất cả đã đọc</button>
+                        <li><h6 class="dropdown-header row d-flex align-items-center gap-2">
+                            <a-button class="col" @click="maskAsAllRead">Đánh dấu tất cả đã đọc</a-button>
+                            <a-button class="col" @click="viewAllNotifications">Xem tất cả</a-button>
                         </h6></li>
                         <li><hr class="dropdown-divider"></li>
                         <div v-if="showNotifications">
@@ -89,7 +90,7 @@
         onMounted,
         onUnmounted,
     } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRouter } from 'vue-router';
     import { useAuth } from '@/stores/use-auth';
     import { useNotificationStore } from '@/stores/use-notification';
 
@@ -101,7 +102,7 @@
         ExclamationCircleOutlined
     } from '@ant-design/icons-vue';
 
-    const route = useRoute();
+    const router = useRouter();
     const authStore = useAuth();
     const notificationStore = useNotificationStore();
     const user = authStore.user;
@@ -154,13 +155,13 @@
         window.Echo.channel('user.' + user.id) 
             .listen('.new-notification', (event) => {
                 console.log(event);
-                // const notification = {
-                //     id: event.notification.id,
-                //     content: event.notification.content,
-                // };
+                const notification = {
+                    id: event.notification.id,
+                    content: event.notification.content,
+                };
 
-                // notifications.push(notification);
-                // unreadMessagesCount++;
+                notifications.value.splice(0, 0, notification);
+                unreadMessagesCount.value++;
                 playSound();
             }
         );
@@ -191,6 +192,17 @@
         //     }
         // );
     }
+
+    const maskAsAllRead = () => {
+        // notificationStore.markAsAllRead(user.id);
+        notifications.value = [];
+        unreadMessagesCount.value = 0;
+    };
+
+    const viewAllNotifications = () => {
+        // Chuyển hướng đến trang thông báo
+        router.push({ name: role + '-notification' });
+    };
     
 
     const showDrawer = () => {

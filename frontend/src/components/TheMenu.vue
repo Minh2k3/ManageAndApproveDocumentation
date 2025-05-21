@@ -3,15 +3,23 @@
 	<a-menu v-if="role === 'admin'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="admin-dashboard">
 			<router-link  class="text-decoration-none" :to="{ name: 'admin-dashboard' }" title="Quản lý chung">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Quản lý chung
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-menu-item menu-item key="admin-notification">
+			<router-link  class="text-decoration-none" :to="{ name: 'admin-notification' }" title="Thông báo">
+				<span class="d-inline-flex align-items-center">
+					<NotificationOutlined class="me-2" />Thông báo
 				</span>
 			</router-link>
 		</a-menu-item>
 
 		<a-sub-menu key="admin-users">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<UserOutlined class="me-2" /> Quản lý người dùng
 				</span>
 			</template>
@@ -27,7 +35,7 @@
 
 		<a-sub-menu key="admin-documents">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<FileOutlined class="me-2" /> Quản lý văn bản
 				</span>
 			</template>
@@ -60,7 +68,7 @@
 
 		<a-sub-menu key="admin-roles">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<TagOutlined class="me-2" /> Quản lý vai trò
 				</span>
 			</template>
@@ -80,7 +88,7 @@
 
 		<a-sub-menu key="admin-approval-flows">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<BranchesOutlined class="me-2" /> Luồng phê duyệt
 				</span>
 			</template>
@@ -96,7 +104,7 @@
 
 		<a-menu-item key="admin-settings">
 			<router-link  class="text-decoration-none" :to="{ name: 'admin-settings' }" title="Cài đặt">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
 			</router-link>
@@ -174,7 +182,7 @@
 	<a-menu v-if="role === 'approver'" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" mode="inline">
 		<a-menu-item menu-item key="approver-dashboard">
 			<router-link  class="text-decoration-none" :to="{ name: 'approver-dashboard' }" title="Tin tức">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<HomeOutlined class="me-2" />Tin tức
 				</span>
 			</router-link>
@@ -182,7 +190,7 @@
 
 		<a-sub-menu key="approver-documents">
 			<template #title>
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<FileOutlined class="me-2" /> Văn bản của tôi nè
 				</span>
 			</template>
@@ -210,7 +218,7 @@
 
 		<a-menu-item key="approver-settings">
 			<router-link  class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
-				<span class="fs-6 d-inline-flex align-items-center">
+				<span class="d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
 			</router-link>

@@ -11,6 +11,11 @@ const admin = [
                 name: 'admin-dashboard',
                 component: () => import('@/pages/admin/dashboard/index.vue'),
             },
+            {
+                path: 'notification',
+                name: 'admin-notification',
+                component: () => import('@/pages/admin/dashboard/notification.vue'),
+            },
             // Quản lý Users
             {
                 path: 'users',
