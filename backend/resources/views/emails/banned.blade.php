@@ -44,24 +44,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Xác thực tài khoản của bạn</h2>
+            <h2>Tài khoản của bạn đã bị khóa!</h2>
         </div>
 
-        <p>Xin chào {{ $user->name }},</p>
+        <p>Gửi {{ $user->name }},</p>
 
-        <p>Cảm ơn bạn đã đăng ký tài khoản! Vui lòng nhấp vào nút bên dưới để xác thực địa chỉ email của bạn:</p>
+        <p>Tài khoản trên hệ thống của bạn hiện tại đã bị khóa bởi Quản trị viên hệ thống.</p>
 
-        <div style="text-align: center;">
-            <a href="{{ route('verification.verify', ['id' => $user->id, 'token' => $user->verification_token]) }}" class="btn">Xác thực tài khoản</a>
-        </div>
+        <p>Nguyên nhân được đưa ra là: <strong>{{ $notification }}</strong></p>
 
-        <p>Nếu bạn không thể nhấp vào nút, vui lòng sao chép và dán liên kết sau vào trình duyệt của bạn:</p>
-
-        <p>{{ route('verification.verify', ['id' => $user->id, 'token' => $user->verification_token]) }}</p>
-
-        <p>Liên kết này sẽ hết hạn sau 3 ngày.</p>
-
-        <p>Nếu bạn không tạo tài khoản, vui lòng kiểm tra lại bảo mật email hoặc bỏ qua email này.</p>
+        <p>Vui lòng liên hệ với Quản trị viên hệ thống để biết thêm thông tin chi tiết.</p>
 
         <div class="footer">
             <p>Trân trọng,<br>{{ config('app.name') }}</p>

@@ -1,5 +1,7 @@
 <template>
     Đây là trang phê duyệt văn bản của người phê duyệt.
+    
+
 </template>
 
 <script>

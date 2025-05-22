@@ -2,86 +2,136 @@
     <div>
         <h2 class="fw-bold mb-3">Chi tiết văn bản</h2>
 
-        <div v-if="document">
-            <p><strong>ID:</strong> {{ document.id }}</p>
-            <p><strong>Tên văn bản:</strong> {{ document.name }}</p>
-            <p><strong>Loại:</strong> {{ document.type }}</p>
-            <p><strong>Trạng thái:</strong> {{ document.status }}</p>
-            <p><strong>Ngày tạo:</strong> {{ document.created_at }}</p>
-            <p><strong>Ngày cập nhật:</strong> {{ document.updated_at }}</p>
+        <div v-if="document.from_me">
+            Văn bản tôi tạo
+            <div>
+                <p><strong>ID:</strong> {{ document.id }}</p>
+                <p><strong>Tên văn bản:</strong> {{ document.title }}</p>
+                <p><strong>Loại:</strong> {{ document.type }}</p>
+                <p><strong>Trạng thái:</strong> {{ document.status }}</p>
+                <p><strong>Ngày tạo:</strong> {{ document.created_at }}</p>
+                <p><strong>Ngày cập nhật:</strong> {{ document.updated_at }}</p>
+            </div>
         </div>
         <div v-else>
-            <p>Không tìm thấy văn bản.</p>
+            Văn bản cần tôi duyệt
+            <div class="container py-4">
+                <!-- Information Section -->
+                <div class="row border-1 rounded-3 p-4 mb-4 bg-light col-xl-8">
+                    <div class="col">
+                        <div class="row mb-3">
+                            <div class="col d-flex justify-content-center">
+                                <span class="fs-5 fw-bold ">Thông tin văn bản</span>
+                            </div>
+                        </div>
+
+                        <!-- Document Name -->
+                        <div class="row mt-3">
+                            <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                <label>
+                                    <span>Tên văn bản:</span>
+                                </label>
+                            </div>
+                            <div class="col-xl-10">
+                                <a-input v-model:value="document_name" placeholder="Văn bản số 1" allow-clear />
+
+                                <div class="w-100"></div>
+
+                                <!-- <xlall 
+                                    v-if="errors.username && firstFieldError === 'username'" 
+                                    class="text-danger">
+                                        {{ errors.username[0] }}
+                                </xlall> -->
+                            </div>
+                        </div>
+
+                        <!-- Document Type -->
+                        <div class="row mt-3">
+                            <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                <label>
+                                    <span>Loại văn bản:</span>
+                                </label>
+                            </div>
+                            <div class="col-xl-4">
+                                <!-- Nhóm select + button chung hàng -->
+                                <div class="d-flex">
+                                    <a-select 
+                                        v-model:value="document_type" show-search placeholder="Loại" style="width: 100%"
+                                        :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Description -->
+                        <div class="row mt-3">
+                            <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                <label>
+                                    <span>Mô tả:</span>
+                                </label>
+                            </div>
+                            <div class="col-xl-10">
+                                <a-textarea 
+                                    placeholder="Mô tả đơn giản" 
+                                    v-model:value="document.description" 
+                                    show-count
+                                    :maxlength="1000" 
+                                    disabled
+                                    />
+
+                                <div class="w-100"></div>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload -->
+                        <div class="row mt-3">
+                            <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-top ps-3 pt-3">
+                                <label>
+                                    <span>Tệp đính kèm:</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
     </div>
 
 </template>
 
 <script>
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode 
+} from 'vue';
 import { useMenu } from '@/stores/use-menu.js';
-import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useDocumentStore } from '@/stores/approver/document-store';
+import { useAuth } from '@/stores/use-auth.js';
+
 export default {
     setup() {
         useMenu().onSelectedKeys(["approver-documents-detail"]);
-        const route = useRoute();
-        const documents = ref([
-            {
-                id: 1,
-                name: 'Văn bản 1',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-01',
-                updated_at: '2023-10-01',
-            },
-            {
-                id: 2,
-                name: 'Văn bản 2',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-02',
-                updated_at: '2023-10-02',
-            }, 
-            {
-                id: 3,
-                name: 'Văn bản 3',
-                type_id: 3,
-                type: 'Văn bản nội bộ',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-03',
-                updated_at: '2023-10-03',
-            },
-            {
-                id: 4,
-                name: 'Văn bản 4',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-04',
-                updated_at: '2023-10-04',
-            },
-            {
-                id: 5,
-                name: 'Văn bản 5',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-05',
-                updated_at: '2023-10-05',
-            },
-        ]);
+        const documentStore = useDocumentStore();
+        const authStore = useAuth();
+        const user = authStore.user;
 
+        const route = useRoute();
+
+        const documents = ref([]);
         const document = computed(() => {
-            const id = parseInt(route.params.id);
-            return documents.value.find(doc => doc.id === id) || null;
-        });
+            const id = parseInt(route.params.id)
+            return documents.value.find(doc => doc.id === id) || null
+        })
+
+        onMounted(async () => {
+            documents.value = documentStore.documents
+        })
 
         return {
             document,

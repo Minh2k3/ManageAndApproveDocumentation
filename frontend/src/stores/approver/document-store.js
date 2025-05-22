@@ -114,6 +114,7 @@ export const useDocumentStore = defineStore("document", () => {
         try {
             const response = await axiosInstance.get(`api/approvers/${id}/documents`);
             if (response.data) {
+                isFetchedDocuments.value = true;
                 console.log("response.data", response.data);
                 documents.value = response.data.documents;
             }

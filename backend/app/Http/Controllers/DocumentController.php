@@ -34,6 +34,13 @@ class DocumentController extends Controller
         $documents = Document::withCount('versions')
             ->join('users', 'documents.created_by', '=', 'users.id')
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->leftJoin(\DB::raw('(
+                SELECT user_id, department_id, roll_at_department_id FROM approvers
+                UNION ALL
+                SELECT user_id, department_id, roll_at_department_id FROM creators
+            ) as user_roles'), 'users.id', '=', 'user_roles.user_id')
+            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
+            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -46,6 +53,9 @@ class DocumentController extends Controller
                 'users.id as creator_id',
                 'document_types.name as type',
                 'document_types.id as type_id',
+                'departments.id as department_id',
+                'roll_at_departments.id as roll_id',
+                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll')
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
@@ -117,6 +127,7 @@ class DocumentController extends Controller
                 'documents.status as status',
                 'documents.created_at as created_at',
                 'documents.updated_at as updated_at',
+                'documents.document_flow_id as document_flow_id',
                 'document_types.name as type',
                 \DB::raw('COALESCE(version_counts.version_count, 0) as version_count')
             )
@@ -133,6 +144,8 @@ class DocumentController extends Controller
     {
         $documents_of_me = Document::where('created_by', $id)
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
+            ->leftJoin(\DB::raw('(SELECT document_id, COUNT(*) as version_count FROM document_versions GROUP BY document_id) as version_counts'), 
+                  'documents.id', '=', 'version_counts.document_id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -141,17 +154,34 @@ class DocumentController extends Controller
                 'documents.status as status',
                 'documents.created_at as created_at',
                 'documents.updated_at as updated_at',
-                'document_types.name as type'
+                'documents.document_flow_id as document_flow_id',
+                'document_types.name as type',
+                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count')
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
+
+        $approver = Approver::where('user_id', $id)->first(); 
+        $approver_id = $approver ? $approver['id'] : null;
         
-        $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($id) {
-                $query->where('approver_id', $id);
+        $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id) {
+                $query->where('approver_id', $approver_id);
             })
-            ->join('document_versions', 'document_versions.document_id', '=', 'documents.id')
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->where('status', '!=', 'draft')
+            ->leftJoin(DB::raw('(
+                SELECT document_id, MAX(version) as max_version
+                FROM document_versions 
+                GROUP BY document_id
+            ) as latest_versions'), 'documents.id', '=', 'latest_versions.document_id')
+            ->leftJoin(\DB::raw('(
+                SELECT user_id, department_id, roll_at_department_id FROM approvers
+                UNION ALL
+                SELECT user_id, department_id, roll_at_department_id FROM creators
+            ) as user_roles'), 'documents.created_by', '=', 'user_roles.user_id')
+            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
+            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
+            ->join('users', 'documents.created_by', '=', 'users.id')
+            ->where('documents.status', '!=', 'draft')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -159,9 +189,16 @@ class DocumentController extends Controller
                 'documents.status as status',
                 'documents.created_at as created_at',
                 'documents.updated_at as updated_at',
+                'documents.document_flow_id as document_flow_id',
                 'document_types.name as type',
-                'document_versions.file_path as file_path',
-                ''
+                'documents.file_path as file_path',
+                'latest_versions.max_version as version_count',
+                \DB::raw('false as from_me'),
+                'documents.created_by as creator_id',
+                'departments.id as department_id',
+                'roll_at_departments.id as roll_id',
+                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
+                'users.name as creator_name'
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();

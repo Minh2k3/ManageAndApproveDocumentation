@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentFlow;
 use App\Models\Department;
 use App\Models\Approver;
+use App\Models\DocumentComment;
+use Carbon\Carbon;
 
 class DocumentFlowStep extends Model
 {
@@ -23,7 +25,6 @@ class DocumentFlowStep extends Model
         'multichoice',
         'status',
         'decision',
-        'comment',
         'signed_at',
         'created_at',
         'updated_at',
@@ -65,5 +66,29 @@ class DocumentFlowStep extends Model
     public function approver()
     {
         return $this->belongsTo(Approver::class);
+    }
+
+    /**
+     * Get the comments for this step.
+     */
+    public function comments()
+    {
+        return $this->hasMany(DocumentComment::class, 'document_flow_step_id');
+    }
+
+    /**
+     * Get the created_at attribute formatted.
+     */
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    /**
+     * Get the updated_at attribute formatted.
+     */
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
 }

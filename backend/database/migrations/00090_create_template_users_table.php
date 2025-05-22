@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('template_id')->constrained('document_templates')->cascadeOnDelete();
-            $table->integer('count')->default(0);
             $table->boolean('is_liked')->default(false);
             $table->timestamps();
             

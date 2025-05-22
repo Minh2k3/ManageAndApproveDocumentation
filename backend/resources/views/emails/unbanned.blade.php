@@ -44,24 +44,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Xác thực tài khoản của bạn</h2>
+            <h2>Tài khoản của bạn đã được mở khóa!</h2>
         </div>
 
-        <p>Xin chào {{ $user->name }},</p>
+        <p>Gửi {{ $user->name }},</p>
 
-        <p>Cảm ơn bạn đã đăng ký tài khoản! Vui lòng nhấp vào nút bên dưới để xác thực địa chỉ email của bạn:</p>
+        <p>Chúng tôi xin thông báo tài khoản của bạn đã được mở trở lại! Click vào nút phía dưới để đăng nhập.</p>
 
+        @php
+            $loginUrl = config('app.frontend_url', 'http://localhost:5173') . '/login';
+        @endphp
+        
         <div style="text-align: center;">
-            <a href="{{ route('verification.verify', ['id' => $user->id, 'token' => $user->verification_token]) }}" class="btn">Xác thực tài khoản</a>
+            <a href="{{ $loginUrl }}" class="btn">Đăng nhập</a>
         </div>
-
+        
         <p>Nếu bạn không thể nhấp vào nút, vui lòng sao chép và dán liên kết sau vào trình duyệt của bạn:</p>
-
-        <p>{{ route('verification.verify', ['id' => $user->id, 'token' => $user->verification_token]) }}</p>
-
-        <p>Liên kết này sẽ hết hạn sau 3 ngày.</p>
-
-        <p>Nếu bạn không tạo tài khoản, vui lòng kiểm tra lại bảo mật email hoặc bỏ qua email này.</p>
+        <p>{{ $loginUrl }}</p>
 
         <div class="footer">
             <p>Trân trọng,<br>{{ config('app.name') }}</p>

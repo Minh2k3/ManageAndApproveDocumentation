@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('file_path');
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('document_type_id')->constrained();
+            $table->integer('downloaded')->default(0);
+            $table->integer('liked')->default(0);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

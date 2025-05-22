@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserAccountEmail;
 use App\Models\User;
 
 class UserController extends Controller
@@ -73,9 +78,10 @@ class UserController extends Controller
     public function activeUser(Request $request) {
         $id = $request['id'];
         $user = User::find($id);
-        if ($user) {
-            $user->status = 'active';
+        if ($user && $user['status'] == 'pending') {
+            $user['status'] = 'active';
             $user->save();
+            Mail::to($user->email)->send(new UserAccountEmail($user, 'verify_ok', ''));
             return response()->json(['message' => 'User activated successfully.']);
         }
         return response()->json(['message' => 'User not found.'], 404);
@@ -83,10 +89,12 @@ class UserController extends Controller
 
     public function bannedUser(Request $request) {
         $id = $request['id'];
+        $notification = $request['notification'];
         $user = User::find($id);
-        if ($user) {
+        if ($user && $user->status == 'active') {
             $user->status = 'banned';
             $user->save();
+            Mail::to($user->email)->send(new UserAccountEmail($user, 'banned', $notification));
             return response()->json(['message' => 'User banned successfully.']);
         }
         return response()->json(['message' => 'User not found.'], 404);
@@ -95,9 +103,10 @@ class UserController extends Controller
     public function unbanUser(Request $request) {
         $id = $request['id'];
         $user = User::find($id);
-        if ($user) {
+        if ($user && $user->status == 'banned') {
             $user->status = 'active';
             $user->save();
+            Mail::to($user->email)->send(new UserAccountEmail($user, 'unbanned'));
             return response()->json(['message' => 'User unbanned successfully.']);
         }
         return response()->json(['message' => 'User not found.'], 404);

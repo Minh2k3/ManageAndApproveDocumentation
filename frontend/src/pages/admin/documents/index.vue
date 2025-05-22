@@ -82,27 +82,24 @@
                             <span>{{ index + 1 }}</span>
                         </template>
 
+                        <template v-if="column.key === 'creator_name'">
+                            <a-tooltip>
+                                <template #title>
+                                    <span class="">{{ record.roll }}</span>
+                                </template>
+                                <span>{{ record.creator_name }}</span>
+                            </a-tooltip>
+                        </template>
+
                         <template v-if="column.key === 'type'">
                             <span>{{ record.type }}</span>
                         </template>
 
-                        <template v-if="column.key === 'creator'">
-                            <span>{{ record.creator_name }}</span>
-                        </template>
-
                         <template v-if="column.key === 'status'">
-                            <span v-if="record.status === 'draft'">
-                                <a-tag color="default">Bản nháp</a-tag>
-                            </span>
-                            <span v-else-if="record.status === 'pending'">
-                                <a-tag color="processing">Chờ phê duyệt</a-tag>
-                            </span>
-                            <span v-else-if="record.status === 'approved'">
-                                <a-tag color="success">Đã phê duyệt</a-tag>
-                            </span>
-                            <span v-else-if="record.status === 'rejected'">
-                                <a-tag color="error">Bị từ chối</a-tag>
-                            </span>
+                            <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
+                            <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                            <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
+                            <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
                         </template>
 
                         <template v-if="column.key === 'created_at'">
@@ -244,14 +241,12 @@ export default defineComponent ({
             },
             {
                 title: 'Người đề xuất',
-                key: 'creator',
-                dataIndex: 'creator',
+                key: 'creator_name',
+                dataIndex: 'creator_name',
                 width: 200,
-                sorter: (a, b) => a.creator.localeCompare(b.creator),
+                sorter: (a, b) => a.creator_name.localeCompare(b.creator_name),
                 sortDirections: ['ascend', 'descend'],
-                customHeaderCell: () => {
-                    return { style: { textAlign: 'center' } };
-                }
+                align: 'center',
             },
             {
                 title: 'Trạng thái',
@@ -279,6 +274,21 @@ export default defineComponent ({
                     // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
                     const dateA = a.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.created_at.split(' ')[0];
                     const dateB = b.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.created_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+            {
+                title: 'Ngày cập nhật',
+                key: 'updated_at',
+                dataIndex: 'updated_at',
+                width: 150,
+                sorter: (a, b) => {
+                    // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
+                    const dateA = a.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.updated_at.split(' ')[0];
+                    const dateB = b.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.updated_at.split(' ')[0];
 
                     return dateA.localeCompare(dateB);
                 },

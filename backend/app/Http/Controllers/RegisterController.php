@@ -229,6 +229,34 @@ class RegisterController extends Controller
             $user->save();
             
             \DB::commit();
+
+            $admins = User::where('role_id', '1')->get();
+            foreach ($admins as $admin) {
+                $notification = Notification::create([
+                    'notification_category_id' => 2,
+                    'receiver_id' => $admin['id'],
+                    'title' => "Lưu nháp văn bản",
+                    'content' => $user['name'] . " vừa xác thực tài khoản thành công.",
+                    'is_read' => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                // broadcast(new SaveDraftEvent($admin, $notification, $new_document['id']));
+                $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+                $pusher = new \Pusher\Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    $options
+                );
+
+                $data['notification'] = $notification;
+                $data['user'] = $user;
+                $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
+            }
             
             return redirect(env('APP_URL') . '/verified_email?status=verified');
         } catch (\Exception $e) {

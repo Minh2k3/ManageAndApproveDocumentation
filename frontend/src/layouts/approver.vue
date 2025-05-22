@@ -11,9 +11,10 @@
                     </template>
                 </a-list>
             </div>
-
             <div class="col-12 col-sm-9 col-xxl-10 bg-right bg-gradient pb-3">
-                <router-view></router-view>
+                <div style="height: 500px">
+                    <router-view></router-view>
+                </div>
             </div>
         </div>
     </div>

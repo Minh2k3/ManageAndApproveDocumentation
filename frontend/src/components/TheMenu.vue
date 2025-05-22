@@ -324,6 +324,7 @@ export default defineComponent({
 			role,
 			isDetailPage,
 			isDetailPageApprover,
+			
 			onMenuClick,
 			handleLogout,
 		};

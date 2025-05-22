@@ -4,15 +4,15 @@
         <div class="row my-3">
             <div class="d-flex justify-content-end align-items-center">
                 <a-button type="primary" class="col-6 col-sm-4">
-                    <router-link to=documents/create>
-                        <i class="fa-solid fa-add  me-2"></i>Tạo văn bản mới
+                    <router-link to=documents/create class="text-decoration-none">
+                        <i class="fa-solid fa-add me-2"></i>Tạo văn bản mới
                     </router-link>
                 </a-button>
             </div>
         </div>
 
-                <!-- Bảng trạng thái -->
-                <div class="row mb-3">
+        <!-- Bảng trạng thái -->
+        <div class="row mb-3">
             <div v-for="item in statusList" :key="item.key"
                 class="col-5 col-md mb-2 mb-md-0 border rounded-2 mx-2 p-3 cursor-pointer" :style="{
                     backgroundColor: selectedStatus === item.key
@@ -109,6 +109,15 @@
                             <span>{{ index + 1 }}</span>
                         </template>
 
+                        <template v-if="column.key === 'creator_name'">
+                            <a-tooltip>
+                                <template #title>
+                                    <span class="">{{ record.roll }}</span>
+                                </template>
+                                <span>{{ record.creator_name }}</span>
+                            </a-tooltip>
+                        </template>                        
+
                         <template v-if="column.key === 'type'">
                             <span v-if="record.type_id == 1"
                                 class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
@@ -122,12 +131,10 @@
                         </template>
 
                         <template v-if="column.key === 'status'">
-                            <span v-if="record.status_id == 1"
-                                class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.status
-                                }}</span>
-                            <span v-if="record.status_id == 2"
-                                class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.status
-                                }}</span>
+                            <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
+                            <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                            <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
+                            <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
                         </template>
 
                     </template>
@@ -139,90 +146,42 @@
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
-import { ref, defineComponent, h } from 'vue';
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode 
+} from 'vue';
 import { useRouter } from 'vue-router';
+import { useDocumentStore } from '@/stores/approver/document-store';
+import { useAuth } from '@/stores/use-auth.js';
 export default defineComponent({
     setup() {
         useMenu().onSelectedKeys(["approver-documents"]);
+        const documentStore = useDocumentStore();
+        const authStore = useAuth();
 
-        const documents = ref([
-            {
-                id: 1,
-                name: 'Văn bản 1',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-01',
-                updated_at: '2023-10-01',
-            },
-            {
-                id: 2,
-                name: 'Văn bản 2',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-02',
-                updated_at: '2023-10-02',
-            }, 
-            {
-                id: 3,
-                name: 'Văn bản 3',
-                type_id: 3,
-                type: 'Văn bản nội bộ',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-03',
-                updated_at: '2023-10-03',
-            },
-            {
-                id: 4,
-                name: 'Văn bản 4',
-                type_id: 1,
-                type: 'Văn bản đi',
-                status_id: 2,
-                status: 'Chờ duyệt',
-                created_at: '2023-10-04',
-                updated_at: '2023-10-04',
-            },
-            {
-                id: 5,
-                name: 'Văn bản 5',
-                type_id: 2,
-                type: 'Văn bản đến',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-05',
-                updated_at: '2023-10-05',
-            },
-            {
-                id: 6,
-                name: 'Văn bản 6',
-                type_id: 3,
-                type: 'Văn bản nội bộ',
-                status_id: 1,
-                status: 'Đã duyệt',
-                created_at: '2023-10-06',
-                updated_at: '2023-10-06',
-            },
+        const documents = ref([]);
 
-        ]);
+        onMounted(async () => {
+            await documentStore.fetchDocuments(authStore.user.id);
+            documents.value = documentStore.documents;
+        });
 
-        const columns = [
-            {
-                title: 'STT',
-                key: 'index',
-                dataIndex: 'index',
-                width: 50,
-            },   
+        const columns = [   
             {
                 title: 'Tên văn bản',
-                key: 'name',
-                dataIndex: 'name',
+                key: 'title',
+                dataIndex: 'title',
                 width: 200,
-                sorter: (a, b) => a.name.localeCompare(b.name),
+                sorter: (a, b) => a.title.localeCompare(b.title),
                 sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
             },
             {
                 title: 'Loại văn bản',
@@ -231,31 +190,75 @@ export default defineComponent({
                 width: 150,
                 sorter: (a, b) => a.type.localeCompare(b.type),
                 sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            },
+            {
+                title: 'Người đề xuất',
+                key: 'creator_name',
+                dataIndex: 'creator_name',
+                width: 200,
+                sorter: (a, b) => a.creator_name.localeCompare(b.creator_name),
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
             {
                 title: 'Trạng thái',
                 key: 'status',
                 dataIndex: 'status',
-                width: 150,
-                sorter: (a, b) => a.status_id - b.status_id,
+                width: 120,
+                sorter: (a, b) => {
+                    const statusOrder = {
+                        'draft': 1,
+                        'pending': 2,
+                        'approved': 3,
+                        'rejected': 4
+                    };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                },
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
             {
                 title: 'Ngày tạo',
                 key: 'created_at',
                 dataIndex: 'created_at',
                 width: 150,
-                sorter: (a, b) => a.created_at.localeCompare(b.created_at),
+                sorter: (a, b) => {
+                    // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
+                    const dateA = a.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.created_at.split(' ')[0];
+                    const dateB = b.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.created_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
             {
                 title: 'Ngày cập nhật',
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,
-                sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
+                sorter: (a, b) => {
+                    // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
+                    const dateA = a.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.updated_at.split(' ')[0];
+                    const dateB = b.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.updated_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
                 sortDirections: ['ascend', 'descend'],
+                align: 'center',
             },
+            // {
+            //     title: "Thao tác",
+            //     key: "action",
+            //     responsive: ["xl"],
+            //     width: 150,
+            //     customHeaderCell: () => {
+            //         return { style: { textAlign: 'center' } };
+            //     }
+            // }
         ];
 
         const router = useRouter();
