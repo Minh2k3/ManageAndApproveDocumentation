@@ -142,16 +142,25 @@ class DocumentController extends Controller
     // Hàm lấy các văn bản liên quan đến một người phê duyệt theo id
     public function getDocumentsByApprover($id)
     {
-        $documents_of_me = Document::where('created_by', $id)
+        $documents_of_me = Document::where('documents.created_by', $id)
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->leftJoin(\DB::raw('(SELECT document_id, COUNT(*) as version_count FROM document_versions GROUP BY document_id) as version_counts'), 
-                  'documents.id', '=', 'version_counts.document_id')
+            ->leftJoin(\DB::raw('(
+                SELECT document_id, COUNT(*) as version_count 
+                FROM document_versions 
+                GROUP BY document_id
+            ) as version_counts'), 'documents.id', '=', 'version_counts.document_id')
             ->leftJoin('users', 'documents.created_by', '=', 'users.id')
             ->leftJoin(\DB::raw('(
                 SELECT user_id, department_id, roll_at_department_id FROM approvers
             ) as user_roles'), 'documents.created_by', '=', 'user_roles.user_id')
             ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
             ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
+            ->leftJoin(\DB::raw('(
+                SELECT document_flow_id, COUNT(*) as step_count 
+                FROM document_flow_steps 
+                GROUP BY document_flow_id
+            ) as flow_step_counts'), 'documents.document_flow_id', '=', 'flow_step_counts.document_flow_id')
+            ->leftJoin('document_flows', 'documents.document_flow_id', '=', 'document_flows.id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -163,9 +172,11 @@ class DocumentController extends Controller
                 'documents.document_flow_id as document_flow_id',
                 'document_types.name as type',
                 'users.name as creator_name',
+                'document_flows.process as process',
                 \DB::raw('true as from_me'),                
                 \DB::raw('COALESCE(version_counts.version_count, 0) as version_count'),
                 \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
+                \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
@@ -191,6 +202,12 @@ class DocumentController extends Controller
             ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
             ->join('users', 'documents.created_by', '=', 'users.id')
             ->where('documents.status', '!=', 'draft')
+                        ->leftJoin(\DB::raw('(
+                SELECT document_flow_id, COUNT(*) as step_count 
+                FROM document_flow_steps 
+                GROUP BY document_flow_id
+            ) as flow_step_counts'), 'documents.document_flow_id', '=', 'flow_step_counts.document_flow_id')
+            ->leftJoin('document_flows', 'documents.document_flow_id', '=', 'document_flows.id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -207,7 +224,9 @@ class DocumentController extends Controller
                 'departments.id as department_id',
                 'roll_at_departments.id as roll_id',
                 \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
-                'users.name as creator_name'
+                'users.name as creator_name',
+                'document_flows.process as process',
+                \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
@@ -459,7 +478,7 @@ class DocumentController extends Controller
         ]);
     }
 
-    // Hàm xử lý upload file
+    // Hàm xử lý upload file văn bản
     public function uploadFile(Request $request)
     {
         $file = $request->file('upload_file');
@@ -485,6 +504,8 @@ class DocumentController extends Controller
         ]);
     }
 
+
+    // Mấy hàm dưới đây để hiển thị file PDF nhưng không rõ có dùng nữa hay không
     public function viewPdf($filename)
     {
         // Validate filename

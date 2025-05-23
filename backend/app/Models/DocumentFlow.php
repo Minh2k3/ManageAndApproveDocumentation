@@ -21,6 +21,7 @@ class DocumentFlow extends Model
         'created_by',
         'is_active',
         'is_template',
+        'process',
     ];
 
     /**

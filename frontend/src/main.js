@@ -30,6 +30,7 @@ import {
     Avatar,
     Pagination,
     Modal,
+    Descriptions,
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -66,4 +67,5 @@ app.use(DatePicker)
 app.use(TimePicker)
 app.use(Modal)
 app.use(message)
+app.use(Descriptions)
 app.mount('#app')

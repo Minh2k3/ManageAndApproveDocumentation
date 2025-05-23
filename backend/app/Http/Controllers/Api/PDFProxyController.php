@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
-class PdfProxyController extends Controller
+class PDFProxyController extends Controller
 {
     /**
      * Proxy PDF files to handle CORS

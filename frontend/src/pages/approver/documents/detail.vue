@@ -1,7 +1,6 @@
 <template>
-    <div>
+    <div class="container-fluid">
         <h2 class="fw-bold mb-3">Chi tiết văn bản</h2>
-
         <div v-if="document.from_me">
             Văn bản tôi tạo
             <div>
@@ -16,53 +15,26 @@
         <div v-else>
             Văn bản cần tôi duyệt
             <div class="container py-4">
-                <div class="row justify-content-between gap-2">
+                <div class="row justify-content-between gap-3">
                     <div class="col-xl-7">
                         <!-- Information Section -->
                         <div class="row border-1 rounded-3 p-4 mb-4 bg-light">
                             <div class="col">
                                 <div class="row mb-3">
-                                    <div class="col d-flex justify-content-center">
-                                        <span class="fs-5 fw-bold ">{{ document.title }}</span>
+                                    <div class="d-flex justify-content-center">
+                                        <span class="fs-5 fw-bold ">Tên tài liệu:</span>
+                                        &nbsp;
+                                        <span class="fs-5 fw-bold fst-italic ">{{ document.title }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- File -->
-  <div class="document-viewer-page">
-    <div class="header">
-      <h1>Trình xem tài liệu PDF</h1>
-      
-      <div class="document-selector">
-        <label for="document-select">Chọn tài liệu:</label>
-        <select id="document-select" v-model="selectedDocument" @change="onDocumentChange">
-          <option value="">-- Chọn file PDF --</option>
-          <option v-for="file in pdfFiles" :key="file.name" :value="file.name">
-            {{ file.name }} ({{ formatFileSize(file.size) }})
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <div v-if="selectedDocument" class="viewer-container">
-      <PDFViewer 
-        :pdf-url="selectedDocument"
-        :initial-scale="1.2"
-        @page-change="onPageChange"
-      />
-    </div>
-
-    <div v-else class="no-document">
-      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/>
-        <polyline points="14 2 14 8 20 8" stroke-width="2"/>
-        <line x1="16" y1="13" x2="8" y2="13" stroke-width="2"/>
-        <line x1="16" y1="17" x2="8" y2="17" stroke-width="2"/>
-        <polyline points="10 9 9 9 8 9" stroke-width="2"/>
-      </svg>
-      <p>Vui lòng chọn một tài liệu PDF để xem</p>
-    </div>
-  </div>
+                            <div>
+                                <PDFViewer 
+                                    :pdf-url="pdfUrl" 
+                                />
+                            </div>
                         </div>
                     </div>
                     <div class="col-xl">
@@ -77,12 +49,12 @@
 
                                 <!-- Document Name -->
                                 <div class="row mt-3">
-                                    <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
                                         <label>
                                             <span>Tên văn bản:</span>
                                         </label>
                                     </div>
-                                    <div class="col-xl-10">
+                                    <div class="col-8">
                                         <a-input v-model:value="document.title" placeholder="Văn bản số 1" disabled />
                                         <div class="w-100"></div>
                                     </div>
@@ -90,12 +62,12 @@
 
                                 <!-- Document Type -->
                                 <div class="row mt-3">
-                                    <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
                                         <label>
                                             <span>Loại văn bản:</span>
                                         </label>
                                     </div>
-                                    <div class="col-xl-4">
+                                    <div class="col-8">
                                         <!-- Nhóm select + button chung hàng -->
                                         <div class="d-flex">
                                             <a-input v-model:value="document.type" placeholder="Văn bản số 1" disabled />
@@ -105,12 +77,12 @@
 
                                 <!-- Document Description -->
                                 <div class="row mt-3">
-                                    <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
                                         <label>
                                             <span>Mô tả:</span>
                                         </label>
                                     </div>
-                                    <div class="col-xl-10">
+                                    <div class="col-12 mt-1">
                                         <a-textarea 
                                             placeholder="Mô tả đơn giản" 
                                             v-model:value="document.description" 
@@ -118,21 +90,49 @@
                                             :maxlength="1000" 
                                             disabled
                                             />
-
-                                        <div class="w-100"></div>
                                     </div>
                                 </div>
 
                                 <!-- Document Upload -->
                                 <div class="row mt-3">
-                                    <div class="col-xl-3 text-start mb-2 mb-xl-0 align-self-top ps-3 pt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-top ps-3 pt-3">
                                         <label>
                                             <span>Tệp đính kèm:</span>
+                                            <a :href="`http://localhost:8000/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Mở trong tab mới
+                                            </a>
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div> 
+
+                        <!-- Process Section -->
+                        <div class="row border-1 rounded-3 p-4 mb-4 bg-light">
+                            <div class="col">
+                                <div class="row mb-3">
+                                    <div class="text-center">
+                                        <span class="fs-5 fw-bold">Luồng phê duyệt</span>
+                                        <br>
+                                        <span>Tiến độ: {{  }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        
+
+                        <!-- Approve/Reject Section -->
+                        <div class="row border-1 rounded-3 p-4 mb-4 bg-light">
+                            <div class="col">
+                                <div class="row mb-3">
+                                    <div class="col d-flex justify-content-center">
+                                        <span class="fs-5 fw-bold ">Phê duyệt văn bản</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
                     </div>
                 </div>               
             </div>
@@ -171,45 +171,142 @@ export default defineComponent({
         const route = useRoute();
         const documents = ref([]);
         let document = ref([]);
-        // const pdfUrl = ref(null);
-        // // const { pdf } = usePDF('sample.pdf');
-        // const pdf = ref(null);
-        const documentFilename = ref('3374b893-4fe4-4f5c-8f31-c75ef448bc9c.pdf');
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+        const pdfUrl = ref('')
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents
             const id = parseInt(route.params.id)
             document.value = documents.value.find(doc => doc.id === id) || null;
             console.log(document.value);
-            // pdfUrl.value = document.value ? document.value.file_path : null;
-            // pdfUrl.value = 'http://localhost:8000/documents/' + pdfUrl.value;
-            // pdf.value = pdfUrl.value;
-            // console.log('pdf: ' + pdf.value);
-            // console.log('pdfUrl: ' + pdfUrl.value);
+            pdfUrl.value = document.value.file_path;
         });
-        const pdfUrl = ref('http://localhost:8000/documents/3374b893-4fe4-4f5c-8f31-c75ef448bc9c.pdf')
-
-        const onPdfLoaded = (info) => {
-        console.log('PDF loaded:', info.filename)
-        console.log('View URL:', info.url) // http://localhost:8000/documents/filename.pdf/view
-        }
-
-        const onPdfError = (error) => {
-        console.error('PDF error:', error.message)
-        }
 
         return {
             document,
-            // pdfUrl,
-            // pdf,
-            documentFilename,
-            apiBaseUrl,
             pdfUrl,
-
-            onPdfLoaded,
-            onPdfError,
         };
     },
 });
 </script>
+
+<style scoped>
+.document-viewer-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.document-info {
+  display: flex;
+  gap: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-item svg {
+  opacity: 0.5;
+}
+
+.loading-container,
+.error-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  color: #d32f2f;
+}
+
+.error-container svg {
+  opacity: 0.3;
+  margin-bottom: 20px;
+}
+
+.error-container p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
+}
+
+.viewer-container {
+  flex: 1;
+  margin: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 15px;
+  }
+  
+  .header h1 {
+    font-size: 20px;
+  }
+  
+  .document-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .viewer-container {
+    margin: 10px;
+    min-height: calc(100vh - 140px);
+  }
+}
+</style>

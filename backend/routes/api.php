@@ -72,7 +72,7 @@ RateLimiter::for('api', function (Request $request) {
 // User api
 // User
 Route::get('/users', [UserController::class, 'getUsers'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('users.index');
 
 Route::post('/users/active', [UserController::class, 'activeUser'])
@@ -181,5 +181,5 @@ Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
     // ->middleware('auth:sanctum')
     ->name('access-logs.getAccessStats');
 
-Route::get('/pdf-proxy', [PdfProxyController::class, 'proxy']);
-Route::get('/pdf-list', [PdfProxyController::class, 'list']);
+Route::get('/pdf-proxy', [PDFProxyController::class, 'proxy']);
+Route::get('/pdf-list', [PDFProxyController::class, 'list']);
