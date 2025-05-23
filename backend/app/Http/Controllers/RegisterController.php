@@ -149,9 +149,10 @@ class RegisterController extends Controller
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 2,
+                    'from_user_id' => $user['id'],
                     'receiver_id' => $admin['id'],
-                    'title' => "Lưu nháp văn bản",
-                    'content' => $user['name'] . " vừa tạo tài khoản trên hệ thống.",
+                    'title' => "Đăng ký tài khoản",
+                    'content' => "Tạo tài khoản mới trên hệ thống.",
                     'is_read' => false,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -234,9 +235,10 @@ class RegisterController extends Controller
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 2,
+                    'from_user_id' => $user['id'],
                     'receiver_id' => $admin['id'],
-                    'title' => "Lưu nháp văn bản",
-                    'content' => $user['name'] . " vừa xác thực tài khoản thành công.",
+                    'title' => "Xác thực tài khoản",
+                    'content' => "Xác thực tài khoản thành công.",
                     'is_read' => false,
                     'created_at' => now(),
                     'updated_at' => now(),

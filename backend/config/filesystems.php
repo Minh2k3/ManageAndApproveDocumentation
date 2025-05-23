@@ -47,6 +47,30 @@ return [
             'report' => false,
         ],
 
+        // Dành cho lưu tài liệu
+        'documents' => [
+            'driver' => 'local',
+            'root' => public_path('documents'),
+            'url' => env('APP_URL') . '/documents',
+            'visibility' => 'public',
+        ],
+
+        // Dành cho lưu hình ảnh
+        'images' => [
+            'driver' => 'local',
+            'root' => public_path('images'),
+            'url' => env('APP_URL') . '/images',
+            'visibility' => 'public',
+        ],
+
+        // Dành cho lưu hình ảnh đại diện
+        'avatar' => [
+            'driver' => 'local',
+            'root' => public_path('images'),
+            'url' => env('APP_URL') . '/images/avatars',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -11,26 +11,55 @@
             </div>
 
             <div  class="col-sm-6 d-none d-sm-flex align-items-center justify-content-sm-end">
-                <div class="dropdown me-3">
+                <div class="dropdown me-4">
+                    <!-- Notification Button -->
                     <button class="btn btn-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleNotifications" style="background-color: #007cba;">
                         <i class="fa-solid fa-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1">
                             {{ unreadMessagesCount > 9 ? 9 : unreadMessagesCount }}{{ unreadMessagesCount > 9 ? '+' : '' }}
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header row d-flex align-items-center gap-2">
-                            <a-button class="col" @click="maskAsAllRead">Đánh dấu tất cả đã đọc</a-button>
-                            <a-button class="col" @click="viewAllNotifications">Xem tất cả</a-button>
-                        </h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <div v-if="showNotifications">
-                            <li v-if="notifications.length === 0" class="dropdown-item">Không có thông báo nào</li>
-                            <li v-else v-for="notification in notifications" :key="notification.id">
-                                <a href="#" @click="viewNotification(notification.id)" class="dropdown-item">{{ notification.content }}</a>
-                            </li>
-                        </div>
+                    
+                    <!-- Notification Dropdown Menu -->
+                    <ul class="dropdown-menu notification-dropdown">
+                        <li class="dropdown-header">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <a-button class="col" @click="maskAsAllRead">Đánh dấu tất cả đã đọc</a-button>
+                                <a-button class="col" @click="viewAllNotifications">Xem tất cả</a-button>
+                            </div>
+                        </li>
+                        
+                        <!-- Loading state -->
+                        <li v-if="loading" class="text-center p-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </li>
+                        
+                        <!-- Empty state -->
+                        <li v-else-if="notifications.length === 0" class="text-center text-muted p-3">
+                            Không có thông báo chưa đọc nào
+                        </li>
+                        
+                        <!-- Notification Items -->
+                        <li v-else v-for="notification in notifications" :key="notification.id">
+                            <a href="#" 
+                            @click="viewNotification(notification.id)" 
+                            class="dropdown-item notification-item d-flex text-decoration-none">
+                                <div class="notification-icon">
+                                    <i class="fa-solid fa-bell"></i>
+                                </div>
+                                <div class="notification-body">
+                                    <div class="notification-content">
+                                        {{ notification.content }}
+                                    </div>
+                                    <small class="notification-time">
+                                        {{ notification.created_at }}
+                                    </small>
+                                </div>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 
@@ -203,6 +232,17 @@
         // Chuyển hướng đến trang thông báo
         router.push({ name: role + '-notification' });
     };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString)
+        return date.toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
     
 
     const showDrawer = () => {
@@ -246,3 +286,140 @@
         showConfirmLogout();
     }
 </script>
+
+<style scoped>
+/* Dropdown Container */
+.notification-dropdown {
+    max-width: 350px;
+    min-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .notification-dropdown {
+        max-width: 280px;
+        min-width: 250px;
+    }
+}
+
+/* Header */
+.dropdown-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    padding: 12px 16px;
+    margin: 0;
+}
+
+/* Notification Item */
+.notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: normal;
+    word-wrap: break-word;
+    transition: background-color 0.2s ease;
+    color: inherit;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+    color: inherit;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+/* Icon */
+.notification-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 12px;
+    color: #1976d2;
+}
+
+/* Content Body */
+.notification-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-content {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+    margin-bottom: 4px;
+    word-wrap: break-word;
+    word-break: break-word;
+    display: block;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #6c757d;
+    display: block;
+    margin-top: 4px;
+}
+
+/* Scrollbar styling */
+.notification-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Loading và Empty states */
+.text-center {
+    text-align: center;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Badge cho notification count */
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+}
+
+/* Notification button */
+.btn-link {
+    position: relative;
+    color: #333;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    color: #0d6efd;
+}
+</style>

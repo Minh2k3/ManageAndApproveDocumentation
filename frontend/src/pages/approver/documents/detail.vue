@@ -33,15 +33,8 @@
                                 </label>
                             </div>
                             <div class="col-xl-10">
-                                <a-input v-model:value="document_name" placeholder="Văn bản số 1" allow-clear />
-
+                                <a-input v-model:value="document.title" placeholder="Văn bản số 1" disabled />
                                 <div class="w-100"></div>
-
-                                <!-- <xlall 
-                                    v-if="errors.username && firstFieldError === 'username'" 
-                                    class="text-danger">
-                                        {{ errors.username[0] }}
-                                </xlall> -->
                             </div>
                         </div>
 
@@ -55,9 +48,7 @@
                             <div class="col-xl-4">
                                 <!-- Nhóm select + button chung hàng -->
                                 <div class="d-flex">
-                                    <a-select 
-                                        v-model:value="document_type" show-search placeholder="Loại" style="width: 100%"
-                                        :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
+                                    <a-input v-model:value="document.type" placeholder="Văn bản số 1" disabled />
                                 </div>
                             </div>
                         </div>
@@ -122,16 +113,18 @@ export default {
         const user = authStore.user;
 
         const route = useRoute();
-
         const documents = ref([]);
-        const document = computed(() => {
-            const id = parseInt(route.params.id)
-            return documents.value.find(doc => doc.id === id) || null
+        let document = ref([]);
+        onMounted(async () => {
+            await documentStore.fetchDocuments(user.id);
+            documents.value = documentStore.documents
+            document = computed(() => {
+                const id = parseInt(route.params.id)
+                return documents.value.find(doc => doc.id === id) || null
+            })
+            console.log(documents.value);
         })
 
-        onMounted(async () => {
-            documents.value = documentStore.documents
-        })
 
         return {
             document,

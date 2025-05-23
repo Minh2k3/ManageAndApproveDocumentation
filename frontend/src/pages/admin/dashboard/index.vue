@@ -111,86 +111,25 @@
                 <div class="row mt-1">
                     <span class="text-secondary">Các hoạt động gần đây trên hệ thống</span>
                 </div>
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
+               <div v-for="(notification, index) in new_notifications" 
+                    :key="index"
+                    class="row border border-1 border-dark mt-3 p-2 mx-1"
+                >
+                    <div class="col-lg-2 col-2 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
+                            <img v-if="notification.sender?.avatar != null" :src="notification.sender?.avatar" class="w-100 h-100" style="object-fit: cover;" />
+                            <img v-else :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
                     <div class="col-lg col align-items-center d-flex d-lg-flex">
                         <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">Đã tạo một văn bản mới</span>
+                            <span class="fw-bold">{{ notification.sender?.name }}</span>
+                            <span class="text-secondary">{{ notification.title }}</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-lg col align-items-center d-flex d-lg-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">Đã tạo một văn bản mới</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-lg col align-items-center d-flex d-lg-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">Đã tạo một văn bản mới</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-lg col align-items-center d-flex d-lg-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">Đã tạo một văn bản mới</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row border border-1 border-dark mt-3 p-2 mx-1">
-                    <div class="col-lg-1 col-1 d-flex d-lg-flex justify-content-center align-items-center px-0">
-                        <div class="rounded-circle overflow-hidden border border-1 border-dark"
-                            style="width: 3.5rem; height: 3.5rem;">
-                            <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
-                        </div>
-                    </div>
-
-                    <div class="col-lg col align-items-center d-flex d-lg-flex">
-                        <div class="row">
-                            <span class="fw-bold">Nguyễn Văn A</span>
-                            <span class="text-secondary">Đã tạo một văn bản mới</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Người dùng mới -->
@@ -454,6 +393,7 @@ export default defineComponent({
             await notificationStore.fetchNotifications(authStore.user.id);
             // console.log(notificationStore.notifications);
             notifications.value = notificationStore.notifications;
+            console.log(notifications.value);
         });
 
         const number_of_users = computed(() => users.value.length);
@@ -490,6 +430,20 @@ export default defineComponent({
         return result;
         });
 
+        const new_notifications = computed(() => {
+            return [...notifications.value]
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 5)
+                .map(notification => ({
+                    title: notification.title,
+                    from: notification.from_user_id,
+                    receiver: notification.receiver_id,
+                    content: notification.content,
+                    created_at: notification.created_at
+                })
+            )
+        });
+
         const new_registered_users = computed(() => {
             return [...users.value]
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -503,6 +457,7 @@ export default defineComponent({
             );
         });
         console.log(new_registered_users.value);
+
         const getStatusStyle = (status) => {
             switch (status) {
                 case 'active':
@@ -550,6 +505,7 @@ export default defineComponent({
             number_of_documents,
             new_registered_users,
             number_of_documents_by_status,
+            new_notifications,
 
             getStatusStyle,
             getStatusText,

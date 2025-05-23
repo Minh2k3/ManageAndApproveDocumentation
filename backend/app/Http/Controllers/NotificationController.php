@@ -66,6 +66,8 @@ class NotificationController extends Controller
     public function getAllNotificationsByUserId($user_id)
     {
         $notifications = Notification::where('receiver_id', $user_id)
+            ->with(['sender:id,name,avatar'])
+            ->with(['category:id,name'])
             ->orderBy('created_at', 'desc')
             ->get();
         return response()->json([

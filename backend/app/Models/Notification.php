@@ -24,6 +24,7 @@ class Notification extends Model
      */
     protected $fillable = [
         'notification_category_id',
+        'from_user_id',
         'receiver_id',
         'title',
         'content',
@@ -47,6 +48,14 @@ class Notification extends Model
     public function category()
     {
         return $this->belongsTo(NotificationCategory::class, 'notification_category_id');
+    }
+
+    /**
+     * Get the user that sent the notification.
+     */
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'from_user_id');
     }
 
     /**

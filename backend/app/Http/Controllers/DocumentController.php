@@ -146,6 +146,12 @@ class DocumentController extends Controller
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
             ->leftJoin(\DB::raw('(SELECT document_id, COUNT(*) as version_count FROM document_versions GROUP BY document_id) as version_counts'), 
                   'documents.id', '=', 'version_counts.document_id')
+            ->leftJoin('users', 'documents.created_by', '=', 'users.id')
+            ->leftJoin(\DB::raw('(
+                SELECT user_id, department_id, roll_at_department_id FROM approvers
+            ) as user_roles'), 'documents.created_by', '=', 'user_roles.user_id')
+            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
+            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
             ->select(
                 'documents.id as id',
                 'documents.title as title',
@@ -156,7 +162,10 @@ class DocumentController extends Controller
                 'documents.updated_at as updated_at',
                 'documents.document_flow_id as document_flow_id',
                 'document_types.name as type',
-                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count')
+                'users.name as creator_name',
+                \DB::raw('true as from_me'),                
+                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count'),
+                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
@@ -273,9 +282,10 @@ class DocumentController extends Controller
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 1,
+                    'from_user_id' => $user['id'],
                     'receiver_id' => $admin['id'],
                     'title' => "Lưu nháp văn bản",
-                    'content' => $user['name'] . " đã lưu bản nháp tài liệu '" . $new_document['title'] . "'",
+                    'content' => "Lưu bản nháp văn bản '" . $new_document['title'] . "'",
                     'is_read' => false,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -357,7 +367,7 @@ class DocumentController extends Controller
                 'document_type_id' => $document['document_type_id'],
                 'created_by' => $document['created_by'],
                 'document_flow_id' => $new_document_flow['id'],
-                'status' => 'pending',
+                'status' => 'in_review',
                 'is_public' => $document['is_public'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -376,9 +386,10 @@ class DocumentController extends Controller
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 2,
+                    'from_user_id' => $user['id'],
                     'receiver_id' => $admin['id'],
                     'title' => "Phê duyệt văn bản",
-                    'content' => $user['name'] . " đã tạo một luồng phê duyệt cho '" . $new_document['title'] . "'",
+                    'content' => "Tạo một luồng phê duyệt cho văn bản '" . $new_document['title'] . "'",
                     'is_read' => false,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -402,14 +413,15 @@ class DocumentController extends Controller
 
             foreach ($document_flow_step as $step) {
                 $approver = Approver::find($step['approver_id']);
-                $content = $user['name'] . " đã thêm bạn vào luồng phê duyệt cho '" . $new_document['title'];
+                $content = "Thêm bạn vào luồng phê duyệt cho văn bản '" . $new_document['title'] . "'";
                 if ($step['step'] == 1) {
-                    $content = "Bạn là người phê duyệt đầu tiên cho '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                    $content = "Bạn là người phê duyệt đầu tiên cho văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
                 }
                 $notification = Notification::create([
                     'notification_category_id' => 3,
+                    'from_user_id' => $user['id'],
                     'receiver_id' => $approver['user_id'],
-                    'title' => "Thêm bạn vào luồng phê duyệt văn bản",
+                    'title' => "Thêm vào luồng phê duyệt văn bản",
                     'content' => $content,
                     'is_read' => false,
                     'created_at' => now(),
@@ -434,6 +446,7 @@ class DocumentController extends Controller
 
             \DB::commit();
         } catch (\Exception $e) {
+            \Log::error('Error in storeRequestDocument: ' . $e->getMessage());
             \DB::rollBack();
             return response()->json([
                 'message' => 'Lỗi khi gửi phê duyệt: ' . $e->getMessage(),
@@ -451,7 +464,7 @@ class DocumentController extends Controller
     {
         $file = $request->file('upload_file');
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('', $filename, 'public');
+        $path = $file->storeAs('', $filename, 'documents');
 
         // Update file_path cho Document
         $document = Document::find($request['document_id']);

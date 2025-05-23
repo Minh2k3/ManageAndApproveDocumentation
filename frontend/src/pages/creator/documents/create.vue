@@ -609,6 +609,7 @@ export default defineComponent({
                 step: step + 1,
                 department_id: null,
                 approver_id: null,
+                multichoice: false,
             };
 
             current_flow_step.value.splice(index + 1, 0, newStep);
@@ -634,12 +635,22 @@ export default defineComponent({
 
         // Thêm một bước cùng cấp với bước hiện tại
         function addSameStep(step, index) {
+            current_flow_step.value[index].multichoice = true;
             const newStep = {
                 step: step,
                 department_id: null,
                 approver_id: null,
+                multichoice: true,
             };
             current_flow_step.value.splice(index + 1, 0, newStep);
+
+            for (let i = index; i < current_flow_step.value.length; ++i) {
+                if (current_flow_step.value[i].step == step) {
+                    multichoice = true;
+                } else {
+                    current_flow_step.value[i].step += 1;
+                }
+            }
         }
 
         // Xóa bước hiện tại
@@ -652,6 +663,21 @@ export default defineComponent({
                     break;
                 } else {
                     current_flow_step.value[i].step -= 1;
+                }
+            }
+            const count_step = new Map();
+            for (cur_step of current_flow_step) {
+                if (count_step.has(cur_step.step)) {
+                    count_step.set(cur_step.step, count_step.get(cur_step.step) + 1);
+                } else {
+                    count_step.set(cur_step.step, 1);
+                }
+            }
+            for (let i = 0; i < current_flow_step.value.length; ++i) {
+                if (count_step.get(current_flow_step.value[i].step) > 1) {
+                    current_flow_step.value[i].multichoice = true;
+                } else {
+                    current_flow_step.value[i].multichoice = false;
                 }
             }
         }
