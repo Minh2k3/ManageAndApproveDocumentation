@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-CIRKYwAT.js";import{_ as t,d as n}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const o=n({setup(){e().onSelectedKeys(["admin-documents-detail"])}});function s(r,a,c,i,d,p){return" Đây là trang chi tiết văn bản "}const f=t(o,[["render",s]]);export{f as default};

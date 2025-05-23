@@ -9,6 +9,24 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: [
+      'pdfjs-dist/build/pdf',
+      'pdfjs-dist/build/pdf.worker.min.js'
+    ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pdfjs: [
+            'pdfjs-dist/build/pdf',
+            'pdfjs-dist/build/pdf.worker.min.js',
+          ]
+        }
+      }
+    }
+  },
   server: {
     proxy: {
       '/api': {

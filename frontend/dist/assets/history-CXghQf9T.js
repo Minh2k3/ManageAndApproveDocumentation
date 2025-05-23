@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-CIRKYwAT.js";import{_ as e}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const r={setup(){t().onSelectedKeys(["creator-documents-history"])}};function o(s,c,n,a,p,u){return" Đây là trang lịch sử "}const m=e(r,[["render",o]]);export{m as default};

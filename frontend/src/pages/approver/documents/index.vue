@@ -132,7 +132,7 @@
 
                         <template v-if="column.key === 'status'">
                             <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
-                            <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                            <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
                             <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
                             <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
                         </template>
@@ -211,7 +211,7 @@ export default defineComponent({
                 sorter: (a, b) => {
                     const statusOrder = {
                         'draft': 1,
-                        'pending': 2,
+                        'in_review': 2,
                         'approved': 3,
                         'rejected': 4
                     };

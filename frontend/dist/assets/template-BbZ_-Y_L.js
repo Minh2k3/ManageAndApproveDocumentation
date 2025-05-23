@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-CIRKYwAT.js";import{_ as e}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const o={setup(){t().onSelectedKeys(["admin-approval-flows-template"])}};function r(p,s,a,n,u,c){return" Đây là trang mẫu luồng phê duyệt "}const l=e(o,[["render",r]]);export{l as default};

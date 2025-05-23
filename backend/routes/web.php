@@ -61,4 +61,14 @@ Route::get('/direct-pusher', function () {
 
     return "Đã gửi sự kiện trực tiếp qua Pusher API. Kiểm tra Debug Console.";
 });    
+
+// Route để serve documents với CORS headers
+// Route đơn giản để serve PDF
+// routes/web.php
+Route::prefix('documents')->group(function () {
+    Route::get('{filename}/view', [DocumentController::class, 'viewPdf'])->name('documents.view');
+    Route::get('{filename}/download', [DocumentController::class, 'downloadPdf'])->name('documents.download');
+    Route::options('{filename}/view', [DocumentController::class, 'handlePreflight']);
+    Route::options('{filename}/download', [DocumentController::class, 'handlePreflight']);
+});
 // require __DIR__.'/auth.php';

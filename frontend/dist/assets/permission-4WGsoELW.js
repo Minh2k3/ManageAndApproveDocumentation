@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-CIRKYwAT.js";import{_ as s}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const r={setup(){e().onSelectedKeys(["admin-roles-permission"])}};function n(o,t,p,i,a,c){return" Đây là trang quyền hạn "}const f=s(r,[["render",n]]);export{f as default};

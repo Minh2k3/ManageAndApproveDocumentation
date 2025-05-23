@@ -1,0 +1,1 @@
+import{u as o}from"./use-menu-CIRKYwAT.js";import{_ as e,d as t,z as n}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const s=t({setup(){o().onSelectedKeys(["admin-notification"]),n()}});function i(r,a,c,p,f,u){return" Thông báo cho Admin "}const $=e(s,[["render",i]]);export{$ as default};

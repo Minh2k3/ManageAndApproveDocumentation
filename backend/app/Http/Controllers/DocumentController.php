@@ -484,4 +484,91 @@ class DocumentController extends Controller
             'file_url' => url(`/documents/` . $filename),
         ]);
     }
+
+    public function viewPdf($filename)
+    {
+        // Validate filename
+        if (!preg_match('/^[a-zA-Z0-9\-_.]+\.pdf$/', $filename)) {
+            return response()->json(['error' => 'Invalid filename'], 400);
+        }
+        
+        $path = storage_path('app/public/documents/' . $filename);
+        
+        if (!file_exists($path)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+        
+        // Validate PDF file
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $path);
+        finfo_close($finfo);
+        
+        if ($mimeType !== 'application/pdf') {
+            return response()->json(['error' => 'Invalid file type'], 400);
+        }
+        
+        // Return file with CORS headers
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($filename) . '"',
+            'Cache-Control' => 'public, max-age=3600',
+            // CORS Headers
+            'Access-Control-Allow-Origin' => $this->getAllowedOrigin(),
+            'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization',
+            'Access-Control-Expose-Headers' => 'Content-Length, Content-Type, Content-Disposition',
+            'Access-Control-Max-Age' => '86400', // 24 hours
+        ]);
+    }
+    
+    public function downloadPdf($filename)
+    {
+        $path = storage_path('app/public/documents/' . $filename);
+        
+        if (!file_exists($path)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+        
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/pdf',
+            // CORS Headers for download
+            'Access-Control-Allow-Origin' => $this->getAllowedOrigin(),
+            'Access-Control-Expose-Headers' => 'Content-Disposition',
+        ]);
+    }
+    
+    public function handlePreflight($filename)
+    {
+        return response('', 200, [
+            'Access-Control-Allow-Origin' => $this->getAllowedOrigin(),
+            'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization',
+            'Access-Control-Max-Age' => '86400',
+        ]);
+    }
+    
+    private function getAllowedOrigin()
+    {
+        $allowedOrigins = [
+            'http://localhost:8000',
+            'http://localhost:5173',
+            'http://127.0.0.1:8000',
+            'http://127.0.0.1:5173',
+            env('FRONTEND_URL', 'http://localhost:5173')
+        ];
+        
+        $origin = request()->header('Origin');
+        
+        if (in_array($origin, $allowedOrigins)) {
+            return $origin;
+        }
+        
+        // For development, allow all
+        if (app()->environment('local')) {
+            return '*';
+        }
+        
+        // Production: return specific domain
+        return env('FRONTEND_URL', 'http://localhost:5173');
+    }
 }

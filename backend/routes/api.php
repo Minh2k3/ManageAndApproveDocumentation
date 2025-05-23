@@ -28,6 +28,7 @@ use App\Http\Controllers\DocumentVersionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserAccessLogController;
+use App\Http\Controllers\Api\PDFProxyController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -116,6 +117,11 @@ Route::post('/documents/upload-file', [DocumentController::class, 'uploadFile'])
     // ->middleware('auth:sanctum')
     ->name('documents.uploadFile');
 
+Route::prefix('documents')->group(function () {
+    Route::get('{filename}/view', [DocumentController::class, 'viewPdf'])->name('documents.view');
+    Route::get('{filename}/download', [DocumentController::class, 'downloadPdf'])->name('documents.download');
+});
+
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');
@@ -174,3 +180,6 @@ Route::post('/notifications/{user_id}', [NotificationController::class, 'markAll
 Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
     // ->middleware('auth:sanctum')
     ->name('access-logs.getAccessStats');
+
+Route::get('/pdf-proxy', [PdfProxyController::class, 'proxy']);
+Route::get('/pdf-list', [PdfProxyController::class, 'list']);

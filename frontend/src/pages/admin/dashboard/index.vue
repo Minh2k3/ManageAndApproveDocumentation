@@ -104,7 +104,7 @@
 
         <div class="row mt-2 justify-content-around">
             <!-- Hoạt động hệ thống -->
-            <div class="bg-light col-xxl col-9 col-lg border border-2 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
+            <div class="bg-light col-xxl col-9 col-lg border border-1 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
                 <div class="row">
                     <span class="fs-4 fw-bold">Hoạt Động Hệ Thống</span>
                 </div>
@@ -118,7 +118,7 @@
                     <div class="col-lg-2 col-2 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                            <img v-if="notification.sender?.avatar != null" :src="notification.sender?.avatar" class="w-100 h-100" style="object-fit: cover;" />
+                            <img v-if="notification.sender?.avatar != null" :src="getAvatarUrl(notification.sender?.avatar)" class="w-100 h-100" style="object-fit: cover;" />
                             <img v-else :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
@@ -133,7 +133,7 @@
             </div>
 
             <!-- Người dùng mới -->
-            <div class="bg-light col-xxl col-9 col-lg border border-2 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
+            <div class="bg-light col-xxl col-9 col-lg border border-1 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
                 <div class="row">
                     <span class="fs-4 fw-bold">Người Dùng Mới</span>
                 </div>
@@ -150,7 +150,8 @@
                     <div class="col-lg-2 col-2 d-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                        <img :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
+                            <img v-if="user?.avatar != null" :src="getAvatarUrl(user?.avatar)" class="w-100 h-100" style="object-fit: cover;" />
+                            <img v-else :src="avatarUrl" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
@@ -439,7 +440,11 @@ export default defineComponent({
                     from: notification.from_user_id,
                     receiver: notification.receiver_id,
                     content: notification.content,
-                    created_at: notification.created_at
+                    created_at: notification.created_at,
+                    sender: {
+                        name: notification.sender?.name,
+                        avatar: notification.sender?.avatar,
+                    },
                 })
             )
         });
@@ -457,6 +462,13 @@ export default defineComponent({
             );
         });
         console.log(new_registered_users.value);
+
+        const API_BASE_URL = 'http://localhost:8000'
+
+        const getAvatarUrl = (avatar) => {
+            if (!avatar) return null
+            return `${API_BASE_URL}/images/avatars/${avatar}`
+        }
 
         const getStatusStyle = (status) => {
             switch (status) {
@@ -509,6 +521,7 @@ export default defineComponent({
 
             getStatusStyle,
             getStatusText,
+            getAvatarUrl,
         }
     },
 

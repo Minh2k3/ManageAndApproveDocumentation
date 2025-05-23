@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-CIRKYwAT.js";import{u as t}from"./document-store-D3-2n2Ps.js";import{_ as r,d as o,q as n}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const s=o({setup(){return e().onSelectedKeys(["approver-dashboard"]),t(),n(),{}}});function a(u,p,c,d,i,m){return" Đây là trang chung của người phê duyệt. "}const $=r(s,[["render",a]]);export{$ as default};

@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-CIRKYwAT.js";import{_ as e}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const s={setup(){t().onSelectedKeys(["admin-documents-history"])}};function o(r,n,c,a,p,i){return" Đây là trang lịch sử văn bản "}const d=e(s,[["render",o]]);export{d as default};
