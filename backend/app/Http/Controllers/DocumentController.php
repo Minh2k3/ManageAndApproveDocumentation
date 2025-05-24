@@ -187,6 +187,13 @@ class DocumentController extends Controller
         $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id) {
                 $query->where('approver_id', $approver_id);
             })
+            ->leftJoin(DB::raw("(
+                SELECT id as step_id, approver_id, document_flow_id
+                FROM document_flow_steps
+            ) as my_step"), function ($join) use ($approver_id) {
+                $join->on('documents.document_flow_id', '=', 'my_step.document_flow_id')
+                    ->where('my_step.approver_id', '=', $approver_id);
+            })
             ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
             ->leftJoin(DB::raw('(
                 SELECT document_id, MAX(version) as max_version
@@ -202,7 +209,7 @@ class DocumentController extends Controller
             ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
             ->join('users', 'documents.created_by', '=', 'users.id')
             ->where('documents.status', '!=', 'draft')
-                        ->leftJoin(\DB::raw('(
+            ->leftJoin(\DB::raw('(
                 SELECT document_flow_id, COUNT(*) as step_count 
                 FROM document_flow_steps 
                 GROUP BY document_flow_id
@@ -228,6 +235,8 @@ class DocumentController extends Controller
                 'users.id as creator_id',
                 'document_flows.process as process',
                 \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
+                \DB::raw('COALESCE(my_step.step_id, 0) as document_flow_step_id'),
+                \DB::raw('COALESCE(my_step.approver_id, 0) as approver_id')
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();

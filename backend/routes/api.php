@@ -124,7 +124,7 @@ Route::prefix('documents')->group(function () {
 });
 
 Route::get('/documents/{id}/comments', [DocumentCommentController::class, 'getCommentsByDocument']);
-Route::post('/documents/{document_flow_step_id}/comments', [DocumentCommentController::class, 'storeComment'])
+Route::post('/documents/{document_id}/comments', [DocumentCommentController::class, 'storeComment'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeComment');
 

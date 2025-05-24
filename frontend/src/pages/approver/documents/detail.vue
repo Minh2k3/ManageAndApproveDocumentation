@@ -390,18 +390,23 @@ export default defineComponent({
                 message.error('Vui lòng nhập bình luận');
                 return;
             }
+
+            // console.log(document.value.creator_id);
+            // console.log(comment.value);
+            console.log(parseInt(document.value['document_flow_step_id']));
+            // return;
             try {
                 const id = parseInt(route.params.id);
                 await axios.post(`/api/documents/${id}/comments`, {
-                    creator_id: document.creator_id,
-                    document_id: document.id,
+                    creator_id: document.value.creator_id,
                     comment: comment.value,
+                    document_flow_step_id: parseInt(document.value['document_flow_step_id']),
                 });
                 message.success('Nhận xét gửi thành công');
 
                 await documentStore.fetchDocumentComments(id, true);
                 document_comments.value = documentStore.document_comments;
-
+                comment.value = '';
             } catch (error) {
                 message.error('Có lỗi xảy ra khi gửi nhận xét');
                 console.error('Error sending comment:', error);

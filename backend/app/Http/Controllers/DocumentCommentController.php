@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Document;
 use App\Models\User;
 use App\Models\DocumentFlowStep;
+use App\Models\DocumentFlow;
+use App\Models\Notification;
 
 class DocumentCommentController extends Controller
 {
@@ -102,20 +104,21 @@ class DocumentCommentController extends Controller
     /**
      * Store a newly created comment in storage.
      */
-    public function storeComment(Request $request, $document_flow_step_id)
+    public function storeComment(Request $request, $document_id)
     {
-        $step = DocumentFlowStep::find($document_flow_step_id);
         $creator_of_document_id = $request['creator_id'];
         $creator = User::find($creator_of_document_id);
         $user = auth()->user();
-        $document = Document::find($request['document_id']);
+        $document = Document::find($document_id);
+        $document_flow_step_id = $request['document_flow_step_id'];
 
         \DB::beginTransaction();
 
         try {
-            $step->comments()->create([
+            DocumentComment::create([
                 'document_flow_step_id' => $document_flow_step_id,
-                'content' => $request->comment,
+                'comment' => $request['comment'],
+                'created_at' => now(),
             ]);
 
             $admins = User::where('role_id', '1')->get();
@@ -175,12 +178,13 @@ class DocumentCommentController extends Controller
             \DB::commit();
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Failed to save comment: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to save comment'], 500);
         }
 
         return response()->json([
             'message' => 'Comment saved successfully',
-            'comment' => $request->comment,
+            'comment' => $request['comment'],
         ]);
     }
 
