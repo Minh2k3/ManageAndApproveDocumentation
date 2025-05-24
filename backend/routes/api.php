@@ -23,6 +23,7 @@ use App\Http\Controllers\DocumentFlowStepController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\DocumentVersionController;
+use App\Http\Controllers\DocumentCommentController;
 
 // Other Controllers
 use App\Http\Controllers\DepartmentController;
@@ -122,6 +123,11 @@ Route::prefix('documents')->group(function () {
     Route::get('{filename}/download', [DocumentController::class, 'downloadPdf'])->name('documents.download');
 });
 
+Route::get('/documents/{id}/comments', [DocumentCommentController::class, 'getCommentsByDocument']);
+Route::post('/documents/{document_flow_step_id}/comments', [DocumentCommentController::class, 'storeComment'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.storeComment');
+
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');
@@ -138,6 +144,10 @@ Route::get('/document-flow-steps', [DocumentFlowStepController::class, 'index'])
 
 Route::get('document-flow-steps/{documentFlow}', [DocumentFlowStepController::class, 'getStepsByDocumentFlowId'])
     ->name('document-flow-steps.getStepsByDocumentFlowId');
+
+Route::post('/document-steps/{document_step_id}/approve', [DocumentFlowStepController::class, 'approveStep'])
+    // ->middleware('auth:sanctum')
+    ->name('document-flow-steps.approveStep');
 
 // Document Type
 Route::get('/document-types', [DocumentTypeController::class, 'index'])

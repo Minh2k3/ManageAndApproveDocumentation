@@ -225,6 +225,7 @@ class DocumentController extends Controller
                 'roll_at_departments.id as roll_id',
                 \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
                 'users.name as creator_name',
+                'users.id as creator_id',
                 'document_flows.process as process',
                 \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
             )

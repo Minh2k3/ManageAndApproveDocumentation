@@ -86,4 +86,18 @@ class DocumentFlowStepController extends Controller
             'document_flow_steps' => $steps,
         ])->setStatusCode(200, 'Document flow steps retrieved successfully.');
     }
+
+    /**
+     * Approve a document flow step
+     */
+    public function approveStep($id) 
+    {
+        $documentFlowStep = DocumentFlowStep::findOrFail($id);
+        $documentFlowStep->update(['status' => 'approved']);
+
+        return response()->json([
+            'message' => 'Document flow step approved successfully.',
+            'document_flow_step' => $documentFlowStep,
+        ])->setStatusCode(200, 'Document flow step approved successfully.');
+    }
 }
