@@ -65,82 +65,169 @@
             </div>
         </div>
 
-        <!-- Bảng văn bản -->
-        <div class="row">
-            <div class="col-12">
-                <a-table 
-                    :dataSource="documents" 
-                    :columns="columns" 
-                    :scroll="{ x: 576 }" 
-                    bordered 
-                    :customRow="customRow"
-                    :showSorterTooltip="false"
-                >
-                    <template #headerCell="{ column }">
-                        <template v-if="column.key === 'name'">
-                            <a-tooltip title="Sắp xếp theo tên văn bản">
-                                <span>{{ column.title }}</span>
-                            </a-tooltip>
-                        </template>
-                        <template v-else-if="column.key === 'type'">
-                            <a-tooltip title="Sắp xếp theo loại văn bản">
-                                <span>{{ column.title }}</span>
-                            </a-tooltip>
-                        </template>
-                        <template v-else-if="column.key === 'status'">
-                            <a-tooltip title="Sắp xếp theo trạng thái">
-                                <span>{{ column.title }}</span>
-                            </a-tooltip>
-                        </template>
-                        <template v-else-if="column.key === 'created_at'">
-                            <a-tooltip title="Sắp xếp theo ngày tạo">
-                                <span>{{ column.title }}</span>
-                            </a-tooltip>
-                        </template>
-                        <template v-else-if="column.key === 'updated_at'">
-                            <a-tooltip title="Sắp xếp theo ngày cập nhật">
-                                <span>{{ column.title }}</span>
-                            </a-tooltip>
-                        </template>
-                    </template>
-
-                    <template #bodyCell="{ column, index, record }">
-                        <template v-if="column.key === 'index'">
-                            <span>{{ index + 1 }}</span>
-                        </template>
-
-                        <template v-if="column.key === 'creator_name'">
-                            <a-tooltip>
-                                <template #title>
-                                    <span class="">{{ record.roll }}</span>
+        <a-tabs 
+            v-model:activeKey="activeKey" 
+            type="card"
+            class="row"
+            >
+            <a-tab-pane key="1" tab="Văn bản gửi đi">
+                <!-- Bảng văn bản gửi đến tôi -->
+                <div class="row">
+                    <div class="col-12">
+                        <a-table 
+                            :dataSource="documents_of_me" 
+                            :columns="columns_of_me" 
+                            :scroll="{ x: 576 }" 
+                            bordered 
+                            :customRow="customRow"
+                            :showSorterTooltip="false"
+                        >
+                            <template #headerCell="{ column }">
+                                <template v-if="column.key === 'name'">
+                                    <a-tooltip title="Sắp xếp theo tên văn bản">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
                                 </template>
-                                <span>{{ record.creator_name }}</span>
-                            </a-tooltip>
-                        </template>                        
+                                <template v-else-if="column.key === 'type'">
+                                    <a-tooltip title="Sắp xếp theo loại văn bản">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'status'">
+                                    <a-tooltip title="Sắp xếp theo trạng thái">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'created_at'">
+                                    <a-tooltip title="Sắp xếp theo ngày tạo">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'updated_at'">
+                                    <a-tooltip title="Sắp xếp theo ngày cập nhật">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                            </template>
 
-                        <template v-if="column.key === 'type'">
-                            <span v-if="record.type_id == 1"
-                                class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                }}</span>
-                            <span v-if="record.type_id == 2"
-                                class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                }}</span>
-                            <span v-if="record.type_id == 3"
-                                class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                }}</span>
-                        </template>
+                            <template #bodyCell="{ column, index, record }">
+                                <template v-if="column.key === 'index'">
+                                    <span>{{ index + 1 }}</span>
+                                </template>
 
-                        <template v-if="column.key === 'status'">
-                            <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
-                            <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
-                            <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
-                            <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
-                        </template>
+                                <template v-if="column.key === 'creator_name'">
+                                    <a-tooltip>
+                                        <template #title>
+                                            <span class="">{{ record.roll }}</span>
+                                        </template>
+                                        <span>{{ record.creator_name }}</span>
+                                    </a-tooltip>
+                                </template>                        
 
-                    </template>
-                </a-table>
-            </div>
-        </div>
+                                <template v-if="column.key === 'type'">
+                                    <span v-if="record.type_id == 1"
+                                        class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                    <span v-if="record.type_id == 2"
+                                        class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                    <span v-if="record.type_id == 3"
+                                        class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                </template>
+
+                                <template v-if="column.key === 'status'">
+                                    <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
+                                    <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                                    <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
+                                    <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
+                                </template>
+
+                            </template>
+                        </a-table>
+                    </div>
+                </div>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="Văn bản đến tôi" force-render>
+                <!-- Bảng văn bản cần tôi phê duyệt -->
+                <div class="row">
+                    <div class="col-12">
+                        <a-table 
+                            :dataSource="documents_need_me" 
+                            :columns="columns_need_me" 
+                            :scroll="{ x: 576 }" 
+                            bordered 
+                            :customRow="customRow"
+                            :showSorterTooltip="false"
+                        >
+                            <template #headerCell="{ column }">
+                                <template v-if="column.key === 'name'">
+                                    <a-tooltip title="Sắp xếp theo tên văn bản">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'type'">
+                                    <a-tooltip title="Sắp xếp theo loại văn bản">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'status'">
+                                    <a-tooltip title="Sắp xếp theo trạng thái">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'created_at'">
+                                    <a-tooltip title="Sắp xếp theo ngày tạo">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                                <template v-else-if="column.key === 'updated_at'">
+                                    <a-tooltip title="Sắp xếp theo ngày cập nhật">
+                                        <span>{{ column.title }}</span>
+                                    </a-tooltip>
+                                </template>
+                            </template>
+
+                            <template #bodyCell="{ column, index, record }">
+                                <template v-if="column.key === 'index'">
+                                    <span>{{ index + 1 }}</span>
+                                </template>
+
+                                <template v-if="column.key === 'creator_name'">
+                                    <a-tooltip>
+                                        <template #title>
+                                            <span class="">{{ record.roll }}</span>
+                                        </template>
+                                        <span>{{ record.creator_name }}</span>
+                                    </a-tooltip>
+                                </template>                        
+
+                                <template v-if="column.key === 'type'">
+                                    <span v-if="record.type_id == 1"
+                                        class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                    <span v-if="record.type_id == 2"
+                                        class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                    <span v-if="record.type_id == 3"
+                                        class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.type
+                                        }}</span>
+                                </template>
+
+                                <template v-if="column.key === 'status'">
+                                    <span v-if="record.status === 'pending'" class="text-secondary">Chưa tới bạn</span>
+                                    <span v-if="record.status === 'in_review'" class="text-primary">Chờ bạn duyệt</span>
+                                    <span v-if="record.status === 'approved'" class="text-success">Bạn đã duyệt</span>
+                                    <span v-if="record.status === 'rejected'" class="text-danger">Bạn từ chối</span>
+                                </template>
+
+                            </template>
+                        </a-table>
+                    </div>
+                </div>
+            </a-tab-pane>
+        </a-tabs>
+
     </a-card>
 </template>
 
@@ -160,18 +247,22 @@ import { useDocumentStore } from '@/stores/approver/document-store';
 import { useAuth } from '@/stores/use-auth.js';
 export default defineComponent({
     setup() {
+        const activeKey = ref("1");
         useMenu().onSelectedKeys(["approver-documents"]);
         const documentStore = useDocumentStore();
         const authStore = useAuth();
 
-        const documents = ref([]);
+        const documents_need_me = ref([]);
+        const documents_of_me = ref([]);
 
         onMounted(async () => {
             await documentStore.fetchDocuments(authStore.user.id);
-            documents.value = documentStore.documents;
+            // console.log(documentStore.documents);
+            documents_need_me.value = documentStore.documents.documents_need_me;
+            documents_of_me.value = documentStore.documents.documents_of_me;
         });
 
-        const columns = [   
+        const columns_need_me = [   
             {
                 title: 'Tên văn bản',
                 key: 'title',
@@ -210,8 +301,8 @@ export default defineComponent({
                 width: 120,
                 sorter: (a, b) => {
                     const statusOrder = {
-                        'draft': 1,
-                        'in_review': 2,
+                        'in_review': 1,
+                        'pending': 2,
                         'approved': 3,
                         'rejected': 4
                     };
@@ -261,12 +352,95 @@ export default defineComponent({
             // }
         ];
 
+        const columns_of_me = [   
+            {
+                title: 'Tên văn bản',
+                key: 'title',
+                dataIndex: 'title',
+                width: 200,
+                sorter: (a, b) => a.title.localeCompare(b.title),
+                sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            },
+            {
+                title: 'Loại văn bản',
+                key: 'type',
+                dataIndex: 'type',
+                width: 150,
+                sorter: (a, b) => a.type.localeCompare(b.type),
+                sortDirections: ['ascend', 'descend'],
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            },
+            {
+                title: 'Người đề xuất',
+                key: 'creator_name',
+                dataIndex: 'creator_name',
+                width: 200,
+                sorter: (a, b) => a.creator_name.localeCompare(b.creator_name),
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+            {
+                title: 'Trạng thái',
+                key: 'status',
+                dataIndex: 'status',
+                width: 120,
+                sorter: (a, b) => {
+                    const statusOrder = {
+                        'draft': 1,
+                        'pending': 2,
+                        'approved': 3,
+                        'rejected': 4
+                    };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                },
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+            {
+                title: 'Ngày tạo',
+                key: 'created_at',
+                dataIndex: 'created_at',
+                width: 150,
+                sorter: (a, b) => {
+                    const dateA = a.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.created_at.split(' ')[0];
+                    const dateB = b.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.created_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+            {
+                title: 'Ngày cập nhật',
+                key: 'updated_at',
+                dataIndex: 'updated_at',
+                width: 150,
+                sorter: (a, b) => {
+                    const dateA = a.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.updated_at.split(' ')[0];
+                    const dateB = b.updated_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.updated_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+        ];
+
         const router = useRouter();
 
         const customRow = (record) => {
             return {
                 onClick: () => {
-                    router.push(`documents/${record.id}`);
+                    router.push({
+                        name: 'approver-documents-detail',
+                        params: { id: record.id },
+                        query: { from_me: activeKey.value === '1' ? '1' : '0' }
+                    });
                 },
                 style: {
                     cursor: 'pointer'
@@ -275,8 +449,12 @@ export default defineComponent({
         };
 
         return {
-            documents,
-            columns,
+            documents_need_me,
+            documents_of_me,
+            columns_need_me,
+            columns_of_me,
+            activeKey,
+
             customRow,
 
         };

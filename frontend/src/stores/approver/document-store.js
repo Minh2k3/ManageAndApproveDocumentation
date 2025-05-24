@@ -143,6 +143,18 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
+    async function fetchDocumentById(id) {
+        try {
+            const response = await axiosInstance.get(`api/documents/${id}`);
+            if (response.data) {
+                console.log("Document: " + JSON.stringify(response.data, null, 2));
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error fetching document by ID:", error);
+        }
+    }
+
     function reset() {
         document_types.value = []
         isFetchedDocumentTypes.value = false

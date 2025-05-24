@@ -83,9 +83,15 @@ class DocumentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Document $document)
+    public function show($id)
     {
-        //
+        $document = Document::where('id', $id)
+            ->get();
+        
+        return response()->json([
+            'message' => 'Document retrieved successfully.',
+            'document' => $document,
+        ])->setStatusCode(200, 'Document retrieved successfully.');
     }
 
     /**
@@ -188,7 +194,7 @@ class DocumentController extends Controller
                 $query->where('approver_id', $approver_id);
             })
             ->leftJoin(DB::raw("(
-                SELECT id as step_id, approver_id, document_flow_id
+                SELECT id as step_id, approver_id, document_flow_id, multichoice, step, status
                 FROM document_flow_steps
             ) as my_step"), function ($join) use ($approver_id) {
                 $join->on('documents.document_flow_id', '=', 'my_step.document_flow_id')
@@ -219,7 +225,7 @@ class DocumentController extends Controller
                 'documents.id as id',
                 'documents.title as title',
                 'documents.description as description',
-                'documents.status as status',
+                // 'documents.status as status',
                 'documents.created_at as created_at',
                 'documents.updated_at as updated_at',
                 'documents.document_flow_id as document_flow_id',
@@ -236,13 +242,18 @@ class DocumentController extends Controller
                 'document_flows.process as process',
                 \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
                 \DB::raw('COALESCE(my_step.step_id, 0) as document_flow_step_id'),
-                \DB::raw('COALESCE(my_step.approver_id, 0) as approver_id')
+                \DB::raw('COALESCE(my_step.approver_id, 0) as approver_id'),
+                \DB::raw('COALESCE(my_step.multichoice, false) as multichoice'),
+                \DB::raw('COALESCE(my_step.step, 0) as step'),
+                \DB::raw('COALESCE(my_step.status, "pending") as status')
             )
             ->orderBy('documents.updated_at', 'desc')
             ->get();
-
-        $documents = $documents_of_me->merge($documents_need_me)->unique('id')->values();
-        $documents = $documents->sortByDesc('updated_at')->values();
+        
+        $documents = [
+            'documents_need_me' => $documents_need_me,
+            'documents_of_me' => $documents_of_me,
+        ];
 
         return response()->json([
             'documents' => $documents,

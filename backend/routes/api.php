@@ -73,7 +73,7 @@ RateLimiter::for('api', function (Request $request) {
 // User api
 // User
 Route::get('/users', [UserController::class, 'getUsers'])
-    ->middleware('auth:sanctum')
+    // ->middleware('auth:sanctum')
     ->name('users.index');
 
 Route::post('/users/active', [UserController::class, 'activeUser'])
@@ -94,8 +94,8 @@ Route::get('/documents', [DocumentController::class, 'index'])
     // ->middleware('auth:sanctum')
     ->name('documents.index');
 
-Route::get('/documents/{document}', [DocumentController::class, 'show'])
-    ->middleware('auth:sanctum')
+Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
+    // ->middleware('auth:sanctum')
     ->name('documents.show');
 
 Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocumentsByCreator'])
@@ -145,7 +145,7 @@ Route::get('/document-flow-steps', [DocumentFlowStepController::class, 'index'])
 Route::get('document-flow-steps/{documentFlow}', [DocumentFlowStepController::class, 'getStepsByDocumentFlowId'])
     ->name('document-flow-steps.getStepsByDocumentFlowId');
 
-Route::post('/document-steps/{document_step_id}/approve', [DocumentFlowStepController::class, 'approveStep'])
+Route::post('/document-steps/{document_flow_step_id}/approve', [DocumentFlowStepController::class, 'approveStep'])
     // ->middleware('auth:sanctum')
     ->name('document-flow-steps.approveStep');
 
@@ -193,3 +193,5 @@ Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
 
 Route::get('/pdf-proxy', [PDFProxyController::class, 'proxy']);
 Route::get('/pdf-list', [PDFProxyController::class, 'list']);
+
+Route::get('/access-statistics', [UserAccessLogController::class, 'dailyAccess']);

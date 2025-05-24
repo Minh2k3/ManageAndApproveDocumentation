@@ -96,7 +96,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row mb-3">
+                                <div v-if="document.status === 'in_review'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-success w-100 py-2 button-click-effect" 
@@ -116,6 +116,20 @@
                                             >
                                             <span>
                                                 <i class="bi bi-x-lg me-2"></i>Từ chối
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div v-else class="row mb-3">
+                                    <div class="col">
+                                        <button 
+                                            class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
+                                            style="--bs-bg-opacity: .9;"
+                                            @click=""
+                                            >
+                                            <span>
+                                                <i class="bi bi-hourglass-split me-2"></i>Chưa đến lượt bạn đâu
                                             </span>
                                         </button>
                                     </div>
@@ -327,9 +341,14 @@ export default defineComponent({
         const document_comments = ref([]);
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
-            documents.value = documentStore.documents
-            const id = parseInt(route.params.id)
-            document.value = documents.value.find(doc => doc.id === id) || null;
+            documents.value = documentStore.documents;
+            const id = parseInt(route.params.id);
+            const from_me = route.query.from_me === '1';
+            if (from_me) {
+                document.value = documents.value.documents_of_me.find(doc => doc.id === id && doc.from_me) || null;
+            } else {
+                document.value = documents.value.documents_need_me.find(doc => doc.id === id && !doc.from_me) || null;
+            }
 
             await documentStore.fetchDocumentComments(id);
             document_comments.value = documentStore.document_comments;
@@ -393,7 +412,7 @@ export default defineComponent({
 
             // console.log(document.value.creator_id);
             // console.log(comment.value);
-            console.log(parseInt(document.value['document_flow_step_id']));
+            // console.log(parseInt(document.value['document_flow_step_id']));
             // return;
             try {
                 const id = parseInt(route.params.id);

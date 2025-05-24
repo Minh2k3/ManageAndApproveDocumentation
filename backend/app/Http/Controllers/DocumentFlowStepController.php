@@ -90,8 +90,9 @@ class DocumentFlowStepController extends Controller
     /**
      * Approve a document flow step
      */
-    public function approveStep($id) 
+    public function approveStep(Request $request, $id) 
     {
+        $document = Document::findOrFail($request['document_id']);
         $documentFlowStep = DocumentFlowStep::findOrFail($id);
         $documentFlowStep->update(['status' => 'approved']);
 

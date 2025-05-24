@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UserAccessLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserAccessLogController extends Controller
 {
@@ -64,15 +65,27 @@ class UserAccessLogController extends Controller
         //
     }
 
-    public function getAccessStats()
+    public function dailyAccess()
     {
-        // Lấy dữ liệu trong 7 ngày qua
-        $stats = UserAccessLog::selectRaw('DATE(access_time) as date, COUNT(*) as visits')
-            ->where('access_time', '>=', Carbon::now()->subDays(7)) // Lọc dữ liệu trong 7 ngày qua
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
+        $days = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $days->push(Carbon::today()->subDays($i)->format('Y-m-d'));
+        }
 
-        return response()->json($stats);
+        // ✅ Bước 2: Truy vấn đếm lượt truy cập theo ngày
+        $accessCounts = DB::table('user_access_logs')
+            ->selectRaw('DATE(access_time) as access_date, COUNT(*) as total')
+            ->where('access_time', '>=', Carbon::today()->subDays(6))
+            ->groupBy('access_date')
+            ->pluck('total', 'access_date');
+
+        // ✅ Bước 3: Gộp dữ liệu để đảm bảo đủ 7 ngày (ngày không có thì gán 0)
+        $statistics = $days->mapWithKeys(function ($day) use ($accessCounts) {
+            return [$day => $accessCounts[$day] ?? 0];
+        });
+
+        return response()->json([
+            'daily_access' => $statistics
+        ]);
     }
 }
