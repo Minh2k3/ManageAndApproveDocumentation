@@ -41,6 +41,11 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/sanctum/, '/sanctum'), // Tùy chọn: giữ nguyên đường dẫn
       },
+      '/documents': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      }
     },
   },
 });

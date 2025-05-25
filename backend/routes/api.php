@@ -149,6 +149,10 @@ Route::post('/document-steps/{document_flow_step_id}/approve', [DocumentFlowStep
     // ->middleware('auth:sanctum')
     ->name('document-flow-steps.approveStep');
 
+Route::post('/document-steps/{document_flow_step_id}/reject', [DocumentFlowStepController::class, 'rejectStep'])
+    // ->middleware('auth:sanctum')
+    ->name('document-flow-steps.rejectStep');
+
 // Document Type
 Route::get('/document-types', [DocumentTypeController::class, 'index'])
     ->name('document-types.index');
@@ -195,3 +199,15 @@ Route::get('/pdf-proxy', [PDFProxyController::class, 'proxy']);
 Route::get('/pdf-list', [PDFProxyController::class, 'list']);
 
 Route::get('/access-statistics', [UserAccessLogController::class, 'dailyAccess']);
+
+// Download Document
+Route::get('/download-document', function (Request $request) {
+    $filePath = $request->query('file_path');
+    $fullPath = storage_path('public/documents/' . $filePath);
+    
+    if (!file_exists($fullPath)) {
+        return response()->json(['error' => 'File not found'], 404);
+    }
+    
+    return response()->download($fullPath);
+});

@@ -90,7 +90,7 @@
                             </div>
                         </div>
 
-                        <form @submit.prevent="login">
+                        <form @submit.prevent="login" @keydown.enter="login">
                             <!-- Email -->
                             <div class="row justify-content-center ">
                                 <div class="col-sm-6">
@@ -170,9 +170,14 @@
                                                 border-color: #0d6efd;
                                                 color: #ffffff;
                                             "
+                                            :disabled="loading"
                                             @click="login"
                                         >
-                                            Đăng nhập
+                                            <span v-if="loading">
+                                                <i class="spinner-border spinner-border-sm me-2"></i>
+                                                Đang đăng nhập...
+                                            </span>
+                                            <span v-else>Đăng nhập</span>
                                         </button>
                                     </div>
                                 </div>
@@ -195,7 +200,7 @@
 
 <script>
 import { HomeOutlined, MailOutlined } from "@ant-design/icons-vue";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, watch, onMounted, onUnmounted } from "vue";
 import { message } from 'ant-design-vue';
 import { useRouter } from "vue-router";
 import axiosInstance from "@/lib/axios.js";
@@ -216,6 +221,7 @@ export default defineComponent({
         const rememberMe = ref(false);
 
         const validateForm = ref(false);
+        const loading = ref(false);
 
         console.log("user", email.value);
 
@@ -227,13 +233,14 @@ export default defineComponent({
             }
 
             validateForm.value = true;
+            loading.value = true;
         }
 
 
-        watch(validateForm, (newValue) => {
+        watch(validateForm, async (newValue) => {
             if (newValue) {
                 console.log("Form đã xác thực ở phía frontend.");
-                loginUser();
+                await loginUser();
                 validateForm.value = false;
             }
         });
@@ -260,10 +267,25 @@ export default defineComponent({
                 console.log(user.id);
                 router.push({ name: authStore.role });
             } catch (error) {
-                // message.error("Đăng nhập thất bại: " + JSON.stringify(error.response?.data?.message || error.message));
+
+            } finally {
+                loading.value = false;
             }
         };
 
+        const handleGlobalKeydown = (event) => {
+            if (event.key === 'Enter') {
+                login();
+            }
+        };
+
+        onMounted(() => {
+            document.addEventListener('keydown', handleGlobalKeydown);
+        });
+
+        onUnmounted(() => {
+            document.removeEventListener('keydown', handleGlobalKeydown);
+        });
 
         return {
             email,
@@ -271,6 +293,8 @@ export default defineComponent({
             rememberMe,
             HomeOutlined,
             MailOutlined,
+            loading,
+
             login,
         };
     }

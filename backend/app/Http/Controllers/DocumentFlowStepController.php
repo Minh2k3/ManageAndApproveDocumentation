@@ -101,4 +101,77 @@ class DocumentFlowStepController extends Controller
             'document_flow_step' => $documentFlowStep,
         ])->setStatusCode(200, 'Document flow step approved successfully.');
     }
+
+    /**
+     * Reject a document flow step
+     */
+    public function rejectStep(Request $request, $id)
+    {
+        $document = Document::findOrFail($request['document_id']);
+        $creator_id = $document->created_by;
+        $reason = $request['reason'];
+        $documentFlowStep = DocumentFlowStep::findOrFail($id);              
+        $documentFlowStep->update(['status' => 'rejected']);
+
+        $user = auth()->user();
+        $admins = User::where('role_id', '1')->get();
+        foreach ($admins as $admin) {
+            $notification = Notification::create([
+                'notification_category_id' => 2,
+                'from_user_id' => $user['id'],
+                'receiver_id' => $admin['id'],
+                'title' => "Từ chối văn bản",
+                'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "'",
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]); 
+
+            $options = [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true
+            ];
+            $pusher = new \Pusher\Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                $options
+            );
+
+            $data['notification'] = $notification;
+            $data['document'] = $document;
+            $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
+        }
+
+        $notification = Notification::create([
+            'notification_category_id' => 2,
+            'from_user_id' => $user['id'],
+            'receiver_id' => $creator_id,
+            'title' => "Từ chối văn bản",
+            'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "' của bạn.",
+            'is_read' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]); 
+
+        $options = [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true
+        ];
+        $pusher = new \Pusher\Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
+
+        $data['notification'] = $notification;
+        $data['document'] = $document;
+        $pusher->trigger('user.' . $creator_id, 'new-notification', $data);
+
+        return response()->json([
+            'message' => 'Document flow step rejected successfully.',
+            'document_flow_step' => $documentFlowStep,
+        ])->setStatusCode(200, 'Document flow step rejected successfully.');
+    }
 }

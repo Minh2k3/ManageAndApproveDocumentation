@@ -81,189 +81,195 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-center ">
-                            <div class="col-sm-4">
-                                <div class="col-12 col-sm-12 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Họ và tên</span>
-                                    </label>
-                                </div>
-
-                                <div class="w-100"></div>
-
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <a-input v-model:value="name" placeholder="Trần Tuấn Minh" allow-clear/>
-                                    <div class="w-100"></div>
-                                    <!-- 
-                                <small 
-                                    v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                    class="text-danger">
-                                        {{ errors.status_id[0] }}
-                                </small> -->
-                                </div>
-                            </div>
-                        
-
-                            <div class="col-sm-4 mt-sm-0 mt-3">
-                                <div class="col-12 col-sm-12 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Email</span>
-                                    </label>
-                                </div>
-
-                                <div class="w-100"></div>
-
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear/>
-
-                                    <div class="w-100"></div>
-                                    <!-- 
-                                <small 
-                                    v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                    class="text-danger">
-                                        {{ errors.status_id[0] }}
-                                </small> -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-5">
-                                <div class="col-12 col-sm-12 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Phòng/Khoa/Đơn vị</span>
-                                    </label>
-                                </div>
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <div class="d-flex align-items-center">
-                                        <a-select 
-                                        v-model:value="selectedDepartment"
-                                        show-search 
-                                        placeholder="Phòng/Khoa/Đơn vị" 
-                                        style="width: 100%"
-                                        :options="departments" 
-                                        :filter-option="filterOption" 
-                                        allow-clear
-                                        :list-height="160"
-                                        ></a-select>
-                                        
-                                        <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlock của trường">
-                                            <QuestionCircleOutlined 
-                                                class="ms-2 text-primary"
-                                                style="font-size: 18px; cursor: pointer;"
-                                                @click="showRequestNewDepartmentModal"
-                                            />
-                                        </a-tooltip>
+                        <form @submit.prevent="register" @keydown.enter="register">
+                            <div class="row justify-content-center ">
+                                <div class="col-sm-4">
+                                    <div class="col-12 col-sm-12 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Họ và tên</span>
+                                        </label>
                                     </div>
 
                                     <div class="w-100"></div>
-                                </div>
-                            </div>
 
-                            <div class="col-sm-3 mt-sm-0 mt-3">
-                                <div class="col-12 col-sm-12 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Vai trò</span>
-                                    </label>
-                                </div>
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <div class="d-flex">
-                                        <a-select 
-                                        v-model:value="selectedRoll"
-                                        show-search 
-                                        placeholder="Vai trò" 
-                                        style="width: 100%"
-                                        :options="rolls" 
-                                        :filter-option="filterOption" 
-                                        allow-clear
-                                        :list-height="160"
-                                        ></a-select>
-                                    </div>
-
-                                    <div class="w-100"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Mật khẩu -->
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-4">
-                                <div class="col-12 col-sm-7 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Mật khẩu</span>
-                                    </label>
-                                </div>
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <a-input-password v-model:value="password" placeholder="abcILoveYou123"
-                                        allow-clear />
-
-                                    <div class="w-100"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-4 mt-sm-0 mt-3">
-                                <div class="col-12 col-sm-12 text-start align-self-center">
-                                    <label>
-                                        <span class="text-danger me-1">*</span>
-                                        <span class="fw-bold">Xác nhận mật khẩu</span>
-                                    </label>
-                                </div>
-                                <div class="col-12 col-sm-12 mt-1">
-                                    <a-input-password v-model:value="password_confirmation" placeholder="abcILoveYou123"
-                                        allow-clear />
-
-                                    <div class="w-100"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-sm-6 col-12 border border-secondary row py-2">
-                                    <div class="col-sm-1 col-1">
-                                        <div class="d-flex justify-content-center">
-                                            <a-checkbox v-model:checked="ok" class="">
-                                            </a-checkbox>
-                                        </div>
+                                    <div class="col-12 col-sm-12 mt-1">
+                                        <a-input v-model:value="name" placeholder="Trần Tuấn Minh" allow-clear/>
                                         <div class="w-100"></div>
-                                        
+                                        <!-- 
+                                    <small 
+                                        v-if="errors.status_id && firstFieldError === 'status_id'" 
+                                        class="text-danger">
+                                            {{ errors.status_id[0] }}
+                                    </small> -->
                                     </div>
-                                    
-                                    <div class="col-sm-11 col-11 px-0 ps-2">
+                                </div>
+                            
+
+                                <div class="col-sm-4 mt-sm-0 mt-3">
+                                    <div class="col-12 col-sm-12 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Email</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="w-100"></div>
+
+                                    <div class="col-12 col-sm-12 mt-1">
+                                        <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear/>
+
+                                        <div class="w-100"></div>
+                                        <!-- 
+                                    <small 
+                                        v-if="errors.status_id && firstFieldError === 'status_id'" 
+                                        class="text-danger">
+                                            {{ errors.status_id[0] }}
+                                    </small> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-sm-5">
+                                    <div class="col-12 col-sm-12 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Phòng/Khoa/Đơn vị</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-sm-12 mt-1">
+                                        <div class="d-flex align-items-center">
+                                            <a-select 
+                                            v-model:value="selectedDepartment"
+                                            show-search 
+                                            placeholder="Phòng/Khoa/Đơn vị" 
+                                            style="width: 100%"
+                                            :options="departments" 
+                                            :filter-option="filterOption" 
+                                            allow-clear
+                                            :list-height="160"
+                                            ></a-select>
+                                            
+                                            <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlock của trường">
+                                                <QuestionCircleOutlined 
+                                                    class="ms-2 text-primary"
+                                                    style="font-size: 18px; cursor: pointer;"
+                                                    @click="showRequestNewDepartmentModal"
+                                                />
+                                            </a-tooltip>
+                                        </div>
+
+                                        <div class="w-100"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3 mt-sm-0 mt-3">
+                                    <div class="col-12 col-sm-12 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Vai trò</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-sm-12 mt-1">
                                         <div class="d-flex">
-                                            <span class="fw-bold fst-italic">Tôi đồng ý với các điều khoản và chính sách của hệ thống</span>
+                                            <a-select 
+                                            v-model:value="selectedRoll"
+                                            show-search 
+                                            placeholder="Vai trò" 
+                                            style="width: 100%"
+                                            :options="rolls" 
+                                            :filter-option="filterOption" 
+                                            allow-clear
+                                            :list-height="160"
+                                            ></a-select>
                                         </div>
-                                        <div class="w-100"></div>
-                                        <div class="d-flex pt-2 align-items-center">
-                                            <span class="text-secondary">Chi tiết điều khoản xem tại</span>
-                                            &nbsp;
-                                            <a href="#" class="text-decoration-none text-primary fst-italic">đây</a>
-                                        </div>
-                                    </div>
-                                
-                            </div>
-                        </div>
 
-                        <div class="row justify-content-center mt-3">
-                            <div class="col-12 col-sm-6 justify-content-center">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary rounded-3 py-2 my-button" 
-                                        type="button" 
-                                        style="background-color: #0d6efd;
-                                            border-color: #0d6efd;
-                                            color: #ffffff;"
-                                        @click="register"
-                                    >
-                                        Đăng ký
-                                    </button>
+                                        <div class="w-100"></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
+                            <!-- Mật khẩu -->
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-sm-4">
+                                    <div class="col-12 col-sm-7 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Mật khẩu</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-sm-12 mt-1">
+                                        <a-input-password v-model:value="password" placeholder="abcILoveYou123"
+                                            allow-clear />
+
+                                        <div class="w-100"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4 mt-sm-0 mt-3">
+                                    <div class="col-12 col-sm-12 text-start align-self-center">
+                                        <label>
+                                            <span class="text-danger me-1">*</span>
+                                            <span class="fw-bold">Xác nhận mật khẩu</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-sm-12 mt-1">
+                                        <a-input-password v-model:value="password_confirmation" placeholder="abcILoveYou123"
+                                            allow-clear />
+
+                                        <div class="w-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-sm-6 col-12 border border-secondary row py-2">
+                                        <div class="col-sm-1 col-1">
+                                            <div class="d-flex justify-content-center">
+                                                <a-checkbox v-model:checked="ok" class="">
+                                                </a-checkbox>
+                                            </div>
+                                            <div class="w-100"></div>
+                                            
+                                        </div>
+                                        
+                                        <div class="col-sm-11 col-11 px-0 ps-2">
+                                            <div class="d-flex">
+                                                <span class="fw-bold fst-italic">Tôi đồng ý với các điều khoản và chính sách của hệ thống</span>
+                                            </div>
+                                            <div class="w-100"></div>
+                                            <div class="d-flex pt-2 align-items-center">
+                                                <span class="text-secondary">Chi tiết điều khoản xem tại</span>
+                                                &nbsp;
+                                                <a href="#" class="text-decoration-none text-primary fst-italic">đây</a>
+                                            </div>
+                                        </div>
+                                    
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-3">
+                                <div class="col-12 col-sm-6 justify-content-center">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary rounded-3 py-2 my-button" 
+                                            type="button" 
+                                            style="background-color: #0d6efd;
+                                                border-color: #0d6efd;
+                                                color: #ffffff;"
+                                            :disabled="loading"
+                                            @click="register"
+                                        >
+                                            <span v-if="loading">
+                                                <i class="spinner-border spinner-border-sm me-2"></i>
+                                                Đang đăng ký...
+                                            </span>
+                                            <span v-else>Đăng ký</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         <div class="row mt-4">
                             <div class="col-12 justify-content-center d-flex">
                                 <span class="text-center text-secondary mx-2">Đã có tài khoản?</span>
@@ -288,10 +294,12 @@ import {
     HomeOutlined
 } from "@ant-design/icons-vue";
 
-import { defineComponent, 
+import { 
+    defineComponent, 
     ref, 
     onMounted,
-    watch 
+    watch,
+    onUnmounted
 } from "vue";
 import { useRouter } from "vue-router";
 import bgImage from '@/assets/images/NMT.jpg';
@@ -375,9 +383,9 @@ export default defineComponent({
         });
 
         const validateFrontend = ref(false);
+        const loading = ref(false);
 
         const register = () => {
-
             console.log("Đăng ký với thông tin:", {
                 name: name.value,
                 email: email.value,
@@ -444,37 +452,13 @@ export default defineComponent({
             
 
             validateFrontend.value = true;
-            //     // Gửi yêu cầu đăng ký đến API
-            //     axios.post("/api/register", {
-            //         name: name.value,
-            //         email: email.value,
-            //         password: password.value,
-            //         password_confirmation: password_confirmation.value,
-            //         department_id: selectedDepartment.value,
-            //         roll_id: selectedRoll.value
-            //     })
-            //     .then(response => {
-            //         console.log("Đăng ký thành công:", response.data);
-            //         message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
-            //         // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
-            //         router.push({ name: "login" });
-            //     })
-            //     .catch((error) => {
-            //         if (error.response && error.response.status === 422) {
-            //             console.log("Lỗi validate:", error.response.data.errors);
-            //             alert("Đăng ký thất bại: " + JSON.stringify(error.response.data.errors));
-            //         } else {
-            //             console.error("Lỗi khác:", error);
-            //             message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.message));
-            //         }
-            //     });
-            // });
+            loading.value = true;
         };       
 
-        watch(validateFrontend, (newValue) => {
+        watch(validateFrontend, async (newValue) => {
             if (newValue) {
                 console.log("Đăng ký người dùng mới");
-                registerUser();
+                await registerUser();
                 validateFrontend.value = false;
             }
         });
@@ -504,10 +488,25 @@ export default defineComponent({
                     console.error("Lỗi khác:", error);
                     message.error("Đăng ký thất bại: " + JSON.stringify(error.response.data.message));
                 }
+            } finally {
+                loading.value = false;
             }
         }
         
-        
+        const handleGlobalKeydown = (event) => {
+            if (event.key === 'Enter') {
+                register();
+            }
+        };
+
+        onMounted(() => {
+            document.addEventListener('keydown', handleGlobalKeydown);
+        });
+
+        onUnmounted(() => {
+            document.removeEventListener('keydown', handleGlobalKeydown);
+        });
+
         return {
             // Form đăng ký
             name,
@@ -520,6 +519,8 @@ export default defineComponent({
             bgImage,
             selectedDepartment,
             selectedRoll,
+            loading,
+
             filterOption,
             showRequestNewDepartmentModal,
             register,

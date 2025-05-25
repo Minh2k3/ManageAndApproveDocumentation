@@ -17,7 +17,6 @@ export const useDocumentStore = defineStore("document", () => {
     const documents = ref([])
     const isFetchedDocuments = ref(false)
     const document_comments = ref([])
-    const isFetchedDocumentComments = ref(false)
 
     // Actions
     async function fetchDocumentTypes(force = false) {
@@ -126,15 +125,10 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocumentComments(documentId, force = false) {
-        if (isFetchedDocumentComments.value && !force) {
-            return;
-        }
-
+    async function fetchDocumentComments(documentId) {
         try {
             const response = await axiosInstance.get(`api/documents/${documentId}/comments`);
             if (response.data) {
-                isFetchedDocumentComments.value = true;
                 console.log("Document_comments: " + JSON.stringify(response.data, null, 2));
                 document_comments.value = response.data;
             }
@@ -155,6 +149,18 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
+    async function rejectDocument(id, data) {
+        try {
+            const response = await axiosInstance.post(`api/documents/${id}/reject`, data);
+            if (response.data) {
+                console.log("Reject document response: ", response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error rejecting document:", error);
+        }
+    }
+
     function reset() {
         document_types.value = []
         isFetchedDocumentTypes.value = false
@@ -168,6 +174,7 @@ export const useDocumentStore = defineStore("document", () => {
         isFetchedDocumentFlowSteps.value = false
         documents.value = []
         isFetchedDocuments.value = false
+        document_comments.value = []
     }
 
     // fetch all
@@ -193,7 +200,6 @@ export const useDocumentStore = defineStore("document", () => {
         documents,
         isFetchedDocuments,
         document_comments,
-        isFetchedDocumentComments,
 
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
@@ -202,6 +208,8 @@ export const useDocumentStore = defineStore("document", () => {
         fetchDocumentFlowSteps,
         fetchDocuments,
         fetchDocumentComments,
+        // fetchDocumentById,
+        rejectDocument,
         fetchAll,
         reset,
     };

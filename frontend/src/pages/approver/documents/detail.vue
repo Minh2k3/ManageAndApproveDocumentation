@@ -53,7 +53,7 @@
                             </a-tab-pane>
                             <a-tab-pane key="2" :tab="`Nhận xét (${document_comments.total_comments})`" force-render>
                                 <!-- Comments Section -->
-                                <div v-for="(comment, index) in document_comments.comments" :key="index">
+                                <div v-if="document_comments.total_comments > 0" v-for="(comment, index) in document_comments.comments" :key="index">
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
@@ -81,6 +81,12 @@
                                             &nbsp;
                                             <span class="fs-5 fw-bold fst-italic ">{{ comment.user_name }}</span>
                                         </div> -->
+                                    </div>
+                                </div>
+
+                                <div v-else class="row mb-3">
+                                    <div class="col d-flex">
+                                        <span class="">Chưa có nhận xét nào</span>
                                     </div>
                                 </div>
                             </a-tab-pane>
@@ -125,8 +131,8 @@
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
-                                            style="--bs-bg-opacity: .9;"
-                                            @click=""
+                                            style="--bs-bg-opacity: 1;"
+                                            @click="handleClickNotYourTurn"
                                             >
                                             <span>
                                                 <i class="bi bi-hourglass-split me-2"></i>Chưa đến lượt bạn đâu
@@ -151,9 +157,15 @@
                                         <button 
                                             class="border border-2 rounded-2 w-100 py-2 text-white bg-primary button-click-effect" 
                                             style="--bs-bg-opacity: .9;"
-                                            @click="handleClickDownload"
-                                            >
-                                            <span><i class="bi bi-download me-2"></i>Tải xuống</span>    
+                                            @click="handleClickDownload(document.file_path, document.title)"
+                                            :disabled="isDownloading"
+                                        >
+                                            <span v-if="!isDownloading">
+                                                <i class="bi bi-download me-2"></i>Tải xuống
+                                            </span>
+                                            <span v-else>
+                                                <i class="bi bi-hourglass-split me-2"></i>Đang tải...
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
@@ -175,6 +187,7 @@
                                             v-model:value="comment" 
                                             show-count
                                             :maxlength="1000" 
+                                            ref="commentTextarea"
                                             />
                                     </div>
                                 </div>
@@ -294,8 +307,34 @@
                 </div>               
             </div>
         </div>
-        
     </div>
+
+    <a-modal
+        v-model:visible="rejectVisible"
+        width="600px"
+        >
+        <div>
+            <h5>❌ Từ chối văn bản</h5>
+            <a-divider />
+            <div>
+                <span>Lý do chia tay là gì, em có biết không???</span>
+                <a-textarea 
+                    v-model:value="reasonReject" 
+                    placeholder="Vì em không yêu anh như anh yêu em, vì em xem anh chỉ là nhất thời." 
+                    show-count
+                    :maxlength="1000"
+                    rows="4"
+                    class="mb-5"
+                />
+            </div>
+            <a-divider />
+        </div>
+
+        <template #footer>
+            <a-button @click="rejectVisible = false">Hủy</a-button>
+            <a-button type="primary" @click="handleRejectDocument">Từ chối</a-button>
+        </template>
+    </a-modal>
 
 </template>
 
@@ -308,7 +347,8 @@ import {
     watch, 
     onMounted, 
     createVNode, 
-    h
+    h,
+    nextTick
 } from 'vue';
 import { useMenu } from '@/stores/use-menu.js';
 import { useRoute } from 'vue-router';
@@ -335,7 +375,7 @@ export default defineComponent({
 
         const route = useRoute();
         const documents = ref([]);
-        let document = ref([]);
+        let documentData = ref([]);
         const pdfUrl = ref('')
         const process_of_document = ref(0);
         const document_comments = ref([]);
@@ -345,19 +385,19 @@ export default defineComponent({
             const id = parseInt(route.params.id);
             const from_me = route.query.from_me === '1';
             if (from_me) {
-                document.value = documents.value.documents_of_me.find(doc => doc.id === id && doc.from_me) || null;
+                documentData.value = documents.value.documents_of_me.find(doc => doc.id === id && doc.from_me) || null;
             } else {
-                document.value = documents.value.documents_need_me.find(doc => doc.id === id && !doc.from_me) || null;
+                documentData.value = documents.value.documents_need_me.find(doc => doc.id === id && !doc.from_me) || null;
             }
 
             await documentStore.fetchDocumentComments(id);
             document_comments.value = documentStore.document_comments;
 
             console.log(document_comments.value);
-            console.log(document.value);
+            console.log(documentData.value);
 
-            pdfUrl.value = document.value.file_path;
-            process_of_document.value = document.value.process / document.value.step_count * 100;
+            pdfUrl.value = documentData.value.file_path;
+            process_of_document.value = documentData.value.process / documentData.value.step_count * 100;
         });
 
         const comment = ref('');
@@ -373,10 +413,41 @@ export default defineComponent({
             console.log('Approve clicked');
         };
 
-        const handleClickReject = async () => {
-            console.log('Reject clicked');
+        const rejectVisible = ref(false);
+        const reasonReject = ref('');
+
+        const handleRejectDocument = async () => {
+            if (reasonReject.value.trim() === '') {
+                message.error('Vui lòng nhập lý do từ chối');
+                return;
+            }
+
+            const id = parseInt(route.params.id);
+            const data = {
+                document_id: id,
+                reason: reasonReject.value,
+            };
+            const step_id = parseInt(documentData.value['document_flow_step_id']);
+
+            console.log('Rejecting document with data:', data);
+            console.log('Step ID:', step_id);
+            return;
+            try {
+                await documentStore.rejectDocument(step_id, data);
+                message.success('Bạn vừa từ chối văn bản với lý do: ' + reasonReject.value);
+            } catch (error) {
+                message.error('Có lỗi xảy ra khi từ chối văn bản');
+                console.error('Error rejecting document:', error);
+            } finally {
+                rejectVisible.value = false;
+            }
         };
 
+        const handleClickReject = async () => {
+            rejectVisible.value = true;
+        };
+
+        const commentTextarea = ref(null)
         const btnCommentText = ref('Nhận xét');
         const handleClickComment = async () => {
             console.log('Comment clicked');
@@ -384,7 +455,9 @@ export default defineComponent({
             if (activeKey.value === '1') {
                 activeKey.value = '2';
                 btnCommentText.value = 'Văn bản';
-            } else {
+                await nextTick();   
+                commentTextarea.value.focus();
+            } else {    
                 activeKey.value = '1';
                 btnCommentText.value = 'Nhận xét';
             }
@@ -400,8 +473,34 @@ export default defineComponent({
             }
         });
 
-        const handleClickDownload = async () => {
-            console.log('Download clicked');
+        const isDownloading = ref(false);
+
+        const handleClickDownload = (filePath, fileName = null) => {
+            try {
+                isDownloading.value = true;
+                
+                const downloadUrl = `http://localhost:8000/documents/${filePath}`;
+                const link = document.createElement('a');
+                
+                link.href = downloadUrl;
+                link.download = fileName || filePath.split('/').pop();
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                message.success('Đang tải file...');
+                
+                setTimeout(() => {
+                    isDownloading.value = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                message.error('Có lỗi xảy ra khi tải file!');
+                isDownloading.value = false;
+            }
         };
 
         const handleSendComment = async () => {
@@ -410,20 +509,20 @@ export default defineComponent({
                 return;
             }
 
-            // console.log(document.value.creator_id);
+            // console.log(documentData.value.creator_id);
             // console.log(comment.value);
-            // console.log(parseInt(document.value['document_flow_step_id']));
+            // console.log(parseInt(documentData.value['document_flow_step_id']));
             // return;
             try {
                 const id = parseInt(route.params.id);
                 await axios.post(`/api/documents/${id}/comments`, {
-                    creator_id: document.value.creator_id,
+                    creator_id: documentData.value.creator_id,
                     comment: comment.value,
-                    document_flow_step_id: parseInt(document.value['document_flow_step_id']),
+                    document_flow_step_id: parseInt(documentData.value['document_flow_step_id']),
                 });
                 message.success('Nhận xét gửi thành công');
 
-                await documentStore.fetchDocumentComments(id, true);
+                await documentStore.fetchDocumentComments(id);
                 document_comments.value = documentStore.document_comments;
                 comment.value = '';
             } catch (error) {
@@ -432,8 +531,16 @@ export default defineComponent({
             }
         };
 
+        const handleClickNotYourTurn = () => {
+            Modal.info({
+                title: 'Thông báo',
+                content: createVNode('p', null, 'Chưa đến lượt bạn phê duyệt văn bản này.'),
+                okText: 'Đóng',
+            });
+        };
+
         return {
-            document,
+            document: documentData,
             pdfUrl,
             process_of_document,
             activeKey,
@@ -442,6 +549,10 @@ export default defineComponent({
             document_comments,
             dayjs,
             btnCommentText,
+            commentTextarea,
+            isDownloading,
+            rejectVisible,
+            reasonReject,
 
             getAvatarUrl,
             handleClickApprove,
@@ -449,6 +560,8 @@ export default defineComponent({
             handleClickComment,
             handleClickDownload,
             handleSendComment,
+            handleClickNotYourTurn,
+            handleRejectDocument,
         };
     },
 });
@@ -462,7 +575,7 @@ export default defineComponent({
 }
 
 .button-click-effect:hover {
-    filter: brightness(1.2);
+    filter: brightness(1.1);
     transition: transform 0.1s ease;
 }
 
