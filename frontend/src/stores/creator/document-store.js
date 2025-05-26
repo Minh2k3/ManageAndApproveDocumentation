@@ -16,6 +16,7 @@ export const useDocumentStore = defineStore("document", () => {
     const isFetchedDocumentFlowSteps = ref(false)
     const documents = ref([])
     const isFetchedDocuments = ref(false)
+    const document_comments = ref([])
 
     // Actions
     async function fetchDocumentTypes(force = false) {
@@ -123,6 +124,18 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
+    async function fetchDocumentComments(documentId) {
+        try {
+            const response = await axiosInstance.get(`api/documents/${documentId}/comments`);
+            if (response.data) {
+                console.log("Document_comments: " + JSON.stringify(response.data, null, 2));
+                document_comments.value = response.data;
+            }
+        } catch (error) {
+            console.error("Error fetching document comments:", error);
+        }
+    }
+
     function reset() {
         document_types.value = []
         isFetchedDocumentTypes.value = false
@@ -160,6 +173,7 @@ export const useDocumentStore = defineStore("document", () => {
         isFetchedDocumentFlowSteps,
         documents,
         isFetchedDocuments,
+        document_comments,
 
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
@@ -167,6 +181,7 @@ export const useDocumentStore = defineStore("document", () => {
         fetchTemplateUser,
         fetchDocumentFlowSteps,
         fetchDocuments,
+        fetchDocumentComments,
         fetchAll,
         reset,
     };

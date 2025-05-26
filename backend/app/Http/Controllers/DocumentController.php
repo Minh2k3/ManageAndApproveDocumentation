@@ -14,6 +14,9 @@ use App\Models\DocumentVersion;
 use App\Models\DocumentFlow;
 use App\Models\DocumentFlowStep;
 use App\Models\Notification;
+use App\Models\Creator;
+use App\Models\RollAtDepartment;
+use Pusher\Pusher;
 
 use App\Notifications\SaveDraft;
 use App\Events\SaveDraft as SaveDraftEvent;
@@ -118,27 +121,93 @@ class DocumentController extends Controller
         //
     }
 
+    private function getCreatorInfoByUserId($user_id)
+    {
+        // Thử tìm trong bảng creators trước
+        $creator = Creator::with(['user:id,name', 'department:id,name', 'rollAtDepartment:id,name'])
+            ->where('user_id', $user_id)
+            ->first();
+        
+        if ($creator) {
+            return [
+                'name' => $creator->user->name ?? null,
+                'department_id' => $creator->department_id,
+                'roll_at_department_id' => $creator->roll_at_department_id,
+                'roll' => $creator->rollAtDepartment && $creator->department 
+                    ? $creator->rollAtDepartment->name . ' - ' . $creator->department->name 
+                    : null,
+            ];
+        }
+        
+        // Nếu không tìm thấy trong creators, thử tìm trong approvers
+        $approver = Approver::with(['user:id,name', 'department:id,name', 'rollAtDepartment:id,name'])
+            ->where('user_id', $user_id)
+            ->first();
+        
+        if ($approver) {
+            return [
+                'name' => $approver->user->name ?? null,
+                'department_id' => $approver->department_id,
+                'roll_at_department_id' => $approver->roll_at_department_id,
+                'roll' => $approver->rollAtDepartment && $approver->department 
+                    ? $approver->rollAtDepartment->name . ' - ' . $approver->department->name 
+                    : null,
+            ];
+        }
+        
+        // Nếu không tìm thấy ở cả hai bảng, chỉ lấy thông tin user
+        $user = User::select('id', 'name')->find($user_id);
+        
+        return [
+            'name' => $user ? $user->name : null,
+            'department_id' => null,
+            'roll_at_department_id' => null,
+            'roll' => null,
+        ];
+    }
+
     // Hàm lấy các văn bản của một người gửi yêu cầu
     public function getDocumentsByCreator($id)
     {
-        $documents = Document::where('created_by', $id)
-            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->leftJoin(\DB::raw('(SELECT document_id, COUNT(*) as version_count FROM document_versions GROUP BY document_id) as version_counts'), 
-                  'documents.id', '=', 'version_counts.document_id')
-            ->select(
-                'documents.id as id',
-                'documents.title as title',
-                'documents.description as description',
-                'documents.file_path as file_path',
-                'documents.status as status',
-                'documents.created_at as created_at',
-                'documents.updated_at as updated_at',
-                'documents.document_flow_id as document_flow_id',
-                'document_types.name as type',
-                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count')
-            )
-            ->orderBy('documents.updated_at', 'desc')
-            ->get();
+        $documents = Document::with([
+            'documentType:id,name',
+            'documentFlow:id,name,process',
+            'documentFlow.documentFlowSteps:id,document_flow_id',
+            'versions' => function($query) {
+                $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                    ->orderBy('version', 'desc')
+                    ->limit(1);
+            }
+        ])
+        ->where('created_by', $id) // $id là user_id
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->map(function($document) {
+            $latestVersion = $document->versions->first();
+            
+            // Tìm thông tin người tạo từ user_id
+            $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+            
+            return [
+                'id' => $document->id,
+                'title' => $document->title,
+                'description' => $document->description,
+                'file_path' => $document->file_path,
+                'status' => $latestVersion ? $latestVersion->status : null,
+                'created_at' => $document->created_at,
+                'updated_at' => $document->updated_at,
+                'document_flow_id' => $document->document_flow_id,
+                'type' => $document->documentType->name ?? null,
+                'creator_name' => $creatorInfo['name'],
+                'process' => $document->documentFlow->process ?? 0,
+                'from_me' => true,
+                'version_id' => $latestVersion->id ?? null,
+                'version_count' => $latestVersion->version ?? 0,
+                'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+                'roll' => $creatorInfo['roll'],
+                'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+            ];
+        });
 
         return response()->json([
             'documents' => $documents,
@@ -148,108 +217,112 @@ class DocumentController extends Controller
     // Hàm lấy các văn bản liên quan đến một người phê duyệt theo id
     public function getDocumentsByApprover($id)
     {
-        $documents_of_me = Document::where('documents.created_by', $id)
-            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->leftJoin(\DB::raw('(
-                SELECT document_id, COUNT(*) as version_count 
-                FROM document_versions 
-                GROUP BY document_id
-            ) as version_counts'), 'documents.id', '=', 'version_counts.document_id')
-            ->leftJoin('users', 'documents.created_by', '=', 'users.id')
-            ->leftJoin(\DB::raw('(
-                SELECT user_id, department_id, roll_at_department_id FROM approvers
-            ) as user_roles'), 'documents.created_by', '=', 'user_roles.user_id')
-            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
-            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
-            ->leftJoin(\DB::raw('(
-                SELECT document_flow_id, COUNT(*) as step_count 
-                FROM document_flow_steps 
-                GROUP BY document_flow_id
-            ) as flow_step_counts'), 'documents.document_flow_id', '=', 'flow_step_counts.document_flow_id')
-            ->leftJoin('document_flows', 'documents.document_flow_id', '=', 'document_flows.id')
-            ->select(
-                'documents.id as id',
-                'documents.title as title',
-                'documents.description as description',
-                'documents.file_path as file_path',
-                'documents.status as status',
-                'documents.created_at as created_at',
-                'documents.updated_at as updated_at',
-                'documents.document_flow_id as document_flow_id',
-                'document_types.name as type',
-                'users.name as creator_name',
-                'document_flows.process as process',
-                \DB::raw('true as from_me'),                
-                \DB::raw('COALESCE(version_counts.version_count, 0) as version_count'),
-                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
-                \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
-            )
-            ->orderBy('documents.updated_at', 'desc')
-            ->get();
+        // Lấy các văn bản do tôi tạo
+        $documents_of_me = Document::with([
+            'documentType:id,name',
+            'documentFlow:id,name,process',
+            'documentFlow.documentFlowSteps:id,document_flow_id',
+            'versions' => function($query) {
+                $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                    ->orderBy('version', 'desc')
+                    ->limit(1);
+            }
+        ])
+        ->where('created_by', $id) // $id là user_id
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->map(function($document) {
+            $latestVersion = $document->versions->first();
+            
+            // Tìm thông tin người tạo từ user_id
+            $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+            
+            return [
+                'id' => $document->id,
+                'title' => $document->title,
+                'description' => $document->description,
+                'file_path' => $document->file_path,
+                'status' => $latestVersion ? $latestVersion->status : null,
+                'created_at' => $document->created_at,
+                'updated_at' => $document->updated_at,
+                'document_flow_id' => $document->document_flow_id,
+                'type' => $document->documentType->name ?? null,
+                'creator_name' => $creatorInfo['name'],
+                'process' => $document->documentFlow->process ?? 0,
+                'from_me' => true,
+                'version_id' => $latestVersion->id ?? null,
+                'version_count' => $latestVersion->version ?? 0,
+                'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+                'roll' => $creatorInfo['roll'],
+                'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+            ];
+        });
 
-        $approver = Approver::where('user_id', $id)->first(); 
-        $approver_id = $approver ? $approver['id'] : null;
+        // Tìm approver record của user hiện tại
+        $approver = Approver::where('user_id', $id)->first();
+        $approver_id = $approver ? $approver->id : null;
+
+        // Lấy các văn bản cần tôi duyệt
+        $documents_need_me = collect();
         
-        $documents_need_me = Document::whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id) {
+        if ($approver_id) {
+            $documents_need_me = Document::with([
+                'documentType:id,name',
+                'documentFlow:id,name,process',
+                'documentFlow.documentFlowSteps' => function($query) use ($approver_id) {
+                    $query->where('approver_id', $approver_id)
+                        ->select('id', 'document_flow_id', 'approver_id', 'step', 'multichoice', 'status');
+                },
+                'versions' => function($query) {
+                    $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                        ->orderBy('version', 'desc')
+                        ->limit(1);
+                }
+            ])
+            ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id) {
                 $query->where('approver_id', $approver_id);
             })
-            ->leftJoin(DB::raw("(
-                SELECT id as step_id, approver_id, document_flow_id, multichoice, step, status
-                FROM document_flow_steps
-            ) as my_step"), function ($join) use ($approver_id) {
-                $join->on('documents.document_flow_id', '=', 'my_step.document_flow_id')
-                    ->where('my_step.approver_id', '=', $approver_id);
+            ->whereHas('versions', function($query) {
+                $query->where('status', '!=', 'draft');
             })
-            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->leftJoin(DB::raw('(
-                SELECT document_id, MAX(version) as max_version
-                FROM document_versions 
-                GROUP BY document_id
-            ) as latest_versions'), 'documents.id', '=', 'latest_versions.document_id')
-            ->leftJoin(\DB::raw('(
-                SELECT user_id, department_id, roll_at_department_id FROM approvers
-                UNION ALL
-                SELECT user_id, department_id, roll_at_department_id FROM creators
-            ) as user_roles'), 'documents.created_by', '=', 'user_roles.user_id')
-            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
-            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
-            ->join('users', 'documents.created_by', '=', 'users.id')
-            ->where('documents.status', '!=', 'draft')
-            ->leftJoin(\DB::raw('(
-                SELECT document_flow_id, COUNT(*) as step_count 
-                FROM document_flow_steps 
-                GROUP BY document_flow_id
-            ) as flow_step_counts'), 'documents.document_flow_id', '=', 'flow_step_counts.document_flow_id')
-            ->leftJoin('document_flows', 'documents.document_flow_id', '=', 'document_flows.id')
-            ->select(
-                'documents.id as id',
-                'documents.title as title',
-                'documents.description as description',
-                // 'documents.status as status',
-                'documents.created_at as created_at',
-                'documents.updated_at as updated_at',
-                'documents.document_flow_id as document_flow_id',
-                'document_types.name as type',
-                'documents.file_path as file_path',
-                'latest_versions.max_version as version_count',
-                \DB::raw('false as from_me'),
-                'documents.created_by as creator_id',
-                'departments.id as department_id',
-                'roll_at_departments.id as roll_id',
-                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll'),
-                'users.name as creator_name',
-                'users.id as creator_id',
-                'document_flows.process as process',
-                \DB::raw('COALESCE(flow_step_counts.step_count, 0) as step_count'),
-                \DB::raw('COALESCE(my_step.step_id, 0) as document_flow_step_id'),
-                \DB::raw('COALESCE(my_step.approver_id, 0) as approver_id'),
-                \DB::raw('COALESCE(my_step.multichoice, false) as multichoice'),
-                \DB::raw('COALESCE(my_step.step, 0) as step'),
-                \DB::raw('COALESCE(my_step.status, "pending") as status')
-            )
-            ->orderBy('documents.updated_at', 'desc')
-            ->get();
-        
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function($document) use ($approver_id) {
+                $latestVersion = $document->versions->first();
+                $myStep = $document->documentFlow->documentFlowSteps->first();
+                
+                // Tìm thông tin người tạo từ user_id
+                $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+                
+                return [
+                    'id' => $document->id,
+                    'title' => $document->title,
+                    'description' => $document->description,
+                    'file_path' => $document->file_path,
+                    'created_at' => $document->created_at,
+                    'updated_at' => $document->updated_at,
+                    'document_flow_id' => $document->document_flow_id,
+                    'type' => $document->documentType->name ?? null,
+                    'version_id' => $latestVersion->id ?? null,
+                    'version_count' => $latestVersion->version ?? 0,
+                    'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+                    'from_me' => false,
+                    'creator_id' => $document->created_by,
+                    'department_id' => $creatorInfo['department_id'],
+                    'roll_id' => $creatorInfo['roll_at_department_id'],
+                    'roll' => $creatorInfo['roll'],
+                    'creator_name' => $creatorInfo['name'],
+                    'process' => $document->documentFlow->process ?? 0,
+                    'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+                    'document_flow_step_id' => $myStep->id ?? 0,
+                    'approver_id' => $myStep->approver_id ?? 0,
+                    'multichoice' => $myStep->multichoice ?? false,
+                    'step' => $myStep->step ?? 0,
+                    'status' => $myStep->status ?? 'pending',
+                ];
+            });
+        }
+
         $documents = [
             'documents_need_me' => $documents_need_me,
             'documents_of_me' => $documents_of_me,
@@ -428,7 +501,7 @@ class DocumentController extends Controller
                     'notification_category_id' => 2,
                     'from_user_id' => $user['id'],
                     'receiver_id' => $admin['id'],
-                    'title' => "Phê duyệt văn bản",
+                    'title' => "Tạo văn bản phê duyệt",
                     'content' => "Tạo một luồng phê duyệt cho văn bản '" . $new_document['title'] . "'",
                     'is_read' => false,
                     'created_at' => now(),

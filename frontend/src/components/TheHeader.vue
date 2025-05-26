@@ -1,16 +1,16 @@
 <template>
     <div class="container-fluid">
         <div class="row" style="background-color: #007cba; padding: 1rem;">
-            <div class="col-1 d-flex d-sm-none align-items-center justify-content-center">
+            <div class="col-1 d-flex d-lg-none align-items-center justify-content-center">
                 <span @click="showDrawer()"><i class="fa-solid fa-indent fs-1"></i></span>
             </div>
 
-            <div class="col-10 col-sm-6 d-flex align-items-center justify-content-center justify-content-sm-start">
+            <div class="col-8 col-lg-6 d-flex align-items-center justify-content-center justify-content-lg-start">
                 <img src="../assets/images/logo_tlu.svg" alt="logo" height="32" width="34">
-                <span class="d-none d-sm-flex text-white ms-3 me-3 fs-4">QUẢN TRỊ HỆ THỐNG</span>
+                <span class="d-none d-lg-flex text-white ms-3 me-3 fs-4">QUẢN TRỊ HỆ THỐNG</span>
             </div>
 
-            <div  class="col-sm-6 d-none d-sm-flex align-items-center justify-content-sm-end">
+            <div  class="col-lg-6 d-none d-lg-flex align-items-center justify-content-lg-end">
                 <div class="dropdown me-4">
                     <!-- Notification Button -->
                     <button class="btn btn-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleNotifications" style="background-color: #007cba;">
@@ -84,8 +84,77 @@
                 </div>
             </div>
 
-            <div class="col-1 d-flex d-sm-none align-items-center justify-content-center">
-                <span @click="showDrawerUser()"><i class="fa-solid fa-user fs-1"></i></span>
+            <div class="col-3 d-flex d-lg-none align-items-center justify-content-center ">
+                <div class="dropdown me-4">
+                    <!-- Notification Button -->
+                    <button class="btn btn-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleNotifications" style="background-color: #007cba;">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1">
+                            {{ unreadMessagesCount > 9 ? 9 : unreadMessagesCount }}{{ unreadMessagesCount > 9 ? '+' : '' }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </button>
+                    
+                    <!-- Notification Dropdown Menu -->
+                    <ul class="dropdown-menu notification-dropdown">
+                        <li class="dropdown-header">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <a-button class="col" @click="maskAsAllRead">Đánh dấu tất cả đã đọc</a-button>
+                                <a-button class="col" @click="viewAllNotifications">Xem tất cả</a-button>
+                            </div>
+                        </li>
+                        
+                        <!-- Loading state -->
+                        <li v-if="loading" class="text-center p-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </li>
+                        
+                        <!-- Empty state -->
+                        <li v-else-if="notifications.length === 0" class="text-center text-muted p-3">
+                            Không có thông báo chưa đọc nào
+                        </li>
+                        
+                        <!-- Notification Items -->
+                        <li v-else v-for="notification in notifications" :key="notification.id">
+                            <a href="#" 
+                            @click="viewNotification(notification.id)" 
+                            class="dropdown-item notification-item d-flex text-decoration-none">
+                                <div class="notification-icon">
+                                    <i class="fa-solid fa-bell"></i>
+                                </div>
+                                <div class="notification-body">
+                                    <div class="notification-content">
+                                        {{ notification.content }}
+                                    </div>
+                                    <small class="notification-time">
+                                        {{ notification.created_at }}
+                                    </small>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle text-capitalize" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header row d-flex align-items-center">
+                            <div class="col-3"><i class="fa-solid fa-user me-2"></i></div>
+                            <div class="col-9">
+                                <div class="row fs-6">{{ user_name }}</div>
+                                <div class="row text-capitalize">{{ role }}</div>
+                            </div>
+                            
+                        </h6></li>
+                        <li><a class="dropdown-item" href="#">Thông báo</a></li>
+                        <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="handleLogout"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

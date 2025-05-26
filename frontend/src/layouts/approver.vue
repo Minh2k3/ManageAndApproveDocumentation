@@ -1,43 +1,48 @@
 <template>
-    <TheHeader />
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <!-- Toggle Button -->
-            <div class="col-12 mb-2">
-                <button 
-                    @click="toggleMenu" 
-                    class="btn btn-outline-primary btn-sm"
-                    type="button"
+    <div>
+        <div class="sticky-header">
+            <TheHeader />
+        </div>
+        <div class="container-fluid mt-3">
+            <div class="row">
+                <!-- Toggle Button -->
+                <div class="col-12 mb-2">
+                    <button 
+                        @click="toggleMenu" 
+                        class="btn btn-outline-primary btn-sm"
+                        type="button"
+                    >
+                        <i :class="isMenuVisible ? 'fas fa-times' : 'fas fa-bars'"></i>
+                        {{ isMenuVisible ? 'Ẩn menu' : 'Hiện menu' }}
+                    </button>
+                </div>
+                
+                <!-- Sidebar Menu -->
+                <div 
+                    v-if="isMenuVisible" 
+                    class="col-sm-3 col-xxl-2 d-none d-sm-flex sidebar-transition"
                 >
-                    <i :class="isMenuVisible ? 'fas fa-times' : 'fas fa-bars'"></i>
-                    {{ isMenuVisible ? 'Ẩn menu' : 'Hiện menu' }}
-                </button>
-            </div>
-            
-            <!-- Sidebar Menu -->
-            <div 
-                v-if="isMenuVisible" 
-                class="col-sm-3 col-xxl-2 d-none d-sm-flex sidebar-transition"
-            >
-                <a-list bordered style="width: 100%;">
-                    <TheMenu />
-                    <template #header>
-                        <div>BẢNG ĐIỀU KHIỂN</div>
-                    </template>
-                </a-list>
-            </div>
-            
-            <!-- Main Content -->
-            <div 
-                :class="contentClasses"
-                class="bg-right bg-gradient pb-3 p-4 "
-            >
-                <div style="height: 100%">
-                    <router-view></router-view>
+                    <a-list bordered style="width: 100%;">
+                        <TheMenu />
+                        <template #header>
+                            <div>BẢNG ĐIỀU KHIỂN</div>
+                        </template>
+                    </a-list>
+                </div>
+                
+                <!-- Main Content -->
+                <div 
+                    :class="contentClasses"
+                    class="bg-right bg-gradient pb-3 p-4 "
+                >
+                    <div style="height: 100%">
+                        <router-view></router-view>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <a-back-top />
 </template>
 
 <script>
@@ -97,5 +102,13 @@ export default {
     .d-none.d-sm-flex.show {
         transform: translateX(0);
     }
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white; /* Hoặc màu nền phù hợp với header của bạn */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Tùy chọn: thêm shadow để tạo độ sâu */
 }
 </style>

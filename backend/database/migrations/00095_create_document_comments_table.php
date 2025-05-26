@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('document_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('document_flow_step_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('document_version_id')
+                ->constrained('document_versions')
+                ->onDelete('cascade');
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
             $table->text('comment');
             $table->timestamp('created_at')->default(now());
         });

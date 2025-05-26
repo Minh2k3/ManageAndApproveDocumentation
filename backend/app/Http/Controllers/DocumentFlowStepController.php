@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\DocumentFlowStep;
 use Illuminate\Http\Request;
+use App\Models\Document;
+use App\Models\DocumentVersion;
+use App\Models\User;
+use App\Models\Notification;
+use Pusher\Pusher;
+
 
 class DocumentFlowStepController extends Controller
 {
@@ -107,21 +113,68 @@ class DocumentFlowStepController extends Controller
      */
     public function rejectStep(Request $request, $id)
     {
-        $document = Document::findOrFail($request['document_id']);
+        \DB::beginTransaction();
+
+        $document_version_id = $request['document_version_id'];
+        $document_version = DocumentVersion::where('id', $document_version_id)
+            ->lockForUpdate()
+            ->first();
+            
+        if ($document_version->status !== 'in_review') {
+            return response()->json([
+                'message' => 'Document version is not in review status.',
+            ])->setStatusCode(400, 'Bad Request');
+        }
+
+        $document = Document::where('id', $document_version['document_id'])
+            ->lockForUpdate()
+            ->first();
+
         $creator_id = $document->created_by;
         $reason = $request['reason'];
-        $documentFlowStep = DocumentFlowStep::findOrFail($id);              
-        $documentFlowStep->update(['status' => 'rejected']);
+        $document_flow_step = DocumentFlowStep::findOrFail($id);   
 
-        $user = auth()->user();
-        $admins = User::where('role_id', '1')->get();
-        foreach ($admins as $admin) {
+        try {
+            $document_version->update(['status' => 'rejected']);
+            $document_flow_step->update(['status' => 'rejected']);
+            $document_flow_step->update(['reason' => $reason]);
+
+            $user = auth()->user();
+            $admins = User::where('role_id', '1')->get();
+            foreach ($admins as $admin) {
+                $notification = Notification::create([
+                    'notification_category_id' => 2,
+                    'from_user_id' => $user['id'],
+                    'receiver_id' => $admin['id'],
+                    'title' => "Từ chối văn bản",
+                    'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "'",
+                    'is_read' => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]); 
+
+                $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+                $pusher = new \Pusher\Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    $options
+                );
+
+                $data['notification'] = $notification;
+                $data['document'] = $document;
+                $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
+            }
+
             $notification = Notification::create([
                 'notification_category_id' => 2,
                 'from_user_id' => $user['id'],
-                'receiver_id' => $admin['id'],
+                'receiver_id' => $creator_id,
                 'title' => "Từ chối văn bản",
-                'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "'",
+                'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "' của bạn.",
                 'is_read' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -140,38 +193,18 @@ class DocumentFlowStepController extends Controller
 
             $data['notification'] = $notification;
             $data['document'] = $document;
-            $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
+            $pusher->trigger('user.' . $creator_id, 'new-notification', $data);
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to reject document.',
+                'error' => $e->getMessage(),
+            ])->setStatusCode(500, 'Internal Server Error');
         }
-
-        $notification = Notification::create([
-            'notification_category_id' => 2,
-            'from_user_id' => $user['id'],
-            'receiver_id' => $creator_id,
-            'title' => "Từ chối văn bản",
-            'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "' của bạn.",
-            'is_read' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]); 
-
-        $options = [
-            'cluster' => env('PUSHER_APP_CLUSTER'),
-            'useTLS' => true
-        ];
-        $pusher = new \Pusher\Pusher(
-            env('PUSHER_APP_KEY'),
-            env('PUSHER_APP_SECRET'),
-            env('PUSHER_APP_ID'),
-            $options
-        );
-
-        $data['notification'] = $notification;
-        $data['document'] = $document;
-        $pusher->trigger('user.' . $creator_id, 'new-notification', $data);
-
         return response()->json([
             'message' => 'Document flow step rejected successfully.',
-            'document_flow_step' => $documentFlowStep,
+            'document_flow_step' => $document_flow_step,
         ])->setStatusCode(200, 'Document flow step rejected successfully.');
     }
 }

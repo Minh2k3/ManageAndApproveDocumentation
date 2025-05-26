@@ -1,7 +1,7 @@
 <template>
     <div class="col-12">
         <div class="row justify-content-around mt-2">
-            <div class="bg-light col-lg col-9 border border-1 border-dark rounded-3 p-2 mx-2">
+            <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex justify-content-between">
                         <div class="d-flex align-items-center justify-content-start">
@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="bg-light col-lg col-9 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
+            <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex justify-content-between">
                         <div class="d-flex align-items-center justify-content-start">
@@ -47,7 +47,7 @@
                 </div>
             </div>
 
-            <div class="bg-light col-lg col-9 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
+            <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex">
                         <div class="d-flex align-items-center justify-content-start">
@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <div class="bg-light col-lg col-9 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
+            <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex">
                         <div class="d-flex align-items-center justify-content-start">
@@ -96,7 +96,7 @@
 
         <div class="row mt-2 justify-content-around">
             <!-- Hoạt động hệ thống -->
-            <div class="bg-light col-xxl col-9 col-lg border border-1 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
+            <div class="bg-light col-xxl col-11 col-lg border border-1 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
                 <div class="row">
                     <span class="fs-4 fw-bold">Hoạt Động Hệ Thống</span>
                 </div>
@@ -105,7 +105,7 @@
                 </div>
                <div v-for="(notification, index) in new_notifications" 
                     :key="index"
-                    class="row border border-1 border-dark mt-3 p-2 mx-1"
+                    class="row border border-1 border-dark mt-2 p-2 mx-1 mb-1"
                 >
                     <div class="col-lg-2 col-2 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
@@ -125,7 +125,7 @@
             </div>
 
             <!-- Người dùng mới -->
-            <div class="bg-light col-xxl col-9 col-lg border border-1 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
+            <div class="bg-light col-xxl col-11 col-lg border border-1 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
                 <div class="row">
                     <span class="fs-4 fw-bold">Người Dùng Mới</span>
                 </div>
@@ -135,7 +135,7 @@
                 
                 <div v-for="(user, index) in new_registered_users" 
                     :key="index"
-                    class="row border border-1 border-dark mt-3 p-2 mx-1"
+                    class="row border border-1 border-dark mt-2 p-2 mx-1 mb-1"
                     >
 
                     <!-- Avatar -->
@@ -166,7 +166,7 @@
 
         <div class="row mt-2 justify-content-around">
             <!-- Thống kê văn bản -->
-            <div class="bg-light col-xl-8 col-9 col-lg border border-1 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
+            <div class="bg-light col-xl col-11 col-lg border border-1 border-dark rounded-3 pt-3 ps-3 mx-2 pb-3">
                 <div class="row">
                     <span class="fs-4 fw-bold">Thống Kê Văn Bản</span>
                 </div>
@@ -286,12 +286,12 @@
             </div>
 
             <!-- Thống kê truy cập -->
-            <div class="bg-light col-xl col-9 col-lg-5 border border-1 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
+            <div class="bg-light col-xl col-11 col-lg border border-1 border-dark rounded-3 pt-3 mx-2 mt-3 mt-lg-0">
                 <div class="row">
                     <span class="fs-4 fw-bold">Thống Kê Truy Cập</span>
                 </div>
                 <div class="row mt-1">
-                    <span class="text-secondary">Số lượng truy cập trong 7 ngày qua</span>
+                    <span class="text-secondary">Số lượt đăng nhập web trong 7 ngày qua</span>
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">

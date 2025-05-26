@@ -81,7 +81,7 @@
                             </div>
                         </div>
 
-                        <form @submit.prevent="register" @keydown.enter="register">
+                        <form @submit.prevent="register">
                             <div class="row justify-content-center ">
                                 <div class="col-sm-4">
                                     <div class="col-12 col-sm-12 text-start align-self-center">

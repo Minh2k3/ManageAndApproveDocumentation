@@ -11,7 +11,7 @@ use App\Models\Admin;
 use App\Models\DocumentTemplate;
 use App\Models\Notification;
 use App\Models\DigitalSignature;
-// use App\Models\DocumentComment;
+use App\Models\DocumentComment;
 use App\Models\Role;
 use App\Models\UserBan;
 use App\Models\Approver;
@@ -158,10 +158,10 @@ class User extends Authenticatable implements MustVerifyEmail
     // /**
     //  * Get the comments made by the user.
     //  */
-    // public function comments()
-    // {
-    //     return $this->hasMany(DocumentComment::class);
-    // }
+    public function comments()
+    {
+        return $this->hasMany(DocumentComment::class);
+    }
 
     /**
      * Check if the user is an admin.

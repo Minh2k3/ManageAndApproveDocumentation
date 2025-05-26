@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
-// use App\Models\DocumentComment;
+use App\Models\DocumentComment;
 // use App\Models\DocumentSignature;
 use Carbon\Carbon;
 
@@ -24,6 +24,7 @@ class DocumentVersion extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'description',
         'document_id',
         'version',
         'status',
@@ -52,10 +53,10 @@ class DocumentVersion extends Model
     // /**
     //  * Get the comments for the document version.
     //  */
-    // public function comments()
-    // {
-    //     return $this->hasMany(DocumentComment::class);
-    // }
+    public function comments()
+    {
+        return $this->hasMany(DocumentComment::class);
+    }
 
     // /**
     //  * Get the signatures for the document version.

@@ -127,7 +127,7 @@
 
                         <template v-if="column.key === 'status'">
                             <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
-                            <span v-if="record.status === 'pending'" class="text-primary">Chờ duyệt</span>
+                            <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
                             <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
                             <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
                         </template>
@@ -157,21 +157,12 @@
             </p>
 
             <a-divider />
-
-            <!-- <h5>📌 Luồng phê duyệt</h5> -->
-            <!-- <ol v-if="document_flow_steps.value.length > 1 || document_flow_steps.value[0].department_id !== null">
-            <li v-for="step in document_flow_steps" :key="step.step">
-                Bước {{ step.step }}:
-                {{ step.department_name }} -
-                {{ step.approver_name }} <span v-if="step.multichoice">(Cùng cấp)</span>
-            </li>
-            </ol> -->
-            <!-- <p v-else class="text-muted fst-italic">Chưa thiết lập luồng phê duyệt</p> -->
         </div>
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button type="primary" @click="goToEditPage(selectedDocument.id)">Chi tiết</a-button>
+            <a-button type="warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>
 
@@ -313,6 +304,14 @@ export default defineComponent({
             router.push(`documents/${id}`);
         };
 
+        // Hàm điều hướng đến trang chi tiết văn bản
+        const goToDetailPage = (id) => {
+            router.push({
+                name: 'creator-documents-detail',
+                params: { id: id },
+            });
+        };
+
         return {
             documents,
             columns,
@@ -322,6 +321,7 @@ export default defineComponent({
             customRow,
             viewDetail,
             goToEditPage,
+            goToDetailPage,
         };
     },
 });

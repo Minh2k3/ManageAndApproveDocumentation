@@ -34,6 +34,8 @@ import {
     TabPane,
     Tabs,
     Comment,
+    FloatButton,
+    Steps,
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -74,4 +76,6 @@ app.use(Descriptions)
 app.use(TabPane)
 app.use(Tabs)
 app.use(Comment)
+app.use(FloatButton)
+app.use(Steps)
 app.mount('#app')

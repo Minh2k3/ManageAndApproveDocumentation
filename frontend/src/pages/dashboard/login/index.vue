@@ -90,7 +90,7 @@
                             </div>
                         </div>
 
-                        <form @submit.prevent="login" @keydown.enter="login">
+                        <form @submit.prevent="login">
                             <!-- Email -->
                             <div class="row justify-content-center ">
                                 <div class="col-sm-6">

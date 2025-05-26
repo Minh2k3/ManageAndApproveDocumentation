@@ -15,9 +15,8 @@ class RollAtDepartment extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'department_id',
-        'roll_at_department_id',
         'name',
+        'description',
         'level',
     ];
 

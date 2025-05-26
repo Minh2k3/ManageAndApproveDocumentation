@@ -99,7 +99,7 @@ Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
     ->name('documents.show');
 
 Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocumentsByCreator'])
-    ->middleware('auth:sanctum')
+    // ->middleware('auth:sanctum')
     ->name('documents.getDocumentsByCreator');
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])

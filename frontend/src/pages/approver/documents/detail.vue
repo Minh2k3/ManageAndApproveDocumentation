@@ -1,16 +1,228 @@
 <template>
     <div class="container-fluid">
         <h2 class="fw-bold mb-3">Chi tiết văn bản</h2>
+
+        <!-- Giao diện khi văn bản là của tôi -->
         <div v-if="document.from_me">
-            <div>
-                <p><strong>ID:</strong> {{ document.id }}</p>
-                <p><strong>Tên văn bản:</strong> {{ document.title }}</p>
-                <p><strong>Loại:</strong> {{ document.type }}</p>
-                <p><strong>Trạng thái:</strong> {{ document.status }}</p>
-                <p><strong>Ngày tạo:</strong> {{ document.created_at }}</p>
-                <p><strong>Ngày cập nhật:</strong> {{ document.updated_at }}</p>
+            <div class="container py-1">
+                <div class="row justify-content-between gap-3">
+                    <div class="col-xl-7">
+                        <a-tabs 
+                            v-model:activeKey="activeKey" 
+                            type="card"
+                            class="row border-1 rounded-3 p-4 mb-2 bg-light"
+                            >
+                            <a-tab-pane key="1" tab="Văn bản">
+                                <div class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Mở tệp trong tab mới
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Information Section -->
+                                <div >
+                                    <div class="col">
+                                        <div class="row mb-3">
+                                            <div class="d-flex justify-content-center">
+                                                <span class="fs-5 fw-bold ">Tên tài liệu:</span>
+                                                &nbsp;
+                                                <span class="fs-5 fw-bold fst-italic ">{{ document.title }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- File -->
+                                    <div>
+                                        <PDFViewer 
+                                            :pdf-url="pdfUrl" 
+                                        />
+                                    </div>
+                                </div>
+                            </a-tab-pane>
+                            <a-tab-pane key="2" :tab="`Nhận xét (${document_comments.total_comments})`" force-render>
+                                <!-- Comments Section -->
+                                <div v-if="document_comments.total_comments > 0" v-for="(comment, index) in document_comments.current_comments" :key="index">
+                                    <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
+                                        <div class="col align-self-center">
+                                            <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
+                                            <a-avatar class="" v-else src="https://avatar.iran.liara.run/public" alt="Random Avatar" />
+                                        </div>
+                                        <div class="col-10">
+                                            <div class="row">
+                                                <span class="fw-bold">
+                                                    {{ comment.user['name'] }}
+                                                </span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="text-muted">
+                                                    {{ comment.content }}
+                                                </span>
+                                            </div>
+                                            <div class="row text-end">
+                                                <span class="text-muted">
+                                                    {{ comment.commented_at }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="col d-flex justify-content-center">
+                                            <span class="fs-5 fw-bold ">Người bình luận:</span>
+                                            &nbsp;
+                                            <span class="fs-5 fw-bold fst-italic ">{{ comment.user_name }}</span>
+                                        </div> -->
+                                    </div>
+                                </div>
+
+                                <div v-else class="row mb-3">
+                                    <div class="col d-flex">
+                                        <span class="">Chưa có nhận xét nào</span>
+                                    </div>
+                                </div>
+                            </a-tab-pane>
+                        </a-tabs>
+                    </div>
+                    <div class="col-xl">
+                        <!-- Comment Section -->
+                        <div v-if="commentSection" class="row border-1 rounded-3 p-4 mb-4 bg-light">
+                            <div class="col">
+                                <div class="row mb-3">
+                                    <div class="col d-flex justify-content-center">
+                                        <span class="fs-5 fw-bold ">Nhận xét</span>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <a-textarea 
+                                            placeholder="Nhập nhận xét của bạn" 
+                                            v-model:value="comment" 
+                                            show-count
+                                            :maxlength="1000" 
+                                            ref="commentTextarea"
+                                            />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <button 
+                                            class="border border-2 rounded-2 w-100 py-2 bg-secondary text-white button-click-effect" 
+                                            style="--bs-bg-opacity: .9;"
+                                            @click="handleSendComment"
+                                            >
+                                            <span>
+                                                <i class="bi bi-chat-square-dots me-2"></i>Gửi bình luận
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Information Section -->
+                        <div class="row border-1 rounded-3 p-4 mb-4 bg-light">
+                            <div class="col">
+                                <div class="row mb-3">
+                                    <div class="col d-flex justify-content-center">
+                                        <span class="fs-5 fw-bold ">Thông tin văn bản</span>
+                                    </div>
+                                </div>
+
+                                <!-- Creator Name -->
+                                <div class="row mt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                        <label>
+                                            <span>Người tạo:</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-8">
+                                        <a-input v-model:value="document.creator_name" placeholder="Văn bản số 1" disabled />
+                                        <div class="w-100"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Document Name -->
+                                <div class="row mt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                        <label>
+                                            <span>Tên văn bản:</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-8">
+                                        <a-input v-model:value="document.title" placeholder="Văn bản số 1" disabled />
+                                        <div class="w-100"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Document Type -->
+                                <div class="row mt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                        <label>
+                                            <span>Loại văn bản:</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-8">
+                                        <!-- Nhóm select + button chung hàng -->
+                                        <div class="d-flex">
+                                            <a-input v-model:value="document.type" placeholder="Love" disabled />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Document Description -->
+                                <div class="row mt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                        <label>
+                                            <span>Mô tả:</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        <a-textarea 
+                                            placeholder="Mô tả đơn giản" 
+                                            v-model:value="document.description" 
+                                            show-count
+                                            :maxlength="1000" 
+                                            disabled
+                                            />
+                                    </div>
+                                </div>
+
+                                <!-- Document Created -->
+                                <div class="row mt-3">
+                                    <div class="col text-start mb-2 mb-xl-0 align-self-center ps-3">
+                                        <label>
+                                            <span>Ngày tạo:</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-8">
+                                        <a-input v-model:value="document.created_at" placeholder="Ngày chờ, tháng nhớ, năm mong" disabled />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div> 
+
+                        <!-- Process Section -->
+                        <div class="row border-1 rounded-3 p-4 mb-4 bg-light">
+                            <div class="col">
+                                <div class="row mb-3">
+                                    <div class="text-center">
+                                        <span class="fs-5 fw-bold">Luồng phê duyệt</span>
+                                        <br>
+                                        <span>Tiến độ: {{ process_of_document }}%</span>
+                                    </div>
+                                    <NestedProgressSteps :steps="document_steps" />
+                                </div>
+                            </div>
+                        </div>                        
+
+                    </div>
+                </div>               
             </div>
         </div>
+
+        <!-- Giao diện khi văn bản cần tôi phê duyệt -->
         <div v-else>
             <div class="container py-1">
                 <div class="row justify-content-between gap-3">
@@ -53,7 +265,7 @@
                             </a-tab-pane>
                             <a-tab-pane key="2" :tab="`Nhận xét (${document_comments.total_comments})`" force-render>
                                 <!-- Comments Section -->
-                                <div v-if="document_comments.total_comments > 0" v-for="(comment, index) in document_comments.comments" :key="index">
+                                <div v-if="document_comments.total_comments > 0" v-for="(comment, index) in document_comments.current_comments" :key="index">
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
@@ -127,7 +339,7 @@
                                     </div>
                                 </div>
 
-                                <div v-else class="row mb-3">
+                                <div v-else-if="document.status ==='pending'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
@@ -136,6 +348,20 @@
                                             >
                                             <span>
                                                 <i class="bi bi-hourglass-split me-2"></i>Chưa đến lượt bạn đâu
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div v-else class="row mb-3">
+                                    <div class="col">
+                                        <button 
+                                            class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
+                                            style="--bs-bg-opacity: 1;"
+                                            @click="handleClickNotYourTurn"
+                                            >
+                                            <span>
+                                                Bạn đã {{ document.status === 'approved' ? 'chấp thuận' : 'từ chối' }} văn bản này rồi!
                                             </span>
                                         </button>
                                     </div>
@@ -308,6 +534,7 @@
             </div>
         </div>
     </div>
+    
 
     <a-modal
         v-model:visible="rejectVisible"
@@ -358,11 +585,13 @@ import PDFViewer from '@/components/PDFViewer.vue'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { message, Modal } from 'ant-design-vue';
+import NestedProgressSteps from '@/components/ProgressDocument.vue';
 
 
 export default defineComponent({
     components: {
         PDFViewer,
+        NestedProgressSteps,
     },
     setup() {
         dayjs.extend(relativeTime);
@@ -379,6 +608,60 @@ export default defineComponent({
         const pdfUrl = ref('')
         const process_of_document = ref(0);
         const document_comments = ref([]);
+        const document_steps = 
+        [
+            {
+                title: 'Bước 1',
+                description: 'Mô tả bước 1',
+                status: 'approved', // hoặc 'rejected', 'in_review', 'waiting'
+                subSteps: [
+                    {
+                        title: 'Bước con 1.1',
+                        description: 'Mô tả bước con 1.1',
+                        status: 'approved'
+                    },
+                    {
+                        title: 'Bước con 1.2', 
+                        description: 'Mô tả bước con 1.2',
+                        status: 'in_review'
+                    }
+                ]
+            },
+            {
+                title: 'Bước 2',
+                description: 'Mô tả bước 2',
+                status: 'waiting',
+                subSteps: [
+                    {
+                        title: 'Bước con 2.1',
+                        description: 'Mô tả bước con 2.1', 
+                        status: 'waiting'
+                    },
+                    {
+                        title: 'Bước con 2.2',
+                        description: 'Mô tả bước con 2.2',
+                        status: 'waiting'
+                    }
+                ]
+            },
+            {
+                title: 'Bước 3',
+                description: 'Mô tả bước 3',
+                status: 'waiting',
+                subSteps: [
+                    {
+                        title: 'Bước con 3.1',
+                        description: 'Mô tả bước con 3.1', 
+                        status: 'waiting'
+                    },
+                    {
+                        title: 'Bước con 3.2',
+                        description: 'Mô tả bước con 3.2',
+                        status: 'waiting'
+                    }
+                ]
+            }
+        ]
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents;
@@ -422,9 +705,8 @@ export default defineComponent({
                 return;
             }
 
-            const id = parseInt(route.params.id);
             const data = {
-                document_id: id,
+                document_version_id: documentData.value['version_id'],
                 reason: reasonReject.value,
             };
             const step_id = parseInt(documentData.value['document_flow_step_id']);
@@ -434,6 +716,7 @@ export default defineComponent({
             return;
             try {
                 await documentStore.rejectDocument(step_id, data);
+                documentData.value.status = 'rejected';
                 message.success('Bạn vừa từ chối văn bản với lý do: ' + reasonReject.value);
             } catch (error) {
                 message.error('Có lỗi xảy ra khi từ chối văn bản');
@@ -553,6 +836,7 @@ export default defineComponent({
             isDownloading,
             rejectVisible,
             reasonReject,
+            document_steps,
 
             getAvatarUrl,
             handleClickApprove,
