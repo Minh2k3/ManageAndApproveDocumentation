@@ -50,6 +50,11 @@ const creator = [
                 name: "creator-documents-template",
                 component: () => import('@/pages/creator/documents/template.vue')
             },
+            {
+                path: "documents/:id/edit",
+                name: "creator-documents-edit",
+                component: () => import('@/pages/creator/documents/edit.vue')
+            },
 
             // Quản lý Signatures
             {

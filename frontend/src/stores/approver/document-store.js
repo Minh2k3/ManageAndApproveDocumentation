@@ -151,7 +151,7 @@ export const useDocumentStore = defineStore("document", () => {
 
     async function rejectDocument(id, data) {
         try {
-            const response = await axiosInstance.post(`api/documents/${id}/reject`, data);
+            const response = await axiosInstance.post(`api/document-steps/${id}/reject`, data);
             if (response.data) {
                 console.log("Reject document response: ", response.data);
                 return response.data;

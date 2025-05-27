@@ -49,7 +49,7 @@
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
-                                            <a-avatar class="" v-else src="https://avatar.iran.liara.run/public" alt="Random Avatar" />
+                                            <a-avatar class="" v-else :src="randomAvatar(comment.user['id'])" alt="Random Avatar" />
                                         </div>
                                         <div class="col-10">
                                             <div class="row">
@@ -205,9 +205,14 @@
                                     <div class="text-center">
                                         <span class="fs-5 fw-bold">Luồng phê duyệt</span>
                                         <br>
-                                        <span>Tiến độ: {{ process_of_document }}%</span>
+                                        <span v-if="document.status === 'approved'" class="fst-italic text-success">Đã được duyệt</span>
+                                        <span v-else-if="document.status === 'rejected'" class="fst-italic text-danger">Bị từ chối</span>
+                                        <span v-else class="fst-italic text-secondary">Tiến độ: {{ document_flow_steps.progress_percentage }}%</span>
                                     </div>
-                                    <NestedProgressSteps :steps="document_steps" />
+                                    <NestedProgressSteps 
+                                        v-if="document_flow_steps && Object.keys(document_flow_steps).length > 0" 
+                                        :steps="document_flow_steps" 
+                                    />
                                 </div>
                             </div>
                         </div>                        
@@ -263,41 +268,18 @@ export default defineComponent({
         const pdfUrl = ref('')
         const process_of_document = ref(0);
         const document_comments = ref([]);
+        const document_flow_steps = ref([]);
         const document_steps = 
         [
             {
                 title: 'Bước 1',
                 description: 'Mô tả bước 1',
                 status: 'approved', // hoặc 'rejected', 'in_review', 'waiting'
-                subSteps: [
-                    {
-                        title: 'Bước con 1.1',
-                        description: 'Mô tả bước con 1.1',
-                        status: 'approved'
-                    },
-                    {
-                        title: 'Bước con 1.2', 
-                        description: 'Mô tả bước con 1.2',
-                        status: 'in_review'
-                    }
-                ]
             },
             {
                 title: 'Bước 2',
                 description: 'Mô tả bước 2',
-                status: 'waiting',
-                subSteps: [
-                    {
-                        title: 'Bước con 2.1',
-                        description: 'Mô tả bước con 2.1', 
-                        status: 'waiting'
-                    },
-                    {
-                        title: 'Bước con 2.2',
-                        description: 'Mô tả bước con 2.2',
-                        status: 'waiting'
-                    }
-                ]
+                status: 'in_review',
             },
             {
                 title: 'Bước 3',
@@ -331,6 +313,10 @@ export default defineComponent({
 
             pdfUrl.value = documentData.value.file_path;
             process_of_document.value = documentData.value.process / documentData.value.step_count * 100;
+
+            await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
+            document_flow_steps.value = documentStore.current_document_flow_steps;
+            console.log(document_flow_steps.value);
         });
 
         const comment = ref('');
@@ -425,6 +411,13 @@ export default defineComponent({
             }
         };
 
+        const randomAvatar = (id) => {
+            if (id > 100 || id == null) {
+                return `https://avatar.iran.liara.run/public`;
+            }
+            return `https://avatar.iran.liara.run/public/${id}`;
+        };
+
         return {
             document: documentData,
             pdfUrl,
@@ -438,11 +431,14 @@ export default defineComponent({
             commentTextarea,
             isDownloading,
             document_steps,
+            document_flow_steps,
 
             getAvatarUrl,
+            randomAvatar,
             handleClickComment,
             handleClickDownload,
             handleSendComment,
+
         };
     },
 });

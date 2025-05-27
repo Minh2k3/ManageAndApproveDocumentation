@@ -42,7 +42,12 @@
             </div>
         </div>
     </div>
-    <a-back-top />
+    <a-tooltip placement="left">
+        <template #title>
+            <span>Về đầu trang</span>
+        </template>
+        <a-back-top />
+    </a-tooltip>
 </template>
 
 <script>

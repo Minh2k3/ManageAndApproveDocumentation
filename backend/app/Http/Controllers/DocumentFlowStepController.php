@@ -137,7 +137,9 @@ class DocumentFlowStepController extends Controller
         try {
             $document_version->update(['status' => 'rejected']);
             $document_flow_step->update(['status' => 'rejected']);
+            $document_flow_step->update(['decision' => 'rejected']);
             $document_flow_step->update(['reason' => $reason]);
+            $document->update(['status' => 'rejected']);
 
             $user = auth()->user();
             $admins = User::where('role_id', '1')->get();

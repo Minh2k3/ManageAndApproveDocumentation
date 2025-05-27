@@ -353,15 +353,29 @@
                                     </div>
                                 </div>
 
-                                <div v-else class="row mb-3">
+                                <div v-else-if="document.status === 'approved'" class="row mb-3">
                                     <div class="col">
                                         <button 
-                                            class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
+                                            class="border border-2 rounded-2 text-white bg-success w-100 py-2 button-click-effect" 
                                             style="--bs-bg-opacity: 1;"
-                                            @click="handleClickNotYourTurn"
+                                            @click="handleClickApproved"
                                             >
                                             <span>
-                                                Bạn đã {{ document.status === 'approved' ? 'chấp thuận' : 'từ chối' }} văn bản này rồi!
+                                                Bạn đã đồng ý văn bản này rồi!
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div v-else-if="document.status === 'rejected'" class="row mb-3">
+                                    <div class="col">
+                                        <button 
+                                            class="border border-2 rounded-2 text-white bg-danger w-100 py-2 button-click-effect" 
+                                            style="--bs-bg-opacity: 1;"
+                                            @click="handleClickRejected"
+                                            >
+                                            <span>
+                                                Bạn đã từ chối văn bản này rồi!
                                             </span>
                                         </button>
                                     </div>
@@ -713,7 +727,7 @@ export default defineComponent({
 
             console.log('Rejecting document with data:', data);
             console.log('Step ID:', step_id);
-            return;
+            // return;
             try {
                 await documentStore.rejectDocument(step_id, data);
                 documentData.value.status = 'rejected';
@@ -822,6 +836,22 @@ export default defineComponent({
             });
         };
 
+        const handleClickApproved = () => {
+            Modal.info({
+                title: 'Thông báo',
+                content: createVNode('p', null, 'Bạn đã phê duyệt văn bản này rồi!'),
+                okText: 'Đóng',
+            });
+        };
+
+        const handleClickRejected = () => {
+            Modal.info({
+                title: 'Thông báo',
+                content: createVNode('p', null, 'Bạn đã từ chối văn bản này rồi!'),
+                okText: 'Đóng',
+            });
+        };
+
         return {
             document: documentData,
             pdfUrl,
@@ -846,6 +876,8 @@ export default defineComponent({
             handleSendComment,
             handleClickNotYourTurn,
             handleRejectDocument,
+            handleClickApproved,
+            handleClickRejected,
         };
     },
 });

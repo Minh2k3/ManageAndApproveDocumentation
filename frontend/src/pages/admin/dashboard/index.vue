@@ -239,11 +239,11 @@
                             <!-- Progress bar -->
                             <div class="col-lg-7">
                                 <div class="progress" role="progressbar" aria-label="Success example" 
-                                    :aria-valuenow="number_of_documents_by_status.get('reject').percentage"
+                                    :aria-valuenow="number_of_documents_by_status.get('rejected').percentage"
                                     aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
                                     <div class="progress-bar bg-danger" 
                                         :style="{
-                                            width: number_of_documents_by_status.get('reject').percentage + '%',
+                                            width: number_of_documents_by_status.get('rejected').percentage + '%',
                                             height: '1.2rem'
                                         }"></div>
                                 </div>
@@ -251,7 +251,7 @@
 
                             <!-- Percentage -->
                             <div class="col-lg-2 text-lg-start text-end">
-                                <span class="fw-semibold">{{ number_of_documents_by_status.get("reject").percentage }} %</span>
+                                <span class="fw-semibold">{{ number_of_documents_by_status.get("rejected").percentage }} %</span>
                             </div>
                         </div>
                     </div>

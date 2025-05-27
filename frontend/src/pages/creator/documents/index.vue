@@ -113,6 +113,15 @@
                             <span>{{ index + 1 }}</span>
                         </template>
 
+                        <template v-if="column.key === 'title'">
+                            <a-tooltip>
+                                <template #title>
+                                    <span class="">{{ record.description }}</span>
+                                </template>
+                                <span class="">{{ record.title }}</span>
+                            </a-tooltip>
+                        </template>
+
                         <template v-if="column.key === 'type'">
                             <span v-if="record.type_id == 1"
                                 class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
@@ -126,10 +135,20 @@
                         </template>
 
                         <template v-if="column.key === 'status'">
-                            <span v-if="record.status === 'draft'" class="text-secondary">Bản nháp</span>
-                            <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
-                            <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
-                            <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
+                            <div v-if="record.status === 'draft'">
+                                <span class="text-secondary">Bản nháp</span>
+                            </div>
+                            <div v-else>
+                                <a-tooltip>
+                                    <template #title>
+                                        <span class="">{{ showProcess(record) }}</span>
+                                    </template>
+                                    <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
+                                    <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
+                                    <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
+                                </a-tooltip>
+                            </div>
+
                         </template>
                     </template>
                 </a-table>
@@ -161,7 +180,7 @@
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button type="warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <a-button v-if="selectedDocument.status !== 'in_review'" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
             <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>
@@ -184,6 +203,7 @@ import { useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/creator/document-store.js';
 import { message, Modal } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
+import { responsiveArray } from 'ant-design-vue/es/_util/responsiveObserve';
 
 export default defineComponent({
     setup() {
@@ -258,10 +278,20 @@ export default defineComponent({
                 align: 'center',
             },
             {
+                title: 'Số phiên bản',
+                key: 'version_count',
+                dataIndex: 'version_count',
+                width: 120,
+                sorter: (a, b) => a.version_count - b.version_count,
+                sortDirections: ['ascend', 'descend'],
+                align: 'center',
+            },
+            {
                 title: 'Ngày tạo',
                 key: 'created_at',
                 dataIndex: 'created_at',
                 width: 150,
+                responsive: ['xl'],
                 sorter: (a, b) => a.created_at.localeCompare(b.created_at),
                 sortDirections: ['ascend', 'descend'],
                 align: 'center',
@@ -275,14 +305,14 @@ export default defineComponent({
                 sortDirections: ['ascend', 'descend'],
                 align: 'center',
             },
-            {
-                title: "Thao tác",
-                key: "action",
-                responsive: ["xxl"],
-                customHeaderCell: () => {
-                    return { style: { textAlign: 'center' } };
-                }
-            }
+            // {
+            //     title: "Thao tác",
+            //     key: "action",
+            //     responsive: ["xl"],
+            //     customHeaderCell: () => {
+            //         return { style: { textAlign: 'center' } };
+            //     }
+            // }
         ];
 
         const router = useRouter();
@@ -301,7 +331,7 @@ export default defineComponent({
 
         // Hàm điều hướng đến trang sửa văn bản
         const goToEditPage = (id) => {
-            router.push(`documents/${id}`);
+            router.push(`documents/${id}/edit`);
         };
 
         // Hàm điều hướng đến trang chi tiết văn bản
@@ -312,16 +342,22 @@ export default defineComponent({
             });
         };
 
+        const showProcess = (record) => {
+            return record.process + '/' + record.step_count + ' bước';
+        }
+
         return {
             documents,
             columns,
             document_flow_steps,
             detailVisible,
             selectedDocument,
+
             customRow,
             viewDetail,
             goToEditPage,
             goToDetailPage,
+            showProcess,
         };
     },
 });

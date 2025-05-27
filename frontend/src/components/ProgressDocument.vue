@@ -1,80 +1,61 @@
 <template>
-  <div class="nested-steps-container">
+  <div class="document-flow-container">
+    <div class="flow-header" v-if="flowData">
+      <h3 class="flow-title">{{ flowData.document_flow_name }}</h3>
+      <div class="flow-info">
+        <span class="step-counter">{{ completedSteps }}/{{ flowData.total_steps }} bước hoàn thành</span>
+      </div>
+    </div>
+    
     <a-steps
       direction="vertical"
-      :current="currentMainStep"
+      :current="currentStep"
       class="main-steps"
     >
       <a-step
-        v-for="(step, index) in stepsWithStatus"
-        :key="index"
+        v-for="(step, index) in processedSteps"
+        :key="step.id"
         :title="step.title"
         :description="step.description"
-        :status="getAntdStatus(step.status)"
-        :icon="getStepIcon(step.status)"
-        :class="getStepClass(step.status, step.isDisabled)"
+        :status="getAntdStatus(step.displayStatus)"
+        :icon="getStepIcon(step.displayStatus)"
+        :class="getStepClass(step.displayStatus)"
       >
         <template #description>
-          <div :class="{ 'disabled-content': step.isDisabled }">
+          <div class="step-content">
             <div class="step-description">{{ step.description }}</div>
             
-            <!-- Hiển thị trạng thái của bước cha -->
+            <!-- Hiển thị trạng thái -->
             <div class="step-status-badge">
               <a-tag 
-                :color="getStatusColor(step.originalStatus || step.status)"
+                :color="getStatusColor(step.displayStatus)"
                 class="status-tag"
               >
-                {{ getStatusText(step.originalStatus || step.status) }}
+                {{ getStatusText(step.displayStatus) }}
               </a-tag>
             </div>
             
-            <!-- Sub-steps nếu có -->
-            <div v-if="step.subSteps && step.subSteps.length > 0" class="sub-steps-container">
-              <div class="sub-steps-header">
-                <span class="sub-steps-title">Chi tiết các bước:</span>
+            <!-- Hiển thị thông tin người phê duyệt -->
+            <div class="approver-info">
+              <div class="approver-name">
+                <strong>{{ step.approver.name }}</strong>
               </div>
-              
-              <!-- Hiển thị từng bước con dưới dạng list thay vì a-steps -->
-              <div class="sub-steps-list">
-                <div 
-                  v-for="(subStep, subIndex) in step.subSteps"
-                  :key="subIndex"
-                  class="sub-step-item"
-                  :class="{ 'disabled-sub-step': step.isDisabled }"
-                  :data-status="step.isDisabled ? 'disabled' : subStep.status"
-                >
-                  <!-- Icon và title của sub-step -->
-                  <div class="sub-step-header">
-                    <div class="sub-step-icon">
-                      <component 
-                        :is="getStepIcon(step.isDisabled ? 'disabled' : subStep.status)"
-                        class="sub-step-icon-component"
-                      />
-                    </div>
-                    <div class="sub-step-content">
-                      <div class="sub-step-title">{{ subStep.title }}</div>
-                      <div class="sub-step-description">{{ subStep.description }}</div>
-                      
-                      <!-- Status badge cho sub-step -->
-                      <div class="step-status-badge">
-                        <a-tag 
-                          :color="getStatusColor(step.isDisabled ? 'disabled' : subStep.status)"
-                          class="status-tag-small"
-                          size="small"
-                        >
-                          {{ getStatusText(step.isDisabled ? 'disabled' : subStep.status) }}
-                        </a-tag>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Connector line trừ item cuối -->
-                  <div 
-                    v-if="subIndex < step.subSteps.length - 1" 
-                    class="sub-step-connector"
-                  ></div>
-                </div>
+              <div class="approver-role">
+                {{ step.approver.roll_display }}
               </div>
+            </div>
+            
+            <!-- Hiển thị thời gian ký nếu có -->
+            <div v-if="step.signed_at" class="signed-time">
+              <span class="time-label">Thời gian ký:</span>
+              <span class="time-value">{{ step.signed_at }}</span>
+            </div>
+            
+            <!-- Hiển thị thông tin multichoice nếu có -->
+            <div v-if="step.multichoice" class="multichoice-info">
+              <a-tag color="blue" size="small">
+                Phê duyệt đồng thuận
+              </a-tag>
             </div>
           </div>
         </template>
@@ -85,153 +66,151 @@
 
 <script setup>
 import { computed, h } from 'vue'
-import { CheckCircleOutlined, CloseCircleOutlined, SyncOutlined, ClockCircleOutlined } from '@ant-design/icons-vue'
+import { CheckCircleOutlined, CloseCircleOutlined, SyncOutlined, ClockCircleOutlined, StopOutlined } from '@ant-design/icons-vue'
 
 // Props
 const props = defineProps({
   steps: {
-    type: Array,
-    required: true,
-    default: () => []
+    type: Object,
+    required: false,
+    default: () => null
   }
 })
 
-// Sample data structure
-const sampleSteps = [
-  {
-    title: 'Khởi tạo dự án',
-    description: 'Thiết lập môi trường và cấu hình ban đầu',
-    status: 'approved',
-    subSteps: [
-      {
-        title: 'Tạo repository',
-        description: 'Khởi tạo Git repository',
-        status: 'approved'
+// Sample data nếu không có props
+const sampleData = {
+  "document_flow_id": 8,
+  "document_flow_name": "Luồng phê duyệt cho 'Test thêm nháp' của Hải Nam - 5/27/2025, 9:23:01 AM",
+  "total_steps": 2,
+  "steps": [
+    {
+      "id": 15,
+      "step": 1,
+      "department": {
+        "id": 6,
+        "name": "Hội Sinh viên"
       },
-      {
-        title: 'Cài đặt dependencies',
-        description: 'Cài đặt các package cần thiết',
-        status: 'approved'
-      }
-    ]
-  },
-  {
-    title: 'Phát triển tính năng',
-    description: 'Xây dựng các tính năng chính',
-    status: 'rejected',
-    subSteps: [
-      {
-        title: 'Frontend Development',
-        description: 'Phát triển giao diện người dùng',
-        status: 'approved'
+      "approver": {
+        "id": 17,
+        "name": "Ngọc Thúy",
+        "department": {
+          "id": 6,
+          "name": "Hội Sinh viên"
+        },
+        "roll": {
+          "id": 16,
+          "name": "Phó Chủ tịch"
+        },
+        "roll_display": "Phó Chủ tịch - Hội Sinh viên"
       },
-      {
-        title: 'Backend API',
-        description: 'Xây dựng API backend',
-        status: 'rejected'
+      "multichoice": false,
+      "status": "approved", // approved, rejected, pending
+      "decision": "approve", // approve, reject, not_yet
+      "signed_at": "10:30:15 27/05/2025",
+      "created_at": "09:23:02 27/05/2025",
+      "updated_at": "10:30:15 27/05/2025"
+    },
+    {
+      "id": 16,
+      "step": 2,
+      "department": {
+        "id": 4,
+        "name": "Phòng CT & CTSV"
       },
-      {
-        title: 'Database Design',
-        description: 'Thiết kế cơ sở dữ liệu',
-        status: 'waiting'
-      }
-    ]
-  },
-  {
-    title: 'Testing & Deployment',
-    description: 'Kiểm thử và triển khai ứng dụng',
-    status: 'waiting',
-    subSteps: [
-      {
-        title: 'Unit Testing',
-        description: 'Viết và chạy unit tests',
-        status: 'waiting'
+      "approver": {
+        "id": 16,
+        "name": "Diệp Hoàng Trúc Mai",
+        "department": {
+          "id": 4,
+          "name": "Phòng CT & CTSV"
+        },
+        "roll": {
+          "id": 2,
+          "name": "Phó phòng"
+        },
+        "roll_display": "Phó phòng - Phòng CT & CTSV"
       },
-      {
-        title: 'Integration Testing',
-        description: 'Kiểm thử tích hợp',
-        status: 'waiting'
-      },
-      {
-        title: 'Production Deployment',
-        description: 'Triển khai lên production',
-        status: 'waiting'
-      }
-    ]
-  }
-]
-
-// Sử dụng sample data nếu không có props
-const currentSteps = computed(() => props.steps.length > 0 ? props.steps : sampleSteps)
-
-// Hàm tính toán trạng thái của bước cha dựa trên bước con
-const calculateParentStatus = (subSteps) => {
-  if (!subSteps || subSteps.length === 0) return 'waiting'
-  
-  const statuses = subSteps.map(step => step.status)
-  
-  // Nếu có bước con bị rejected thì cha bị rejected
-  if (statuses.includes('rejected')) return 'rejected'
-  
-  // Nếu có bước con đang in_review thì cha đang in_review
-  if (statuses.includes('in_review')) return 'in_review'
-  
-  // Nếu tất cả bước con đều approved thì cha approved
-  if (statuses.every(status => status === 'approved')) return 'approved'
-  
-  // Nếu có bước con waiting thì cha waiting
-  if (statuses.includes('waiting')) return 'waiting'
-  
-  return 'waiting'
+      "multichoice": false,
+      "status": "pending",
+      "decision": "not_yet",
+      "signed_at": null,
+      "created_at": "09:23:02 27/05/2025",
+      "updated_at": "09:23:02 27/05/2025"
+    }
+  ]
 }
 
-// Tính toán lại trạng thái cho các bước với logic disable
-const stepsWithStatus = computed(() => {
-  let hasRejectedBefore = false
+// Sử dụng data từ props hoặc sample data
+const flowData = computed(() => {
+  console.log('Props received:', props.steps)
+  return props.steps || sampleData
+})
+
+// Chuyển đổi status từ API sang status hiển thị
+const convertApiStatus = (apiStatus, decision) => {
+  switch (apiStatus) {
+    case 'approved':
+      return 'approved'
+    case 'rejected':
+      return 'rejected'
+    case 'pending':
+      return 'waiting'
+    case 'in_review':
+      return 'in_review'
+    default:
+      return 'waiting'
+  }
+}
+
+// Xử lý logic multichoice và disabled steps
+const processedSteps = computed(() => {
+  if (!flowData.value?.steps) return []
   
-  return currentSteps.value.map((step, index) => {
-    // Tính trạng thái hiện tại của bước
-    const currentStatus = step.subSteps && step.subSteps.length > 0 
-      ? calculateParentStatus(step.subSteps)
-      : step.status
+  const steps = flowData.value.steps
+  let hasRejectedStep = false
+  
+  return steps.map((step, index) => {
+    // Chuyển đổi status
+    let displayStatus = convertApiStatus(step.status, step.decision)
     
-    // Nếu bước trước đó bị rejected, các bước sau sẽ bị disabled
-    const finalStatus = hasRejectedBefore ? 'disabled' : currentStatus
-    
-    // Cập nhật flag nếu bước hiện tại bị rejected
-    if (currentStatus === 'rejected') {
-      hasRejectedBefore = true
+    // Logic disable: nếu có bước trước bị reject, các bước sau sẽ bị disable
+    if (hasRejectedStep && displayStatus !== 'rejected') {
+      displayStatus = 'disabled'
     }
     
+    // Cập nhật flag nếu bước hiện tại bị rejected
+    if (step.status === 'rejected' || step.decision === 'reject') {
+      hasRejectedStep = true
+      displayStatus = 'rejected'
+    }
+
     return {
       ...step,
-      status: finalStatus,
-      originalStatus: currentStatus, // Lưu trạng thái gốc
-      isDisabled: hasRejectedBefore && currentStatus !== 'rejected'
+      title: `Bước ${step.step}: ${step.department.name}`,
+      description: `Phê duyệt bởi ${step.approver.name}`,
+      displayStatus: displayStatus,
+      originalStatus: step.status
     }
   })
 })
 
-// Tính current step cho main steps
-const currentMainStep = computed(() => {
-  const steps = stepsWithStatus.value
+// Tính current step
+const currentStep = computed(() => {
+  const steps = processedSteps.value
   for (let i = 0; i < steps.length; i++) {
-    if (steps[i].status === 'in_review' || steps[i].status === 'waiting') {
+    if (steps[i].displayStatus === 'in_review' || steps[i].displayStatus === 'waiting') {
       return i
     }
   }
   return steps.length - 1
 })
 
-// Tính current step cho sub steps
-const getCurrentSubStep = (subSteps) => {
-  for (let i = 0; i < subSteps.length; i++) {
-    if (subSteps[i].status === 'in_review' || subSteps[i].status === 'waiting') {
-      return i
-    }
-  }
-  return subSteps.length - 1
-}
+// Đếm số bước đã hoàn thành
+const completedSteps = computed(() => {
+  return processedSteps.value.filter(step => 
+    step.displayStatus === 'approved'
+  ).length
+})
 
 // Hàm lấy icon cho từng trạng thái
 const getStepIcon = (status) => {
@@ -245,17 +224,14 @@ const getStepIcon = (status) => {
     case 'waiting':
       return h(ClockCircleOutlined, { style: { color: '#d9d9d9' } })
     case 'disabled':
-      return h(ClockCircleOutlined, { style: { color: '#bfbfbf', opacity: 0.5 } })
+      return h(StopOutlined, { style: { color: '#bfbfbf', opacity: 0.5 } })
     default:
       return undefined
   }
 }
 
 // Hàm lấy class CSS cho trạng thái
-const getStepClass = (status, isDisabled = false) => {
-  if (isDisabled || status === 'disabled') {
-    return 'step-disabled'
-  }
+const getStepClass = (status) => {
   return `step-${status}`
 }
 
@@ -315,10 +291,40 @@ const getStatusText = (status) => {
 </script>
 
 <style scoped>
-.nested-steps-container {
+.document-flow-container {
   padding: 20px;
   background: #fafafa;
   border-radius: 8px;
+}
+
+.flow-header {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.flow-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  line-height: 1.4;
+}
+
+.flow-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-counter {
+  font-size: 14px;
+  color: #666;
+  background: #f0f2f5;
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 
 .main-steps {
@@ -328,121 +334,62 @@ const getStatusText = (status) => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.step-content {
+  padding: 8px 0;
+}
+
 .step-description {
   margin-bottom: 12px;
   color: #666;
-}
-
-.sub-steps-container {
-  margin-top: 16px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.sub-steps-list {
-  margin-top: 12px;
-}
-
-.sub-step-item {
-  position: relative;
-  margin-bottom: 16px;
-}
-
-.sub-step-item:last-child {
-  margin-bottom: 0;
-}
-
-.sub-step-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.sub-step-icon {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 50%;
-  border: 2px solid #d9d9d9;
-  margin-top: 2px;
-}
-
-.sub-step-icon-component {
   font-size: 14px;
 }
 
-.sub-step-content {
-  flex: 1;
-  min-width: 0;
+.step-status-badge {
+  margin: 8px 0;
 }
 
-.sub-step-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #262626;
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-
-.sub-step-description {
+.status-tag {
   font-size: 12px;
-  color: #8c8c8c;
-  margin-bottom: 8px;
-  line-height: 1.5;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 
-.sub-step-connector {
-  position: absolute;
-  left: 11px;
-  top: 32px;
-  width: 2px;
-  height: 24px;
-  background: #f0f0f0;
-  z-index: 1;
+.approver-info {
+  margin: 12px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #1890ff;
 }
 
-.disabled-sub-step {
-  opacity: 0.5;
+.approver-name {
+  font-size: 14px;
+  margin-bottom: 4px;
 }
 
-.disabled-sub-step .sub-step-title {
-  color: #bfbfbf !important;
+.approver-role {
+  font-size: 12px;
+  color: #666;
 }
 
-.disabled-sub-step .sub-step-description {
-  color: #d9d9d9 !important;
+.signed-time {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #666;
 }
 
-.disabled-sub-step .sub-step-icon {
-  background: #f5f5f5;
-  border-color: #d9d9d9;
+.time-label {
+  margin-right: 8px;
 }
 
-/* Color coding cho sub-step icon dựa theo status */
-.sub-step-item[data-status="approved"] .sub-step-icon {
-  border-color: #52c41a;
-  background: #f6ffed;
+.time-value {
+  font-weight: 500;
+  color: #262626;
 }
 
-.sub-step-item[data-status="rejected"] .sub-step-icon {
-  border-color: #ff4d4f;
-  background: #fff2f0;
-}
-
-.sub-step-item[data-status="in_review"] .sub-step-icon {
-  border-color: #1890ff;
-  background: #f0f8ff;
-}
-
-.sub-step-item[data-status="waiting"] .sub-step-icon {
-  border-color: #d9d9d9;
-  background: white;
+.multichoice-info {
+  margin: 8px 0;
 }
 
 /* Custom styles cho các trạng thái */
@@ -461,7 +408,6 @@ const getStatusText = (status) => {
   border-color: #d9d9d9;
 }
 
-/* Custom styles cho rejected status */
 :deep(.ant-steps-item-error .ant-steps-item-icon) {
   background-color: #ff4d4f;
   border-color: #ff4d4f;
@@ -491,51 +437,18 @@ const getStatusText = (status) => {
   opacity: 0.5;
 }
 
-.disabled-content {
+.step-disabled .step-content {
   opacity: 0.6;
   color: #bfbfbf;
 }
 
-/* Status badge styles */
-.step-status-badge {
-  margin: 8px 0;
-}
-
-.status-tag {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-}
-
-.status-tag-small {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 8px;
-}
-
-/* Sub-steps header */
-.sub-steps-header {
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.sub-steps-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #666;
-}
-
-.sub-step-description {
-  font-size: 12px;
-  color: #888;
-  margin-bottom: 4px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-  .nested-steps-container {
+  .document-flow-container {
+    padding: 12px;
+  }
+  
+  .flow-header {
     padding: 12px;
   }
   
@@ -543,11 +456,11 @@ const getStatusText = (status) => {
     padding: 12px;
   }
   
-  .sub-steps-container {
-    padding-left: 12px;
+  .flow-title {
+    font-size: 14px;
   }
   
-  .sub-steps {
+  .approver-info {
     padding: 8px;
   }
 }

@@ -144,13 +144,18 @@
 				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
+			<a-menu-item key="creator-documents-edit" :disabled="!isEditPageCreator" :selectable="isEditPageCreator">
+				Sửa văn bản
+			</a-menu-item>
+			
+			<a-menu-item key="creator-documents-detail" :disabled="!isDetailPageCreator" :selectable="isDetailPageCreator">
+				Chi tiết văn bản
+			</a-menu-item>
+
 			<a-menu-item key="creator-documents-history">
 				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
 			</a-menu-item>
 
-			<a-menu-item key="creator-documents-detail" :disabled="!isDetailPage" :selectable="isDetailPage">
-				Chi tiết văn bản
-			</a-menu-item>
 		</a-sub-menu>
 
 		<a-menu-item key="creator-documents-template">
@@ -280,8 +285,12 @@ export default defineComponent({
 
 		const route = useRoute();
 
-		const isDetailPage = computed(() => {
+		const isDetailPageCreator = computed(() => {
 			return route.name === 'creator-documents-detail';
+		});
+
+		const isEditPageCreator = computed(() => {
+			return route.name === 'creator-documents-edit';
 		});
 
 		const isDetailPageApprover = computed(() => {
@@ -322,7 +331,8 @@ export default defineComponent({
 		return {
 			...storeToRefs(store),
 			role,
-			isDetailPage,
+			isDetailPageCreator,
+			isEditPageCreator,
 			isDetailPageApprover,
 			
 			onMenuClick,
