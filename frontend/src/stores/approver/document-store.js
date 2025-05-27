@@ -17,6 +17,7 @@ export const useDocumentStore = defineStore("document", () => {
     const documents = ref([])
     const isFetchedDocuments = ref(false)
     const document_comments = ref([])
+    const current_document_flow_steps = ref([]);
 
     // Actions
     async function fetchDocumentTypes(force = false) {
@@ -149,6 +150,30 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
+    async function fetchStepsByDocumentFlowId(documentFlowId) {
+        try {
+            const response = await axiosInstance.get(`api/document-flows/${documentFlowId}/steps`);
+            if (response.data) {
+                console.log("Document_flow_step: " + JSON.stringify(response.data, null, 2));
+                current_document_flow_steps.value = response.data;
+            }
+        } catch (error) {
+            console.error("Error fetching document flow steps:", error);
+        }
+    }
+    
+    async function approveDocument(id) {
+        try {
+            const response = await axiosInstance.post(`api/document-steps/${id}/approve`);
+            if (response.data) {
+                console.log("Approve document response: ", response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error approving document:", error);
+        }   
+    }
+
     async function rejectDocument(id, data) {
         try {
             const response = await axiosInstance.post(`api/document-steps/${id}/reject`, data);
@@ -200,6 +225,7 @@ export const useDocumentStore = defineStore("document", () => {
         documents,
         isFetchedDocuments,
         document_comments,
+        current_document_flow_steps,
 
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
@@ -209,6 +235,8 @@ export const useDocumentStore = defineStore("document", () => {
         fetchDocuments,
         fetchDocumentComments,
         // fetchDocumentById,
+        fetchStepsByDocumentFlowId,
+        approveDocument,
         rejectDocument,
         fetchAll,
         reset,

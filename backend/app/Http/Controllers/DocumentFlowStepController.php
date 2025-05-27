@@ -3,13 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\DocumentFlowStep;
-use Illuminate\Http\Request;
+use App\Models\DocumentFlow;
 use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\DocumentComment;
+use App\Models\ApprovalPermission;
+use App\Models\Department;
+use App\Models\Approver;
+use App\Models\DocumentType;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Pusher\Pusher;
-
 
 class DocumentFlowStepController extends Controller
 {
@@ -18,16 +24,10 @@ class DocumentFlowStepController extends Controller
      */
     public function index()
     {
-        $documentFlowSteps = DocumentFlowStep::all();
+        $documentFlowSteps = DocumentFlowStep::with(['approver.user', 'department'])
+            ->paginate(20);
+            
         return response()->json($documentFlowSteps);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -35,77 +35,175 @@ class DocumentFlowStepController extends Controller
      */
     public function store(Request $request)
     {
-        $documentFlowStep = DocumentFlowStep::create($request->all());
+        $validated = $request->validate([
+            'document_flow_id' => 'required|exists:document_flows,id',
+            'step' => 'required|integer|min:1',
+            'department_id' => 'required|exists:departments,id',
+            'approver_id' => 'nullable|exists:approvers,id',
+            'multichoice' => 'boolean',
+            'status' => 'in:pending,in_review,approved,rejected'
+        ]);
+
+        $documentFlowStep = DocumentFlowStep::create($validated);
 
         return response()->json([
             'message' => 'Document flow step created successfully.',
-            'document_flow_step' => $documentFlowStep,
-        ])->setStatusCode(201, 'Document flow step created successfully.');
+            'document_flow_step' => $documentFlowStep->load(['approver.user', 'department'])
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(DocumentFlowStep $documentFlowStep)
+    public function show($id)
     {
-        //
-    }
+        $documentFlowStep = DocumentFlowStep::with([
+            'approver.user',
+            'department',
+            'documentFlow',
+            'comments'
+        ])->findOrFail($id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(DocumentFlowStep $documentFlowStep)
-    {
-        //
+        return response()->json($documentFlowStep);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, DocumentFlowStep $documentFlowStep)
+    public function update(Request $request, $id)
     {
-        //
+        $documentFlowStep = DocumentFlowStep::findOrFail($id);
+        
+        $validated = $request->validate([
+            'approver_id' => 'nullable|exists:approvers,id',
+            'multichoice' => 'boolean'
+        ]);
+
+        $documentFlowStep->update($validated);
+
+        return response()->json([
+            'message' => 'Document flow step updated successfully.',
+            'document_flow_step' => $documentFlowStep->fresh()
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DocumentFlowStep $documentFlowStep)
+    public function destroy($id)
     {
-        //
+        $documentFlowStep = DocumentFlowStep::findOrFail($id);
+        
+        // Check if can delete
+        if ($documentFlowStep->status !== 'pending') {
+            return response()->json([
+                'message' => 'Cannot delete a step that has been processed.'
+            ], 400);
+        }
+        
+        $documentFlowStep->delete();
+
+        return response()->json([
+            'message' => 'Document flow step deleted successfully.'
+        ]);
     }
 
     /**
-     * Get all step of a document flow
+     * Get all steps of a document flow
      */
     public function getStepsByDocumentFlowId($documentFlowId)
     {
         $steps = DocumentFlowStep::where('document_flow_id', $documentFlowId)
-        ->select(
-            'document_flow_id',
-            'step',
-            'multichoice',
-            'department_id',
-        )
-        ->get();
+            ->with(['approver.user', 'department'])
+            ->orderBy('step')
+            ->get();
+            
         return response()->json([
-            'document_flow_steps' => $steps,
-        ])->setStatusCode(200, 'Document flow steps retrieved successfully.');
+            'document_flow_steps' => $steps
+        ]);
     }
 
     /**
      * Approve a document flow step
      */
-    public function approveStep(Request $request, $id) 
+    public function approveStep($id)
     {
-        $document = Document::findOrFail($request['document_id']);
-        $documentFlowStep = DocumentFlowStep::findOrFail($id);
-        $documentFlowStep->update(['status' => 'approved']);
+        // $validated = $request->validate([
+        //     'comment' => 'nullable|string|max:1000'
+        // ]);
 
-        return response()->json([
-            'message' => 'Document flow step approved successfully.',
-            'document_flow_step' => $documentFlowStep,
-        ])->setStatusCode(200, 'Document flow step approved successfully.');
+        DB::beginTransaction();
+        
+        try {
+            // 1. Lock và kiểm tra document flow step hiện tại
+            $currentStep = DocumentFlowStep::where('id', $id)
+                ->lockForUpdate()
+                ->first();
+                
+            if (!$currentStep) {
+                throw new \Exception('Document flow step not found.', 404);
+            }
+            
+            // Kiểm tra quyền
+            $this->authorizeApproval($currentStep);
+            
+            // Kiểm tra trạng thái hiện tại
+            if ($currentStep->status !== 'in_review') {
+                throw new \Exception('This step has already been processed.', 400);
+            }
+            
+            // Lock các resources liên quan
+            $resources = $this->lockRelatedResources($currentStep);
+            
+            // 2. Cập nhật trạng thái và decision của step hiện tại
+            $currentStep->update([
+                'status' => 'approved',
+                'decision' => 'approved',
+                'signed_at' => now()
+            ]);
+            
+            // Lưu comment nếu có
+            // if (!empty($validated['comment'])) {
+            //     $this->saveComment($currentStep->id, $validated['comment']);
+            // }
+            
+            // 3. Tăng process count trong document_flows
+            $resources['documentFlow']->increment('process');
+            
+            // 4. Xử lý logic multichoice và chuyển step
+            // Trả về true khi bước hiện tại đã phê duyệt xong
+            $shouldProceedToNext = $this->handleMultichoiceLogic($currentStep);
+            
+            // Kiểm tra xem đã ở bước cuối hay chưa
+            $flagIfDone = false;
+            if ($shouldProceedToNext) {
+                $flagIfDone = $this->processNextStep($currentStep, $resources);
+            }
+            
+            // 5. Gửi thông báo (chỉ gửi cho người tạo và admins)
+            // Nếu trả về đúng, tức là chưa phải bước cuối => gửi thông báo phê duyệt
+            if ($flagIfDone) {
+                $this->sendApprovalNotifications($resources['document'], $currentStep);
+            }
+
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Document flow step approved successfully.',
+                'document_flow_step' => $currentStep->fresh(['approver.user', 'department']),
+                'document' => $resources['document']->fresh(),
+                'should_proceed' => $shouldProceedToNext
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            $statusCode = $e->getCode() ?: 500;
+            return response()->json([
+                'message' => 'Failed to approve document.',
+                'error' => $e->getMessage()
+            ], $statusCode);
+        }
     }
 
     /**
@@ -113,100 +211,442 @@ class DocumentFlowStepController extends Controller
      */
     public function rejectStep(Request $request, $id)
     {
-        \DB::beginTransaction();
+        $validated = $request->validate([
+            'reason' => 'required|string|max:1000'
+        ]);
 
-        $document_version_id = $request['document_version_id'];
-        $document_version = DocumentVersion::where('id', $document_version_id)
+        DB::beginTransaction();
+        
+        try {
+            // 1. Lock và kiểm tra document flow step hiện tại
+            $currentStep = DocumentFlowStep::where('id', $id)
+                ->lockForUpdate()
+                ->first();
+                
+            if (!$currentStep) {
+                throw new \Exception('Document flow step not found.', 404);
+            }
+            
+            // Kiểm tra quyền
+            $this->authorizeApproval($currentStep);
+            
+            // Kiểm tra trạng thái
+            if ($currentStep->status !== 'in_review') {
+                throw new \Exception('This step has already been processed.', 400);
+            }
+            
+            // Lock các resources liên quan
+            $resources = $this->lockRelatedResources($currentStep);
+            
+            // 2. Cập nhật trạng thái rejection
+            $currentStep->update([
+                'status' => 'rejected',
+                'decision' => 'reject',
+                'reason' => $validated['reason'],
+                'signed_at' => now()
+            ]);
+            
+            // Lưu lý do từ chối
+            $this->saveComment($resources['documentVersion']->id, $validated['reason']);
+            
+            // 3. Cập nhật tất cả các step sau và document
+            // $this->rejectSubsequentSteps($currentStep);
+            
+            // Update document và version status
+            $resources['documentVersion']->update(['status' => 'rejected']);
+            $resources['document']->update(['status' => 'rejected']);
+            
+            // 4. Gửi thông báo
+            $this->sendRejectionNotifications($resources['document'], $currentStep, $validated['reason']);
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Document flow step rejected successfully.',
+                'document_flow_step' => $currentStep->fresh(),
+                'document' => $resources['document']->fresh()
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            $statusCode = $e->getCode() ?: 500;
+            return response()->json([
+                'message' => 'Failed to reject document.',
+                'error' => $e->getMessage()
+            ], $statusCode);
+        }
+    }
+
+    /**
+     * Check authorization for approval/rejection
+     */
+    private function authorizeApproval($step)
+    {
+        $user = auth()->user();
+        
+        // Lấy thông tin document để biết document_type_id
+        $document = Document::where('document_flow_id', $step->document_flow_id)->first();
+        if (!$document) {
+            throw new \Exception('Document not found.', 404);
+        }
+        
+        // Admin không có quyền phê duyệt
+        if ($user->role_id == 1) {
+            return false;
+        }
+        
+        // Xác định approver cần kiểm tra
+        $approver = null;
+        
+        if ($step->approver_id) {
+            // Step có chỉ định approver cụ thể
+            $approver = $user->approver;
+            if (!$approver || $approver->id !== $step->approver_id) {
+                throw new \Exception('You are not the assigned approver for this step.', 403);
+            }
+        } else {
+            // Step theo department
+            $approver = $user->approver()
+                ->where('department_id', $step->department_id)
+                ->first();
+                
+            if (!$approver) {
+                throw new \Exception('You are not an approver in the required department.', 403);
+            }
+        }
+        
+        // Kiểm tra quyền ký trong approval_permissions
+        $hasPermission = ApprovalPermission::where('roll_at_department_id', $approver->roll_at_department_id)
+            ->where('document_type_id', $document->document_type_id)
+            ->where(function($query) {
+                $query->whereNull('ended_at')
+                    ->orWhere('ended_at', '>', now());
+            })
+            ->exists();
+            
+        if (!$hasPermission) {
+            throw new \Exception(
+                'Your role does not have permission to approve this document type.', 
+                403
+            );
+        }
+    }
+
+    /**
+     * Lock all related resources
+     */
+    private function lockRelatedResources($currentStep)
+    {
+        // Lock document flow
+        $documentFlow = DocumentFlow::where('id', $currentStep->document_flow_id)
             ->lockForUpdate()
             ->first();
             
-        if ($document_version->status !== 'in_review') {
-            return response()->json([
-                'message' => 'Document version is not in review status.',
-            ])->setStatusCode(400, 'Bad Request');
+        if (!$documentFlow) {
+            throw new \Exception('Document flow not found.', 404);
         }
-
-        $document = Document::where('id', $document_version['document_id'])
+        
+        // Lock document
+        $document = Document::where('document_flow_id', $documentFlow->id)
             ->lockForUpdate()
             ->first();
-
-        $creator_id = $document->created_by;
-        $reason = $request['reason'];
-        $document_flow_step = DocumentFlowStep::findOrFail($id);   
-
-        try {
-            $document_version->update(['status' => 'rejected']);
-            $document_flow_step->update(['status' => 'rejected']);
-            $document_flow_step->update(['decision' => 'rejected']);
-            $document_flow_step->update(['reason' => $reason]);
-            $document->update(['status' => 'rejected']);
-
-            $user = auth()->user();
-            $admins = User::where('role_id', '1')->get();
-            foreach ($admins as $admin) {
-                $notification = Notification::create([
-                    'notification_category_id' => 2,
-                    'from_user_id' => $user['id'],
-                    'receiver_id' => $admin['id'],
-                    'title' => "Từ chối văn bản",
-                    'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "'",
-                    'is_read' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]); 
-
-                $options = [
-                    'cluster' => env('PUSHER_APP_CLUSTER'),
-                    'useTLS' => true
-                ];
-                $pusher = new \Pusher\Pusher(
-                    env('PUSHER_APP_KEY'),
-                    env('PUSHER_APP_SECRET'),
-                    env('PUSHER_APP_ID'),
-                    $options
-                );
-
-                $data['notification'] = $notification;
-                $data['document'] = $document;
-                $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
-            }
-
-            $notification = Notification::create([
-                'notification_category_id' => 2,
-                'from_user_id' => $user['id'],
-                'receiver_id' => $creator_id,
-                'title' => "Từ chối văn bản",
-                'content' => "Từ chối phê duyệt cho văn bản '" . $document['title'] . "' của bạn.",
-                'is_read' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]); 
-
-            $options = [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true
-            ];
-            $pusher = new \Pusher\Pusher(
-                env('PUSHER_APP_KEY'),
-                env('PUSHER_APP_SECRET'),
-                env('PUSHER_APP_ID'),
-                $options
-            );
-
-            $data['notification'] = $notification;
-            $data['document'] = $document;
-            $pusher->trigger('user.' . $creator_id, 'new-notification', $data);
-            \DB::commit();
-        } catch (\Exception $e) {
-            \DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to reject document.',
-                'error' => $e->getMessage(),
-            ])->setStatusCode(500, 'Internal Server Error');
+            
+        if (!$document) {
+            throw new \Exception('Document not found.', 404);
         }
-        return response()->json([
-            'message' => 'Document flow step rejected successfully.',
-            'document_flow_step' => $document_flow_step,
-        ])->setStatusCode(200, 'Document flow step rejected successfully.');
+        
+        // Lock document version
+        $documentVersion = DocumentVersion::where('document_id', $document->id)
+            ->where('status', 'in_review')
+            ->orderBy('version', 'desc')
+            ->lockForUpdate()
+            ->first();
+            
+        if (!$documentVersion) {
+            throw new \Exception('No document version in review status.', 400);
+        }
+        
+        return [
+            'documentFlow' => $documentFlow,
+            'document' => $document,
+            'documentVersion' => $documentVersion
+        ];
+    }
+
+    /**
+     * Handle multichoice logic
+     */
+    private function handleMultichoiceLogic($currentStep)
+    {
+        if (!$currentStep->multichoice) {
+            // Single choice - proceed immediately
+            // Set other steps at same level to skipped
+            // DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
+            //     ->where('step', $currentStep->step)
+            //     ->where('id', '!=', $currentStep->id)
+            //     ->where('status', 'in_review')
+            //     ->update(['status' => 'skipped']);
+  
+            return true;
+        }
+        
+        // Multichoice - check if all approved
+        $sameStepQuery = DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
+            ->where('step', $currentStep->step);
+            
+        $totalCount = $sameStepQuery->count();  // Total steps at this level
+        $approvedCount = $sameStepQuery->where('status', 'approved')->count(); // Count of approved steps
+        
+        return $totalCount === $approvedCount;
+    }
+
+    /**
+     * Process next step or complete approval
+     */
+    private function processNextStep($currentStep, $resources)
+    {
+        // Get next step number
+        $nextStepNumber = DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
+            ->where('step', '>', $currentStep->step)
+            ->min('step');
+            
+        if ($nextStepNumber) {
+            // Activate next step
+            DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
+                ->where('step', $nextStepNumber)
+                ->update(['status' => 'in_review']);
+                
+            // Notify next approvers
+            $this->notifyNextStepApprovers($currentStep->document_flow_id, $nextStepNumber, $resources['document']);
+
+            return true;
+        } else {
+            // No more steps - complete approval
+            $resources['documentVersion']->update(['status' => 'approved']);
+            $resources['document']->update(['status' => 'approved']);
+            
+            // Notify completion
+            $this->notifyDocumentApproved($resources['document']);
+
+            return false;
+        }
+    }
+
+    /**
+     * Reject all subsequent steps
+     */
+    private function rejectSubsequentSteps($currentStep)
+    {
+        DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
+            ->where('step', '>', $currentStep->step)
+            ->update(['status' => 'rejected']);
+    }
+
+    /**
+     * Save comment for a step
+     */
+    private function saveComment($documentVersionId, $comment)
+    {
+        DocumentComment::create([
+            'document_version_id' => $documentVersionId,
+            'user_id' => auth()->id(),
+            'comment' => 'Lý do từ chối: ' . $comment,
+            'created_at' => now()
+        ]);
+    }
+
+    /**
+     * Send approval notifications
+     */
+    private function sendApprovalNotifications($document, $approvedStep)
+    {
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        // Notify creator
+        $this->createAndSendNotification(
+            $currentUser->id,
+            $document->creator_id,
+            'Văn bản được phê duyệt',
+            "Văn bản '{$document->title}' đã được phê duyệt bởi {$currentUser->name}.",
+            $pusher,
+            $document,
+            'step_approved'
+        );
+        
+        // Notify admins
+        $this->notifyAdmins($document, 'Đồng ý phê duyệt', "Đồng ý phê duyệt cho văn bản '{$document->title}'.");
+    }
+
+    /**
+     * Send rejection notifications
+     */
+    private function sendRejectionNotifications($document, $rejectedStep, $reason)
+    {
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        // Notify creator
+        $this->createAndSendNotification(
+            $currentUser->id,
+            $document->creator_id,
+            'Văn bản bị từ chối',
+            "Văn bản '{$document->title}' đã bị từ chối. Lý do: {$reason}",
+            $pusher,
+            $document,
+            'document_rejected'
+        );
+        
+        // Notify previous approvers
+        $this->notifyPreviousApprovers($document, $rejectedStep, $reason);
+        
+        // Notify admins
+        $this->notifyAdmins($document, 'Từ chối phê duyệt', "Từ chối phê duyệt cho văn bản '{$document->title}'.");
+    }
+
+    /**
+     * Notify approvers at next step
+     */
+    private function notifyNextStepApprovers($documentFlowId, $nextStepNumber, $document)
+    {
+        $nextStepApprovers = DocumentFlowStep::where('document_flow_id', $documentFlowId)
+            ->where('step', $nextStepNumber)
+            ->with('approver.user')
+            ->get();
+            
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        foreach ($nextStepApprovers as $stepApprover) {
+            if ($stepApprover->approver && $stepApprover->approver->user) {
+                $this->createAndSendNotification(
+                    $currentUser->id,
+                    $stepApprover->approver->user_id,
+                    'Văn bản cần phê duyệt',
+                    "Bạn có văn bản '{$document->title}' cần phê duyệt.",
+                    $pusher,
+                    $document,
+                    'new_approval_request'
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify when document is fully approved
+     */
+    private function notifyDocumentApproved($document)
+    {
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        // Notify creator
+        $this->createAndSendNotification(
+            $currentUser->id,
+            $document->creator_id,
+            'Văn bản đã được phê duyệt',
+            "Văn bản '{$document->title}' của bạn đã được phê duyệt hoàn tất.",
+            $pusher,
+            $document,
+            'document_fully_approved'
+        );
+        
+        // Notify admins
+        $this->notifyAdmins($document, 'Hoàn tất phê duyệt', "Văn bản '{$document->title}' đã được phê duyệt hoàn tất");
+    }
+
+    /**
+     * Notify previous approvers when document is rejected
+     */
+    private function notifyPreviousApprovers($document, $rejectedStep, $reason)
+    {
+        $previousApprovers = DocumentFlowStep::where('document_flow_id', $rejectedStep->document_flow_id)
+            ->where('step', '<=', $rejectedStep->step)
+            ->where('status', 'approved')
+            ->with('approver.user')
+            ->get();
+            
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        foreach ($previousApprovers as $approver) {
+            if ($approver->approver && $approver->approver->user) {
+                $this->createAndSendNotification(
+                    $currentUser->id,
+                    $approver->approver->user_id,
+                    'Văn bản đã duyệt bị từ chối',
+                    "Văn bản '{$document->title}' mà bạn đã phê duyệt đã bị từ chối ở bước sau. Lý do: {$reason}",
+                    $pusher,
+                    $document,
+                    'approved_document_rejected'
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify all admins
+     */
+    private function notifyAdmins($document, $title, $content)
+    {
+        $pusher = $this->getPusherInstance();
+        $currentUser = auth()->user();
+        
+        $admins = User::where('role_id', 1)->get();
+        
+        foreach ($admins as $admin) {
+            $this->createAndSendNotification(
+                $currentUser->id,
+                $admin->id,
+                $title,
+                $content,
+                $pusher,
+                $document,
+                'system_notification'
+            );
+        }
+    }
+
+    /**
+     * Create and send notification helper
+     */
+    private function createAndSendNotification($fromUserId, $toUserId, $title, $content, $pusher, $document, $type)
+    {
+        $notification = Notification::create([
+            'notification_category_id' => 2,
+            'from_user_id' => $fromUserId,
+            'receiver_id' => $toUserId,
+            'title' => $title,
+            'content' => $content,
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+        
+        $data = [
+            'notification' => $notification,
+            'document' => $document,
+            'type' => $type
+        ];
+        
+        $pusher->trigger("user.{$toUserId}", 'new-notification', $data);
+    }
+
+    /**
+     * Get Pusher instance
+     */
+    private function getPusherInstance()
+    {
+        $options = [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true
+        ];
+        
+        return new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
     }
 }

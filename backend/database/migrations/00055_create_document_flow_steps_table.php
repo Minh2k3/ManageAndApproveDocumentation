@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('multichoice')->default(false);
             $table->enum('status', ['pending', 'in_review', 'approved', 'rejected'])->default('pending');
             $table->enum('decision', ['approved', 'rejected', 'not_yet'])->default('not_yet');
+            $table->text('reason')->nullable();
             $table->timestamp('signed_at')->nullable();
             $table->timestamps();
         });

@@ -49,7 +49,7 @@
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
-                                            <a-avatar class="" v-else src="https://avatar.iran.liara.run/public" alt="Random Avatar" />
+                                            <a-avatar class="" v-else :src="randomAvatar(comment.user['id'])" alt="Random Avatar" />
                                         </div>
                                         <div class="col-10">
                                             <div class="row">
@@ -210,9 +210,14 @@
                                     <div class="text-center">
                                         <span class="fs-5 fw-bold">Luồng phê duyệt</span>
                                         <br>
-                                        <span>Tiến độ: {{ process_of_document }}%</span>
+                                        <span v-if="document.status === 'approved'" class="fst-italic text-success">Đã được duyệt</span>
+                                        <span v-else-if="document.status === 'rejected'" class="fst-italic text-danger">Bị từ chối</span>
+                                        <span v-else class="fst-italic text-secondary">Tiến độ: {{ document_flow_steps.progress_percentage }}%</span>
                                     </div>
-                                    <NestedProgressSteps :steps="document_steps" />
+                                    <NestedProgressSteps 
+                                        v-if="document_flow_steps && Object.keys(document_flow_steps).length > 0" 
+                                        :steps="document_flow_steps" 
+                                    />
                                 </div>
                             </div>
                         </div>                        
@@ -269,7 +274,7 @@
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
-                                            <a-avatar class="" v-else src="https://avatar.iran.liara.run/public" alt="Random Avatar" />
+                                            <a-avatar class="" v-else :src="randomAvatar(comment.user['id'])" alt="Random Avatar" />
                                         </div>
                                         <div class="col-10">
                                             <div class="row">
@@ -314,12 +319,13 @@
                                     </div>
                                 </div>
 
-                                <div v-if="document.status === 'in_review'" class="row mb-3">
+                                <div v-if="document.step_status === 'in_review'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-success w-100 py-2 button-click-effect" 
                                             style="--bs-bg-opacity: .9;"
                                             @click="handleClickApprove"
+                                            :disabled="btnApproveDisabled"
                                             >
                                             <span>
                                                 <i class="bi bi-check-lg me-1"></i>Chấp thuận
@@ -331,6 +337,7 @@
                                             class="border border-2 rounded-2 text-white bg-danger w-100 py-2 button-click-effect" 
                                             style="--bs-bg-opacity: .9;"
                                             @click="handleClickReject"
+                                            :disabled="btnRejectDisabled"
                                             >
                                             <span>
                                                 <i class="bi bi-x-lg me-2"></i>Từ chối
@@ -339,7 +346,7 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="document.status ==='pending'" class="row mb-3">
+                                <div v-else-if="document.step_status ==='pending'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-warning w-100 py-2 button-click-effect" 
@@ -353,7 +360,7 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="document.status === 'approved'" class="row mb-3">
+                                <div v-else-if="document.step_status === 'approved'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-success w-100 py-2 button-click-effect" 
@@ -367,7 +374,7 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="document.status === 'rejected'" class="row mb-3">
+                                <div v-else-if="document.step_status === 'rejected'" class="row mb-3">
                                     <div class="col">
                                         <button 
                                             class="border border-2 rounded-2 text-white bg-danger w-100 py-2 button-click-effect" 
@@ -537,8 +544,14 @@
                                     <div class="text-center">
                                         <span class="fs-5 fw-bold">Luồng phê duyệt</span>
                                         <br>
-                                        <span>Tiến độ: {{ process_of_document }}%</span>
+                                        <span v-if="document.document_status === 'approved'" class="fst-italic text-success">Đã được duyệt</span>
+                                        <span v-else-if="document.document_status === 'rejected'" class="fst-italic text-danger">Bị từ chối</span>
+                                        <span v-else class="fst-italic text-secondary">Tiến độ: {{ document_flow_steps.progress_percentage }}%</span>
                                     </div>
+                                    <NestedProgressSteps 
+                                        v-if="document_flow_steps && Object.keys(document_flow_steps).length > 0" 
+                                        :steps="document_flow_steps" 
+                                    />
                                 </div>
                             </div>
                         </div>                        
@@ -549,7 +562,7 @@
         </div>
     </div>
     
-
+    <!-- Modal từ chối văn bản -->
     <a-modal
         v-model:visible="rejectVisible"
         width="600px"
@@ -676,6 +689,8 @@ export default defineComponent({
                 ]
             }
         ]
+        const document_flow_steps = ref([]);
+
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents;
@@ -695,6 +710,9 @@ export default defineComponent({
 
             pdfUrl.value = documentData.value.file_path;
             process_of_document.value = documentData.value.process / documentData.value.step_count * 100;
+
+            await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
+            document_flow_steps.value = documentStore.current_document_flow_steps;
         });
 
         const comment = ref('');
@@ -706,8 +724,32 @@ export default defineComponent({
             return `${API_BASE_URL}/images/avatars/${avatar}`
         }
 
+        const btnApproveDisabled = ref(false);
+        const btnRejectDisabled = ref(false);
+
         const handleClickApprove = async () => {
-            console.log('Approve clicked');
+            const step_id = parseInt(documentData.value['document_flow_step_id']);
+            console.log('Step ID:', step_id);
+            btnApproveDisabled.value = true;
+            btnRejectDisabled.value = true;
+            // setTimeout(() => {
+            //     btnApproveDisabled.value = false;
+            //     btnRejectDisabled.value = false;
+            // }, 2000); // Disable buttons for 2 seconds
+            // return;
+            try {
+                await documentStore.approveDocument(step_id);
+                documentData.value.status = 'approved';
+                message.success('Bạn vừa đồng ý phê duyệt');
+                await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
+                document_flow_steps.value = documentStore.current_document_flow_steps;
+            } catch (error) {
+                message.error('Có lỗi xảy ra khi đồng ý phê duyệt văn bản');
+                console.error('Error approving document:', error);
+            } finally {
+                btnApproveDisabled.value = false;
+                btnRejectDisabled.value = false;
+            }
         };
 
         const rejectVisible = ref(false);
@@ -727,6 +769,8 @@ export default defineComponent({
 
             console.log('Rejecting document with data:', data);
             console.log('Step ID:', step_id);
+            btnApproveDisabled.value = true;
+            btnRejectDisabled.value = true;
             // return;
             try {
                 await documentStore.rejectDocument(step_id, data);
@@ -737,6 +781,8 @@ export default defineComponent({
                 console.error('Error rejecting document:', error);
             } finally {
                 rejectVisible.value = false;
+                btnApproveDisabled.value = false;
+                btnRejectDisabled.value = false;
             }
         };
 
@@ -851,6 +897,13 @@ export default defineComponent({
                 okText: 'Đóng',
             });
         };
+        
+        const randomAvatar = (id) => {
+            if (id > 100 || id == null) {
+                return `https://avatar.iran.liara.run/public`;
+            }
+            return `https://avatar.iran.liara.run/public/${id}`;
+        };
 
         return {
             document: documentData,
@@ -864,11 +917,16 @@ export default defineComponent({
             btnCommentText,
             commentTextarea,
             isDownloading,
+            btnApproveDisabled,
+            btnRejectDisabled,
             rejectVisible,
             reasonReject,
             document_steps,
+            document_flow_steps,
 
             getAvatarUrl,
+            randomAvatar,
+
             handleClickApprove,
             handleClickReject,
             handleClickComment,
@@ -895,4 +953,14 @@ export default defineComponent({
     transition: transform 0.1s ease;
 }
 
+.button-click-effect:disabled {
+    background-color: #6c757d !important; /* Màu xám */
+    border-color: #6c757d !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+    opacity: 0.65;
+    transform: none !important;
+    box-shadow: none !important;
+    pointer-events: none; /* Loại bỏ hoàn toàn các sự kiện chuột */
+}
 </style>

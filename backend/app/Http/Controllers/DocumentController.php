@@ -313,12 +313,13 @@ class DocumentController extends Controller
                     'roll' => $creatorInfo['roll'],
                     'creator_name' => $creatorInfo['name'],
                     'process' => $document->documentFlow->process ?? 0,
-                    'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+                    'step_count' => DocumentFlowStep::where('document_flow_id', $document->document_flow_id)->count(),
                     'document_flow_step_id' => $myStep->id ?? 0,
                     'approver_id' => $myStep->approver_id ?? 0,
                     'multichoice' => $myStep->multichoice ?? false,
                     'step' => $myStep->step ?? 0,
-                    'status' => $myStep->status ?? 'pending',
+                    'document_status' => $document->status ?? 'pending',
+                    'step_status' => $myStep->status ?? 'pending',
                 ];
             });
         }

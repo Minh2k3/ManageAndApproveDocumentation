@@ -1,11 +1,11 @@
 <template>
   <div class="document-flow-container">
-    <div class="flow-header" v-if="flowData">
+    <!-- <div class="flow-header" v-if="flowData">
       <h3 class="flow-title">{{ flowData.document_flow_name }}</h3>
-      <div class="flow-info">
+      <div class="flow-info d-flex justify-content-center align-items-center">
         <span class="step-counter">{{ completedSteps }}/{{ flowData.total_steps }} bước hoàn thành</span>
       </div>
-    </div>
+    </div> -->
     
     <a-steps
       direction="vertical"

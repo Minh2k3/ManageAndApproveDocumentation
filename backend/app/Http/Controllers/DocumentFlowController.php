@@ -101,7 +101,7 @@ class DocumentFlowController extends Controller
 
         // Đếm số bước đã được chấp thuận
         $approvedStepsCount = $documentFlow->documentFlowSteps
-            ->where('decision', 'accept')
+            ->where('decision', 'approved')
             ->count();
 
         $steps = $documentFlow->documentFlowSteps->map(function($step) {

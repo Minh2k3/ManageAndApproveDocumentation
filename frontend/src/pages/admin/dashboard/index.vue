@@ -408,7 +408,7 @@ export default defineComponent({
                 return acc;
             }, new Map([
                 ["approved", 0],
-                ["reject", 0],
+                ["rejected", 0],
                 ["in_review", 0],
                 ["draft", 0]
             ]));

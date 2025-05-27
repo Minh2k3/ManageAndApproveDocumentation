@@ -184,7 +184,6 @@
             <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>
-
 </template>
 
 <script>

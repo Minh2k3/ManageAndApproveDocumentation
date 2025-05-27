@@ -215,10 +215,24 @@
                                 </template>
 
                                 <template v-if="column.key === 'status'">
-                                    <span v-if="record.status === 'pending'" class="text-secondary">Chưa tới bạn</span>
-                                    <span v-if="record.status === 'in_review'" class="text-primary">Chờ bạn duyệt</span>
-                                    <span v-if="record.status === 'approved'" class="text-success">Bạn đã duyệt</span>
-                                    <span v-if="record.status === 'rejected'" class="text-danger">Bạn từ chối</span>
+                                    <a-tooltip>
+                                        <template #title>
+                                            <span class="">{{ showProcess(record) }}</span>
+                                        </template>
+                                    
+                                        <div v-if="record.document_status === 'in_review'">
+                                            <span v-if="record.step_status === 'pending'" class="text-secondary">Chưa tới bạn</span>
+                                            <span v-if="record.step_status === 'in_review'" class="text-primary">Chờ bạn duyệt</span>
+                                            <span v-if="record.step_status === 'approved'" class="text-success">Bạn đã duyệt</span>
+                                            <span v-if="record.step_status === 'rejected'" class="text-danger">Bạn từ chối</span>
+                                        </div>
+                                        <div v-else-if="record.document_status === 'approved'">
+                                            <span class="text-success">Đã được duyệt</span>
+                                        </div>
+                                        <div v-else-if="record.document_status === 'rejected'">
+                                            <span class="text-danger">Bị từ chối</span>
+                                        </div>
+                                    </a-tooltip>
                                 </template>
 
                             </template>
@@ -448,6 +462,10 @@ export default defineComponent({
             };
         };
 
+        const showProcess = (record) => {
+            return record.process + '/' + record.step_count + ' bước';
+        }
+
         return {
             documents_need_me,
             documents_of_me,
@@ -456,6 +474,7 @@ export default defineComponent({
             activeKey,
 
             customRow,
+            showProcess,
 
         };
     },
