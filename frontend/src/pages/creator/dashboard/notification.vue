@@ -1,5 +1,6 @@
+
 <template>
-    Thông báo cho Creator
+
 </template>
 
 <script>

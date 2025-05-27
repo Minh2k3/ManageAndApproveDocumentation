@@ -9,24 +9,24 @@ window.axios = axios;
 // import './style.css'
 import App from './App.vue'
 import { 
-    Select,
+    Button, 
     Checkbox,
     Radio,
     RadioGroup,
     RadioButton,
+    Form,
+    Input,
     DatePicker,
     TimePicker,
     Tooltip,
-    Form,
-    Input,
+    Table, 
+    Select,
     Menu, 
     List, 
     Drawer, 
-    Button, 
     message, 
     Upload,
     Card, 
-    Table, 
     Avatar,
     Pagination,
     Modal,
@@ -36,6 +36,8 @@ import {
     Comment,
     FloatButton,
     Steps,
+    Empty,
+    Carousel,
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -53,6 +55,9 @@ app.use(pinia)
 app.use(router)
 app.use(Button)
 app.use(Checkbox)
+app.use(Radio)
+app.use(RadioGroup)
+app.use(RadioButton)
 app.use(Table)
 app.use(Drawer)
 app.use(List)
@@ -65,9 +70,6 @@ app.use(Form)
 app.use(Upload)
 app.use(Input)
 app.use(Pagination)
-app.use(Radio)
-app.use(RadioGroup)
-app.use(RadioButton)
 app.use(DatePicker)
 app.use(TimePicker)
 app.use(Modal)
@@ -78,4 +80,6 @@ app.use(Tabs)
 app.use(Comment)
 app.use(FloatButton)
 app.use(Steps)
+app.use(Empty)
+app.use(Carousel)
 app.mount('#app')

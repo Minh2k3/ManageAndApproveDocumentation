@@ -18,6 +18,7 @@ export const useDocumentStore = defineStore("document", () => {
     const isFetchedDocuments = ref(false)
     const document_comments = ref([])
     const current_document_flow_steps = ref([]);
+    const current_document = ref([]);
 
     // Actions
     async function fetchDocumentTypes(force = false) {
@@ -138,12 +139,17 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocumentById(id) {
+    async function fetchDocumentById(id, from_me) {
         try {
-            const response = await axiosInstance.get(`api/documents/${id}`);
+            let response;
+            if (from_me) {
+                response = await axiosInstance.get(`api/document/${id}/fm`);
+            } else {
+                response = await axiosInstance.get(`api/document/${id}/nm`);
+            }
             if (response.data) {
-                console.log("Document: " + JSON.stringify(response.data, null, 2));
-                return response.data;
+                current_document.value = response.data.document;
+                console.log("Current document: ", current_document.value);
             }
         } catch (error) {
             console.error("Error fetching document by ID:", error);
@@ -226,6 +232,7 @@ export const useDocumentStore = defineStore("document", () => {
         isFetchedDocuments,
         document_comments,
         current_document_flow_steps,
+        current_document,
 
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
@@ -234,7 +241,7 @@ export const useDocumentStore = defineStore("document", () => {
         fetchDocumentFlowSteps,
         fetchDocuments,
         fetchDocumentComments,
-        // fetchDocumentById,
+        fetchDocumentById,
         fetchStepsByDocumentFlowId,
         approveDocument,
         rejectDocument,

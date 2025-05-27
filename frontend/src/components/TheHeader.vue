@@ -67,14 +67,17 @@
                     <button type="button" class="btn btn-info dropdown-toggle text-capitalize" data-bs-toggle="dropdown" aria-expanded="false">
                         {{ user_name }}
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end" 
+                        style="min-width: 200px; /* Độ rộng tối thiểu */
+                            width: max-content; /* Tự động điều chỉnh theo nội dung */
+                            max-width: 350px;"
+                            >
                         <li><h6 class="dropdown-header row d-flex align-items-center">
                             <div class="col-3"><i class="fa-solid fa-user me-2"></i></div>
                             <div class="col-9">
                                 <div class="row fs-6">{{ user_name }}</div>
                                 <div class="row text-capitalize">{{ role }}</div>
                             </div>
-                            
                         </h6></li>
                         <li><a class="dropdown-item" href="#">Thông báo</a></li>
                         <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
@@ -299,6 +302,8 @@
 
     const viewAllNotifications = () => {
         // Chuyển hướng đến trang thông báo
+        console.log('Role:', role);
+        console.log('Check name:', role + '-notification');
         router.push({ name: role + '-notification' });
     };
 

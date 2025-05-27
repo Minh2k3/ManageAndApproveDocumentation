@@ -74,7 +74,22 @@
                 <!-- Bảng văn bản gửi đến tôi -->
                 <div class="row">
                     <div class="col-12">
+                        <a-empty
+                            v-if="documents_of_me.length === 0"
+                            image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
+                            :image-style="{
+                            height: '60px',
+                            }"
+                        >
+                            <template #description>
+                            <span>
+                                Bạn thuộc dạng đẳng cấp nên chả cần tạo văn bản phê duyệt nhỉ.
+                            </span>
+                            </template>
+                            <a-button type="primary">Bấm nếu bạn cần</a-button>
+                        </a-empty>
                         <a-table 
+                            v-else
                             :dataSource="documents_of_me" 
                             :columns="columns_of_me" 
                             :scroll="{ x: 576 }" 
@@ -152,7 +167,21 @@
                 <!-- Bảng văn bản cần tôi phê duyệt -->
                 <div class="row">
                     <div class="col-12">
+                        <a-empty
+                            v-if="documents_need_me.length === 0"
+                            image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
+                            :image-style="{
+                            height: '60px',
+                            }"
+                        >
+                            <template #description>
+                            <span>
+                                Có quyền phê duyệt mà đếch ai cần đến bạn, tội ghê gớm!
+                            </span>
+                            </template>
+                        </a-empty>
                         <a-table 
+                            v-else
                             :dataSource="documents_need_me" 
                             :columns="columns_need_me" 
                             :scroll="{ x: 576 }" 
@@ -241,8 +270,36 @@
                 </div>
             </a-tab-pane>
         </a-tabs>
-
     </a-card>
+
+    <a-modal
+        v-model:visible="detailVisible"
+        width="600px"
+        >
+        <div>
+            <h5>📄 Thông tin văn bản</h5>
+            <p><strong>Tiêu đề:</strong> {{ selectedDocument.title }}</p>
+            <p><strong>Mô tả:</strong> {{ selectedDocument.description }}</p>
+            <p><strong>Loại văn bản:</strong> {{ selectedDocument.type }}</p>
+            <p><strong>Số lượng phiên bản:</strong> {{ selectedDocument.version_count }}</p>
+            <p><strong>Ngày tạo:</strong> {{ selectedDocument.created_at }}</p>
+            <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
+            <p>
+                <strong>Tệp:</strong>
+                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank">
+                    Xem tệp
+                </a>
+            </p>
+
+            <a-divider />
+        </div>
+
+        <template #footer>
+            <a-button @click="detailVisible = false">Đóng</a-button>
+            <a-button v-if="selectedDocument.status !== 'in_review' && selectedDocument.from_me === true" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
+        </template>
+    </a-modal>
 </template>
 
 <script>
@@ -271,7 +328,6 @@ export default defineComponent({
 
         onMounted(async () => {
             await documentStore.fetchDocuments(authStore.user.id);
-            // console.log(documentStore.documents);
             documents_need_me.value = documentStore.documents.documents_need_me;
             documents_of_me.value = documentStore.documents.documents_of_me;
         });
@@ -447,14 +503,23 @@ export default defineComponent({
 
         const router = useRouter();
 
+        const showProcess = (record) => {
+            return record.process + '/' + record.step_count + ' bước';
+        }
+
+        const detailVisible = ref(false);
+        const selectedDocument = ref({});
+        const viewDetail = (document) => {
+            selectedDocument.value = document;
+            detailVisible.value = true;
+            console.log(selectedDocument.value.id);
+        };
+
+        // Hàm xem chi tiết văn bản khi click vào dòng
         const customRow = (record) => {
             return {
                 onClick: () => {
-                    router.push({
-                        name: 'approver-documents-detail',
-                        params: { id: record.id },
-                        query: { from_me: activeKey.value === '1' ? '1' : '0' }
-                    });
+                    viewDetail(record);
                 },
                 style: {
                     cursor: 'pointer'
@@ -462,9 +527,19 @@ export default defineComponent({
             };
         };
 
-        const showProcess = (record) => {
-            return record.process + '/' + record.step_count + ' bước';
-        }
+        // Hàm điều hướng đến trang sửa văn bản
+        const goToEditPage = (id) => {
+            router.push(`documents/${id}/edit`);
+        };
+
+        // Hàm điều hướng đến trang chi tiết văn bản
+        const goToDetailPage = (id) => {
+            router.push({
+                name: 'approver-documents-detail',
+                params: { id: id },
+                query: { from_me: activeKey.value === '1' ? '1' : '0' }
+            });
+        };
 
         return {
             documents_need_me,
@@ -472,9 +547,13 @@ export default defineComponent({
             columns_need_me,
             columns_of_me,
             activeKey,
+            detailVisible,
+            selectedDocument,
 
             customRow,
             showProcess,
+            goToEditPage,
+            goToDetailPage,
 
         };
     },

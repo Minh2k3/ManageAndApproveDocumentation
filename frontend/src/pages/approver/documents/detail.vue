@@ -28,9 +28,9 @@
                                     <div class="col">
                                         <div class="row mb-3">
                                             <div class="d-flex justify-content-center">
-                                                <span class="fs-5 fw-bold ">Tên tài liệu:</span>
+                                                <span class="fs-5 ">Tên tài liệu:</span>
                                                 &nbsp;
-                                                <span class="fs-5 fw-bold fst-italic ">{{ document.title }}</span>
+                                                <span class="fs-5 fw-bold">{{ document.title }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -253,9 +253,9 @@
                                     <div class="col">
                                         <div class="row mb-3">
                                             <div class="d-flex justify-content-center">
-                                                <span class="fs-5 fw-bold ">Tên tài liệu:</span>
+                                                <span class="fs-5 ">Tên tài liệu:</span>
                                                 &nbsp;
-                                                <span class="fs-5 fw-bold fst-italic ">{{ document.title }}</span>
+                                                <span class="fs-5 fw-bold ">{{ document.title }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -630,86 +630,21 @@ export default defineComponent({
         const user = authStore.user;
 
         const route = useRoute();
-        const documents = ref([]);
-        let documentData = ref([]);
+        const documentData = ref([]);
         const pdfUrl = ref('')
-        const process_of_document = ref(0);
         const document_comments = ref([]);
-        const document_steps = 
-        [
-            {
-                title: 'Bước 1',
-                description: 'Mô tả bước 1',
-                status: 'approved', // hoặc 'rejected', 'in_review', 'waiting'
-                subSteps: [
-                    {
-                        title: 'Bước con 1.1',
-                        description: 'Mô tả bước con 1.1',
-                        status: 'approved'
-                    },
-                    {
-                        title: 'Bước con 1.2', 
-                        description: 'Mô tả bước con 1.2',
-                        status: 'in_review'
-                    }
-                ]
-            },
-            {
-                title: 'Bước 2',
-                description: 'Mô tả bước 2',
-                status: 'waiting',
-                subSteps: [
-                    {
-                        title: 'Bước con 2.1',
-                        description: 'Mô tả bước con 2.1', 
-                        status: 'waiting'
-                    },
-                    {
-                        title: 'Bước con 2.2',
-                        description: 'Mô tả bước con 2.2',
-                        status: 'waiting'
-                    }
-                ]
-            },
-            {
-                title: 'Bước 3',
-                description: 'Mô tả bước 3',
-                status: 'waiting',
-                subSteps: [
-                    {
-                        title: 'Bước con 3.1',
-                        description: 'Mô tả bước con 3.1', 
-                        status: 'waiting'
-                    },
-                    {
-                        title: 'Bước con 3.2',
-                        description: 'Mô tả bước con 3.2',
-                        status: 'waiting'
-                    }
-                ]
-            }
-        ]
         const document_flow_steps = ref([]);
 
         onMounted(async () => {
-            await documentStore.fetchDocuments(user.id);
-            documents.value = documentStore.documents;
             const id = parseInt(route.params.id);
             const from_me = route.query.from_me === '1';
-            if (from_me) {
-                documentData.value = documents.value.documents_of_me.find(doc => doc.id === id && doc.from_me) || null;
-            } else {
-                documentData.value = documents.value.documents_need_me.find(doc => doc.id === id && !doc.from_me) || null;
-            }
+            await documentStore.fetchDocumentById(id, from_me);
+            documentData.value = documentStore.current_document;
+            console.log('Document Data:', documentData.value);
+            pdfUrl.value = documentData.value.file_path;
 
             await documentStore.fetchDocumentComments(id);
             document_comments.value = documentStore.document_comments;
-
-            console.log(document_comments.value);
-            console.log(documentData.value);
-
-            pdfUrl.value = documentData.value.file_path;
-            process_of_document.value = documentData.value.process / documentData.value.step_count * 100;
 
             await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
             document_flow_steps.value = documentStore.current_document_flow_steps;
@@ -908,7 +843,6 @@ export default defineComponent({
         return {
             document: documentData,
             pdfUrl,
-            process_of_document,
             activeKey,
             commentSection,
             comment,
@@ -921,7 +855,6 @@ export default defineComponent({
             btnRejectDisabled,
             rejectVisible,
             reasonReject,
-            document_steps,
             document_flow_steps,
 
             getAvatarUrl,

@@ -67,7 +67,22 @@
         <!-- Bảng văn bản -->
         <div class="row">
             <div class="col-12">
+                <a-empty
+                    v-if="documents.length === 0"
+                    image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
+                    :image-style="{
+                    height: '60px',
+                    }"
+                >
+                    <template #description>
+                    <span>
+                        Mạnh dạn tạo văn bản mới mà gửi đi chứ, rén làm gì.
+                    </span>
+                    </template>
+                    <a-button type="primary">Bấm nếu bạn cần</a-button>
+                </a-empty>                
                 <a-table 
+                    v-else
                     :dataSource="documents" 
                     :columns="columns" 
                     :scroll="{ x: 576 }" 

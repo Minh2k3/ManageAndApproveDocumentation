@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen d-flex flex-column">
-        <header class="bg-primary text-white py-4">
+        <header class="bg-header text-white py-4">
             <div class="container d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <img src="../assets/images/logo_tlu.png" alt="Logo ĐH Thủy Lợi" class="me-2"
@@ -44,8 +44,28 @@
                             </div>
                         </div>
                         <div class="col-md-6 text-center">
-                            <img src="../assets/images/Cosette.jpg" alt="Minh họa hệ thống"
-                                class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                            <a-carousel autoplay>
+                                <div><h3>
+                                    <img src="@/assets/images/Cosette_square.jpg" alt="Em Cosette"
+                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                </h3></div>
+                                <div><h3>
+                                    <img src="@/assets/images/Retro_Punk_square.jpg" alt="Em gái Anime nằm trên giường"
+                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                </h3></div>
+                                <div><h3>
+                                    <img src="@/assets/images/YourLieInApril.jpg" alt="Minh họa hệ thống"
+                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                </h3></div>
+                                <div><h3>
+                                    <img src="@/assets/images/ZeroTwo.png" alt="Minh họa hệ thống"
+                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                </h3></div>
+                                <div><h3>
+                                    <img src="@/assets/images/Ai_Hoshino.png" alt="Minh họa hệ thống"
+                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                </h3></div>
+                            </a-carousel>                            
                         </div>
                     </div>
                 </div>
@@ -248,4 +268,25 @@ export default defineComponent({
     transform: translateY(-8px);
     box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
 }
+
+.image-wrapper { 
+    width: 100%; 
+    height: auto; /* hoặc chiều cao bạn muốn */ 
+    overflow: hidden; border-radius: 8px; 
+} 
+
+.full-cover { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    object-position: center; 
+}
+
+.bg-header {
+    background-color: #0078e8; /* Màu nền của header */
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Đảm bảo header luôn ở trên cùng */
+}
+
 </style>

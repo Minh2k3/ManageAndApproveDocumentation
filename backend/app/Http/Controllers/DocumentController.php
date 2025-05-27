@@ -334,6 +334,153 @@ class DocumentController extends Controller
         ]);
     }
 
+    /**
+     * Lấy thông tin văn bản do người dùng hiện tại tạo theo document_id
+     * Dùng cho cả creators và approvers
+     */
+    public function getDocumentOfMeById($documentId)
+    {
+        $userId = auth()->user()->id;
+        
+        $document = Document::with([
+            'documentType:id,name',
+            'documentFlow:id,name,process',
+            'documentFlow.documentFlowSteps:id,document_flow_id',
+            'versions' => function($query) {
+                $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                    ->orderBy('version', 'desc')
+                    ->limit(1);
+            }
+        ])
+        ->where('id', $documentId)
+        ->where('created_by', $userId)
+        ->first();
+        
+        if (!$document) {
+            return response()->json([
+                'message' => 'Document not found or you are not the creator',
+                'document' => null
+            ], 404);
+        }
+        
+        $latestVersion = $document->versions->first();
+        
+        // Tìm thông tin người tạo từ user_id
+        $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+        
+        $documentData = [
+            'id' => $document->id,
+            'title' => $document->title,
+            'description' => $document->description,
+            'file_path' => $document->file_path,
+            'status' => $latestVersion ? $latestVersion->status : null,
+            'created_at' => $document->created_at,
+            'updated_at' => $document->updated_at,
+            'document_flow_id' => $document->document_flow_id,
+            'type' => $document->documentType->name ?? null,
+            'creator_name' => $creatorInfo['name'],
+            'process' => $document->documentFlow->process ?? 0,
+            'from_me' => true,
+            'version_id' => $latestVersion->id ?? null,
+            'version_count' => $latestVersion->version ?? 0,
+            'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+            'roll' => $creatorInfo['roll'],
+            'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+        ];
+        
+        return response()->json([
+            'document' => $documentData
+        ]);
+    }
+
+    /**
+     * Lấy thông tin văn bản cần duyệt của approver theo document_id
+     * Chỉ dùng cho approvers
+     */
+    public function getDocumentNeedMeById($documentId)
+    {
+        $userId = auth()->user()->id;
+        
+        // Tìm approver record của user hiện tại
+        $approver = Approver::where('user_id', $userId)->first();
+        
+        if (!$approver) {
+            return response()->json([
+                'message' => 'You are not an approver',
+                'document' => null
+            ], 403);
+        }
+        
+        $approverId = $approver->id;
+        
+        $document = Document::with([
+            'documentType:id,name',
+            'documentFlow:id,name,process',
+            'documentFlow.documentFlowSteps' => function($query) use ($approverId) {
+                $query->where('approver_id', $approverId)
+                    ->select('id', 'document_flow_id', 'approver_id', 'step', 'multichoice', 'status');
+            },
+            'versions' => function($query) {
+                $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                    ->orderBy('version', 'desc')
+                    ->limit(1);
+            }
+        ])
+        ->where('id', $documentId)
+        ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approverId) {
+            $query->where('approver_id', $approverId);
+        })
+        ->whereHas('versions', function($query) {
+            $query->where('status', '!=', 'draft');
+        })
+        ->first();
+        
+        if (!$document) {
+            return response()->json([
+                'message' => 'Document not found or you are not assigned to approve this document',
+                'document' => null
+            ], 404);
+        }
+        
+        $latestVersion = $document->versions->first();
+        $myStep = $document->documentFlow->documentFlowSteps->first();
+        
+        // Tìm thông tin người tạo từ user_id
+        $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+        
+        $documentData = [
+            'id' => $document->id,
+            'title' => $document->title,
+            'description' => $document->description,
+            'file_path' => $document->file_path,
+            'created_at' => $document->created_at,
+            'updated_at' => $document->updated_at,
+            'document_flow_id' => $document->document_flow_id,
+            'type' => $document->documentType->name ?? null,
+            'version_id' => $latestVersion->id ?? null,
+            'version_count' => $latestVersion->version ?? 0,
+            'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+            'from_me' => false,
+            'creator_id' => $document->created_by,
+            'department_id' => $creatorInfo['department_id'],
+            'roll_id' => $creatorInfo['roll_at_department_id'],
+            'roll' => $creatorInfo['roll'],
+            'creator_name' => $creatorInfo['name'],
+            'process' => $document->documentFlow->process ?? 0,
+            'step_count' => DocumentFlowStep::where('document_flow_id', $document->document_flow_id)->count(),
+            'document_flow_step_id' => $myStep->id ?? 0,
+            'approver_id' => $myStep->approver_id ?? 0,
+            'multichoice' => $myStep->multichoice ?? false,
+            'step' => $myStep->step ?? 0,
+            'document_status' => $document->status ?? 'pending',
+            'step_status' => $myStep->status ?? 'pending',
+        ];
+        
+        return response()->json([
+            'document' => $documentData
+        ]);
+    }
+
     // Hàm lưu nháp
     public function storeDraftDocument(Request $request)
     {
@@ -506,7 +653,6 @@ class DocumentController extends Controller
                     'content' => "Tạo một luồng phê duyệt cho văn bản '" . $new_document['title'] . "'",
                     'is_read' => false,
                     'created_at' => now(),
-                    'updated_at' => now(),
                 ]); 
 
                 $options = [
@@ -539,7 +685,6 @@ class DocumentController extends Controller
                     'content' => $content,
                     'is_read' => false,
                     'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
 
                 $options = [

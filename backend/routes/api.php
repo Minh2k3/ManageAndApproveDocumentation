@@ -106,6 +106,15 @@ Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocument
     // ->middleware('auth:sanctum')
     ->name('documents.getDocumentsByApprover');
 
+Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.getDocumentOfMeById');
+
+Route::get('/document/{id}/nm', [DocumentController::class, 'getDocumentNeedMeById'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.getDocumentNeedMeById');
+    
+
 Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeDraftDocument');

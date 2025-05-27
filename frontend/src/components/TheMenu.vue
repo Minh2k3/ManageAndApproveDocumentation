@@ -193,6 +193,14 @@
 			</router-link>
 		</a-menu-item>
 
+		<a-menu-item menu-item key="approver-notification">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-notification' }" title="Thông báo">
+				<span class="d-inline-flex align-items-center">
+					<NotificationOutlined class="me-2" />Thông báo
+				</span>
+			</router-link>
+		</a-menu-item>
+
 		<a-sub-menu key="approver-documents">
 			<template #title>
 				<span class="d-inline-flex align-items-center">
@@ -206,6 +214,10 @@
 
 			<a-menu-item key="approver-documents-create">
 				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="approver-documents-edit" :disabled="!isEditPageApprover" :selectable="isEditPageApprover">
+				Sửa văn bản
 			</a-menu-item>
 
 			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPageApprover" :selectable="isDetailPageApprover">
@@ -254,6 +266,7 @@ import {
 	BranchesOutlined,
 	ExclamationCircleOutlined,
 	NotificationOutlined,
+	NotificationFilled,
 } from '@ant-design/icons-vue';
 
 import { 
@@ -297,6 +310,10 @@ export default defineComponent({
 			return route.name === 'approver-documents-detail';
 		});
 
+		const isEditPageApprover = computed(() => {
+			return route.name === 'approver-documents-edit';
+		})
+
 		function onMenuClick({ key }) {
 			console.log('Đã bấm' + key);
 			auth.role = key;
@@ -334,6 +351,7 @@ export default defineComponent({
 			isDetailPageCreator,
 			isEditPageCreator,
 			isDetailPageApprover,
+			isEditPageApprover,
 			
 			onMenuClick,
 			handleLogout,

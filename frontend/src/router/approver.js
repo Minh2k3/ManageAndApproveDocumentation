@@ -11,6 +11,11 @@ const approver = [
                 name: 'approver-dashboard',
                 component: () => import('@/pages/approver/dashboard/index.vue'),
             },
+            {
+                path: 'notification',
+                name: 'approver-notification',
+                component: () => import('@/pages/approver/dashboard/notification.vue'),
+            },
 
             // Quản lý Settings
             {
@@ -34,6 +39,11 @@ const approver = [
                 path: "documents/:id",
                 name: "approver-documents-detail",
                 component: () => import('@/pages/approver/documents/detail.vue')
+            },
+           {
+                path: "documents/:id/edit",
+                name: "approver-documents-edit",
+                component: () => import('@/pages/approver/documents/edit.vue')
             },
             // {
             //     path: "documents/approve/:id",

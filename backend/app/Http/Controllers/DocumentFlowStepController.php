@@ -145,7 +145,11 @@ class DocumentFlowStepController extends Controller
             }
             
             // Kiểm tra quyền
-            $this->authorizeApproval($currentStep);
+            $checkPermission = $this->authorizeApproval($currentStep);
+            if (!$checkPermission) {
+                throw new \Exception('You do not have permission to approve this step.', 403);
+            }
+            \Log::info('Current step status: ' . $currentStep->status);
             
             // Kiểm tra trạng thái hiện tại
             if ($currentStep->status !== 'in_review') {
@@ -154,6 +158,7 @@ class DocumentFlowStepController extends Controller
             
             // Lock các resources liên quan
             $resources = $this->lockRelatedResources($currentStep);
+            \Log::info('Resources locked successfully.');
             
             // 2. Cập nhật trạng thái và decision của step hiện tại
             $currentStep->update([
@@ -161,6 +166,7 @@ class DocumentFlowStepController extends Controller
                 'decision' => 'approved',
                 'signed_at' => now()
             ]);
+            \Log::info('Current step updated to approved.');
             
             // Lưu comment nếu có
             // if (!empty($validated['comment'])) {
@@ -173,18 +179,22 @@ class DocumentFlowStepController extends Controller
             // 4. Xử lý logic multichoice và chuyển step
             // Trả về true khi bước hiện tại đã phê duyệt xong
             $shouldProceedToNext = $this->handleMultichoiceLogic($currentStep);
-            
+            \Log::info('Multichoice logic handled. Should proceed to next step: ' . ($shouldProceedToNext ? 'Yes' : 'No'));
+
             // Kiểm tra xem đã ở bước cuối hay chưa
             $flagIfDone = false;
             if ($shouldProceedToNext) {
                 $flagIfDone = $this->processNextStep($currentStep, $resources);
             }
+
+            \Log::info('Next step processed. Should proceed to next step: ' . ($flagIfDone ? 'Yes' : 'No'));
             
             // 5. Gửi thông báo (chỉ gửi cho người tạo và admins)
             // Nếu trả về đúng, tức là chưa phải bước cuối => gửi thông báo phê duyệt
             if ($flagIfDone) {
                 $this->sendApprovalNotifications($resources['document'], $currentStep);
             }
+            \Log::info('Approval notifications sent.');
 
             DB::commit();
             
@@ -228,7 +238,12 @@ class DocumentFlowStepController extends Controller
             }
             
             // Kiểm tra quyền
-            $this->authorizeApproval($currentStep);
+            $checkPermission = $this->authorizeApproval($currentStep);
+            if (!$checkPermission) {
+                throw new \Exception('You do not have permission to reject this step.', 403);
+            }
+
+            \Log::info('Current step status: ' . $currentStep->status);
             
             // Kiểm tra trạng thái
             if ($currentStep->status !== 'in_review') {
@@ -237,6 +252,7 @@ class DocumentFlowStepController extends Controller
             
             // Lock các resources liên quan
             $resources = $this->lockRelatedResources($currentStep);
+            \Log::info('Resources locked successfully.');
             
             // 2. Cập nhật trạng thái rejection
             $currentStep->update([
@@ -245,6 +261,7 @@ class DocumentFlowStepController extends Controller
                 'reason' => $validated['reason'],
                 'signed_at' => now()
             ]);
+            \Log::info('Current step updated to rejected.');
             
             // Lưu lý do từ chối
             $this->saveComment($resources['documentVersion']->id, $validated['reason']);
@@ -255,9 +272,11 @@ class DocumentFlowStepController extends Controller
             // Update document và version status
             $resources['documentVersion']->update(['status' => 'rejected']);
             $resources['document']->update(['status' => 'rejected']);
+            \Log::info('Document and version updated to rejected.');
             
             // 4. Gửi thông báo
             $this->sendRejectionNotifications($resources['document'], $currentStep, $validated['reason']);
+            \Log::info('Rejection notifications sent.');
             
             DB::commit();
             
@@ -288,7 +307,7 @@ class DocumentFlowStepController extends Controller
         // Lấy thông tin document để biết document_type_id
         $document = Document::where('document_flow_id', $step->document_flow_id)->first();
         if (!$document) {
-            throw new \Exception('Document not found.', 404);
+            return false;
         }
         
         // Admin không có quyền phê duyệt
@@ -303,7 +322,7 @@ class DocumentFlowStepController extends Controller
             // Step có chỉ định approver cụ thể
             $approver = $user->approver;
             if (!$approver || $approver->id !== $step->approver_id) {
-                throw new \Exception('You are not the assigned approver for this step.', 403);
+                return false;
             }
         } else {
             // Step theo department
@@ -312,7 +331,7 @@ class DocumentFlowStepController extends Controller
                 ->first();
                 
             if (!$approver) {
-                throw new \Exception('You are not an approver in the required department.', 403);
+                return false;
             }
         }
         
@@ -326,11 +345,10 @@ class DocumentFlowStepController extends Controller
             ->exists();
             
         if (!$hasPermission) {
-            throw new \Exception(
-                'Your role does not have permission to approve this document type.', 
-                403
-            );
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -410,6 +428,7 @@ class DocumentFlowStepController extends Controller
         $nextStepNumber = DocumentFlowStep::where('document_flow_id', $currentStep->document_flow_id)
             ->where('step', '>', $currentStep->step)
             ->min('step');
+        \Log::info('Next step number: ' . $nextStepNumber);
             
         if ($nextStepNumber) {
             // Activate next step
@@ -419,15 +438,18 @@ class DocumentFlowStepController extends Controller
                 
             // Notify next approvers
             $this->notifyNextStepApprovers($currentStep->document_flow_id, $nextStepNumber, $resources['document']);
+            \Log::info('Next step activated and notified approvers.');
 
             return true;
         } else {
             // No more steps - complete approval
             $resources['documentVersion']->update(['status' => 'approved']);
             $resources['document']->update(['status' => 'approved']);
+            \Log::info('Document and version updated to approved.');
             
             // Notify completion
             $this->notifyDocumentApproved($resources['document']);
+            \Log::info('Document fully approved and notified.');
 
             return false;
         }
@@ -467,7 +489,7 @@ class DocumentFlowStepController extends Controller
         // Notify creator
         $this->createAndSendNotification(
             $currentUser->id,
-            $document->creator_id,
+            $document->created_by,
             'Văn bản được phê duyệt',
             "Văn bản '{$document->title}' đã được phê duyệt bởi {$currentUser->name}.",
             $pusher,
@@ -490,7 +512,7 @@ class DocumentFlowStepController extends Controller
         // Notify creator
         $this->createAndSendNotification(
             $currentUser->id,
-            $document->creator_id,
+            $document->created_by,
             'Văn bản bị từ chối',
             "Văn bản '{$document->title}' đã bị từ chối. Lý do: {$reason}",
             $pusher,
@@ -540,17 +562,19 @@ class DocumentFlowStepController extends Controller
     {
         $pusher = $this->getPusherInstance();
         $currentUser = auth()->user();
-        
+        \Log::info('Notifying document fully approved for document ID: ' . $document->id);
+        \Log::info('Current user ID: ' . $currentUser->id);
         // Notify creator
         $this->createAndSendNotification(
             $currentUser->id,
-            $document->creator_id,
+            $document->created_by,
             'Văn bản đã được phê duyệt',
             "Văn bản '{$document->title}' của bạn đã được phê duyệt hoàn tất.",
             $pusher,
             $document,
             'document_fully_approved'
         );
+        \Log::info('Notification sent to creator for document ID: ' . $document->id);
         
         // Notify admins
         $this->notifyAdmins($document, 'Hoàn tất phê duyệt', "Văn bản '{$document->title}' đã được phê duyệt hoàn tất");
@@ -613,6 +637,7 @@ class DocumentFlowStepController extends Controller
      */
     private function createAndSendNotification($fromUserId, $toUserId, $title, $content, $pusher, $document, $type)
     {
+        \Log::info("Creating notification from user ID: {$fromUserId} to user ID: {$toUserId}");
         $notification = Notification::create([
             'notification_category_id' => 2,
             'from_user_id' => $fromUserId,
@@ -622,12 +647,14 @@ class DocumentFlowStepController extends Controller
             'is_read' => false,
             'created_at' => now(),
         ]);
+        \Log::info('Notification created with ID: ' . $notification->id);
         
         $data = [
             'notification' => $notification,
             'document' => $document,
             'type' => $type
         ];
+        \Log::info('Sending notification to user ID: ' . $toUserId . ' with type: ' . $type);
         
         $pusher->trigger("user.{$toUserId}", 'new-notification', $data);
     }
