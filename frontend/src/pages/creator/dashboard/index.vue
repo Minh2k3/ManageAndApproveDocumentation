@@ -1,5 +1,5 @@
 <template>
-    Dashboard cho Creator
+    <News />
 </template>
 
 <script>
@@ -18,7 +18,12 @@ import { useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/creator/document-store.js';
 import { message, Modal } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
+import News from '@/components/News.vue';
+
 export default defineComponent({
+    components: {
+        News
+    },
     setup() {
         useMenu().onSelectedKeys(["creator-dashboard"]);
         const router = useRouter();

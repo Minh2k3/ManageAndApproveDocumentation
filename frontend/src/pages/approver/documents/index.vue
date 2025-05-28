@@ -397,7 +397,7 @@ export default defineComponent({
                 align: 'center',
             },
             {
-                title: 'Ngày cập nhật',
+                title: 'Lần duyệt cuối',
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,
@@ -486,7 +486,7 @@ export default defineComponent({
                 align: 'center',
             },
             {
-                title: 'Ngày cập nhật',
+                title: 'Lần duyệt cuối',
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,

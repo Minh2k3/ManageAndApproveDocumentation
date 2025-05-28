@@ -1,6 +1,7 @@
 <template>
     <div class="col-12">
         <div class="row justify-content-around mt-2">
+            <!-- Tổng số người dùng -->
             <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex justify-content-between">
@@ -24,6 +25,7 @@
                 </div>
             </div>
 
+            <!-- Tổng số văn bản -->
             <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex justify-content-between">
@@ -47,6 +49,7 @@
                 </div>
             </div>
 
+            <!-- Vai trò & Quyền hạn -->
             <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex">
@@ -70,6 +73,7 @@
                 </div>
             </div>
 
+            <!-- Luồng phê duyệt mẫu -->
             <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex">
@@ -183,15 +187,20 @@
 
                             <!-- Progress bar -->
                             <div class="col-lg-7">
-                                <div class="progress" role="progressbar" aria-label="Success example" 
-                                    :aria-valuenow="number_of_documents_by_status.get('approved').percentage"
-                                    aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-success" 
-                                        :style="{
-                                            width: number_of_documents_by_status.get('approved').percentage + '%',
-                                            height: '1.2rem'
-                                        }"></div>
-                                </div>
+                                <a-tooltip>
+                                    <template #title>
+                                        <span>{{ number_of_documents_by_status.get('approved').count }}</span>
+                                    </template>
+                                    <div class="progress" role="progressbar" aria-label="Success example" 
+                                        :aria-valuenow="number_of_documents_by_status.get('approved').percentage"
+                                        aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
+                                        <div class="progress-bar bg-success" 
+                                            :style="{
+                                                width: number_of_documents_by_status.get('approved').percentage + '%',
+                                                height: '1.2rem'
+                                            }"></div>
+                                    </div>
+                                </a-tooltip>
                             </div>
 
                             <!-- Percentage -->
@@ -211,15 +220,20 @@
 
                             <!-- Progress bar -->
                             <div class="col-lg-7">
-                                <div class="progress" role="progressbar" aria-label="Success example" 
-                                    :aria-valuenow="number_of_documents_by_status.get('in_review').percentage"
-                                    aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-info" 
-                                        :style="{
-                                            width: number_of_documents_by_status.get('in_review').percentage + '%',
-                                            height: '1.2rem'
-                                        }"></div>
-                                </div>
+                                <a-tooltip>
+                                    <template #title>
+                                        <span>{{ number_of_documents_by_status.get('in_review').count }}</span>
+                                    </template>
+                                    <div class="progress" role="progressbar" aria-label="Success example" 
+                                        :aria-valuenow="number_of_documents_by_status.get('in_review').percentage"
+                                        aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
+                                        <div class="progress-bar bg-info" 
+                                            :style="{
+                                                width: number_of_documents_by_status.get('in_review').percentage + '%',
+                                                height: '1.2rem'
+                                            }"></div>
+                                    </div>
+                                </a-tooltip>
                             </div>
 
                             <!-- Percentage -->
@@ -238,15 +252,20 @@
 
                             <!-- Progress bar -->
                             <div class="col-lg-7">
-                                <div class="progress" role="progressbar" aria-label="Success example" 
-                                    :aria-valuenow="number_of_documents_by_status.get('rejected').percentage"
-                                    aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-danger" 
+                                <a-tooltip>
+                                    <template #title>
+                                        <span>{{ number_of_documents_by_status.get('rejected').count }}</span>
+                                    </template>
+                                    <div class="progress" role="progressbar" aria-label="Success example" 
+                                        :aria-valuenow="number_of_documents_by_status.get('rejected').percentage"
+                                        aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
+                                        <div class="progress-bar bg-danger" 
                                         :style="{
                                             width: number_of_documents_by_status.get('rejected').percentage + '%',
                                             height: '1.2rem'
                                         }"></div>
-                                </div>
+                                    </div>
+                                </a-tooltip>
                             </div>
 
                             <!-- Percentage -->
@@ -265,15 +284,20 @@
 
                             <!-- Progress bar -->
                             <div class="col-lg-7">
-                                <div class="progress" role="progressbar" aria-label="Success example" 
-                                    :aria-valuenow="number_of_documents_by_status.get('draft').percentage"
-                                    aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
-                                    <div class="progress-bar bg-secondary" 
-                                        :style="{
-                                            width: number_of_documents_by_status.get('draft').percentage + '%',
-                                            height: '1.2rem'
-                                        }"></div>
-                                </div>
+                                <a-tooltip>
+                                    <template #title>
+                                        <span>{{ number_of_documents_by_status.get('draft').count }}</span>
+                                    </template>
+                                    <div class="progress" role="progressbar" aria-label="Draft document" 
+                                        :aria-valuenow="number_of_documents_by_status.get('draft').percentage"
+                                        aria-valuemin="0" aria-valuemax="100" style="background-color: #d7d7d9;">
+                                        <div class="progress-bar bg-secondary" 
+                                            :style="{
+                                                width: number_of_documents_by_status.get('draft').percentage + '%',
+                                                height: '1.2rem'
+                                            }"></div>
+                                    </div>
+                                </a-tooltip>
                             </div>
 
                             <!-- Percentage -->
@@ -417,7 +441,7 @@ export default defineComponent({
             for (const [status, count] of counts.entries()) {
                 const percentage = total > 0 ? ((count / total) * 100).toFixed(2) : "0.00";
                 result.set(status, {
-                    count,
+                    count: `${count}/${total}`,
                     percentage: Number(percentage)
                 });
             }

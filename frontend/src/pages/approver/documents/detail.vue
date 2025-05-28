@@ -444,9 +444,14 @@
                                             class="border border-2 rounded-2 w-100 py-2 bg-secondary text-white button-click-effect" 
                                             style="--bs-bg-opacity: .9;"
                                             @click="handleSendComment"
+                                            :disabled="loadingSendComment"
                                             >
-                                            <span>
-                                                <i class="bi bi-chat-square-dots me-2"></i>Gửi bình luận
+                                            <span v-if="loadingSendComment">
+                                                <i class="spinner-border spinner-border-sm me-2"></i>
+                                                Đang gửi nhận xét...
+                                            </span>
+                                            <span v-else>
+                                                <i class="bi bi-chat-square-dots me-2"></i>Gửi nhận xét
                                             </span>
                                         </button>
                                     </div>
@@ -674,7 +679,7 @@ export default defineComponent({
             // return;
             try {
                 await documentStore.approveDocument(step_id);
-                documentData.value.status = 'approved';
+                documentData.value.step_status = 'approved';
                 message.success('Bạn vừa đồng ý phê duyệt');
                 await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
                 document_flow_steps.value = documentStore.current_document_flow_steps;
@@ -781,6 +786,7 @@ export default defineComponent({
             }
         };
 
+        const loadingSendComment = ref(false);
         const handleSendComment = async () => {
             if (comment.value === '') {
                 message.error('Vui lòng nhập bình luận');
@@ -791,6 +797,8 @@ export default defineComponent({
             // console.log(comment.value);
             // console.log(parseInt(documentData.value['document_flow_step_id']));
             // return;
+
+            loadingSendComment.value = true;
             try {
                 const id = parseInt(route.params.id);
                 await axios.post(`/api/documents/${id}/comments`, {
@@ -806,6 +814,9 @@ export default defineComponent({
             } catch (error) {
                 message.error('Có lỗi xảy ra khi gửi nhận xét');
                 console.error('Error sending comment:', error);
+            } finally {
+                loadingSendComment.value = false;
+                commentTextarea.value.focus();
             }
         };
 
@@ -850,6 +861,7 @@ export default defineComponent({
             dayjs,
             btnCommentText,
             commentTextarea,
+            loadingSendComment,
             isDownloading,
             btnApproveDisabled,
             btnRejectDisabled,

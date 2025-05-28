@@ -29,6 +29,49 @@ use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
+
+    // Hàm lấy ra các văn bản công khai đã được phê duyệt
+    public function getPublicApprovedDocuments()
+    {
+        $documents = Document::where('is_public', true)
+            ->where('status', 'approved')
+            ->whereHas('versions', function($query) {
+                $query->where('status', 'approved');
+            })
+            ->with(['documentType:id,name'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Transform data
+        $transformedDocuments = $documents->map(function($document) {
+            $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+            
+            return [
+                'id' => $document->id,
+                'title' => $document->title,
+                'description' => $document->description,
+                'file_path' => $document->file_path,
+                'document_type' => [
+                    'id' => $document->documentType->id ?? null,
+                    'name' => $document->documentType->name ?? 'Không xác định'
+                ],
+                'creator' => [
+                    'id' => $document->created_by,
+                    'name' => $creatorInfo['name'],
+                    'avatar' => $creatorInfo['avatar'] ?? null,
+                    'position' => $creatorInfo['roll']
+                ],
+                'created_at' => $document->created_at,
+                'updated_at' => $document->updated_at
+            ];
+        });
+        
+        return response()->json([
+            'documents' => $transformedDocuments,
+            'message' => 'Danh sách văn bản công khai đã được phê duyệt.'
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -72,7 +115,8 @@ class DocumentController extends Controller
      */
     public function create()
     {
-        //
+
+        
     }
 
     /**
@@ -102,7 +146,7 @@ class DocumentController extends Controller
      */
     public function edit(Document $document)
     {
-        //
+        
     }
 
     /**
@@ -136,11 +180,12 @@ class DocumentController extends Controller
                 'roll' => $creator->rollAtDepartment && $creator->department 
                     ? $creator->rollAtDepartment->name . ' - ' . $creator->department->name 
                     : null,
+                'avatar' => $creator->user->avatar ?? null,
             ];
         }
         
         // Nếu không tìm thấy trong creators, thử tìm trong approvers
-        $approver = Approver::with(['user:id,name', 'department:id,name', 'rollAtDepartment:id,name'])
+        $approver = Approver::with(['user:id,name,avatar', 'department:id,name', 'rollAtDepartment:id,name'])
             ->where('user_id', $user_id)
             ->first();
         
@@ -152,6 +197,7 @@ class DocumentController extends Controller
                 'roll' => $approver->rollAtDepartment && $approver->department 
                     ? $approver->rollAtDepartment->name . ' - ' . $approver->department->name 
                     : null,
+                'avatar' => $approver->user->avatar ?? null,
             ];
         }
         
@@ -163,8 +209,11 @@ class DocumentController extends Controller
             'department_id' => null,
             'roll_at_department_id' => null,
             'roll' => null,
+            'avatar' => $user?->avatar ?? null,
         ];
     }
+
+
 
     // Hàm lấy các văn bản của một người gửi yêu cầu
     public function getDocumentsByCreator($id)
@@ -338,7 +387,7 @@ class DocumentController extends Controller
      * Lấy thông tin văn bản do người dùng hiện tại tạo theo document_id
      * Dùng cho cả creators và approvers
      */
-    public function getDocumentOfMeById($documentId)
+    public function getDocumentOfMeById($documentId) 
     {
         $userId = auth()->user()->id;
         
@@ -642,8 +691,14 @@ class DocumentController extends Controller
                 'created_at' => now(),
             ]);
 
+            // \Log::info('New document created: ', $new_document->toArray());
+
             $user = auth()->user();
+            // \Log::info('User info: ', $user->toArray());
+
             $admins = User::where('role_id', '1')->get();
+            // \Log::info('Admins: ', $admins->toArray());
+
             foreach ($admins as $admin) {
                 $notification = Notification::create([
                     'notification_category_id' => 2,
@@ -654,6 +709,8 @@ class DocumentController extends Controller
                     'is_read' => false,
                     'created_at' => now(),
                 ]); 
+
+                // \Log::info('Hereeeeeeeeeee 3333333333333333');
 
                 $options = [
                     'cluster' => env('PUSHER_APP_CLUSTER'),
@@ -670,6 +727,8 @@ class DocumentController extends Controller
                 $data['document'] = $new_document;
                 $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
             }
+
+            // \Log::info('Hereeeeeeeeeee');
 
             foreach ($document_flow_step as $step) {
                 $approver = Approver::find($step['approver_id']);

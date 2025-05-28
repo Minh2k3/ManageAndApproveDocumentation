@@ -77,6 +77,38 @@
                         cancelSort: 'Nhấn để hủy sắp xếp'
                     }"
                 >
+                    <template #headerCell="{ column }">
+                        <template v-if="column.key === 'title'">
+                            <a-tooltip title="Sắp xếp theo tên văn bản">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'type'">
+                            <a-tooltip title="Sắp xếp theo loại văn bản">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'creator_name'">
+                            <a-tooltip title="Sắp xếp theo người đề xuất">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'status'">
+                            <a-tooltip title="Sắp xếp theo trạng thái">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'created_at'">
+                            <a-tooltip title="Sắp xếp theo ngày tạo">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                        <template v-else-if="column.key === 'updated_at'">
+                            <a-tooltip title="Sắp xếp theo lần duyệt cuối">
+                                <span>{{ column.title }}</span>
+                            </a-tooltip>
+                        </template>
+                    </template>
                     <template #bodyCell="{ column, index, record }">
                         <template v-if="column.key === 'index'">
                             <span>{{ index + 1 }}</span>
@@ -281,7 +313,7 @@ export default defineComponent ({
                 align: 'center',
             },
             {
-                title: 'Ngày cập nhật',
+                title: 'Lần duyệt cuối',
                 key: 'updated_at',
                 dataIndex: 'updated_at',
                 width: 150,

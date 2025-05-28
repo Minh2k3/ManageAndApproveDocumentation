@@ -94,6 +94,10 @@ Route::get('/documents', [DocumentController::class, 'index'])
     // ->middleware('auth:sanctum')
     ->name('documents.index');
 
+Route::get('/documents/public', [DocumentController::class, 'getPublicApprovedDocuments'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.getPublicApprovedDocuments');
+
 Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
     // ->middleware('auth:sanctum')
     ->name('documents.show');
