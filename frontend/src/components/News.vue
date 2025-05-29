@@ -59,7 +59,7 @@
 
         <!-- Search Input -->
         <div class="filter-item search-box">
-          <label>Tìm kiếm:</label>
+          <label>Tìm kiếm theo tên:</label>
           <div class="search-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
@@ -243,7 +243,7 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="modal-body m-3">
+        <div class="modal-body">
           <div class="document-details">
             <div class="detail-item">
               <label>Loại văn bản:</label>
@@ -272,7 +272,7 @@
                 target="_blank"
                 class="text-decoration-none fst-italic bg-light border border-secondary rounded p-2"
                 >
-                Mở tệp trong tab mới
+                Mở trong tab mới
             </a>
           </div>
         </div>
@@ -287,296 +287,293 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 export default {
-    name: 'PublicDocuments',
-    
-    data() {
-        return {
-        documents: [],
-        filteredDocuments: [],
-        loading: false,
-        viewMode: 'card', // 'card' or 'table'
-        currentPage: 1,
-        itemsPerPage: 12,
-        selectedDocument: null,
-        
-        // Filters
-        filters: {
-            documentType: '',
-            department: '',
-            search: ''
-        },
-        
-        // Filter options
-        documentTypes: [],
-        departments: [],
-        
-        // Sorting
-        sortField: 'created_at',
-        sortOrder: 'desc',
-        
-        // Debounce timer
-        searchTimer: null
-        };
-    },
-    
-    computed: {
-        paginatedDocuments() {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        return this.filteredDocuments.slice(start, end);
-        },
-        
-        totalPages() {
-        return Math.ceil(this.filteredDocuments.length / this.itemsPerPage);
-        },
-        
-        visiblePages() {
-        const pages = [];
-        const range = 2; // Pages to show on each side
-        
-        let start = Math.max(1, this.currentPage - range);
-        let end = Math.min(this.totalPages, this.currentPage + range);
-        
-        // Adjust if at the beginning
-        if (this.currentPage <= range) {
-            end = Math.min(this.totalPages, range * 2 + 1);
-        }
-        
-        // Adjust if at the end
-        if (this.currentPage > this.totalPages - range) {
-            start = Math.max(1, this.totalPages - range * 2);
-        }
-        
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-        
-        return pages;
-        }
-    },
-    
-    mounted() {
-        this.fetchDocuments();
-        this.loadViewMode();
-    },
+  name: 'PublicDocuments',
   
-    methods: {
-        async fetchDocuments() {
-            this.loading = true;
-            try {
-                const response = await axiosInstance.get('/api/documents/public');
-                this.documents = response.data.documents || [];
-                this.filteredDocuments = [...this.documents];
-                
-                // Extract unique document types and departments
-                this.extractFilterOptions();
-                
-            } catch (error) {
-                console.error('Error fetching documents:', error);
-                this.$toast.error('Không thể tải danh sách văn bản');
-            } finally {
-                this.loading = false;
-            }
-        },
-        
-        extractFilterOptions() {
-            // Extract document types
-            const typesMap = new Map();
-            this.documents.forEach(doc => {
-                if (doc.document_type && doc.document_type.id) {
-                typesMap.set(doc.document_type.id, doc.document_type);
-                }
-            });
-            this.documentTypes = Array.from(typesMap.values());
-            
-            // Extract departments from creator positions
-            const deptsSet = new Set();
-            this.documents.forEach(doc => {
-                const dept = this.getDepartmentFromPosition(doc.creator.position);
-                if (dept) {
-                deptsSet.add(dept);
-                }
-            });
-            this.departments = Array.from(deptsSet).map((name, index) => ({
-                id: index + 1,
-                name: name
-            }));
-        },
-        
-        applyFilters() {
-            let filtered = [...this.documents];
-            
-            // Filter by document type
-            if (this.filters.documentType) {
-                filtered = filtered.filter(doc => 
-                doc.document_type.id === parseInt(this.filters.documentType)
-                );
-            }
-            
-            // Filter by department
-            if (this.filters.department) {
-                const selectedDept = this.departments.find(d => d.id === parseInt(this.filters.department));
-                if (selectedDept) {
-                filtered = filtered.filter(doc => 
-                    doc.creator.position.includes(selectedDept.name)
-                );
-                }
-            }
-            
-            // Filter by search
-            if (this.filters.search) {
-                const searchLower = this.filters.search.toLowerCase();
-                filtered = filtered.filter(doc => 
-                doc.title.toLowerCase().includes(searchLower) ||
-                doc.description.toLowerCase().includes(searchLower) ||
-                doc.creator.name.toLowerCase().includes(searchLower)
-                );
-            }
-            
-            // Apply sorting
-            this.filteredDocuments = this.sortDocuments(filtered);
-            
-            // Reset to first page
-            this.currentPage = 1;
-        },
-        
-        sortDocuments(docs) {
-            return docs.sort((a, b) => {
-                let aVal = this.getNestedValue(a, this.sortField);
-                let bVal = this.getNestedValue(b, this.sortField);
-                
-                if (this.sortField === 'created_at') {
-                aVal = new Date(aVal);
-                bVal = new Date(bVal);
-                }
-                
-                if (this.sortOrder === 'asc') {
-                return aVal > bVal ? 1 : -1;
-                } else {
-                return aVal < bVal ? 1 : -1;
-                }
-            });
-        },
-        
-        getNestedValue(obj, path) {
-            return path.split('.').reduce((o, p) => o && o[p], obj);
-        },
-        
-        sortBy(field) {
-            if (this.sortField === field) {
-                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.sortField = field;
-                this.sortOrder = 'asc';
-            }
-            this.applyFilters();
-        },
-        
-        getSortIcon(field) {
-            if (this.sortField !== field) {
-                return 'fas fa-sort';
-            }
-            return this.sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-        },
-        
-        debounceSearch() {
-            clearTimeout(this.searchTimer);
-            this.searchTimer = setTimeout(() => {
-                this.applyFilters();
-            }, 300);
-        },
-        
-        clearFilters() {
-            this.filters = {
-                documentType: '',
-                department: '',
-                search: ''
-            };
-        
-            this.applyFilters();
-        },
-        
-        viewDocument(doc) {
-            this.selectedDocument = doc;
-        },
-        
-        closeModal() {
-            this.selectedDocument = null;
-        },
-            
-        async downloadDocument(doc) {
-            try {
-                const response = await axiosInstance.get(`/api/documents/${doc.id}/download`, {
-                responseType: 'blob'
-                });
-                
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', doc.file_path.split('/').pop());
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                
-                this.$toast.success('Đã tải xuống văn bản');
-            } catch (error) {
-                console.error('Error downloading document:', error);
-                this.$toast.error('Không thể tải xuống văn bản');
-            }
-        },
-        
-        viewFullDocument(doc) {
-            window.open(`/documents/${doc.id}/view`, '_blank');
-        },
-        
-        formatDate(date) {
-            return date;
-        return format(new Date(date), 'dd/MM/yyyy', { locale: vi });
-        },
-        
-        truncateText(text, length) {
-            if (!text || text.length <= length) return text;
-            return text.substring(0, length) + '...';
-        },
-        
-        getDepartmentFromPosition(position) {
-        // Extract department from position string "Role - Department"
-            const parts = position.split(' - ');
-            return parts.length > 1 ? parts[1] : '';
-        },
-        
-        loadViewMode() {
-            const saved = localStorage.getItem('documentViewMode');
-            if (saved) {
-                this.viewMode = saved;
-            }
-        },
-        
-        saveViewMode() {
-            localStorage.setItem('documentViewMode', this.viewMode);
-        },
-
-        randomAvatar(id){
-            if (id > 100 || id == null) {
-                return `https://avatar.iran.liara.run/public`;
-            }
-            return `https://avatar.iran.liara.run/public/${id}`;
-        },
-
-        getAvatarUrl(user){
-            const API_BASE_URL = 'http://localhost:8000'
-            if (user.avatar === null) return this.randomAvatar(user.id);
-            return `${API_BASE_URL}/images/avatars/${user.avatar}`
-        },
-    },
+  data() {
+    return {
+      documents: [],
+      filteredDocuments: [],
+      loading: false,
+      viewMode: 'card', // 'card' or 'table'
+      currentPage: 1,
+      itemsPerPage: 12,
+      selectedDocument: null,
+      
+      // Filters
+      filters: {
+        documentType: '',
+        department: '',
+        search: ''
+      },
+      
+      // Filter options
+      documentTypes: [],
+      departments: [],
+      
+      // Sorting
+      sortField: 'created_at',
+      sortOrder: 'desc',
+      
+      // Debounce timer
+      searchTimer: null
+    };
+  },
   
-    watch: {
-        viewMode() {
-        this.saveViewMode();
+  computed: {
+    paginatedDocuments() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredDocuments.slice(start, end);
+    },
+    
+    totalPages() {
+      return Math.ceil(this.filteredDocuments.length / this.itemsPerPage);
+    },
+    
+    visiblePages() {
+      const pages = [];
+      const range = 2; // Pages to show on each side
+      
+      let start = Math.max(1, this.currentPage - range);
+      let end = Math.min(this.totalPages, this.currentPage + range);
+      
+      // Adjust if at the beginning
+      if (this.currentPage <= range) {
+        end = Math.min(this.totalPages, range * 2 + 1);
+      }
+      
+      // Adjust if at the end
+      if (this.currentPage > this.totalPages - range) {
+        start = Math.max(1, this.totalPages - range * 2);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
+    }
+  },
+  
+  mounted() {
+    this.fetchDocuments();
+    this.loadViewMode();
+  },
+  
+  methods: {
+    async fetchDocuments() {
+      this.loading = true;
+      try {
+        const response = await axiosInstance.get('/api/documents/public');
+        this.documents = response.data.documents || [];
+        this.filteredDocuments = [...this.documents];
+        
+        // Extract unique document types and departments
+        this.extractFilterOptions();
+        
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+        this.$toast.error('Không thể tải danh sách văn bản');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    extractFilterOptions() {
+      // Extract document types
+      const typesMap = new Map();
+      this.documents.forEach(doc => {
+        if (doc.document_type && doc.document_type.id) {
+          typesMap.set(doc.document_type.id, doc.document_type);
         }
+      });
+      this.documentTypes = Array.from(typesMap.values());
+      
+      // Extract departments from creator positions
+      const deptsSet = new Set();
+      this.documents.forEach(doc => {
+        const dept = this.getDepartmentFromPosition(doc.creator.position);
+        if (dept) {
+          deptsSet.add(dept);
+        }
+      });
+      this.departments = Array.from(deptsSet).map((name, index) => ({
+        id: index + 1,
+        name: name
+      }));
+    },
+    
+    applyFilters() {
+      let filtered = [...this.documents];
+      
+      // Filter by document type
+      if (this.filters.documentType) {
+        filtered = filtered.filter(doc => 
+          doc.document_type.id === parseInt(this.filters.documentType)
+        );
+      }
+      
+      // Filter by department
+      if (this.filters.department) {
+        const selectedDept = this.departments.find(d => d.id === parseInt(this.filters.department));
+        if (selectedDept) {
+          filtered = filtered.filter(doc => 
+            doc.creator.position.includes(selectedDept.name)
+          );
+        }
+      }
+      
+      // Filter by search
+      if (this.filters.search) {
+        const searchLower = this.filters.search.toLowerCase();
+        filtered = filtered.filter(doc => 
+          doc.title.toLowerCase().includes(searchLower) ||
+          doc.description.toLowerCase().includes(searchLower) ||
+          doc.creator.name.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Apply sorting
+      this.filteredDocuments = this.sortDocuments(filtered);
+      
+      // Reset to first page
+      this.currentPage = 1;
+    },
+    
+    sortDocuments(docs) {
+      return docs.sort((a, b) => {
+        let aVal = this.getNestedValue(a, this.sortField);
+        let bVal = this.getNestedValue(b, this.sortField);
+        
+        if (this.sortField === 'created_at') {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+        }
+        
+        if (this.sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+    },
+    
+    getNestedValue(obj, path) {
+      return path.split('.').reduce((o, p) => o && o[p], obj);
+    },
+    
+    sortBy(field) {
+      if (this.sortField === field) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortField = field;
+        this.sortOrder = 'asc';
+      }
+      this.applyFilters();
+    },
+    
+    getSortIcon(field) {
+      if (this.sortField !== field) {
+        return 'fas fa-sort';
+      }
+      return this.sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+    },
+    
+    debounceSearch() {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = setTimeout(() => {
+        this.applyFilters();
+      }, 300);
+    },
+    
+    clearFilters() {
+      this.filters = {
+        documentType: '',
+        department: '',
+        search: ''
+      };
+      this.applyFilters();
+    },
+    
+    viewDocument(doc) {
+      this.selectedDocument = doc;
+    },
+    
+    closeModal() {
+      this.selectedDocument = null;
+    },
+    
+    async downloadDocument(doc) {
+      try {
+        const response = await axiosInstance.get(`/api/documents/${doc.id}/download`, {
+          responseType: 'blob'
+        });
+        
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', doc.file_path.split('/').pop());
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        this.$toast.success('Đã tải xuống văn bản');
+      } catch (error) {
+        console.error('Error downloading document:', error);
+        this.$toast.error('Không thể tải xuống văn bản');
+      }
+    },
+    
+    viewFullDocument(doc) {
+      window.open(`/documents/${doc.id}/view`, '_blank');
+    },
+    
+    formatDate(date) {
+      return date;
+      return format(new Date(date), 'dd/MM/yyyy', { locale: vi });
+    },
+    
+    truncateText(text, length) {
+      if (!text || text.length <= length) return text;
+      return text.substring(0, length) + '...';
+    },
+    
+    getDepartmentFromPosition(position) {
+      // Extract department from position string "Role - Department"
+      const parts = position.split(' - ');
+      return parts.length > 1 ? parts[1] : '';
+    },
+    
+    loadViewMode() {
+      const saved = localStorage.getItem('documentViewMode');
+      if (saved) {
+        this.viewMode = saved;
+      }
+    },
+    
+    saveViewMode() {
+      localStorage.setItem('documentViewMode', this.viewMode);
     },
 
+    randomAvatar(id){
+        if (id > 100 || id == null) {
+            return `https://avatar.iran.liara.run/public`;
+        }
+        return `https://avatar.iran.liara.run/public/${id}`;
+    },
 
+    getAvatarUrl(user){
+        const API_BASE_URL = 'http://localhost:8000'
+        if (user.avatar === null) return this.randomAvatar(user.id);
+        return `${API_BASE_URL}/images/avatars/${user.avatar}`
+    },
+  },
+  
+  watch: {
+    viewMode() {
+      this.saveViewMode();
+    }
+  }
 };
 </script>
 
@@ -1065,17 +1062,177 @@ export default {
 }
 
 .modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
   margin: 0;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
   font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  line-height: 1;
+}
+
+.btn-close:hover {
   color: #333;
 }
 
-.modal-header .btn-close {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  font-size: 20px;
+.modal-body {
+  padding: 20px;
 }
 
+.document-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+}
+
+.detail-item span,
+.detail-item p {
+  color: #333;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .documents-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+  }
+  
+  .filter-item {
+    width: 100%;
+  }
+  
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-view {
+    overflow-x: auto;
+  }
+  
+  .documents-table {
+    min-width: 700px;
+  }
+  
+  .document-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.document-card,
+.table-row {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar for modal */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 </style>
