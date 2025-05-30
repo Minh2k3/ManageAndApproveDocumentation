@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('public_key');
             $table->string('private_key');
+            $table->string('signature_image_path')->nullable(); // Path to the signature image file
             $table->timestamps();
         });
     }

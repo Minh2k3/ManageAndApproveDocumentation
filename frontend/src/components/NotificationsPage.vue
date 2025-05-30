@@ -58,7 +58,7 @@
             >
               <div class="notification-avatar">
                 <img 
-                  :src="notification.sender?.avatar || '/default-avatar.png'" 
+                  :src="getAvatarUrl(notification.sender)" 
                   :alt="notification.sender?.name"
                 >
                 <div 
@@ -74,7 +74,7 @@
                   <span class="notification-time">{{ formatTime(notification.created_at) }}</span>
                 </div>
                 <h4 class="notification-title">{{ notification.title }}</h4>
-                <p class="notification-message">{{ notification.message }}</p>
+                <p class="notification-message">{{ notification.content }}</p>
                 <div class="notification-footer">
                   <span class="category-tag">
                     <i :class="getCategoryIcon(notification.category?.name)"></i>
@@ -92,13 +92,6 @@
                   title="Đánh dấu đã đọc"
                 >
                   <i class="fas fa-check"></i>
-                </button>
-                <button 
-                  @click.stop="deleteNotification(notification.id)"
-                  class="btn-action btn-delete"
-                  title="Xóa thông báo"
-                >
-                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </div>
@@ -244,7 +237,7 @@
           <div class="notification-detail">
             <div class="detail-header">
               <img 
-                :src="selectedNotification.sender?.avatar || '/default-avatar.png'" 
+                :src="getAvatarUrl(selectedNotification.sender)" 
                 :alt="selectedNotification.sender?.name"
                 class="sender-avatar"
               >
@@ -268,301 +261,314 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { format, formatDistanceToNow, startOfWeek, isToday, isSameDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { useNotificationStore } from '@/stores/use-notification.js';
+import { useAuth } from '@/stores/use-auth.js';
+import { message } from 'ant-design-vue';
 
-export default {
-  name: 'NotificationsPage',
+// Composables
+const authStore = useAuth();
+const notificationStore = useNotificationStore();
+
+// Reactive state
+const loading = ref(false);
+const activeTab = ref('all');
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const selectedNotification = ref(null);
+
+// Clock state
+const currentTime = ref('');
+const currentDate = ref('');
+const clockInterval = ref(null);
+
+// Calendar state
+const currentMonth = ref(new Date());
+const weekDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+// Recent activities
+const recentActivities = ref([]);
+
+// Computed properties
+const notifications = computed(() => notificationStore.notifications);
+const unreadCount = computed(() => 
+  notifications.value.filter(n => !n.is_read).length
+);
+const userId = computed(() => authStore.user?.id || null);
+
+const tabs = computed(() => [
+  { key: 'all', label: 'Tất cả', count: notifications.value.length },
+  { key: 'unread', label: 'Chưa đọc', count: unreadCount.value },
+  { key: 'read', label: 'Đã đọc', count: readCount.value }
+]);
+
+const readCount = computed(() => 
+  notifications.value.length - unreadCount.value
+); 
+
+const filteredNotifications = computed(() => {
+  switch (activeTab.value) {
+    case 'unread':
+      return notifications.value.filter(n => !n.is_read);
+    case 'read':
+      return notifications.value.filter(n => n.is_read);
+    default:
+      return notifications.value;
+  }
+});
+
+const paginatedNotifications = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredNotifications.value.slice(start, end);
+});
+
+const totalPages = computed(() => 
+  Math.ceil(filteredNotifications.value.length / itemsPerPage)
+);
+
+// Hàm chuyển đổi định dạng từ "23:17:45 28/05/2025" sang Date object
+function parseCustomDate(dateString) {
+  // Tách thời gian và ngày
+  const [time, date] = dateString.split(' ');
+  const [day, month, year] = date.split('/');
+  const [hour, minute, second] = time.split(':');
   
-  data() {
-    return {
-      notifications: [],
-      loading: false,
-      activeTab: 'all',
-      currentPage: 1,
-      itemsPerPage: 10,
-      selectedNotification: null,
-      
-      // Clock
-      currentTime: '',
-      currentDate: '',
-      clockInterval: null,
-      
-      // Calendar
-      currentMonth: new Date(),
-      weekDays: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-      
-      // Recent activities
-      recentActivities: []
-    };
-  },
+  // Tạo Date object (tháng trong JS bắt đầu từ 0)
+  return new Date(year, month - 1, day, hour, minute, second);
+}
+
+// Sử dụng trong computed function
+const todayCount = computed(() => {
+  const today = new Date().toDateString();
+  // console.log('Today:', today);
   
-  computed: {
-    userId() {
-      // Get from store or auth
-      return this.$store?.state?.auth?.user?.id || 1;
-    },
-    
-    tabs() {
-      return [
-        { key: 'all', label: 'Tất cả', count: this.notifications.length },
-        { key: 'unread', label: 'Chưa đọc', count: this.unreadCount },
-        { key: 'read', label: 'Đã đọc', count: this.readCount }
-      ];
-    },
-    
-    filteredNotifications() {
-      switch (this.activeTab) {
-        case 'unread':
-          return this.notifications.filter(n => !n.is_read);
-        case 'read':
-          return this.notifications.filter(n => n.is_read);
-        default:
-          return this.notifications;
-      }
-    },
-    
-    paginatedNotifications() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredNotifications.slice(start, end);
-    },
-    
-    totalPages() {
-      return Math.ceil(this.filteredNotifications.length / this.itemsPerPage);
-    },
-    
-    unreadCount() {
-      return this.notifications.filter(n => !n.is_read).length;
-    },
-    
-    readCount() {
-      return this.notifications.filter(n => n.is_read).length;
-    },
-    
-    todayCount() {
-      const today = new Date().toDateString();
-      return this.notifications.filter(n => 
-        new Date(n.created_at).toDateString() === today
-      ).length;
-    },
-    
-    weekCount() {
-      const weekStart = startOfWeek(new Date(), { locale: vi });
-      return this.notifications.filter(n => 
-        new Date(n.created_at) >= weekStart
-      ).length;
-    },
-    
-    calendarMonth() {
-      return format(this.currentMonth, 'MMMM yyyy', { locale: vi });
-    },
-    
-    calendarDays() {
-      const year = this.currentMonth.getFullYear();
-      const month = this.currentMonth.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const startDate = new Date(firstDay);
-      startDate.setDate(startDate.getDate() - firstDay.getDay());
-      
-      const days = [];
-      const current = new Date(startDate);
-      
-      while (current <= lastDay || current.getDay() !== 0) {
-        const date = current.getDate();
-        const isOtherMonth = current.getMonth() !== month;
-        const hasNotif = this.hasNotificationOnDate(current);
-        
-        days.push({
-          key: current.toISOString(),
-          date,
-          otherMonth: isOtherMonth,
-          isToday: isToday(current),
-          hasNotification: hasNotif
-        });
-        
-        current.setDate(current.getDate() + 1);
-      }
-      
-      return days;
-    }
-  },
+  return notifications.value.filter(n => {
+    // Chuyển đổi created_at từ định dạng custom sang Date
+    const notificationDate = parseCustomDate(n.created_at);
+    // console.log('Notification Date:', notificationDate.toDateString());
+    return notificationDate.toDateString() === today;
+  }).length;
+});
+
+
+const weekCount = computed(() => {
+  const weekStart = startOfWeek(new Date(), { locale: vi });
   
-  mounted() {
-    this.fetchNotifications();
-    this.startClock();
-    this.generateRecentActivities();
-  },
+  return notifications.value.filter(n => {
+    // Chuyển đổi created_at từ định dạng "23:17:45 28/05/2025" sang Date
+    const notificationDate = parseCustomDate(n.created_at);
+    return notificationDate >= weekStart;
+  }).length;
+});
+
+const calendarMonth = computed(() => 
+  format(currentMonth.value, 'MMMM yyyy', { locale: vi })
+);
+
+const calendarDays = computed(() => {
+  const year = currentMonth.value.getFullYear();
+  const month = currentMonth.value.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDate = new Date(firstDay);
+  startDate.setDate(startDate.getDate() - firstDay.getDay());
   
-  beforeDestroy() {
-    if (this.clockInterval) {
-      clearInterval(this.clockInterval);
-    }
-  },
+  const days = [];
+  const current = new Date(startDate);
   
-  methods: {
-    async fetchNotifications() {
-      this.loading = true;
-      try {
-        const response = await axios.get(`/api/notifications/${this.userId}`);
-        this.notifications = response.data.notifications || [];
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        this.$toast?.error('Không thể tải thông báo');
-      } finally {
-        this.loading = false;
-      }
-    },
+  while (current <= lastDay || current.getDay() !== 0) {
+    const date = current.getDate();
+    const isOtherMonth = current.getMonth() !== month;
+    const hasNotif = hasNotificationOnDate(current);
     
-    async markAsRead(notificationId) {
-      try {
-        await axios.put(`/api/notifications/${notificationId}/read`);
-        const notification = this.notifications.find(n => n.id === notificationId);
-        if (notification) {
-          notification.is_read = true;
-        }
-        this.$toast?.success('Đã đánh dấu là đã đọc');
-      } catch (error) {
-        console.error('Error marking as read:', error);
-        this.$toast?.error('Không thể cập nhật trạng thái');
-      }
-    },
+    days.push({
+      key: current.toISOString(),
+      date,
+      otherMonth: isOtherMonth,
+      isToday: isToday(current),
+      hasNotification: hasNotif
+    });
     
-    async markAllAsRead() {
-      try {
-        await axios.put(`/api/notifications/user/${this.userId}/read-all`);
-        this.notifications.forEach(n => {
-          n.is_read = true;
-        });
-        this.$toast?.success('Đã đánh dấu tất cả là đã đọc');
-      } catch (error) {
-        console.error('Error marking all as read:', error);
-        this.$toast?.error('Không thể cập nhật trạng thái');
-      }
-    },
-    
-    async deleteNotification(notificationId) {
-      if (!confirm('Bạn có chắc muốn xóa thông báo này?')) return;
-      
-      try {
-        await axios.delete(`/api/notifications/${notificationId}`);
-        this.notifications = this.notifications.filter(n => n.id !== notificationId);
-        this.$toast?.success('Đã xóa thông báo');
-      } catch (error) {
-        console.error('Error deleting notification:', error);
-        this.$toast?.error('Không thể xóa thông báo');
-      }
-    },
-    
-    viewNotification(notification) {
-      this.selectedNotification = notification;
-      if (!notification.is_read) {
-        this.markAsRead(notification.id);
-      }
-    },
-    
-    closeModal() {
-      this.selectedNotification = null;
-    },
-    
-    refreshNotifications() {
-      this.fetchNotifications();
-    },
-    
-    formatTime(date) {
-      return formatDistanceToNow(new Date(date), { 
-        addSuffix: true, 
-        locale: vi 
-      });
-    },
-    
-    formatFullDate(date) {
-      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi });
-    },
-    
-    getCategoryClass(category) {
-      const categoryMap = {
-        'Văn bản': 'category-document',
-        'Hệ thống': 'category-system',
-        'Nhắc nhở': 'category-reminder',
-        'Thông báo': 'category-info'
-      };
-      return categoryMap[category] || 'category-default';
-    },
-    
-    getCategoryIcon(category) {
-      const iconMap = {
-        'Văn bản': 'fas fa-file-alt',
-        'Hệ thống': 'fas fa-cog',
-        'Nhắc nhở': 'fas fa-bell',
-        'Thông báo': 'fas fa-info-circle'
-      };
-      return iconMap[category] || 'fas fa-envelope';
-    },
-    
-    startClock() {
-      const updateClock = () => {
-        const now = new Date();
-        this.currentTime = format(now, 'HH:mm:ss');
-        this.currentDate = format(now, 'EEEE, dd/MM/yyyy', { locale: vi });
-      };
-      
-      updateClock();
-      this.clockInterval = setInterval(updateClock, 1000);
-    },
-    
-    changeMonth(direction) {
-      const newMonth = new Date(this.currentMonth);
-      newMonth.setMonth(newMonth.getMonth() + direction);
-      this.currentMonth = newMonth;
-    },
-    
-    hasNotificationOnDate(date) {
-      return this.notifications.some(n => 
-        isSameDay(new Date(n.created_at), date)
-      );
-    },
-    
-    generateRecentActivities() {
-      // Simulate recent activities
-      this.recentActivities = [
-        {
-          id: 1,
-          type: 'login',
-          icon: 'fas fa-sign-in-alt',
-          description: 'Đăng nhập vào hệ thống',
-          time: new Date()
-        },
-        {
-          id: 2,
-          type: 'document',
-          icon: 'fas fa-file-alt',
-          description: 'Xem văn bản VB-2024-001',
-          time: new Date(Date.now() - 3600000)
-        },
-        {
-          id: 3,
-          type: 'notification',
-          icon: 'fas fa-bell',
-          description: 'Nhận 3 thông báo mới',
-          time: new Date(Date.now() - 7200000)
-        }
-      ];
-    }
-  },
+    current.setDate(current.getDate() + 1);
+  }
   
-  watch: {
-    activeTab() {
-      this.currentPage = 1;
-    }
+  return days;
+});
+
+// Methods
+const fetchNotifications = async () => {
+  loading.value = true;
+  try {
+    await notificationStore.fetchNotifications(userId.value, true);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    message.error('Không thể tải thông báo');
+  } finally {
+    loading.value = false;
   }
 };
+
+const markAsRead = async (notificationId) => {
+  try {
+    await notificationStore.markAsRead(notificationId);
+    const notification = notifications.value.find(n => n.id === notificationId);
+    if (notification) {
+      notification.is_read = true;
+    }
+  } catch (error) {
+    console.error('Error marking as read:', error);
+    message.error('Không thể cập nhật trạng thái');
+  }
+};
+
+const markAllAsRead = async () => {
+  try {
+    await notificationStore.markAllAsRead(userId.value);
+    message.success('Đã đánh dấu tất cả thông báo là đã đọc');
+  } catch (error) {
+    console.error('Error marking all as read:', error);
+    message.error('Không thể đánh dấu tất cả thông báo là đã đọc');
+  }
+};
+
+const viewNotification = (notification) => {
+  selectedNotification.value = notification;
+  if (!notification.is_read) {
+    markAsRead(notification.id);
+  }
+};
+
+const closeModal = () => {
+  selectedNotification.value = null;
+};
+
+const refreshNotifications = () => {
+  fetchNotifications();
+};
+
+const formatTime = (date) => {
+  return date;
+  return formatDistanceToNow(new Date(date), { 
+    addSuffix: true, 
+    locale: vi 
+  });
+};
+
+const formatFullDate = (date) => {
+  return date;
+  return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi });
+};
+
+const getCategoryClass = (category) => {
+  const categoryMap = {
+    'Văn bản': 'category-document',
+    'Hệ thống': 'category-system',
+    'Nhắc nhở': 'category-reminder',
+    'Thông báo': 'category-info'
+  };
+  return categoryMap[category] || 'category-default';
+};
+
+const getCategoryIcon = (category) => {
+  const iconMap = {
+    'Văn bản': 'fas fa-file-alt',
+    'Hệ thống': 'fas fa-cog',
+    'Nhắc nhở': 'fas fa-bell',
+    'Thông báo': 'fas fa-info-circle'
+  };
+  return iconMap[category] || 'fas fa-envelope';
+};
+
+const startClock = () => {
+  const updateClock = () => {
+    const now = new Date();
+    currentTime.value = format(now, 'HH:mm:ss');
+    currentDate.value = format(now, 'EEEE, dd/MM/yyyy', { locale: vi });
+  };
+  
+  updateClock();
+  clockInterval.value = setInterval(updateClock, 1000);
+};
+
+const changeMonth = (direction) => {
+  const newMonth = new Date(currentMonth.value);
+  newMonth.setMonth(newMonth.getMonth() + direction);
+  currentMonth.value = newMonth;
+};
+
+const hasNotificationOnDate = (date) => {
+  return notifications.value.some(n => 
+    isSameDay(new Date(n.created_at), date)
+  );
+};
+
+const generateRecentActivities = () => {
+  recentActivities.value = [
+    {
+      id: 1,
+      type: 'login',
+      icon: 'fas fa-sign-in-alt',
+      description: 'Đăng nhập vào hệ thống',
+      time: new Date()
+    },
+    {
+      id: 2,
+      type: 'document',
+      icon: 'fas fa-file-alt',
+      description: 'Xem văn bản VB-2024-001',
+      time: new Date(Date.now() - 3600000)
+    },
+    {
+      id: 3,
+      type: 'notification',
+      icon: 'fas fa-bell',
+      description: 'Nhận 3 thông báo mới',
+      time: new Date(Date.now() - 7200000)
+    }
+  ];
+};
+
+const randomAvatar = (id) => {
+  if (id > 100 || id == null) {
+    return `https://avatar.iran.liara.run/public`;
+  }
+  return `https://avatar.iran.liara.run/public/${id}`;
+};
+
+const getAvatarUrl = (user) => {
+  if (!user) return randomAvatar(null);
+  const API_BASE_URL = 'http://localhost:8000';
+  if (user.avatar === null) return randomAvatar(user.id);
+  return `${API_BASE_URL}/images/avatars/${user.avatar}`;
+};
+
+// Lifecycle
+onMounted(() => {
+  if (notificationStore.notifications.length === 0) {
+    fetchNotifications();
+  }
+  startClock();
+  generateRecentActivities();
+});
+
+onBeforeUnmount(() => {
+  if (clockInterval.value) {
+    clearInterval(clockInterval.value);
+  }
+});
+
+// Watchers
+watch(activeTab, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
+/* Copy all your existing styles here */
 .notifications-container {
   padding: 20px;
   max-width: 1600px;
@@ -845,7 +851,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
 }
 
