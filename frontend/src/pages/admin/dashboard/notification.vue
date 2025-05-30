@@ -1,9 +1,10 @@
 <template>
-    Thông báo cho Admin
+    <NotificationsPage />
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
+import NotificationsPage from '@/components/NotificationsPage.vue';
 import { 
     ref, 
     defineComponent, 
@@ -19,6 +20,9 @@ import { useRouter } from 'vue-router';
 import { message, Modal } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
 export default defineComponent({
+    components: {
+        NotificationsPage
+    },
     setup() {
         useMenu().onSelectedKeys(["admin-notification"]);
         const router = useRouter();

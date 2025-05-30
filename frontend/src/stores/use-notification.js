@@ -28,6 +28,38 @@ export const useNotificationStore = defineStore("notification", () => {
         }
     };
 
+    // Read all notifications
+    async function readAllNotifications(user_id) {
+        try {
+            await axiosInstance
+                .post(`api/notifications/read-all/${user_id}`)
+                .then((response) => {
+                    console.log("Response:", response.data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } catch (error) {
+            console.error("Lỗi khi đánh dấu tất cả thông báo đã đọc:", error);
+        }
+    }
+
+    // Read notification has id
+    async function readNotificationById(notification_id) {
+        try {
+            await axiosInstance
+                .post(`api/notifications/read/${notification_id}`)
+                .then((response) => {
+                    console.log("Response:", response.data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } catch (error) {
+            console.error("Lỗi khi đánh dấu thông báo đã đọc:", error);
+        }
+    }
+
 
     function reset() {
         notifications.value = [];
@@ -39,6 +71,8 @@ export const useNotificationStore = defineStore("notification", () => {
         isFetched,
 
         fetchNotifications,
+        readAllNotifications,
+        readNotificationById,
         reset
     };
 });

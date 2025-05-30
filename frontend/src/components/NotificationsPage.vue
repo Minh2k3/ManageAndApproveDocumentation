@@ -58,7 +58,7 @@
             >
               <div class="notification-avatar">
                 <img 
-                  :src="getAvatarUrl(notification.sender.avatar)" 
+                  :src="notification.sender?.avatar || '/default-avatar.png'" 
                   :alt="notification.sender?.name"
                 >
                 <div 
@@ -74,7 +74,7 @@
                   <span class="notification-time">{{ formatTime(notification.created_at) }}</span>
                 </div>
                 <h4 class="notification-title">{{ notification.title }}</h4>
-                <p class="notification-message">{{ notification.content }}</p>
+                <p class="notification-message">{{ notification.message }}</p>
                 <div class="notification-footer">
                   <span class="category-tag">
                     <i :class="getCategoryIcon(notification.category?.name)"></i>
@@ -93,13 +93,13 @@
                 >
                   <i class="fas fa-check"></i>
                 </button>
-                <!-- <button 
+                <button 
                   @click.stop="deleteNotification(notification.id)"
                   class="btn-action btn-delete"
                   title="Xóa thông báo"
                 >
                   <i class="fas fa-trash"></i>
-                </button> -->
+                </button>
               </div>
             </div>
           </transition-group>
@@ -269,7 +269,7 @@
 </template>
 
 <script>
-import axiosInstance from '@/lib/axios.js';
+import axios from 'axios';
 import { format, formatDistanceToNow, startOfWeek, isToday, isSameDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -407,7 +407,7 @@ export default {
     async fetchNotifications() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get(`/api/notifications/${this.userId}`);
+        const response = await axios.get(`/api/notifications/${this.userId}`);
         this.notifications = response.data.notifications || [];
       } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -419,7 +419,7 @@ export default {
     
     async markAsRead(notificationId) {
       try {
-        await axiosInstance.put(`/api/notifications/${notificationId}/read`);
+        await axios.put(`/api/notifications/${notificationId}/read`);
         const notification = this.notifications.find(n => n.id === notificationId);
         if (notification) {
           notification.is_read = true;
@@ -433,7 +433,7 @@ export default {
     
     async markAllAsRead() {
       try {
-        await axiosInstance.put(`/api/notifications/user/${this.userId}/read-all`);
+        await axios.put(`/api/notifications/user/${this.userId}/read-all`);
         this.notifications.forEach(n => {
           n.is_read = true;
         });
@@ -448,7 +448,7 @@ export default {
       if (!confirm('Bạn có chắc muốn xóa thông báo này?')) return;
       
       try {
-        await axiosInstance.delete(`/api/notifications/${notificationId}`);
+        await axios.delete(`/api/notifications/${notificationId}`);
         this.notifications = this.notifications.filter(n => n.id !== notificationId);
         this.$toast?.success('Đã xóa thông báo');
       } catch (error) {
@@ -480,7 +480,6 @@ export default {
     },
     
     formatFullDate(date) {
-        return date;
       return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi });
     },
     
@@ -552,20 +551,7 @@ export default {
           time: new Date(Date.now() - 7200000)
         }
       ];
-    },
-
-    randomAvatar(id){
-        if (id > 100 || id == null) {
-            return `https://avatar.iran.liara.run/public`;
-        }
-        return `https://avatar.iran.liara.run/public/${id}`;
-    },
-
-    getAvatarUrl(user){
-        const API_BASE_URL = 'http://localhost:8000'
-        if (user.avatar === null) return this.randomAvatar(user.id);
-        return `${API_BASE_URL}/images/avatars/${user.avatar}`
-    },
+    }
   },
   
   watch: {
@@ -859,7 +845,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  /* -webkit-line-clamp: 2; */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 

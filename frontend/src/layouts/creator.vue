@@ -74,14 +74,32 @@ export default {
     methods: {
         toggleMenu() {
             this.isMenuVisible = !this.isMenuVisible
+        },
+        
+        checkScreenSize() {
+            // Bootstrap lg breakpoint is 992px
+            if (window.innerWidth < 992) {
+                this.isMenuVisible = false;
+            }
         }
     },
     mounted() {
+        // Check screen size on mount
+        this.checkScreenSize();
+        
         // Lưu và khôi phục trạng thái menu
         const savedState = localStorage.getItem('menuVisible')
         if (savedState !== null) {
             this.isMenuVisible = savedState === 'true'
         }
+        
+        // Listen for window resize
+        window.addEventListener('resize', this.checkScreenSize);
+    },
+    
+    beforeDestroy() {
+        // Clean up event listener
+        window.removeEventListener('resize', this.checkScreenSize);
     },
     watch: {
         isMenuVisible(newVal) {

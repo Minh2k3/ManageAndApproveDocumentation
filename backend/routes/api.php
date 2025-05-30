@@ -199,11 +199,11 @@ Route::get('/notifications/{user_id}', [NotificationController::class, 'getAllNo
     // ->middleware('auth:sanctum')
     ->name('notifications.getAllNotificationsByUserId');
 
-Route::post('/notifications/{id}', [NotificationController::class, 'markAsRead'])
+Route::post('/notifications/read/{notification_id}', [NotificationController::class, 'markAsRead'])
     // ->middleware('auth:sanctum')
     ->name('notifications.markAsRead');
 
-Route::post('/notifications/{user_id}', [NotificationController::class, 'markAllAsRead'])
+Route::post('/notifications/read-all/{user_id}', [NotificationController::class, 'markAllAsRead'])
     // ->middleware('auth:sanctum')
     ->name('notifications.markAllAsRead');
 

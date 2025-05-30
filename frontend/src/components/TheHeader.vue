@@ -228,9 +228,24 @@
         showNotifications.value = !showNotifications.value;
     };
 
-    function viewNotification(notificationId) {
+    function pushToNotificationPage() {
+        console.log('Navigating to notification page for role:', role + '-notification');
+        router.push({ name: role + '-notification' });
+    };
+
+    async function viewNotification(notificationId) {
         unreadMessagesCount.value--;
         notifications.value = notifications.value.filter(n => n.id !== notificationId);
+        pushToNotificationPage();
+        return;
+        await notificationStore.readNotificationById(notificationId)
+            .then(() => {
+                console.log('Notification marked as read:', notificationId);
+                pushToNotificationPage();
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
     }
 
     async function fetchNotifications(force = false) {
@@ -243,13 +258,6 @@
     onMounted(async () => {
         await fetchNotifications();
         loadNotifications();
-    //   // Thiết lập interval để fetch lại mỗi 5 phút (300000 ms)
-    //   const intervalId = setInterval(fetchNotifications(true), 300000); // Mỗi 5 phút
-
-    //   // Dọn dẹp interval khi component bị unmounted
-    //   onUnmounted(() => {
-    //     clearInterval(intervalId); // Dừng interval khi component bị hủy
-    //   });
     });
 
     const loadNotifications = () => {
@@ -294,29 +302,22 @@
         // );
     }
 
-    const maskAsAllRead = () => {
+    const maskAsAllRead = async () => {
         // notificationStore.markAsAllRead(user.id);
-        notifications.value = [];
-        unreadMessagesCount.value = 0;
+        try {
+            await notificationStore.markAsAllRead(user.id);
+            notifications.value = [];
+            unreadMessagesCount.value = 0;
+            message.success('Đã đánh dấu tất cả thông báo là đã đọc');
+        } catch (error) {
+            console.error('Error marking notifications as read:', error);
+            message.error('Đánh dấu tất cả thông báo là đã đọc thất bại');
+        }
     };
 
     const viewAllNotifications = () => {
-        // Chuyển hướng đến trang thông báo
-        console.log('Role:', role);
-        console.log('Check name:', role + '-notification');
-        router.push({ name: role + '-notification' });
+        pushToNotificationPage();
     };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString)
-        return date.toLocaleString('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
     
 
     const showDrawer = () => {
