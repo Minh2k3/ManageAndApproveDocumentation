@@ -13,7 +13,7 @@
             <div  class="col-lg-6 d-none d-lg-flex align-items-center justify-content-lg-end">
                 <div class="dropdown me-4">
                     <!-- Notification Button -->
-                    <button class="btn btn-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleNotifications" style="background-color: #007cba;">
+                    <button id="btn-notification" class="btn btn-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleNotifications" style="background-color: #007cba;">
                         <i class="fa-solid fa-bell"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger px-1">
                             {{ unreadMessagesCount > 9 ? 9 : unreadMessagesCount }}{{ unreadMessagesCount > 9 ? '+' : '' }}
@@ -496,5 +496,10 @@
 
 .btn-link:hover {
     color: #0d6efd;
+}
+
+#btn-notification:hover {
+    background-color: #77d67c;
+    color: #d5d4d4; 
 }
 </style>

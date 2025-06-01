@@ -13,6 +13,7 @@ import {useDocumentStore as useCreatorDocumentStore} from './creator/document-st
 export const useAuth = defineStore('auth', {
     state: () => ({
         user: null,
+        user_details: null,
         role: null,
         roll: null,
         isAuthenticated: false,
@@ -74,12 +75,17 @@ export const useAuth = defineStore('auth', {
                     this.roll = 'Admin';
                 } else if (this.user.role_id === 2) {
                     this.role = 'creator';
+                    const creator_response = await axiosInstance.get('/api/users/' + this.user.id + '/creator');
+                    this.user_details = creator_response.data.creator;
                 } else if (this.user.role_id === 3) {
                     this.role = 'approver';
+                    const approver_response = await axiosInstance.get('/api/users/' + this.user.id + '/approver');
+                    this.user_details = approver_response.data.approver;
                 }
                 this.isAuthenticated = true;
             } catch (error) {
                 this.user = null;
+                this.user_details = null;
                 this.role = null;
                 this.roll = null;
                 this.isAuthenticated = false;

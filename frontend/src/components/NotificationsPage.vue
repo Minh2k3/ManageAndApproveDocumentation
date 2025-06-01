@@ -128,10 +128,10 @@
           </div>
         </div>
         
-        <!-- Calendar Widget -->
+        <!-- Calendar Widget với Lịch Âm -->
         <div class="widget calendar-widget">
           <div class="widget-header">
-            <h3><i class="fas fa-calendar-alt"></i> Lịch</h3>
+            <h3><i class="fas fa-calendar-alt"></i> Lịch Âm Dương</h3>
           </div>
           <div class="calendar">
             <div class="calendar-header">
@@ -152,7 +152,10 @@
                   'has-notification': day.hasNotification
                 }]"
               >
-                {{ day.date }}
+                <div class="solar-date">{{ day.date }}</div>
+                <div v-if="day.lunar" class="lunar-date">
+                  {{ day.lunar.day }}/{{ day.lunar.month }}
+                </div>
                 <div v-if="day.hasNotification" class="day-indicator"></div>
               </div>
             </div>
@@ -269,6 +272,121 @@ import { useNotificationStore } from '@/stores/use-notification.js';
 import { useAuth } from '@/stores/use-auth.js';
 import { message } from 'ant-design-vue';
 
+// Lớp chuyển đổi lịch âm
+class LunarCalendar {
+  static PI = Math.PI;
+  
+  // Hàm tính Julian Day Number
+  static jdFromDate(dd, mm, yy) {
+    const a = Math.floor((14 - mm) / 12);
+    const y = yy - a;
+    const m = mm + 12 * a - 3;
+    const jd = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+    if (jd < 2299161) {
+      return dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083;
+    }
+    return jd;
+  }
+  
+  // Hàm tính new moon (sóc)
+  static newMoon(k) {
+    const T = k / 1236.85;
+    const T2 = T * T;
+    const T3 = T2 * T;
+    const dr = this.PI / 180;
+    let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3;
+    Jd1 = Jd1 + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+    const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
+    const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
+    const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * dr * M);
+    C1 = C1 - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(dr * 2 * Mpr);
+    C1 = C1 - 0.0004 * Math.sin(dr * 3 * Mpr) + 0.0104 * Math.sin(dr * 2 * F);
+    C1 = C1 - 0.0051 * Math.sin(dr * (M + Mpr)) - 0.0074 * Math.sin(dr * (M - Mpr));
+    C1 = C1 + 0.0004 * Math.sin(dr * (2 * F + M)) - 0.0004 * Math.sin(dr * (2 * F - M));
+    C1 = C1 - 0.0006 * Math.sin(dr * (2 * F + Mpr)) + 0.0010 * Math.sin(dr * (2 * F - Mpr));
+    C1 = C1 + 0.0005 * Math.sin(dr * (2 * Mpr + M));
+    const deltat = T < -11 ? 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3 : -0.000278 + 0.000265 * T + 0.000262 * T2;
+    return Jd1 + C1 - deltat;
+  }
+  
+  // Chuyển đổi từ lịch dương sang lịch âm
+  static convertSolar2Lunar(dd, mm, yy, timeZone = 7) {
+    const jd = this.jdFromDate(dd, mm, yy);
+    const k = Math.floor((jd - 2415021.076998695) / 29.530588853);
+    let monthStart = this.newMoon(k + 1);
+    if (monthStart > jd) {
+      monthStart = this.newMoon(k);
+    }
+    let a11 = this.getLunarMonth11(yy, timeZone);
+    let b11 = a11;
+    let lunarYear;
+    if (a11 >= monthStart) {
+      lunarYear = yy;
+      a11 = this.getLunarMonth11(yy - 1, timeZone);
+    } else {
+      lunarYear = yy + 1;
+      b11 = this.getLunarMonth11(yy + 1, timeZone);
+    }
+    const lunarDay = Math.floor(jd - monthStart + 1);
+    const diff = Math.floor((monthStart - a11) / 29);
+    let lunarMonth = diff + 11;
+    if (b11 - a11 > 365) {
+      const leapMonthDiff = this.getLeapMonthOffset(a11, timeZone);
+      if (diff >= leapMonthDiff) {
+        lunarMonth = diff + 10;
+        if (diff === leapMonthDiff) {
+          lunarMonth = -lunarMonth;
+        }
+      }
+    }
+    if (lunarMonth > 12) {
+      lunarMonth = lunarMonth - 12;
+    }
+    if (lunarMonth >= 11 && diff < 4) {
+      lunarYear -= 1;
+    }
+    return [lunarDay, Math.abs(lunarMonth), lunarYear];
+  }
+  
+  static getLunarMonth11(yy, timeZone) {
+    const off = this.jdFromDate(31, 12, yy) - 2415021.076998695;
+    const k = Math.floor(off / 29.530588853);
+    let nm = this.newMoon(k);
+    const sunLong = this.getSunLongitude(nm, timeZone);
+    if (sunLong >= 9) {
+      nm = this.newMoon(k - 1);
+    }
+    return nm;
+  }
+  
+  static getLeapMonthOffset(a11, timeZone) {
+    const k = Math.floor(0.5 + (a11 - 2415021.076998695) / 29.530588853);
+    let last = 0;
+    let i = 1;
+    let arc = this.getSunLongitude(this.newMoon(k + i), timeZone);
+    do {
+      last = arc;
+      i++;
+      arc = this.getSunLongitude(this.newMoon(k + i), timeZone);
+    } while (arc !== last && i < 14);
+    return i - 1;
+  }
+  
+  static getSunLongitude(jdn, timeZone) {
+    const T = (jdn - 2451545.5 - timeZone / 24) / 36525;
+    const T2 = T * T;
+    const dr = this.PI / 180;
+    const M = 357.52911 + 35999.05029 * T - 0.0001537 * T2;
+    const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
+    let DL = (1.914602 - 0.004817 * T - 0.000014 * T2) * Math.sin(dr * M);
+    DL = DL + (0.019993 - 0.000101 * T) * Math.sin(dr * 2 * M) + 0.000289 * Math.sin(dr * 3 * M);
+    const L = L0 + DL;
+    const lambda = L - 360 * Math.floor(L / 360);
+    return Math.floor(lambda / 30);
+  }
+}
+
 // Composables
 const authStore = useAuth();
 const notificationStore = useNotificationStore();
@@ -344,16 +462,13 @@ function parseCustomDate(dateString) {
 // Sử dụng trong computed function
 const todayCount = computed(() => {
   const today = new Date().toDateString();
-  // console.log('Today:', today);
   
   return notifications.value.filter(n => {
     // Chuyển đổi created_at từ định dạng custom sang Date
     const notificationDate = parseCustomDate(n.created_at);
-    // console.log('Notification Date:', notificationDate.toDateString());
     return notificationDate.toDateString() === today;
   }).length;
 });
-
 
 const weekCount = computed(() => {
   const weekStart = startOfWeek(new Date(), { locale: vi });
@@ -380,17 +495,32 @@ const calendarDays = computed(() => {
   const days = [];
   const current = new Date(startDate);
   
-  while (current <= lastDay || current.getDay() !== 0) {
+  // Tạo 42 ngày (6 tuần)
+  for (let i = 0; i < 42; i++) {
     const date = current.getDate();
     const isOtherMonth = current.getMonth() !== month;
     const hasNotif = hasNotificationOnDate(current);
+    
+    // Chuyển đổi sang lịch âm
+    let lunarInfo = null;
+    try {
+      const [lunarDay, lunarMonth, lunarYear] = LunarCalendar.convertSolar2Lunar(
+        current.getDate(), 
+        current.getMonth() + 1, 
+        current.getFullYear()
+      );
+      lunarInfo = { day: lunarDay, month: lunarMonth, year: lunarYear };
+    } catch (error) {
+      console.error('Lỗi chuyển đổi lịch âm:', error);
+    }
     
     days.push({
       key: current.toISOString(),
       date,
       otherMonth: isOtherMonth,
       isToday: isToday(current),
-      hasNotification: hasNotif
+      hasNotification: hasNotif,
+      lunar: lunarInfo
     });
     
     current.setDate(current.getDate() + 1);
@@ -452,15 +582,10 @@ const refreshNotifications = () => {
 
 const formatTime = (date) => {
   return date;
-  return formatDistanceToNow(new Date(date), { 
-    addSuffix: true, 
-    locale: vi 
-  });
 };
 
 const formatFullDate = (date) => {
   return date;
-  return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi });
 };
 
 const getCategoryClass = (category) => {
@@ -568,7 +693,7 @@ watch(activeTab, () => {
 </script>
 
 <style scoped>
-/* Copy all your existing styles here */
+/* Existing styles... */
 .notifications-container {
   padding: 20px;
   max-width: 1600px;
@@ -590,6 +715,13 @@ watch(activeTab, () => {
 
 .page-header i {
   color: #2563eb;
+}
+
+/* Content Layout */
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 30px;
 }
 
 /* Content Layout */
@@ -851,7 +983,6 @@ watch(activeTab, () => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
 }
 
@@ -899,11 +1030,6 @@ watch(activeTab, () => {
 .btn-action:hover {
   background: #e5e7eb;
   color: #111827;
-}
-
-.btn-delete:hover {
-  background: #fee2e2;
-  color: #ef4444;
 }
 
 /* Pagination */
@@ -996,7 +1122,7 @@ watch(activeTab, () => {
   text-transform: capitalize;
 }
 
-/* Calendar Widget */
+/* Calendar Widget với Lịch Âm */
 .calendar {
   font-size: 14px;
 }
@@ -1049,48 +1175,79 @@ watch(activeTab, () => {
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 2px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
+/* Calendar Day - Cập nhật để hỗ trợ lịch âm */
 .calendar-day {
-  aspect-ratio: 1;
+  background: white;
+  min-height: 50px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
+  padding: 4px 2px;
 }
 
 .calendar-day:hover {
-  background: #f3f4f6;
+  background: #f8f9ff;
 }
 
 .calendar-day.other-month {
-  color: #d1d5db;
+  color: #ccc;
+  background: #fafafa;
 }
 
 .calendar-day.today {
   background: #2563eb;
   color: white;
-  font-weight: 600;
+  font-weight: bold;
 }
 
-.calendar-day.has-notification .day-indicator {
+.calendar-day.today .lunar-date {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.calendar-day.has-notification::after {
+  content: '';
   position: absolute;
-  bottom: 4px;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: #ff4444;
+  border-radius: 50%;
+}
+
+/* Solar and Lunar date styling */
+.solar-date {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.lunar-date {
+  font-size: 9px;
+  color: #888;
+  margin-top: 2px;
+  line-height: 1;
+}
+
+.day-indicator {
+  position: absolute;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
-  background: #ef4444;
+  background: #2196F3;
   border-radius: 50%;
-}
-
-.calendar-day.today.has-notification .day-indicator {
-  background: white;
 }
 
 /* Statistics Widget */
@@ -1405,6 +1562,19 @@ watch(activeTab, () => {
   .filter-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-day {
+    min-height: 45px;
+    padding: 2px 1px;
+  }
+  
+  .solar-date {
+    font-size: 12px;
+  }
+  
+  .lunar-date {
+    font-size: 8px;
   }
 }
 

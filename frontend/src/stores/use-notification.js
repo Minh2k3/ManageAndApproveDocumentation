@@ -45,7 +45,7 @@ export const useNotificationStore = defineStore("notification", () => {
     }
 
     // Read notification has id
-    async function readNotificationById(notification_id) {
+    async function markAsRead(notification_id) {
         try {
             await axiosInstance
                 .post(`api/notifications/read/${notification_id}`)
@@ -72,7 +72,7 @@ export const useNotificationStore = defineStore("notification", () => {
 
         fetchNotifications,
         readAllNotifications,
-        readNotificationById,
+        markAsRead,
         reset
     };
 });

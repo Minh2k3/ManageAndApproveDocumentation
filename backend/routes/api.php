@@ -88,6 +88,14 @@ Route::post('/users/unban', [UserController::class, 'unbanUser'])
     ->middleware('auth:sanctum')
     ->name('users.unban');
 
+Route::get('/users/{user_id}/approver', [UserController::class, 'getApproverByUserId'])
+    // ->middleware('auth:sanctum')
+    ->name('users.getApproverByUserId');
+
+Route::get('/users/{user_id}/creator', [UserController::class, 'getCreatorByUserId'])
+    // ->middleware('auth:sanctum')
+    ->name('users.getCreatorByUserId');
+
 // Document api
 // Document
 Route::get('/documents', [DocumentController::class, 'index'])

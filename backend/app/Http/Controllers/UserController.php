@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserAccountEmail;
 use App\Models\User;
+use App\Models\Approver;
+use App\Models\Creator;
+use App\Models\Department;
+use App\Models\RollAtDepartment;
 
 class UserController extends Controller
 {
@@ -112,5 +116,36 @@ class UserController extends Controller
         return response()->json(['message' => 'User not found.'], 404);
     }
 
+    public function getApproverByUserId($user_id)
+    {
+        $approver = Approver::with([
+            'department:id,name',
+            'rollAtDepartment:id,name,level',
+        ])
+        ->where('user_id', $user_id)
+        ->first();
+        if (!$approver) {
+            return response()->json(['message' => 'Approver not found.'], 404);
+        }
+        return response()->json([
+            'approver' => $approver,
+        ]);
+    }
+
+    public function getCreatorByUserId($user_id)
+    {
+        $creator = Creator::with([
+            'department:id,name',
+            'rollAtDepartment:id,name,level',
+        ])
+        ->where('user_id', $user_id)
+        ->first();
+        if (!$creator) {
+            return response()->json(['message' => 'Creator not found.'], 404);
+        }
+        return response()->json([
+            'creator' => $creator,
+        ]);
+    }
 
 }
