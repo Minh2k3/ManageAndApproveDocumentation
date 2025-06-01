@@ -1,12 +1,26 @@
 <template>
-    Đây là trang cài đặt của người phê duyệt.
+    <Settings />
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
-export default {
+import Settings from '@/components/Settings.vue';
+import { 
+    ref, 
+    defineComponent, 
+    computed, 
+    reactive, 
+    watch, 
+    onMounted, 
+    createVNode,
+    h 
+} from 'vue';
+export default defineComponent({
+    components: {
+        Settings,
+    },
     setup() {
         useMenu().onSelectedKeys(["approver-settings"]);
     },
-}
+});
 </script>

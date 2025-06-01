@@ -169,6 +169,7 @@ import {
     CheckSquareOutlined
 } from '@ant-design/icons-vue';
 import pdfFile from '@/assets/files/ĐCĐA_TrầnTuấnMinh_63CNTT4_2151062831.pdf';
+import TemplateDocument from '@/components/TemplateDocument.vue';
 
 export default defineComponent({
     components: {
@@ -176,7 +177,8 @@ export default defineComponent({
         FilterOutlined,
         DownOutlined,
         FileAddOutlined,
-        CheckSquareOutlined
+        CheckSquareOutlined,
+        TemplateDocument,
     },
     setup() {
         const pagination = ref({
@@ -247,6 +249,38 @@ export default defineComponent({
             window.open(pdfFile, '_blank');
         }
 
+    // Event handlers
+    const handleAddTemplate = () => {
+    message.info('Mở form thêm mẫu văn bản mới');
+    // Logic để mở modal/form thêm mẫu mới
+    };
+
+    const handleToggleFavorite = (template) => {
+    // Tìm và cập nhật template trong array
+    const index = templates.value.findIndex(t => t.id === template.id);
+    if (index !== -1) {
+        templates.value[index].isFavorite = !templates.value[index].isFavorite;
+        
+        if (templates.value[index].isFavorite) {
+        message.success(`Đã thêm "${template.title}" vào danh sách yêu thích`);
+        } else {
+        message.info(`Đã xóa "${template.title}" khỏi danh sách yêu thích`);
+        }
+    }
+    };
+
+    const handleViewTemplate = (template) => {
+    message.info(`Đang mở xem mẫu: ${template.title}`);
+    // Logic để mở preview mẫu văn bản
+    // Có thể mở modal hoặc navigate đến trang chi tiết
+    };
+
+    const handleCreateFromTemplate = (template) => {
+    message.success(`Đang tạo văn bản mới từ mẫu: ${template.title}`);
+    // Logic để tạo văn bản mới từ mẫu
+    // Có thể navigate đến trang soạn thảo với dữ liệu từ mẫu
+    };
+
         return {
             pagination,
             templates,
@@ -256,6 +290,9 @@ export default defineComponent({
             handlePageSizeChange,
             openPdf,
             toggleFavorite,
+            handleAddTemplate,
+            handleToggleFavorite,
+            handleViewTemplate,
             Pagination,
             Select
         };

@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import router from './router/index.js'
 import axios from 'axios'
 import '@/lib/echo';
+import { useThemeStore } from '@/stores/use-theme.js';
 
 window.axios = axios;
 
@@ -38,6 +39,7 @@ import {
     Steps,
     Empty,
     Carousel,
+    Divider,
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -50,6 +52,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const app = createApp(App)
 const pinia = createPinia()
+
 app.config.globalProperties.$message = message
 app.use(pinia)
 app.use(router)
@@ -82,4 +85,10 @@ app.use(FloatButton)
 app.use(Steps)
 app.use(Empty)
 app.use(Carousel)
+app.use(Divider)
+
+const themeStore = useThemeStore();
+themeStore.applyTheme();
+themeStore.listenToSystemChange();
+
 app.mount('#app')
