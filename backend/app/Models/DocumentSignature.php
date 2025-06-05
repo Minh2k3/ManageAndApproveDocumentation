@@ -1,55 +1,48 @@
 <?php
-
+// app/Models/DocumentSignature.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use App\Models\DocumentFlowStep;
 use App\Models\DocumentVersion;
-use App\Models\Approver;
+use App\Models\DigitalCertificate;
+use App\Models\SignatureTimestamp;
 
 class DocumentSignature extends Model
 {
-
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'document_version_id',
-        'approver_id',
-        'signed_at',
-        'signature_text',
+        'document_flow_step_id', 'document_version_id', 'certificate_id',
+        'pkcs7_signature', 'document_hash', 'signature_attributes', 
+        'signed_at', 'is_valid', 'verification_details'
     ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+    
     protected $casts = [
+        'signature_attributes' => 'array',
         'signed_at' => 'datetime',
+        'is_valid' => 'boolean'
     ];
-
-    /**
-     * Get the document version that owns the signature.
-     */
-    public function documentVersion()
+    
+    // Relationships
+    public function documentFlowStep(): BelongsTo
+    {
+        return $this->belongsTo(DocumentFlowStep::class);
+    }
+    
+    public function documentVersion(): BelongsTo
     {
         return $this->belongsTo(DocumentVersion::class);
     }
-
-    /**
-     * Get the approver that signed the document.
-     */
-    public function approver()
+    
+    public function certificate(): BelongsTo
     {
-        return $this->belongsTo(Approver::class);
+        return $this->belongsTo(DigitalCertificate::class);
+    }
+    
+    public function timestamps(): HasMany
+    {
+        return $this->hasMany(SignatureTimestamp::class, 'signature_id');
     }
 }

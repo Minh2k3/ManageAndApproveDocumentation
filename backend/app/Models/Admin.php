@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\UserBan;
+use App\Models\CertificateRenewal;
 use Carbon\Carbon;
 
 class Admin extends Model
@@ -44,6 +45,14 @@ class Admin extends Model
     public function bannedUsers()
     {
         return $this->hasMany(UserBan::class, 'banned_by');
+    }
+
+    /**
+     * Get the certificate renewals approved by this admin.
+     */
+    public function approvedCertificateRenewals()
+    {
+        return $this->hasMany(CertificateRenewal::class, 'approved_by');
     }
 
     protected $dates = ['created_at', 'updated_at'];

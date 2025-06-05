@@ -7,6 +7,7 @@ use App\Models\DocumentFlow;
 use App\Models\Department;
 use App\Models\Approver;
 use App\Models\DocumentComment;
+use App\Models\DocumentSignature;
 use Carbon\Carbon;
 
 class DocumentFlowStep extends Model
@@ -76,6 +77,14 @@ class DocumentFlowStep extends Model
         return $this->hasMany(DocumentComment::class, 'document_flow_step_id');
     }
 
+    /**
+     * Get the signatures for this step.
+     */
+    public function signatures()
+    {
+        return $this->hasMany(DocumentSignature::class, 'document_flow_step_id');
+    }
+    
     /**
      * Get the created_at attribute formatted.
      */

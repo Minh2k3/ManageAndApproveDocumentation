@@ -16,6 +16,7 @@ use App\Models\Role;
 use App\Models\UserBan;
 use App\Models\Approver;
 use App\Models\Creator;
+use App\Models\DigitalCertificate;
 use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 
@@ -161,6 +162,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function comments()
     {
         return $this->hasMany(DocumentComment::class);
+    }
+
+    /**
+     * Get the digital certificates associated with the user.
+     */
+    public function digitalCertificates()
+    {
+        return $this->hasMany(DigitalCertificate::class, 'user_id');
     }
 
     /**

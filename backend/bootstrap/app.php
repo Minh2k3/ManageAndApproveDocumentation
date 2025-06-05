@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Configuration\Providers;
 use Illuminate\Foundation\Configuration\Routing;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
@@ -47,4 +48,16 @@ return Application::configure(basePath: dirname(__DIR__))
         \Laravel\Fortify\FortifyServiceProvider::class,
         \App\Providers\FortifyServiceProvider::class,
     ])
+    ->withCommands([
+        // Đăng ký các commands
+        \App\Console\Commands\CheckExpiringCertificate::class,
+        \App\Console\Commands\GenerateUserCertificate::class,
+        \App\Console\Commands\InitializeCertificateSystem::class,
+    ])
+    ->withSchedule(function (Schedule $schedule) {
+        // Kiểm tra chứng chỉ sắp hết hạn hàng ngày lúc 8h sáng
+        $schedule->command('certificates:check-expiring')
+                 ->dailyAt('08:00')
+                 ->appendOutputTo(storage_path('logs/certificate-check.log'));
+    })    
     ->create();

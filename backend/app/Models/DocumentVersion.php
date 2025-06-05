@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\DocumentComment;
-// use App\Models\DocumentSignature;
+use App\Models\DocumentSignature;
 use Carbon\Carbon;
 
 class DocumentVersion extends Model
@@ -61,10 +61,10 @@ class DocumentVersion extends Model
     // /**
     //  * Get the signatures for the document version.
     //  */
-    // public function signatures()
-    // {
-    //     return $this->hasMany(DocumentSignature::class);
-    // }
+    public function signatures()
+    {
+        return $this->hasMany(DocumentSignature::class);
+    }
 
     protected $dates = ['created_at'];
 
