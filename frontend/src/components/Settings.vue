@@ -557,7 +557,7 @@
                     <span class="text-secondary">Quản lý mật khẩu và bảo mật tài khoản của bạn</span>
 
                     <div class="row mt-3">
-                        <div class="col-12 col-md-2 align-items-center">
+                        <div class="col-12 align-items-center">
                             <span>Thay đổi mật khẩu</span>
                         </div>
                         <form @submit.prevent="changeInformation" class="col-12 mt-3">
@@ -601,6 +601,7 @@
                                         <a-input-password 
                                             v-model:value="new_password" 
                                             :placeholder="'Nhập mật khẩu mới'"
+                                            allow-clear
                                             class="mb-2"
                                         >
                                             <template #addonBefore>
@@ -623,7 +624,7 @@
 
                                     <div class="col-12 mt-1">
                                         <a-input-password 
-                                            v-model:value="confirm_password" 
+                                            v-model:value="new_password_confirmation" 
                                             :placeholder="'Xác nhận mật khẩu mới'" 
                                             allow-clear
                                             class="mb-2"
@@ -643,7 +644,7 @@
                                 <div class="col-12 col-sm-12 text-end">
                                     <a-button 
                                         type="primary" 
-                                        @click="changeSecurity"
+                                        @click="changePassword"
                                         class="mt-2"
                                     >
                                         <span><i class="bi bi-save me-2"></i>Lưu thay đổi</span>
@@ -669,7 +670,10 @@ import {
     onMounted, 
     createVNode 
 } from 'vue';
-
+import { 
+    message, 
+    Modal,
+} from 'ant-design-vue';
 import { UserOutlined, UploadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/stores/use-auth.js';
@@ -748,11 +752,37 @@ export default defineComponent({
         // For security tab
         const current_password = ref('');
         const new_password = ref('');
-        const confirm_password = ref('');
+        const new_password_confirmation = ref('');
 
-        const changeSecurity = () => {
-            // Logic to change security settings
-            console.log('Change security clicked');
+        const changePassword = async () => {
+
+            if (!current_password.value.trim() || !new_password.value.trim() || !new_password_confirmation.value.trim()) {
+                message.error('Vui lòng điền đầy đủ thông tin mật khẩu');
+                return;
+            }
+
+            if (new_password.value !== new_password_confirmation.value) {
+                message.error('Mật khẩu mới và xác nhận mật khẩu không khớp');
+                return;
+            }
+
+            // console.log(typeof current_password.value, typeof new_password.value, typeof new_password_confirmation.value);
+
+            try {
+                const response = await authStore.changePassword(
+                    current_password.value.trim(),
+                    new_password.value.trim(),
+                    new_password_confirmation.value.trim()
+                );
+                message.success('Mật khẩu đã được thay đổi thành công');
+                // Reset the password fields
+                current_password.value = '';
+                new_password.value = '';
+                new_password_confirmation.value = '';
+            } catch (error) {
+                console.error('Error changing password:', error);
+            }
+
         };
 
         return {
@@ -774,7 +804,7 @@ export default defineComponent({
 
             current_password,
             new_password,
-            confirm_password,
+            new_password_confirmation,
 
             getAvatarUrl,
             handleClickChangeAvatar,
@@ -782,7 +812,7 @@ export default defineComponent({
 
             changeUserInterface,
 
-            changeSecurity,
+            changePassword,
         };
     },
 });

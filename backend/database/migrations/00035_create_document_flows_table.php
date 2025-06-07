@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->boolean('is_active')->default(true)->comment('Is this template being used');
             $table->boolean('is_template')->default(false)->comment('Check if this flow is a template flow');
+            $table->integer('process')->default(0)->comment('The process of the document flow');
             $table->timestamps();
         });
     }

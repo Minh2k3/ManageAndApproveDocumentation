@@ -14,7 +14,7 @@ class LogoutController extends Controller
         $user = $request->user();
         
         if ($user) {
-             $user->tokens()->delete();
+            $user->tokens()->delete();
             Auth::guard('web')->logout();
             $cookie = cookie('XSRF-TOKEN', '', -1);
             return response()->json(['message' => 'Successfully logged out'], Response::HTTP_OK);

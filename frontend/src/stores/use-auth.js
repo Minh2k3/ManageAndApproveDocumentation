@@ -90,6 +90,28 @@ export const useAuth = defineStore('auth', {
                 this.roll = null;
                 this.isAuthenticated = false;
             }
-        }
+        },
+
+        async changePassword(current_password, new_password, new_password_confirmation) {
+            if (this.user === null) {
+                return { status: 'error', message: 'Chưa đăng nhập' };
+            }
+            
+            // console.log('Changing password for user:', this.user);
+
+            // console.log(typeof current_password, typeof new_password, typeof new_password_confirmation);
+
+            try {
+                await axiosInstance
+                .post(`api/users/${this.user.id}/change-password`, {
+                    current_password: current_password,
+                    new_password: new_password,
+                    new_password_confirmation: new_password_confirmation,
+                });
+            } catch (error) {
+                console.error(error);
+                return { status: 'error', message: error.response?.data?.message || 'Đổi mật khẩu thất bại ở frontend' };
+            }
+        },
     },
 });

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('public_key');
             $table->string('private_key');
             $table->string('signature_image_path')->nullable(); // Path to the signature image file
+            $table->integer('used_count')->default(0); // Count of how many times the signature has been used
             $table->timestamps();
         });
     }

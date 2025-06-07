@@ -9,6 +9,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\CustomAuthenticatedSessionController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\HandlePasswordController;
 
 // User Controllers
 use App\Http\Controllers\UserController;
@@ -95,6 +96,10 @@ Route::get('/users/{user_id}/approver', [UserController::class, 'getApproverByUs
 Route::get('/users/{user_id}/creator', [UserController::class, 'getCreatorByUserId'])
     // ->middleware('auth:sanctum')
     ->name('users.getCreatorByUserId');
+
+Route::post('/users/{user_id}/change-password', [HandlePasswordController::class, 'changePassword'])
+    // ->middleware('auth:sanctum')
+    ->name('users.changePassword');
 
 // Document api
 // Document

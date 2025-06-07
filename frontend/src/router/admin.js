@@ -94,7 +94,19 @@ const admin = [
                 path: "approval-flows/create",
                 name: "admin-approval-flows-create",
                 component: () => import('@/pages/admin/approval-flows/create.vue')
-            }
+            },
+
+            // Quản lý Chữ ký số
+            {
+                path: "signatures",
+                name: "admin-signatures",
+                component: () => import('@/pages/admin/signatures/index.vue')
+            },
+            {
+                path: "signatures/detail",
+                name: "admin-signatures-detail",
+                component: () => import('@/pages/admin/signatures/detail.vue')
+            },
                 
         ]
     }

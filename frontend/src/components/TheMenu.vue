@@ -86,6 +86,22 @@
 			</a-menu-item>
 		</a-sub-menu>
 
+		<a-sub-menu key="admin-signatures">
+			<template #title>
+				<span class="d-inline-flex align-items-center">
+					<TagOutlined class="me-2" /> Quản lý chữ ký số
+				</span>
+			</template>
+
+			<a-menu-item key="admin-signatures">
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-signatures' }">Chữ ký số</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-signatures-detail" :disabled="!isDetailSignatureAdmin" :selectable="isDetailSignatureAdmin">
+				Chi tiết chứng thực
+			</a-menu-item>
+		</a-sub-menu>
+
 		<a-sub-menu key="admin-approval-flows">
 			<template #title>
 				<span class="d-inline-flex align-items-center">
@@ -298,6 +314,10 @@ export default defineComponent({
 
 		const route = useRoute();
 
+		const isDetailSignatureAdmin = computed(() => {
+			return route.name === 'admin-signatures-detail';
+		});
+
 		const isDetailPageCreator = computed(() => {
 			return route.name === 'creator-documents-detail';
 		});
@@ -348,6 +368,7 @@ export default defineComponent({
 		return {
 			...storeToRefs(store),
 			role,
+			isDetailSignatureAdmin,
 			isDetailPageCreator,
 			isEditPageCreator,
 			isDetailPageApprover,

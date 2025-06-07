@@ -6,7 +6,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use App\Models\NonAdmin;
 use App\Models\Admin;
 use App\Models\DocumentTemplate;
 use App\Models\Notification;
@@ -16,6 +15,8 @@ use App\Models\Role;
 use App\Models\UserBan;
 use App\Models\Approver;
 use App\Models\Creator;
+use App\Models\Certificate;
+use App\Models\DocumentSignature;
 use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 
@@ -161,6 +162,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function comments()
     {
         return $this->hasMany(DocumentComment::class);
+    }
+
+    /**
+     * Get the certificates associated with the user.
+     */
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
     }
 
     /**

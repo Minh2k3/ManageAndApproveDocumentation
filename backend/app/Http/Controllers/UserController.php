@@ -7,12 +7,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+
+use App\Http\Controllers\CertificateController;
+
 use App\Mail\UserAccountEmail;
 use App\Models\User;
 use App\Models\Approver;
 use App\Models\Creator;
 use App\Models\Department;
 use App\Models\RollAtDepartment;
+use App\Certificate;
 
 class UserController extends Controller
 {
@@ -85,6 +89,11 @@ class UserController extends Controller
         if ($user && $user['status'] == 'pending') {
             $user['status'] = 'active';
             $user->save();
+
+            // Generate a new certificate for the user
+            $certificateController = new CertificateController();
+            $certificateResponse = $certificateController->issueCertificate($user->id);
+
             Mail::to($user->email)->send(new UserAccountEmail($user, 'verify_ok', ''));
             return response()->json(['message' => 'User activated successfully.']);
         }
