@@ -101,6 +101,9 @@ Route::post('/users/{user_id}/change-password', [HandlePasswordController::class
     // ->middleware('auth:sanctum')
     ->name('users.changePassword');
 
+Route::post('forgot-password', [HandlePasswordController::class, 'forgotPassword'])
+    ->name('forgot-password');
+
 // Document api
 // Document
 Route::get('/documents', [DocumentController::class, 'index'])

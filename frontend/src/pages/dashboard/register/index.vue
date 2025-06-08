@@ -1,289 +1,201 @@
 <template>
-    <div 
-        class="container-fluid vh-100 overflow-hidden backGradient">
-        <div class="position-absolute top-0 end-0 mt-sm-5 me-sm-3">
-            <router-link to="/" class="text-decoration-none">
-                <a-button type="primary" class="d-flex align-items-center">
-                    <HomeOutlined class="me-1" />
-                    Trang chủ
-                </a-button>
-            </router-link>
+    <div class="register-container">
+        <!-- Background particles -->
+        <div class="particles">
+            <div class="particle" v-for="n in 50" :key="n"></div>
         </div>
-        <div class="row h-100 py-3">
-            <!-- Cột trái -->
-            <div class="d-sm-flex col-sm-5 d-none" :style="{      
-                    // backgroundImage: `url(${bgImage})`,
-                    // backgroundSize: 'contain',
-                    // backgroundRepeat: 'no-repeat',
-                    // backgroundPosition: 'top',
-                    // height: '100vh',
-                }"
-            >
-                <div class="col-12">
-                    <div class="row mt-3" >
-                        <div class="col-12 justify-content-center d-flex mb-1 align-items-center">
-                            <a-avatar shape="square" :size="50" style="background-color: transparent;">
-                                <template #icon>
-                                    <img src="@/assets/images/logo_tlu.png" alt="logo_tlu"
-                                        style="width: 100%; height: 100%; object-fit: contain;">
-                                </template>
-                            </a-avatar>
-                            <a-avatar shape="square" :size="50" style="background-color: transparent;" class="mx-3">
-                                <template #icon>
-                                    <img src="@/assets/images/logo_dtn.png" alt="logo_dtn"
-                                        style="width: 100%; height: 100%; object-fit: contain;">
-                                </template>
-                            </a-avatar>
-                            <a-avatar shape="square" :size="45" style="background-color: transparent;">
-                                <template #icon>
-                                    <img src="@/assets/images/logo_hsv.png" alt="logo_hsv"
-                                        style="width: 100%; height: 100%; object-fit: contain;">
-                                </template>
-                            </a-avatar>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-12 justify-content-center">
-                            <h3 class="text-center mb-0 p-1">TRƯỜNG ĐẠI HỌC THỦY LỢI</h3>
-                        </div>
+        <div class="main-content">
+            <!-- Left side - Logo & Title (Hidden on mobile) -->
+            <div class="left-side">
+                <div class="logo-section fade-in-left">
+                    <div class="logos-container">
+                        <a-avatar shape="square" :size="60" class="logo-item">
+                            <template #icon>
+                                <img src="@/assets/images/logo_tlu.png" alt="logo_tlu">
+                            </template>
+                        </a-avatar>
+                        <a-avatar shape="square" :size="60" class="logo-item">
+                            <template #icon>
+                                <img src="@/assets/images/logo_dtn.png" alt="logo_dtn">
+                            </template>
+                        </a-avatar>
+                        <a-avatar shape="square" :size="55" class="logo-item">
+                            <template #icon>
+                                <img src="@/assets/images/logo_hsv.png" alt="logo_hsv">
+                            </template>
+                        </a-avatar>
                     </div>
-                    <div class="row">
-                        <div class="col-12 justify-content-center d-flex mb-3">
-                            <h4 class="text-center col-12">Đoàn Thanh niên - Hội Sinh viên</h4>
-                        </div>
+                    
+                    <div class="title-section">
+                        <h2 class="university-name">TRƯỜNG ĐẠI HỌC THỦY LỢI</h2>
+                        <h3 class="department-name">Đoàn Thanh niên - Hội Sinh viên</h3>
                     </div>
+                </div>
 
-                    <div class="row h-100 ">
-                        <div class="d-flex align-items-center">
-                            <h1 class="fs-1" style="color: #005baa;">Hệ Thống Quản Lý và Phê Duyệt Văn Bản Điện Tử</h1>
-                        </div>
-                    </div>
+                <div class="system-title fade-in-up">
+                    <h1>Hệ Thống Quản Lý và Phê Duyệt Văn Bản Điện Tử</h1>
                 </div>
             </div>
 
-            <!-- Cột phải -->
-            <div class="col-12 col-sm-7 d-flex justify-content-center rounded-start-5 align-items-center"
-                style="background-color: #f8f9fa;">
-                <div class="row w-100">
-                    <div class="col-12">
-                        <!-- Nội dung cột giữa -->
-                        <div class="row">
-                            <div class="justify-content-center">
-                                <h1 class="text-center fw-bold mb-0">ĐĂNG KÝ</h1>
+            <!-- Right side - Register Form -->
+            <div class="right-side">
+                <div class="form-container fade-in-right">
+                    <div class="form-header">
+                        <h1 class="register-title">ĐĂNG KÝ</h1>
+                        <p class="register-subtitle">Tạo tài khoản mới để sử dụng hệ thống</p>
+                    </div>
+
+                    <!-- Register Form -->
+                    <form @submit.prevent="register" class="register-form">
+                        <!-- Name & Email Row -->
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Họ và tên
+                                </label>
+                                <a-input 
+                                    v-model:value="name" 
+                                    placeholder="Trần Tuấn Minh" 
+                                    allow-clear
+                                    size="large"
+                                    class="form-input"
+                                />
+                            </div>
+                            <div class="form-group half-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Email
+                                </label>
+                                <a-input 
+                                    v-model:value="email" 
+                                    placeholder="2151062831@e.tlu.edu.vn" 
+                                    allow-clear
+                                    size="large"
+                                    class="form-input"
+                                />
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-12 justify-content-center">
-                                <h4 class="text-center text-secondary fst-italic">Tạo tài khoản mới để sử dụng hệ thống
-                                </h4>
+                        <!-- Department & Role Row -->
+                        <div class="form-row">
+                            <div class="form-group department-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Phòng/Khoa/Đơn vị
+                                </label>
+                                <div class="department-input">
+                                    <a-select 
+                                        v-model:value="selectedDepartment"
+                                        show-search 
+                                        placeholder="Chọn phòng/khoa/đơn vị" 
+                                        style="width: 100%"
+                                        :options="departments" 
+                                        :filter-option="filterOption" 
+                                        allow-clear
+                                        size="large"
+                                        :dropdown-match-select-width="false"
+                                        :list-height="200"
+                                    />
+                                    <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlook của trường">
+                                        <QuestionCircleOutlined 
+                                            class="question-icon"
+                                            @click="showRequestNewDepartmentModal"
+                                        />
+                                    </a-tooltip>
+                                </div>
+                            </div>
+                            <div class="form-group role-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Vai trò
+                                </label>
+                                <a-select 
+                                    v-model:value="selectedRoll"
+                                    show-search 
+                                    placeholder="Chọn vai trò" 
+                                    style="width: 100%"
+                                    :options="rolls" 
+                                    :filter-option="filterOption" 
+                                    allow-clear
+                                    size="large"
+                                    :dropdown-match-select-width="false"
+                                    :list-height="200"
+                                />
                             </div>
                         </div>
 
-                        <form @submit.prevent="register">
-                            <div class="row justify-content-center ">
-                                <div class="col-sm-4">
-                                    <div class="col-12 col-sm-12 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Họ và tên</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="w-100"></div>
-
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <a-input v-model:value="name" placeholder="Trần Tuấn Minh" allow-clear/>
-                                        <div class="w-100"></div>
-                                        <!-- 
-                                    <small 
-                                        v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                        class="text-danger">
-                                            {{ errors.status_id[0] }}
-                                    </small> -->
-                                    </div>
-                                </div>
-                            
-
-                                <div class="col-sm-4 mt-sm-0 mt-3">
-                                    <div class="col-12 col-sm-12 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Email</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="w-100"></div>
-
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <a-input v-model:value="email" placeholder="2151062831@e.tlu.edu.vn" allow-clear/>
-
-                                        <div class="w-100"></div>
-                                        <!-- 
-                                    <small 
-                                        v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                        class="text-danger">
-                                            {{ errors.status_id[0] }}
-                                    </small> -->
-                                    </div>
-                                </div>
+                        <!-- Password Row -->
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Mật khẩu
+                                </label>
+                                <a-input-password 
+                                    v-model:value="password" 
+                                    placeholder="abcILoveYou123"
+                                    allow-clear 
+                                    size="large"
+                                    class="form-input"
+                                />
                             </div>
-
-                            <div class="row justify-content-center mt-3">
-                                <div class="col-sm-5">
-                                    <div class="col-12 col-sm-12 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Phòng/Khoa/Đơn vị</span>
-                                        </label>
-                                    </div>
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <div class="d-flex align-items-center">
-                                            <a-select 
-                                            v-model:value="selectedDepartment"
-                                            show-search 
-                                            placeholder="Phòng/Khoa/Đơn vị" 
-                                            style="width: 100%"
-                                            :options="departments" 
-                                            :filter-option="filterOption" 
-                                            allow-clear
-                                            :list-height="160"
-                                            ></a-select>
-                                            
-                                            <a-tooltip placement="right" title="Đơn vị của bạn không có trong danh sách? Gửi mail cho admin bằng tài khoản outlock của trường">
-                                                <QuestionCircleOutlined 
-                                                    class="ms-2 text-primary"
-                                                    style="font-size: 18px; cursor: pointer;"
-                                                    @click="showRequestNewDepartmentModal"
-                                                />
-                                            </a-tooltip>
-                                        </div>
-
-                                        <div class="w-100"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-3 mt-sm-0 mt-3">
-                                    <div class="col-12 col-sm-12 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Vai trò</span>
-                                        </label>
-                                    </div>
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <div class="d-flex">
-                                            <a-select 
-                                            v-model:value="selectedRoll"
-                                            show-search 
-                                            placeholder="Vai trò" 
-                                            style="width: 100%"
-                                            :options="rolls" 
-                                            :filter-option="filterOption" 
-                                            allow-clear
-                                            :list-height="160"
-                                            ></a-select>
-                                        </div>
-
-                                        <div class="w-100"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Mật khẩu -->
-                            <div class="row justify-content-center mt-3">
-                                <div class="col-sm-4">
-                                    <div class="col-12 col-sm-7 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Mật khẩu</span>
-                                        </label>
-                                    </div>
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <a-input-password v-model:value="password" placeholder="abcILoveYou123"
-                                            allow-clear />
-
-                                        <div class="w-100"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-4 mt-sm-0 mt-3">
-                                    <div class="col-12 col-sm-12 text-start align-self-center">
-                                        <label>
-                                            <span class="text-danger me-1">*</span>
-                                            <span class="fw-bold">Xác nhận mật khẩu</span>
-                                        </label>
-                                    </div>
-                                    <div class="col-12 col-sm-12 mt-1">
-                                        <a-input-password v-model:value="password_confirmation" placeholder="abcILoveYou123"
-                                            allow-clear />
-
-                                        <div class="w-100"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row justify-content-center mt-3">
-                                <div class="col-sm-6 col-12 border border-secondary row py-2">
-                                        <div class="col-sm-1 col-1">
-                                            <div class="d-flex justify-content-center">
-                                                <a-checkbox v-model:checked="ok" class="">
-                                                </a-checkbox>
-                                            </div>
-                                            <div class="w-100"></div>
-                                            
-                                        </div>
-                                        
-                                        <div class="col-sm-11 col-11 px-0 ps-2">
-                                            <div class="d-flex">
-                                                <span class="fw-bold fst-italic">Tôi đồng ý với các điều khoản và chính sách của hệ thống</span>
-                                            </div>
-                                            <div class="w-100"></div>
-                                            <div class="d-flex pt-2 align-items-center">
-                                                <span class="text-secondary">Chi tiết điều khoản xem tại</span>
-                                                &nbsp;
-                                                <a href="#" class="text-decoration-none text-primary fst-italic">đây</a>
-                                            </div>
-                                        </div>
-                                    
-                                </div>
-                            </div>
-
-                            <div class="row justify-content-center mt-3">
-                                <div class="col-12 col-sm-6 justify-content-center">
-                                    <div class="d-grid gap-2">
-                                        <button class="btn btn-primary rounded-3 py-2 my-button" 
-                                            type="button" 
-                                            style="background-color: #0d6efd;
-                                                border-color: #0d6efd;
-                                                color: #ffffff;"
-                                            :disabled="loading"
-                                            @click="register"
-                                        >
-                                            <span v-if="loading">
-                                                <i class="spinner-border spinner-border-sm me-2"></i>
-                                                Đang đăng ký...
-                                            </span>
-                                            <span v-else>Đăng ký</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="row mt-4">
-                            <div class="col-12 justify-content-center d-flex">
-                                <span class="text-center text-secondary mx-2">Đã có tài khoản?</span>
-                                <router-link :to="{ name: 'login' }" class="text-decoration-none">
-                                    <span class="text-center text-primary fst-italic">Đăng nhập</span>
-                                </router-link>
+                            <div class="form-group half-width">
+                                <label>
+                                    <span class="required">*</span>
+                                    Xác nhận mật khẩu
+                                </label>
+                                <a-input-password 
+                                    v-model:value="password_confirmation" 
+                                    placeholder="abcILoveYou123"
+                                    allow-clear 
+                                    size="large"
+                                    class="form-input"
+                                />
                             </div>
                         </div>
 
+                        <!-- Terms Agreement -->
+                        <div class="terms-section">
+                            <div class="terms-checkbox">
+                                <a-checkbox v-model:checked="ok" class="custom-checkbox">
+                                    <span class="terms-text">
+                                        Tôi đồng ý với các điều khoản và chính sách của hệ thống
+                                    </span>
+                                </a-checkbox>
+                            </div>
+                            <div class="terms-link">
+                                <span class="text-secondary">Chi tiết điều khoản xem </span>
+                                <a href="#" class="link-primary">tại đây</a>
+                            </div>
+                        </div>
+
+                        <!-- Register Button -->
+                        <button 
+                            type="button" 
+                            class="register-btn"
+                            :disabled="loading"
+                            @click="register"
+                        >
+                            <span v-if="loading">
+                                <i class="spinner-border spinner-border-sm me-2"></i>
+                                Đang đăng ký...
+                            </span>
+                            <span v-else>Đăng ký</span>
+                        </button>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="login-link">
+                        <span>Đã có tài khoản?</span>
+                        <router-link :to="{ name: 'login' }">
+                            Đăng nhập ngay
+                        </router-link>
                     </div>
                 </div>
             </div>
         </div>
-        
     </div>
 </template>
 
@@ -302,7 +214,6 @@ import {
     onUnmounted
 } from "vue";
 import { useRouter } from "vue-router";
-import bgImage from '@/assets/images/NMT.jpg';
 import { message } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
 import { useRegisterStore } from "@/stores/use-register";
@@ -350,32 +261,8 @@ export default defineComponent({
             }
         };
 
-        const getUsersRegister = async () => {
-            console.log("Đang lấy dữ liệu từ API...");
-            await axiosInstance.get("sanctum/csrf-cookie");
-            try {
-                await axiosInstance
-                    .get("api/register-options", {
-                        withCredentials: true,
-                    })
-                    .then((response) => {
-                        console.log("Response:", response.data);
-                        departments.value = response.data.departments;
-                        rolls.value = response.data.rolls;
-                        console.log(departments.value);
-                        console.log(rolls.value);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    });
-            } catch (error) {
-                console.error("Lỗi khi lấy dữ liệu:", error);
-            }
-        };
-
         // Gọi hàm lấy danh sách phòng ban và vai trò khi component được khởi tạo
         onMounted(async () => {
-            // getUsersRegister();
             await useRegister.fetchRegisterForm();
             departments.value = useRegister.departments;
             rolls.value = useRegister.rolls;
@@ -395,7 +282,6 @@ export default defineComponent({
                 roll_at_department_id: selectedRoll.value
             });
 
-
             if (!name.value.trim()) {
                 message.error("Vui lòng nhập họ và tên!");
                 validateFrontend.value = false;
@@ -407,12 +293,6 @@ export default defineComponent({
                 validateFrontend.value = false;
                 return;
             }
-
-            // if (!/^[^@]+@(e\.tlu\.edu\.vn|tlu\.edu\.vn)$/.test(email.value)) {
-            //     message.error("Email không hợp lệ. Vui lòng nhập email trường Thủy Lợi.");
-            //     validateFrontend.value = false;
-            //     return;
-            // }
 
             if (selectedDepartment.value === null) {
                 message.error("Phòng ban không được để trống.");
@@ -432,12 +312,6 @@ export default defineComponent({
                 return;
             }
 
-            // if (!/(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])/.test(password.value)) {
-            //     message.error("Mật khẩu phải gồm chữ, số và ký tự đặc biệt.");
-            //     validateFrontend.value = false;
-            //     return;
-            // }
-
             if (password.value !== password_confirmation.value) {
                 message.error("Mật khẩu không khớp!");
                 validateFrontend.value = false;
@@ -449,7 +323,6 @@ export default defineComponent({
                 validateFrontend.value = false;
                 return;
             }
-            
 
             validateFrontend.value = true;
             loading.value = true;
@@ -465,7 +338,6 @@ export default defineComponent({
         
         const registerUser = async () => {
             console.log("Đăng ký người dùng mới");
-            // await axiosInstance.get("sanctum/csrf-cookie");
             try {
                 const response = await axiosInstance.post("api/register", {
                     name: name.value,
@@ -478,7 +350,6 @@ export default defineComponent({
                 console.log("Đăng ký thành công:", response.data);
                 validateFrontend.value = false;
                 message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
-                // Chuyển hướng đến trang đăng nhập hoặc trang khác nếu cần
                 router.push({ name: "login" });
             } catch (error) {
                 if (error.response && error.response.status === 422) {
@@ -516,7 +387,6 @@ export default defineComponent({
             departments,
             rolls,
             ok,
-            bgImage,
             selectedDepartment,
             selectedRoll,
             loading,
@@ -529,29 +399,500 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.ant-tooltip {
-    max-width: 300px;
+<style scoped>
+/* Main Container */
+.register-container {
+    height: 100vh;
+    background: linear-gradient(-45deg, #003a69 0%, #4392ba 28%, #28b6de 67%, #00eeff 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+    position: relative;
+    overflow: hidden;
 }
 
-.backGradient {
-    background: #003a69;
-    background: linear-gradient(-45deg, rgba(0, 58, 105, 1) 0%, rgba(67, 146, 186, 1) 28%, rgba(40, 182, 222, 1) 67%, rgba(0, 238, 255, 1) 100%);
+/* Background Animation */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.my-button {
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* Particles */
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
 
-.my-button:hover {
-  background-color: #59b54b; /* đậm hơn */
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
 }
 
-.my-button:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+.particle:nth-child(odd) {
+    animation-delay: -2s;
+    animation-duration: 8s;
+}
+
+.particle:nth-child(even) {
+    animation-delay: -4s;
+    animation-duration: 10s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Distribute particles randomly */
+.particle:nth-child(1) { left: 10%; }
+.particle:nth-child(2) { left: 20%; }
+.particle:nth-child(3) { left: 30%; }
+.particle:nth-child(4) { left: 40%; }
+.particle:nth-child(5) { left: 50%; }
+.particle:nth-child(6) { left: 60%; }
+.particle:nth-child(7) { left: 70%; }
+.particle:nth-child(8) { left: 80%; }
+.particle:nth-child(9) { left: 90%; }
+.particle:nth-child(10) { left: 15%; }
+
+/* Main Content */
+.main-content {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    padding: 15px;
+}
+
+/* Left Side */
+.left-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    color: white;
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logos-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 20px;
+}
+
+.logo-item {
+    background: transparent !important;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.logo-item:hover {
+    transform: scale(1.1);
+}
+
+.logo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.title-section {
+    text-align: center;
+}
+
+.university-name {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.department-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.system-title h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+}
+
+/* Right Side */
+.right-side {
+    flex: 1.2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-container {
+    background: rgba(248, 249, 250, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 25px;
+    width: 100%;
+    max-width: 550px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.register-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #003a69;
+    margin-bottom: 8px;
+}
+
+.register-subtitle {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+/* Form Styles */
+.register-form {
+    margin-bottom: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.half-width {
+    flex: 1;
+}
+
+.department-width {
+    flex: 2;
+}
+
+.role-width {
+    flex: 1;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    color: #003a69;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.required {
+    color: #dc3545;
+    margin-right: 4px;
+}
+
+.form-input,
+.form-select {
+    border-radius: 8px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-input:hover,
+.form-select:hover {
+    border-color: #4392ba !important;
+}
+
+.form-input:focus,
+.form-input.ant-input-focused,
+.form-select:focus,
+.form-select.ant-select-focused {
+    border-color: #003a69 !important;
+    box-shadow: 0 0 0 2px rgba(0, 58, 105, 0.1) !important;
+}
+
+/* Department Input with Question Icon */
+.department-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.question-icon {
+    color: #003a69;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.question-icon:hover {
+    color: #4392ba;
+}
+
+/* Terms Section */
+.terms-section {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 58, 105, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.terms-checkbox {
+    margin-bottom: 8px;
+}
+
+.custom-checkbox {
+    font-weight: 500;
+    font-style: italic;
+}
+
+.terms-text {
+    color: #003a69;
+}
+
+.terms-link {
+    font-size: 0.9rem;
+}
+
+.link-primary {
+    color: #003a69;
+    text-decoration: none;
+    font-style: italic;
+    transition: color 0.3s ease;
+}
+
+.link-primary:hover {
+    color: #4392ba;
+}
+
+/* Register Button */
+.register-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #003a69 0%, #4392ba 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.register-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 58, 105, 0.3);
+}
+
+.register-btn:active {
+    transform: translateY(0);
+}
+
+.register-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Login Link */
+.login-link {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.login-link a {
+    color: #003a69;
+    text-decoration: none;
+    font-style: italic;
+    font-weight: 500;
+    margin-left: 5px;
+    transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+    color: #4392ba;
+}
+
+/* Animations */
+.fade-in-left {
+    animation: fadeInLeft 1s ease-out;
+}
+
+.fade-in-right {
+    animation: slideInFromRight 1.2s ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 1s ease-out 0.5s both;
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .left-side {
+        display: none;
+    }
+    
+    .main-content {
+        justify-content: center;
+    }
+    
+    .right-side {
+        flex: none;
+        width: 100%;
+        max-width: 500px;
+        padding: 15px;
+    }
+    
+    .form-container {
+        padding: 20px 15px;
+        max-width: 100%;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .register-title {
+        font-size: 1.6rem;
+    }
+    
+    .department-input {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .question-icon {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-container {
+        padding: 18px 12px;
+        margin: 0 8px;
+    }
+    
+    .register-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-row {
+        gap: 10px;
+    }
+    
+    .terms-section {
+        padding: 12px;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Ant Design Select Customization */
+:deep(.ant-select-selector) {
+    border-radius: 8px !important;
+    border: 2px solid #e9ecef !important;
+    height: 40px !important;
+    align-items: center !important;
+}
+
+:deep(.ant-select-selection-placeholder) {
+    color: #6c757d !important;
+    font-size: 14px !important;
+}
+
+:deep(.ant-select:hover .ant-select-selector) {
+    border-color: #4392ba !important;
+}
+
+:deep(.ant-select-focused .ant-select-selector) {
+    border-color: #003a69 !important;
+    box-shadow: 0 0 0 2px rgba(0, 58, 105, 0.1) !important;
+}
+
+:deep(.ant-select-arrow) {
+    color: #6c757d !important;
+}
+
+:deep(.ant-select-clear) {
+    background: rgba(0, 0, 0, 0.06) !important;
 }
 </style>

@@ -6,10 +6,11 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\Auth\HandlePasswordController;
 
-Route::get('/', function () {
-    return ['Laravel' => app()->version()];
-});
+// Route::get('/', function () {
+//     return ['Laravel' => app()->version()];
+// });
 
 // Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 //     // Kiểm tra chữ ký hợp lệ
@@ -43,6 +44,14 @@ Route::post('/resend-verification-email', [RegisterController::class, 'resendVer
 
 Route::get('/api/verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])
     ->name('verification.verify');
+
+Route::post('/forgot-password', [HandlePasswordController::class, 'forgotPassword'])
+    ->middleware('throttle:3,60')
+    ->name('forgot-password');
+Route::post('/reset-password', [HandlePasswordController::class, 'resetPassword'])
+    ->name('reset-password');
+Route::post('/verify-reset-token', [HandlePasswordController::class, 'verifyResetToken'])
+    ->name('verify-reset-token');
 
 Route::get('/direct-pusher', function () {
     $options = [

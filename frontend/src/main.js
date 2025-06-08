@@ -40,6 +40,7 @@ import {
     Empty,
     Carousel,
     Divider,
+    Result
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -86,6 +87,7 @@ app.use(Steps)
 app.use(Empty)
 app.use(Carousel)
 app.use(Divider)
+app.use(Result)
 
 const themeStore = useThemeStore();
 themeStore.applyTheme();

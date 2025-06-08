@@ -82,7 +82,7 @@ class RegisterController extends Controller
         if ($existingUser) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Email đã đăng ký và xác thực thành công',
+                'message' => 'Email đang được sử dụng bởi một tài khoản đã xác thực.',
             ], 422);
         }
 
