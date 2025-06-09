@@ -31,6 +31,10 @@
 			<a-menu-item key="admin-users-create">
 				<router-link  class="text-decoration-none" :to="{ name: 'admin-users-create' }">Thêm người dùng</router-link>
 			</a-menu-item>
+
+			<a-menu-item key="admin-users-departments-and-rolls">
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-users-departments-and-rolls' }">Phòng ban và vai trò</router-link>
+			</a-menu-item>
 		</a-sub-menu>
 
 		<a-sub-menu key="admin-documents">

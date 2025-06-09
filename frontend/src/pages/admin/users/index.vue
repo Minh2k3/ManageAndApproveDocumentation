@@ -106,10 +106,18 @@
                         </template>
 
                         <template v-if="column.key === 'status'">
-                            <span v-if="record.status === 'inactive'" class="text-secondary">Chưa kích hoạt</span>
-                            <span v-if="record.status === 'pending'" class="text-primary">Chờ kích hoạt</span>
-                            <span v-if="record.status === 'active'" class="text-success">Hoạt động</span>
-                            <span v-if="record.status === 'banned'" class="text-danger">Bị cấm</span>
+                            <a-tag v-if="record.status === 'active'" color="green">
+                                <span>Hoạt động</span>
+                            </a-tag>
+                            <a-tag v-if="record.status === 'inactive'" color="gray">
+                                <span>Chưa kích hoạt mail</span>
+                            </a-tag>
+                            <a-tag v-if="record.status === 'pending'" color="orange">
+                                <span>Chờ duyệt</span>
+                            </a-tag>
+                            <a-tag v-if="record.status === 'banned'" color="red">
+                                <span>Bị cấm</span>
+                            </a-tag>
                         </template>
                         <template v-if="column.key === 'action'">
                             <a-space class="d-flex justify-content-center gap-3">
@@ -257,6 +265,7 @@ export default defineComponent ({
                 title: "Thao tác",
                 key: "action",
                 fixed: "right",
+                width: 100,
                 customHeaderCell: () => {
                     return { style: { textAlign: 'center' } };
                 }
@@ -289,7 +298,7 @@ export default defineComponent ({
         // getUsers();
 
         const viewDetail = (user) => {
-            console.log("Chi tiết:", user);
+
         };
 
         const showConfirm = (user, action) => {

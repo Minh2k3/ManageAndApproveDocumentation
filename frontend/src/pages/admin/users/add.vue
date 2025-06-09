@@ -2,7 +2,7 @@
     <form @submit.prevent="createUsers">
         <a-card title="Tạo mới tài khoản">
             <div class="row">
-                <div class="col-12 col-sm-4">
+                <div class="col-12 col-lg-4">
                     <div class="row">
                         <div class="col-12 justify-content-center d-flex mb-3">
                             <a-avatar shape="square" :size="200">
@@ -20,77 +20,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-8">
-                    <!-- Tình trạng -->
-                    <div class="row">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
-                            <label>
-                                <span class="text-danger me-1">*</span>
-                                <span>Tình trạng</span>
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-5">
-                            <a-select 
-                                v-model:value="status_id"
-                                show-search 
-                                placeholder="Tình trạng" 
-                                style="width: 100%"
-                                :options="users_status" 
-                                :filter-option="filterOption" 
-                                allow-clear
-                                :class="{
-                                    'select-danger': firstFieldError === 'status_id'
-                                }"
-                            ></a-select>
-
-                            <div class="w-100"></div>
-
-                            <small 
-                                v-if="errors.status_id && firstFieldError === 'status_id'" 
-                                class="text-danger">
-                                    {{ errors.status_id[0] }}
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Tên tài khoản -->
-                    <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
-                            <label>
-                                <span class="text-danger me-1">*</span>
-                                <span>Tên tài khoản</span>
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-5">
-                            <a-input 
-                                v-model:value="username"
-                                placeholder="Himakevolution" 
-                                allow-clear 
-                                :class="{
-                                    'input-danger': firstFieldError === 'username'
-                                }"
-                            />
-
-                            <div class="w-100"></div>
-
-                            <small 
-                                v-if="errors.username && firstFieldError === 'username'" 
-                                class="text-danger">
-                                    {{ errors.username[0] }}
-                            </small>
-
-                        </div>
-                    </div>
-
+                <div class="col-12 col-lg-8">
                     <!-- Họ và tên -->
                     <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
+                        <div class="col-12 col-lg-3 text-start text-lg-end align-self-center">
                             <label>
                                 <span class="text-danger me-1">*</span>
                                 <span>Họ và tên</span>
                             </label>
                         </div>
-                        <div class="col-12 col-sm-5">
+                        <div class="col-12 col-lg-5">
                             <a-input 
                                 v-model:value="name"
                                 placeholder="Trần Tuấn Minh" 
@@ -113,13 +52,13 @@
 
                     <!-- Email -->
                     <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
+                        <div class="col-12 col-lg-3 text-start text-lg-end align-self-center">
                             <label>
                                 <span class="text-danger me-1">*</span>
                                 <span>Email</span>
                             </label>
                         </div>
-                        <div class="col-12 col-sm-5">
+                        <div class="col-12 col-lg-5">
                             <a-input 
                                 v-model:value="email"
                                 placeholder="2151062831@e.tlu.edu.vn" 
@@ -142,13 +81,13 @@
 
                     <!-- Phòng ban -->
                     <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
+                        <div class="col-12 col-lg-3 text-start text-lg-end align-self-center">
                             <label>
                                 <span class="text-danger me-1">*</span>
                                 <span>Phòng ban</span>
                             </label>
                         </div>
-                        <div class="col-12 col-sm-5">
+                        <div class="col-12 col-lg-5">
                             <!-- Nhóm select + button chung hàng -->
                             <div class="d-flex">
                                 <a-select 
@@ -159,12 +98,13 @@
                                 :options="departments" 
                                 :filter-option="filterOption" 
                                 allow-clear
-                                :class="{ 'select-danger': firstFieldError === 'department_id' }"
-                                ></a-select>
+                                :list-height="150"
+                                />
 
                                 <a-button 
                                     type="default" 
                                     class="ms-2" 
+                                    @click="handleAddDepartment"
                                     style="background-color: #d9d9d9;">
                                 <i class="fa-solid fa-plus"></i>
                                 </a-button>
@@ -179,72 +119,56 @@
                             </div>
                     </div>  
                     
-                    <!-- Mật khẩu -->
+                    <!-- Vai trò -->
                     <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
+                        <div class="col-12 col-lg-3 text-start text-lg-end align-self-center">
                             <label>
                                 <span class="text-danger me-1">*</span>
-                                <span>Mật khẩu</span>
+                                <span>Vai trò</span>
                             </label>
                         </div>
-                        <div class="col-12 col-sm-5">
-                            <a-input-password
-                                v-model:value="password"
-                                placeholder="abcILoveYou123" 
-                                allow-clear
-                                :class="{
-                                'input-danger': firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'
-                                }" 
-                            />
-
-                            <div class="w-100"></div>
-
-                            <small 
-                                v-if="errors.password && firstFieldError === 'password' && firstError !== 'Mật khẩu không khớp.'"
-                                class="text-danger">
-                                    {{ errors.password[0] }}
-                            </small>
-
-                        </div>
-                    </div>   
-                    
-                    <!-- Xác nhận mật khẩu -->
-                    <div class="row mt-3">
-                        <div class="col-12 col-sm-3 text-start text-sm-end align-self-center">
-                            <label>
-                                <span class="text-danger me-1">*</span>
-                                <span>Xác nhận mật khẩu</span>
-                            </label>
-                        </div>
-                        <div class="col-12 col-sm-5">
-                            <a-input-password
-                                v-model:value="password_confirmation"
-                                placeholder="abcILoveYou123" 
-                                allow-clear 
-                                :class="{
-                                'input-danger': firstFieldError === 'password' && firstError === 'Mật khẩu không khớp.'
-                                }" 
+                        <div class="col-12 col-lg-5">
+                            <!-- Nhóm select + button chung hàng -->
+                            <div class="d-flex">
+                                <a-select 
+                                    v-model:value="selectedRoll"
+                                    show-search 
+                                    placeholder="Chọn vai trò" 
+                                    style="width: 100%"
+                                    :options="rolls" 
+                                    :filter-option="filterOption" 
+                                    allow-clear
+                                    :dropdown-match-select-width="false"
+                                    :list-height="150"
                                 />
 
-                                <div class="w-100"></div>
+                                <a-button 
+                                    type="default" 
+                                    class="ms-2" 
+                                    @click="handleAddRoll"
+                                    style="background-color: #d9d9d9;">
+                                <i class="fa-solid fa-plus"></i>
+                                </a-button>
+                            </div>
 
-                                <small 
-                                    v-if="errors.password && firstFieldError === 'password' && firstError === 'Mật khẩu không khớp.'"
-                                    class="text-danger">
-                                        Mật khẩu không khớp.
-                                </small>                                
-                        </div>
-                    </div>      
-                    
+                            <!-- Lỗi nằm dưới hàng mới -->
+                            <small 
+                                v-if="errors.department_id && firstFieldError === 'department_id'" 
+                                class="text-danger mt-1 d-block">
+                                    {{ errors.department_id[0] }}
+                            </small>
+                            </div>
+                    </div>  
+
                     <div class="row mt-5">
-                        <div class="col-12 d-grid justify-content-sm-end d-sm-flex mx-auto">
+                        <div class="col-12 d-grid justify-content-lg-end d-lg-flex mx-auto">
                             <a-button type="default" class="" style="background-color: #d9d9d9;">
                                 <router-link :to="{ name: 'admin-users' }">
                                     <span>Hủy</span>
                                 </router-link>
                             </a-button>
 
-                            <a-button type="primary" class="ms-0 ms-sm-2 mt-2 mt-sm-0" html-type="submit">
+                            <a-button type="primary" class="ms-0 ms-lg-2 mt-2 mt-lg-0" html-type="submit">
                                 Lưu
                             </a-button>
                         </div>
@@ -256,15 +180,33 @@
 </template>
 
 <script>
-import { defineComponent, ref, reactive, toRefs } from "vue";
+import { 
+    defineComponent, 
+    ref, 
+    reactive, 
+    toRefs, 
+    onMounted,
+    watch,
+    onUnmounted 
+} from "vue";
 import { useMenu } from "@/stores/use-menu.js";
 import axios from "axios";
+import {useRegisterStore} from "@/stores/use-register.js";
 export default defineComponent({
     setup() {
         useMenu().onSelectedKeys(["admin-users"]);
+        const useRegister = useRegisterStore();
         
-        const users_status = ref([]);
+        // Danh sách phòng ban và vai trò
         const departments = ref([]);
+        const rolls = ref([]);
+
+        onMounted(async () => {
+            await useRegister.fetchRegisterForm();
+            departments.value = useRegister.departments;
+            rolls.value = useRegister.rolls;
+            console.log("Đã gọi hàm getUsersRegister()");
+        });
 
         const users = reactive({
             username: "",
@@ -277,17 +219,6 @@ export default defineComponent({
         });
 
         const errors = ref({});
-
-        const getUsersCreate = () => {
-            axios.get("http://127.0.0.1:8000/api/users/create")
-                .then((response) => {
-                    users_status.value = response.data.users_status;
-                    departments.value = response.data.departments;
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        };
 
         const filterOption = (input, option) => {
             return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
@@ -328,17 +259,27 @@ export default defineComponent({
                 });
         }
 
-        getUsersCreate();
+        const handleAddDepartment = () => {
+            // Logic to add a new department
+            console.log("Thêm phòng ban mới");
+        };
+
+        const handleAddRoll = () => {
+            // Logic to add a new roll
+            console.log("Thêm vai trò mới");
+        };
 
         return {
-            users_status,
             departments,
+            rolls,
             ...toRefs(users),
             errors,
             filterOption,
             createUsers,
             firstFieldError,
             firstError,
+            handleAddDepartment,
+            handleAddRoll,
         }
     },
 

@@ -151,16 +151,24 @@
 
                         <template v-if="column.key === 'status'">
                             <div v-if="record.status === 'draft'">
-                                <span class="text-secondary">Bản nháp</span>
+                                <a-tag color="blue">
+                                    <span>Bản nháp</span>
+                                </a-tag>
                             </div>
                             <div v-else>
                                 <a-tooltip>
                                     <template #title>
                                         <span class="">{{ showProcess(record) }}</span>
                                     </template>
-                                    <span v-if="record.status === 'in_review'" class="text-primary">Chờ duyệt</span>
-                                    <span v-if="record.status === 'approved'" class="text-success">Đã duyệt</span>
-                                    <span v-if="record.status === 'rejected'" class="text-danger">Bị từ chối</span>
+                                    <a-tag v-if="record.status === 'approved'" color="green">
+                                        <span>Đã duyệt</span>
+                                    </a-tag>
+                                    <a-tag v-if="record.status === 'in_review'" color="orange">
+                                        <span>Chờ duyệt</span>
+                                    </a-tag>
+                                    <a-tag v-if="record.status === 'rejected'" color="red">
+                                        <span>Bị từ chối</span>
+                                    </a-tag>
                                 </a-tooltip>
                             </div>
 

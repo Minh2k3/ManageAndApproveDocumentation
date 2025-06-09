@@ -140,7 +140,7 @@ export default {
 /* Toggle Button Styles */
 .menu-toggle-btn {
     position: fixed;
-    top: 70px; /* Adjust based on your header height */
+    top: 90px; /* Adjust based on your header height */
     left: calc(25% - 20px); /* Default position for desktop */
     transform: translateY(-50%);
     width: 40px;

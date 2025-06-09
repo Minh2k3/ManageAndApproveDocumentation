@@ -3,44 +3,48 @@ import { createPinia } from 'pinia'
 import router from './router/index.js'
 import axios from 'axios'
 import '@/lib/echo';
-import { useThemeStore } from '@/stores/use-theme.js';
+import { useThemeStore } from '@/stores/use-theme.js';  
 
 window.axios = axios;
 
 // import './style.css'
 import App from './App.vue'
-import { 
-    Button, 
+import {
+    Avatar,
+    Button,
+    Card,
+    Carousel,
     Checkbox,
-    Radio,
-    RadioGroup,
-    RadioButton,
+    Col,
+    Comment,
+    DatePicker,
+    Descriptions,
+    Divider,
+    Drawer,
+    Empty,
+    FloatButton,
     Form,
     Input,
-    DatePicker,
-    TimePicker,
-    Tooltip,
-    Table, 
-    Select,
-    Menu, 
-    List, 
-    Drawer, 
-    message, 
-    Upload,
-    Card, 
-    Avatar,
-    Pagination,
+    List,
+    Menu,
     Modal,
-    Descriptions,
+    Pagination,
+    Radio,
+    RadioButton,
+    RadioGroup,
+    Result,
+    Row,
+    Select,
+    Steps,
+    Switch,
+    Table,
     TabPane,
     Tabs,
-    Comment,
-    FloatButton,
-    Steps,
-    Empty,
-    Carousel,
-    Divider,
-    Result
+    Tag,
+    TimePicker,
+    Tooltip,
+    Upload,
+    message,
 } from 'ant-design-vue'
 
 import './static/fontawesome-free-6.7.2-web/css/all.min.css'
@@ -50,6 +54,7 @@ import 'bootstrap/dist/css/bootstrap-utilities.min.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+// import 'ant-design-vue/dist/antd.css';
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -57,37 +62,43 @@ const pinia = createPinia()
 app.config.globalProperties.$message = message
 app.use(pinia)
 app.use(router)
-app.use(Button)
-app.use(Checkbox)
-app.use(Radio)
-app.use(RadioGroup)
-app.use(RadioButton)
-app.use(Table)
-app.use(Drawer)
-app.use(List)
-app.use(Tooltip)
-app.use(Menu)
-app.use(Card)
+
+// Ant Design Vue Components - Alphabetical Order
 app.use(Avatar)
-app.use(Select)
-app.use(Form)
-app.use(Upload)
-app.use(Input)
-app.use(Pagination)
+app.use(Button)
+app.use(Card)
+app.use(Carousel)
+app.use(Checkbox)
+app.use(Col)
+app.use(Comment)
 app.use(DatePicker)
-app.use(TimePicker)
-app.use(Modal)
-app.use(message)
 app.use(Descriptions)
+app.use(Divider)
+app.use(Drawer)
+app.use(Empty)
+app.use(FloatButton)
+app.use(Form)
+app.use(Input)
+app.use(List)
+app.use(Menu)
+app.use(Modal)
+app.use(Pagination)
+app.use(Radio)
+app.use(RadioButton)
+app.use(RadioGroup)
+app.use(Result)
+app.use(Row)
+app.use(Select)
+app.use(Steps)
+app.use(Switch)
+app.use(Table)
 app.use(TabPane)
 app.use(Tabs)
-app.use(Comment)
-app.use(FloatButton)
-app.use(Steps)
-app.use(Empty)
-app.use(Carousel)
-app.use(Divider)
-app.use(Result)
+app.use(Tag)
+app.use(TimePicker)
+app.use(Tooltip)
+app.use(Upload)
+app.use(message)
 
 const themeStore = useThemeStore();
 themeStore.applyTheme();

@@ -27,6 +27,11 @@ const admin = [
                 name: 'admin-users-create',
                 component: () => import('@/pages/admin/users/add.vue'),
             },
+            {
+                path: 'users/dep-and-roll',
+                name: 'admin-users-departments-and-rolls',
+                component: () => import('@/pages/admin/users/departments_and_rolls.vue')
+            },
 
             // Quản lý Roles
             {

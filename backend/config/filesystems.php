@@ -71,6 +71,14 @@ return [
             'visibility' => 'public',
         ],
 
+        // Dành cho lưu ảnh đại diện đơn vị
+        'departments' => [
+            'driver' => 'local',
+            'root' => public_path('images/departments'),
+            'url' => env('APP_URL') . '/images/departments',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

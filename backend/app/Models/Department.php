@@ -11,7 +11,6 @@ use Carbon\Carbon;
 
 class Department extends Model
 {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +23,8 @@ class Department extends Model
         'phone_number',
         'position',
         'can_approve',
+        'status',
+        'group',
         'created_at',
         'updated_at',
     ];
@@ -40,11 +41,30 @@ class Department extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['number_of_users', 'number_of_approvers', 'number_of_creators'];
+
+    /**
      * Get the approvers for the department.
      */
     public function approvers()
     {
         return $this->hasMany(Approver::class);
+    }
+
+    /**
+     * Get the number of approvers for the department.
+     */
+    public function getNumberOfApproversAttribute()
+    {
+        // Sử dụng cache để tránh query lặp lại
+        if (!isset($this->attributes['approvers_count'])) {
+            return $this->approvers()->count();
+        }
+        return $this->attributes['approvers_count'] ?? 0;
     }
 
     /**
@@ -56,6 +76,26 @@ class Department extends Model
     }
 
     /**
+     * Get the number of creators for the department.
+     */
+    public function getNumberOfCreatorsAttribute()
+    {
+        // Sử dụng cache để tránh query lặp lại
+        if (!isset($this->attributes['creators_count'])) {
+            return $this->creators()->count();
+        }
+        return $this->attributes['creators_count'] ?? 0;
+    }
+
+    /**
+     * Get the number of users for the department.
+     */
+    public function getNumberOfUsersAttribute()
+    {
+        return $this->number_of_creators + $this->number_of_approvers;
+    }
+
+    /**
      * Get the document flow steps for the department.
      */
     public function documentFlowSteps()
@@ -63,15 +103,43 @@ class Department extends Model
         return $this->hasMany(DocumentFlowStep::class);
     }
 
-    protected $dates = ['created_at', 'updated_at'];
-
-    public function getCreatedAtAttribute($value)
+    /**
+     * Format created_at for display
+     */
+    public function getFormattedCreatedAtAttribute()
     {
-        return Carbon::parse($value)->format('H:i:s d/m/Y');
+        return $this->created_at ? $this->created_at->format('H:i:s d/m/Y') : null;
     }
 
-    public function getUpdatedAtAttribute($value)
+    /**
+     * Format updated_at for display
+     */
+    public function getFormattedUpdatedAtAttribute()
     {
-        return Carbon::parse($value)->format('H:i:s d/m/Y');
+        return $this->updated_at ? $this->updated_at->format('H:i:s d/m/Y') : null;
+    }
+
+    /**
+     * Scope a query to only include active departments.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope a query to group not type 'Khác'
+     */
+    public function scopeGroupNotOther($query)
+    {
+        return $query->where('group', '!=', 'Khác');
+    }
+
+    /**
+     * Scope a query to exclude first 3 departments.
+     */
+    public function scopeExcludeFirst($query, $count = 3)
+    {
+        return $query->where('id', '>', $count);
     }
 }

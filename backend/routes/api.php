@@ -210,6 +210,14 @@ Route::get('/departments', [DepartmentController::class, 'index'])
 Route::get('/departments/can_approve', [DepartmentController::class, 'getDepartmentsCanApprove'])
     ->name('departments.getDepartmentsCanApprove');
 
+Route::post('/departments', [DepartmentController::class, 'store'])
+    // ->middleware('auth:sanctum')
+    ->name('departments.store');
+
+Route::post('departments/upload-image', [DepartmentController::class, 'uploadFile'])
+    // ->middleware('auth:sanctum')
+    ->name('departments.uploadFile');
+
 // Notification
 Route::get('/notifications/{user_id}', [NotificationController::class, 'getAllNotificationsByUserId'])
     // ->middleware('auth:sanctum')

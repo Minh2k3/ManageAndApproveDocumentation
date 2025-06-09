@@ -29,6 +29,28 @@ export const useRegisterStore = defineStore("register", () => {
         }
     };
 
+    async function addDepartment(department) {
+        try {
+            // await axiosInstance.get("sanctum/csrf-cookie"); // Ensure CSRF token is set
+            const response = await axiosInstance.post("api/departments", department);
+            if (response.data) {
+                console.log("Dữ liệu trả về: " + JSON.stringify(response.data.id, null, 2));
+            }
+            return response.data.id; 
+        } catch (error) {
+            console.error("Error adding department:", error);
+        }
+    }
+
+    async function addRoll(roll) {
+        try {
+            const response = await axiosInstance.post("api/rolls", roll);
+            rolls.value.push(response.data);
+        } catch (error) {
+            console.error("Error adding roll:", error);
+        }
+    }
+
 
     function reset() {
         departments.value = [];
@@ -42,6 +64,8 @@ export const useRegisterStore = defineStore("register", () => {
         isFetched,
         
         fetchRegisterForm,
+        addDepartment,
+        addRoll,
         reset,
     };
 });

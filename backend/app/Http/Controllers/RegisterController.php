@@ -12,6 +12,7 @@ use App\Mail\VerificationMail;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\RollAtDepartment;
 use App\Models\Approver;
 use App\Models\Creator;
 use App\Models\Notification;
@@ -21,20 +22,62 @@ class RegisterController extends Controller
 
     public function getFormOptions(): JsonResponse
     {
-        $departments = \DB::table('departments')
-            ->select(
-                'id as value',
-                'name as label'
-            )
-            ->where('id', '>', 3)
-            ->get();
+        // Thay vì DB::table()
+        $departments = Department::select([
+                    'id',
+                    'name', 
+                    'description',
+                    'status',
+                    'group',
+                    'avatar',
+                    'position',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->withCount(['approvers', 'creators'])
+                ->active()
+                ->GroupNotOther()
+                ->orderBy('updated_at', 'desc')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->map(function ($department) {
+                    return [
+                        'value' => $department->id,
+                        'label' => $department->name,
+                        'description' => $department->description,
+                        'status' => $department->status,
+                        'group' => $department->group,
+                        'avatar' => $department->avatar,
+                        'position' => $department->position,
+                        'created_at' => $department->formatted_created_at,
+                        'updated_at' => $department->formatted_updated_at,
+                        'number_of_users' => $department->approvers_count + $department->creators_count,
+                    ];
+                });
 
-        $rolls = \DB::table('roll_at_departments')
-            ->select(
-                'id as value',
-                'name as label'
-            )
-            ->get();
+                $rolls = RollAtDepartment::select([
+                    'id',
+                    'name', 
+                    'description',
+                    'level',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->withCount(['approvers', 'creators'])
+                ->orderBy('level', 'asc')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->map(function ($roll) {
+                    return [
+                        'value' => $roll->id,
+                        'label' => $roll->name,
+                        'description' => $roll->description,
+                        'level' => $roll->level,
+                        'created_at' => $roll->formatted_created_at,
+                        'updated_at' => $roll->formatted_updated_at,
+                        'number_of_users' => $roll->approvers_count + $roll->creators_count,
+                    ];
+                });
 
         return response()
                     ->json([
