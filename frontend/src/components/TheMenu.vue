@@ -53,7 +53,7 @@
 			</a-menu-item>
 
 			<a-menu-item key="admin-documents-template">
-				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-template' }">Mẫu văn bản</router-link>
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-template' }">Văn bản mẫu</router-link>
 			</a-menu-item>
 
 			<a-menu-item key="admin-documents-history">

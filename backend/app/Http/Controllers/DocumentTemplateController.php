@@ -70,4 +70,27 @@ class DocumentTemplateController extends Controller
     {
         //
     }
+
+    /**
+     * Get all active templates.
+     */
+    public function getAllTemplates()
+    {
+        $documentTemplates = DocumentTemplate::with('creator:id,name,avatar')
+            ->with('documentType:id,name')
+            ->select(
+                'id',
+                'name',
+                'file_path',
+                'description',
+                'is_active',
+                'created_at',
+                'updated_at'
+            )
+            ->get();
+
+        return response()->json([
+            'document_templates' => $documentTemplates,
+        ])->setStatusCode(200, 'Active templates retrieved successfully.');
+    }
 }

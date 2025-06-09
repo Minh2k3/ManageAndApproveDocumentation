@@ -20,6 +20,9 @@ class DocumentTemplate extends Model
         'file_path',
         'created_by',
         'document_type_id',
+        'downloaded',
+        'liked',
+        'is_active',
     ];
 
     /**

@@ -191,8 +191,8 @@ Route::get('/document-types', [DocumentTypeController::class, 'index'])
     ->name('document-types.index');
 
 // Document Template
-Route::get('/document-templates', [DocumentTemplateController::class, 'index'])
-    ->name('document-templates.index');
+Route::get('/document-templates', [DocumentTemplateController::class, 'getAllTemplates'])
+    ->name('document-templates.getAllTemplates');
 
 
 // Approver 

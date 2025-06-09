@@ -212,6 +212,7 @@
                 :show-upload-button="true"
                 :show-upload-list="false"
                 :before-upload="beforeUpload"
+                :custom-request="handleCustomRequest"
                 @change="handleImageChange"
               >
                 <div v-if="departmentForm.imageUrl">
@@ -747,6 +748,12 @@ export default {
       });
     };
 
+    function handleCustomRequest({ onSuccess }) {
+        setTimeout(() => {
+            onSuccess('ok'); // Giả vờ thành công để upload_files cập nhật
+        }, 0);
+    }
+
     const beforeUpload = (file) => {
       const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
       if (!isJpgOrPng) {
@@ -815,6 +822,7 @@ export default {
       resetDepartmentModal,
       resetRoleModal,
       beforeUpload,
+      handleCustomRequest,
       handleImageChange,
     };
   }
