@@ -20,17 +20,17 @@
             <div class="left-side">
                 <div class="logo-section fade-in-left">
                     <div class="logos-container">
-                        <a-avatar shape="square" :size="60" class="logo-item">
+                        <a-avatar type="button" @click="handleClickLogoTlu" shape="square" :size="60" class="logo-item">
                             <template #icon>
                                 <img src="@/assets/images/logo_tlu.png" alt="logo_tlu">
                             </template>
                         </a-avatar>
-                        <a-avatar shape="square" :size="60" class="logo-item">
+                        <a-avatar type="button" @click="handleClickLogoDtn" shape="square" :size="60" class="logo-item">
                             <template #icon>
                                 <img src="@/assets/images/logo_dtn.png" alt="logo_dtn">
                             </template>
                         </a-avatar>
-                        <a-avatar shape="square" :size="55" class="logo-item">
+                        <a-avatar type="button" @click="handleClickLogoHsv" shape="square" :size="55" class="logo-item">
                             <template #icon>
                                 <img src="@/assets/images/logo_hsv.png" alt="logo_hsv">
                             </template>
@@ -44,7 +44,15 @@
                 </div>
 
                 <div class="system-title fade-in-up">
-                    <h1>Hệ Thống Quản Lý và Phê Duyệt Văn Bản Điện Tử</h1>
+                    <h1>
+                        <span>
+                            Hệ Thống Quản Lý và
+                        </span>
+                        <br>
+                        <span>
+                            Phê Duyệt Văn Bản Điện Tử
+                        </span>
+                    </h1>
                 </div>
             </div>
 
@@ -273,6 +281,18 @@ export default defineComponent({
             }
         };
 
+        const handleClickLogoTlu = () => {
+            window.open("https://tlu.edu.vn", "_blank");
+        };
+
+        const handleClickLogoDtn = () => {
+            window.open("https://www.facebook.com/doanthanhnienTLU", "_blank");
+        };
+
+        const handleClickLogoHsv = () => {
+            window.open("https://www.facebook.com/HSVDHTL", "_blank");
+        }
+
         return {
             email,
             password,
@@ -286,6 +306,9 @@ export default defineComponent({
             openModalForgotPassword,
             handleForgotPassword,
             login,
+            handleClickLogoTlu,
+            handleClickLogoDtn,
+            handleClickLogoHsv,
         };
     }
 });

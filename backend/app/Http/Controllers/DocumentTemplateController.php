@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DocumentTemplateController extends Controller
 {
@@ -36,15 +37,64 @@ class DocumentTemplateController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        \DB::beginTransaction();
+        \Log::info('Creating new document template with request data: ', $request->all());
+
+        try {
+            $new_document_template = DocumentTemplate::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'file_path' => 'Minh',
+                'created_by' => $request->created_by,
+                'status' => $request->status,
+                'document_type_id' => $request->document_type_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            \Log::info('New document template created: ' . $new_document_template->id);
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Document template created successfully.',
+                'document_template' => $new_document_template,
+            ])->setStatusCode(201);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create document template: ' . $e->getMessage(),
+            ])->setStatusCode(500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(DocumentTemplate $documentTemplate)
+    public function show($id)
     {
-        //
+        $documentTemplate = DocumentTemplate::with([
+            'creator' => function($query) {
+                $query->select('id', 'name', 'avatar', 'role_id');
+            },
+            'documentType:id,name,description',
+        ])
+        ->select(
+            'id', 'name', 'file_path', 'description', 'status',
+            'created_by', 'document_type_id', 'downloaded', 'liked',
+            'created_at', 'updated_at'
+        )
+        ->find($id);
+
+        if (!$documentTemplate) {
+            return response()->json([
+                'message' => 'Document template not found.',
+            ])->setStatusCode(404);
+        }
+
+        return response()->json([
+            'document_template' => $documentTemplate,
+        ])->setStatusCode(200, 'Document template retrieved successfully.');
     }
 
     /**
@@ -76,21 +126,132 @@ class DocumentTemplateController extends Controller
      */
     public function getAllTemplates()
     {
-        $documentTemplates = DocumentTemplate::with('creator:id,name,avatar')
-            ->with('documentType:id,name')
-            ->select(
-                'id',
-                'name',
-                'file_path',
-                'description',
-                'is_active',
-                'created_at',
-                'updated_at'
-            )
-            ->get();
+        $documentTemplates = DocumentTemplate::with([
+            'creator' => function($query) {
+                $query->select('id', 'name', 'avatar', 'role_id');
+            },
+            'documentType:id,name,description',
+        ])
+        ->select(
+            'id', 'name', 'file_path', 'description', 'status',
+            'created_by', 'document_type_id', 'downloaded', 'liked',
+            'created_at', 'updated_at'
+        )
+        ->orderBy('updated_at', 'desc')
+        ->get();
 
         return response()->json([
             'document_templates' => $documentTemplates,
-        ])->setStatusCode(200, 'Active templates retrieved successfully.');
+        ])->setStatusCode(200, 'Templates retrieved successfully.');
     }
+
+    // Hàm xử lý upload file văn bản
+    public function uploadFile(Request $request)
+    {
+        \Log::info('Upload file request received with data: ', $request->all());
+        $file = $request->file('upload_file');
+        \Log::info('File upload request received.');
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        \Log::info('Generated filename: ' . $filename);
+        $path = $file->storeAs('', $filename, 'documents');
+        \Log::info('File uploaded to: ' . $path);
+
+        // Update file_path cho Document
+        $document = DocumentTemplate::find($request['document_template_id']);
+        \Log::info('Updating document with ID: ' . $document->id);
+        $document->file_path = $filename; 
+        $document->save();
+        \Log::info('Document updated with file_path: ' . $filename);
+
+        return response()->json([
+            'message' => 'Upload file thành công',
+            'file_url' => url(`/documents/` . $filename),
+        ])->setStatusCode(200, 'File uploaded successfully.');
+    }
+
+    public function activeTemplate(Request $request)
+    {
+        $documentTemplate = DocumentTemplate::find($request->id);
+        if (!$documentTemplate) {
+            return response()->json([
+                'message' => 'Document template not found.',
+            ])->setStatusCode(404);
+        }
+        if ($documentTemplate->status === 'active') {
+            return response()->json([
+                'message' => 'Document template is already active.',
+            ])->setStatusCode(200);
+        }
+
+        \DB::beginTransaction();
+
+        try {
+            $documentTemplate->status = 'active';
+            $documentTemplate->save();
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Document template activated successfully.',
+                'document_template' => $documentTemplate,
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to activate document template: ' . $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+    }
+
+    public function downloadTemplate($id, Request $request)
+    {
+        try {
+            // Tìm template
+            $template = DocumentTemplate::with(['creator', 'documentType'])->find($id);
+            
+            if (!$template) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Template không tồn tại'
+                ], 404);
+            }
+
+            // Kiểm tra file có tồn tại không
+            if (!$template->file_path || !Storage::disk('public')->exists($template->file_path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File không tồn tại hoặc đã bị xóa'
+                ], 404);
+            }
+
+            // Lấy đường dẫn file thực
+            $filePath = Storage::disk('public')->path($template->file_path);
+            $fileName = $template->file_name ?? basename($template->file_path);
+
+            // Log download activity
+            $this->logDownload($template, $request);
+
+            // Tăng counter download
+            $template->increment('downloaded');
+
+            // Return file download response
+            return response()->download($filePath, $fileName, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Download template error:', [
+                'template_id' => $id,
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tải file'
+            ], 500);
+        }
+    }    
 }

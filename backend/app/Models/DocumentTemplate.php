@@ -22,7 +22,7 @@ class DocumentTemplate extends Model
         'document_type_id',
         'downloaded',
         'liked',
-        'is_active',
+        'status',
     ];
 
     /**

@@ -74,6 +74,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'updated_at' => 'datetime',
     ];
 
+    protected $appends = ['full_name_with_role'];
+
     /**
      * Get the role associated with the user.
      */
@@ -232,5 +234,35 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getUpdatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    /**
+     * Get the user roll and name.
+     * @return [name - roll_at_department_name - department_name]
+     */
+    // Accessor để lấy full name với chức danh
+    public function getFullNameWithRoleAttribute()
+    {
+        if (!$this->role) {
+            return 'Unknown Role';
+        }
+
+        if ($this->role->name === 'admin') {
+            return 'Admin';
+        }
+
+        $roleInfo = null;
+        
+        if ($this->role->name === 'creator' && $this->creator) {
+            $roleInfo = $this->creator->rollAtDepartment;
+        } elseif ($this->role->name === 'approver' && $this->approver) {
+            $roleInfo = $this->approver->rollAtDepartment;
+        }
+
+        if ($roleInfo && $roleInfo->department) {
+            return $roleInfo->name . ' ' . $roleInfo->department->name;
+        }
+
+        return ucfirst($this->role->name);
     }
 }

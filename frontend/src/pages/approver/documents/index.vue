@@ -232,15 +232,8 @@
                                 </template>                        
 
                                 <template v-if="column.key === 'type'">
-                                    <span v-if="record.type_id == 1"
-                                        class="bg-primary text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                        }}</span>
-                                    <span v-if="record.type_id == 2"
-                                        class="bg-warning text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                        }}</span>
-                                    <span v-if="record.type_id == 3"
-                                        class="bg-success text-white p-1 rounded rounded-1 border border-1"> {{ record.type
-                                        }}</span>
+                                    <span
+                                        class=""> {{ record.type }}</span>
                                 </template>
 
                                 <template v-if="column.key === 'status'">

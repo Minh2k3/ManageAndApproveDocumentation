@@ -194,6 +194,17 @@ Route::get('/document-types', [DocumentTypeController::class, 'index'])
 Route::get('/document-templates', [DocumentTemplateController::class, 'getAllTemplates'])
     ->name('document-templates.getAllTemplates');
 
+Route::post('/document-templates', [DocumentTemplateController::class, 'store'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.store');
+
+Route::post('/document-templates/upload-file', [DocumentTemplateController::class, 'uploadFile'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.uploadFile');
+
+Route::get('/document-templates/{id}', [DocumentTemplateController::class, 'show'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.show');
 
 // Approver 
 Route::get('/approvers', [ApproverController::class, 'index'])
