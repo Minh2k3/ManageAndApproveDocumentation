@@ -28,7 +28,42 @@ class NotificationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        try {
+            $notification = Notification::create([
+                'notification_category_id' => $request->notification_category_id,
+                'from_user_id' => $request->from_user_id,
+                'receiver_id' => $request->receiver_id,
+                'title' => $request->title,
+                'content' => $request->content,
+                'data' => $request->data ? json_encode($request->data) : null,
+                'is_read' => false,
+                'created_at' => now(),
+            ]);
+
+            $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+            $pusher = new \Pusher\Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                $options
+            );
+
+            $data['notification'] = $notification;
+            $pusher->trigger('user.' . $notification['receiver_id'], 'new-notification', $data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error creating notification: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => 'Notification created successfully',
+            'notification' => $notification,
+        ], 201);
     }
 
     /**

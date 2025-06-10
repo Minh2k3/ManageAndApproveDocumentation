@@ -29,6 +29,7 @@ import {
     Menu,
     Modal,
     Pagination,
+    Popconfirm,
     Radio,
     RadioButton,
     RadioGroup,
@@ -83,6 +84,7 @@ app.use(List)
 app.use(Menu)
 app.use(Modal)
 app.use(Pagination)
+app.use(Popconfirm)
 app.use(Radio)
 app.use(RadioButton)
 app.use(RadioGroup)

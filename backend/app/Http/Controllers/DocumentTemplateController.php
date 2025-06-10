@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 class DocumentTemplateController extends Controller
 {
@@ -169,7 +172,7 @@ class DocumentTemplateController extends Controller
         ])->setStatusCode(200, 'File uploaded successfully.');
     }
 
-    public function activeTemplate(Request $request)
+    public function changeStatus(Request $request)
     {
         $documentTemplate = DocumentTemplate::find($request->id);
         if (!$documentTemplate) {
@@ -177,16 +180,12 @@ class DocumentTemplateController extends Controller
                 'message' => 'Document template not found.',
             ])->setStatusCode(404);
         }
-        if ($documentTemplate->status === 'active') {
-            return response()->json([
-                'message' => 'Document template is already active.',
-            ])->setStatusCode(200);
-        }
 
         \DB::beginTransaction();
 
         try {
-            $documentTemplate->status = 'active';
+            $documentTemplate->status = $request->status;
+            $documentTemplate->updated_at = now();
             $documentTemplate->save();
 
             \DB::commit();
@@ -207,7 +206,7 @@ class DocumentTemplateController extends Controller
     {
         try {
             // Tìm template
-            $template = DocumentTemplate::with(['creator', 'documentType'])->find($id);
+            $template = DocumentTemplate::find($id);
             
             if (!$template) {
                 return response()->json([
@@ -216,28 +215,32 @@ class DocumentTemplateController extends Controller
                 ], 404);
             }
 
-            // Kiểm tra file có tồn tại không
-            if (!$template->file_path || !Storage::disk('public')->exists($template->file_path)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'File không tồn tại hoặc đã bị xóa'
-                ], 404);
-            }
+            // // Kiểm tra file có tồn tại không
+            // if (!$template->file_path || !Storage::disk('documents')->exists($template->file_path)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'File không tồn tại hoặc đã bị xóa'
+            //     ], 404);
+            // }
 
-            // Lấy đường dẫn file thực
-            $filePath = Storage::disk('public')->path($template->file_path);
-            $fileName = $template->file_name ?? basename($template->file_path);
+            // // Lấy đường dẫn file thực
+            // $filePath = Storage::disk('documents')->path($template->file_path);
+            // \Log::info('Downloading template file: ' . $filePath);
+            // $fileName = $template->file_name ?? basename($template->file_path);
+            // \Log::info('File name for download: ' . $fileName);
+            // $fileSize = File::size($filePath);
+            // \Log::info('File size: ' . $fileSize . ' bytes');
 
             // Log download activity
-            $this->logDownload($template, $request);
+            // $this->logDownload($template, $request);
 
             // Tăng counter download
             $template->increment('downloaded');
 
             // Return file download response
-            return response()->download($filePath, $fileName, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+            return response()->json([
+                'success' => true,
+                'download_url' => asset('documents/' . $template->file_path)
             ]);
 
         } catch (\Exception $e) {

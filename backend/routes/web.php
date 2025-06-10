@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\Auth\HandlePasswordController;
+use App\Http\Controllers\DocumentController;
+use Illuminate\Support\Facades\Response;
 
 // Route::get('/', function () {
 //     return ['Laravel' => app()->version()];
@@ -69,7 +71,9 @@ Route::get('/direct-pusher', function () {
     $pusher->trigger('user.16', 'new-notification', $data);
 
     return "Đã gửi sự kiện trực tiếp qua Pusher API. Kiểm tra Debug Console.";
-});    
+});  
+
+
 
 // Route để serve documents với CORS headers
 // Route đơn giản để serve PDF

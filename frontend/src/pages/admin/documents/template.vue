@@ -100,54 +100,45 @@
                                         <span class="">Xem chi tiết</span>
                                     </template>
                                     <a-button 
-                                        @click="viewDetail(record)"
+                                        @click="viewDetail(record, index)"
                                         class="bg-primary text-white"
                                         >
                                         <i class="bi bi-eye"></i>
                                     </a-button>
                                 </a-tooltip>
 
-                                <a-tooltip
-                                    v-if="record.status === 'pending'"
-                                    >
+                                <a-popconfirm v-if="record.status === 'pending'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="showConfirmActive(record)">
                                     <template #title>
-                                        <span class="">Chấp thuận mẫu</span>
+                                        <span class="">Bạn có chắc chắn muốn đưa mẫu văn này vào sử dụng?</span>
                                     </template>
                                     <a-button
-                                        @click="showConfirm(record, 'activate')"
                                         class="bg-success text-white"
                                     >
                                         <i class="bi bi-check"></i>
                                     </a-button>
-                                </a-tooltip>
+                                </a-popconfirm>
 
-                                <a-tooltip
-                                    v-if="record.status === 'active'"
-                                    >
+                                <a-popconfirm v-if="record.status === 'active'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="showConfirmInactive(record)">
                                     <template #title>
-                                        <span class="">Tạm ngừng sử dụng</span>
+                                        <span class="">Bạn có chắc chắn tạm ngưng sử dụng mẫu văn bản này?</span>
                                     </template>
                                     <a-button
-                                        @click="showConfirm(record, 'ban')"
                                         class="bg-danger text-white"
                                     >
                                         <i class="bi bi-ban"></i>
                                     </a-button>
-                                </a-tooltip>
+                                </a-popconfirm>                                
 
-                                <a-tooltip
-                                    v-if="record.status === 'inactive'"
-                                    >
+                                <a-popconfirm v-if="record.status === 'inactive'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="showConfirmActive(record)">
                                     <template #title>
-                                        <span class="">Có thể sử dụng</span>
+                                        <span class="">Bạn có chắc chắn muốn kích hoạt lại mẫu văn bản này?</span>
                                     </template>
                                     <a-button
-                                        @click="showConfirmUnban(record)"
                                         class="bg-danger-subtle border-danger text-white"
                                     >
                                         <i class="bi bi-ban"></i>
                                     </a-button>
-                                </a-tooltip>
+                                </a-popconfirm>
                             </a-space>
                         </template>
                     </template>
@@ -373,13 +364,13 @@
                                     >
                                         <i class="fa-solid fa-eye me-1"></i> Xem
                                     </a-button>
-                                    <a-button 
+                                    <!-- <a-button 
                                         type="link" 
                                         size="small"
-                                        @click="downloadFile(selectedTemplate)"
+                                        @click="fetchFileUrl(selectedTemplate)"
                                     >
                                         <i class="fa-solid fa-download me-1"></i> Tải xuống
-                                    </a-button>
+                                    </a-button> -->
                                 </div>
                             </div>
                             <div v-else class="text-muted text-center p-3 border rounded bg-light">
@@ -399,20 +390,24 @@
                             {{ selectedTemplate.downloaded || 0 }}
                         </div>
                         <div class="stat-label text-muted">
-                            <i class="fa-solid fa-download me-1"></i>
-                            Lượt tải xuống
+                            <span class="text-primary">
+                                <i class="fa-solid fa-eye me-1"></i>
+                                Lượt xem
+                            </span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="col-6">
-                    <div class="stat-card text-center p-3 border rounded bg-success bg-opacity-10">
-                        <div class="stat-number text-success fs-4 fw-bold">
+                    <div class="stat-card text-center p-3 border rounded bg-opacity-10" style="background-color: rgba(247, 82, 123, 0.3);">
+                        <div class="stat-number fs-4 fw-bold" style="color: #f7527b;">
                             {{ selectedTemplate.liked || 0 }}
                         </div>
                         <div class="stat-label text-muted">
-                            <i class="fa-solid fa-heart me-1"></i>
-                            Lượt thích
+                            <span style="color: #f7527b;">
+                                <i class="fa-solid fa-heart me-1"></i>
+                                Lượt thích
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -425,7 +420,7 @@
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <a-avatar 
-                                    :src="selectedTemplate.creator?.avatar" 
+                                    :src="getAvatarUrl(selectedTemplate.creator?.avatar, selectedTemplate.creator?.id)" 
                                     :size="40"
                                     class="me-3"
                                 >
@@ -434,7 +429,7 @@
                             </div>
                             <div class="col">
                                 <div class="fw-medium">
-                                    {{ selectedTemplate.creator?.full_name_with_role || selectedTemplate.creator?.name || 'Không xác định' }}
+                                    <span>{{ selectedTemplate.creator?.name }} - {{ selectedTemplate.creator?.full_name_with_role }}</span>
                                 </div>
                                 <small class="text-muted">
                                     Tạo lúc: {{ formatDateTime(selectedTemplate.created_at) }}
@@ -455,7 +450,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import { useMenu } from '@/stores/use-menu.js';
 import { UploadOutlined } from '@ant-design/icons-vue';
 import {useDocumentStore} from '@/stores/admin/document-store.js';
@@ -651,14 +646,80 @@ export default defineComponent({
             }
         };
 
+        const sendNotification = async (notification) => {
+            try {
+                const response = await axiosInstance.post('/api/notifications', notification);
+                if (response.status === 201) {
+                    console.log("Notification sent successfully:", response.data);
+                } else {
+                    console.error("Failed to send notification:", response);
+                }
+            } catch (error) {
+                console.error("Error sending notification:", error);
+            }
+        };
+
+        const handleChangeStatus = async (record, action) => {
+            try {
+                loading.value = true;
+                const old_status = record.status;
+                const response = await axiosInstance.post(`/api/document-templates/${record.id}/change-status`, {
+                    status: action,
+                });
+
+                if (response.status === 200) {
+                    if (old_status === 'pending') {
+                        await sendNotification({
+                            notification_category_id: 1, 
+                            from_user_id: authStore.user.id,
+                            receiver_id: record.creator.id,
+                            title: `Mẫu văn bản "${record.name}" của bạn đã được chấp thuận`,
+                            content: `Mẫu văn bản "${record.name}" đã được chấp thuận và có thể sử dụng.`,
+                        });
+                        message.success(`Mẫu văn bản "${record.name}" đã được chấp thuận để sử dụng.`);
+                    } else if (action === 'active') {
+                        message.success(`Mẫu văn bản "${record.name}" đã có thể kích hoạt.`);
+                    } else if (action === 'inactive') {
+                        message.success(`Mẫu văn bản "${record.name}" đã tạm ngừng sử dụng.`);
+                    }
+                    // Cập nhật lại trạng thái mẫu văn bản trong danh sách
+                    const index = document_templates.value.findIndex(item => item.id === record.id);
+                    if (index !== -1) {
+                        document_templates.value[index].status = action;
+                    }
+                } else {
+                    message.error('Đã xảy ra lỗi khi thay đổi trạng thái mẫu văn bản.');
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+                message.error('Không thể thay đổi trạng thái mẫu văn bản. Vui lòng thử lại sau.');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const showConfirmActive = (record) => {
+            // Hiển thị modal xác nhận kích hoạt mẫu văn bản
+            console.log("Showing confirm active for:", record);
+            handleChangeStatus(record, 'active');
+        };
+
+        const showConfirmInactive = (record) => {
+            // Hiển thị modal xác nhận tạm ngừng mẫu văn bản
+            console.log("Showing confirm inactive for:", record);
+            handleChangeStatus(record, 'inactive');
+        };
+
         const detailModalVisible = ref(false);
 
         const selectedTemplate = ref(null);
+        const selectedTemplateIndex = ref(null);
 
-        const viewDetail = async (record) => {
+        const viewDetail = async (record, index) => {
             // Hiển thị chi tiết mẫu văn bản
             console.log("Viewing details for:", record);
             detailModalVisible.value = true;
+            selectedTemplateIndex.value = index;
             try {
                 loading.value = true;
                 detailModalVisible.value = true;
@@ -710,10 +771,12 @@ export default defineComponent({
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         };        
 
-        const previewFile = (template) => {
+        const previewFile = async (template) => {
             if (template.file_path) {
                 const fileUrl = `http://localhost:8000/documents/${template.file_path}`;
+                const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
                 window.open(fileUrl, '_blank');
+                document_templates.value[selectedTemplateIndex.value].downloaded += 1; // Tăng lượt xem
             } else {
                 message.warning('Không có file để xem');
             }
@@ -730,6 +793,57 @@ export default defineComponent({
                 minute: '2-digit'
             });
         };        
+
+        const downloadUrl = ref('');
+        const fetchFileUrl = async (template) => {
+            try {
+                const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
+                downloadUrl.value = response.data.download_url; // Giả sử API trả về { download_url: "..." }
+                await axiosInstance.get(`/documents/${downloadUrl.value}`)
+            } catch (error) {
+                message.error('Không thể tải file');
+            }
+        };
+
+        const downloadFile = async (url) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Không thể tải file');
+                const blob = await response.blob();
+                const fileUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = fileUrl;
+                link.download = 'document.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(fileUrl);
+            } catch (err) {
+                console.error('Download error:', err);
+                message.error('Không thể tải file. Vui lòng thử lại sau.');
+            }
+        }
+
+        const randomAvatar = (id) => {
+            if (id > 100 || id == null) {
+                return `https://avatar.iran.liara.run/public`;
+            }
+            return `https://avatar.iran.liara.run/public/${id}`;
+        };
+
+        const API_BASE_URL = 'http://localhost:8000';
+
+        const getAvatarUrl = (avatar, id) => {
+            if (!avatar) return randomAvatar(id);
+            return `${API_BASE_URL}/images/avatars/${avatar}`
+        }        
+
+        // using watch to download file when downloadUrl changes
+        // watch(downloadUrl, (newUrl) => {
+        //     if (newUrl) {
+        //         downloadFile(newUrl);
+        //     }
+        // });
 
         const columns = [
             {
@@ -803,6 +917,8 @@ export default defineComponent({
             handlePreview,
             handleFileChange,
             handleAddTemplate,
+            showConfirmActive,
+            showConfirmInactive,
 
             detailModalVisible,
             selectedTemplate,
@@ -813,6 +929,8 @@ export default defineComponent({
             getFileName,
             formatFileSize,
             formatDateTime,
+            fetchFileUrl,
+            getAvatarUrl,
         };
     },
 });

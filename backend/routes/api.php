@@ -206,6 +206,14 @@ Route::get('/document-templates/{id}', [DocumentTemplateController::class, 'show
     // ->middleware('auth:sanctum')
     ->name('document-templates.show');
 
+Route::get('/document-templates/{id}/download', [DocumentTemplateController::class, 'downloadTemplate'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.downloadTemplate');    
+
+Route::post('/document-templates/{id}/change-status', [DocumentTemplateController::class, 'changeStatus'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.changeStatus');
+
 // Approver 
 Route::get('/approvers', [ApproverController::class, 'index'])
     ->name('approvers.index');
@@ -241,6 +249,10 @@ Route::post('/notifications/read/{notification_id}', [NotificationController::cl
 Route::post('/notifications/read-all/{user_id}', [NotificationController::class, 'markAllAsRead'])
     // ->middleware('auth:sanctum')
     ->name('notifications.markAllAsRead');
+
+Route::post('/notifications', [NotificationController::class, 'store'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.store');
 
 // Statistics
 Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
