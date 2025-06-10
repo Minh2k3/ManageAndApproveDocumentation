@@ -1,313 +1,924 @@
 <template>
-    <div class="container py-4">
-        <!-- Header section -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 fw-bold">Mẫu Văn Bản</h1>
-                <p class="text-secondary">Sử dụng và quản lý các mẫu văn bản để tạo văn bản nhanh chóng</p>
-            </div>
-            <a-button type="primary">
-                <template #icon>
-                    <PlusOutlined />
-                </template>
-                Thêm Mẫu Mới
-            </a-button>
-        </div>
-
-        <!-- Search and filter section -->
-        <div class="row mb-4">
-            <div class="col-md-8 mb-3 mb-md-0">
-                <a-input-search placeholder="Tìm kiếm mẫu văn bản..." enter-button allowClear />
-            </div>
-            <div class="col-md-4">
-                <a-dropdown>
-                    <a-button class="w-100">
-                        <FilterOutlined />
-                        <span class="ms-2">Bộ lọc</span>
-                        <DownOutlined />
-                    </a-button>
-                    <template #overlay>
-                        <a-menu>
-                            <a-menu-item key="1">Mới nhất</a-menu-item>
-                            <a-menu-item key="2">Cũ nhất</a-menu-item>
-                            <a-menu-item key="3">A-Z</a-menu-item>
-                            <a-menu-item key="4">Z-A</a-menu-item>
-                        </a-menu>
-                    </template>
-                </a-dropdown>
-            </div>
-        </div>
-
-        <!-- Template documents -->
-        <div class="row">
-            <div class="col-md-4 mb-4" v-for="template in paginatedTemplates" :key="template.id">
-                <div class="col px-4 py-3 rounded-3" style="background-color: #fff;">
-                    <!-- Title -->
-                    <div class="row">
-                        <span class="fs-6 fw-bold mb-1">{{ template.title }}</span>
+    <a-card title="" style="width: 100%">
+        <h2 class="fw-bold mb-3">Mẫu Văn Bản</h2>
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="row g-2">
+                    <!-- Tìm kiếm -->
+                    <div class="col-12 col-md-4">
+                        <a-input-search
+                        placeholder="Tìm kiếm"
+                        allow-clear
+                        enter-button
+                        class="w-100"
+                        />
                     </div>
 
-                    <!-- Updated Time -->
-                    <div class="row mb-2">
-                        <small class="text-muted">Cập nhật: {{ template.updated }}</small>
-                    </div>
-
-                    <!-- Official Tag -->
-                    <div class="row">
-                        <div class="col d-flex align-items-center justify-content-end">
-                            <span v-if="template.isOfficial" class="bg-secondary-subtle p-1 rounded-2">Chính thức</span>
-                            <span v-else class="bg-secondary-subtle p-1 rounded-2">Không chính thức</span>
+                    <!-- Bộ lọc -->
+                    <div class="col-12 col-md-8">
+                        <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <a-select
+                            v-model:value="status_id"
+                            show-search
+                            placeholder="Trạng thái"
+                            :options="documents_status"
+                            :filter-option="filterOption"
+                            allow-clear
+                            class="w-100"
+                            />
                         </div>
-                    </div>
-
-                    <!-- Icon Area -->
-                    <div class="row my-2 bg-secondary-subtle py-3 d-flex justify-content-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-file-text h-12 w-12 text-muted-foreground">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                            <path d="M10 9H8"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                        </svg>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="row">
-                        <span class="description-truncate">
-                            {{ template.description }}
-                        </span>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="row mt-3">
-                        <div class="col">
-                            <!-- Star Favorite Button -->
-                            <a-button class="me-2" shape="circle" @click="toggleFavorite(template)">
-                                <i :class="template.isFavorite ? 'bi bi-star-fill text-warning' : 'bi bi-star'"></i>
-                            </a-button>
-
-                            <!-- Eye View Button -->
-                            <a-button shape="circle" @click="openPdf(template)">
-                                <i class="bi bi-eye"></i>
+                        <div class="col-6 col-md-3">
+                            <a-select
+                            v-model:value="type_id"
+                            show-search
+                            placeholder="Loại văn bản"
+                            :options="documents_type"
+                            :filter-option="filterOption"
+                            allow-clear
+                            class="w-100"
+                            />
+                        </div>
+                        <!-- Nút tạo -->
+                        <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
+                            <a-button type="primary" class="w-100 w-md-auto">
+                                <i class="fa-solid fa-filter "></i>
                             </a-button>
                         </div>
-
-                        <!-- Used Count -->
-                        <div class="col justify-content-end d-flex align-items-center">
-                            <span>Đã dùng: {{ template.used }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pagination and Page Size -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <a-pagination 
-                v-model:current="pagination.current" 
-                :total="templates.length"
-                :page-size="pagination.pageSize" 
-                :show-quick-jumper="true"
-                @change="handlePageChange" />
-            <div class="d-flex align-items-center">
-                <span class="me-2">Hiển thị:</span>
-                <a-select v-model:value="pagination.pageSize" style="width: 100px" @change="handlePageSizeChange">
-                    <a-select-option :value="3">3</a-select-option>
-                    <a-select-option :value="6">6</a-select-option>
-                    <a-select-option :value="9">9</a-select-option>
-                </a-select>
+        <div class="row mb-3 d-flex justify-content-end">
+            <div class="col-3">
+                <a-button type="primary" class="w-100 w-md-auto" @click="showModalAddTemplate">
+                    <i class="fa-solid fa-plus me-2"></i> Thêm mẫu mới
+                </a-button>
             </div>
         </div>
 
-        <a-divider />
-
-        <!-- Recent Templates Section -->
-        <div class="my-4">
-            <h2 class="h4 fw-semibold mb-3">Mẫu Văn Bản Gần Đây</h2>
-            <div class="row">
-                <div class="col-md-6 mb-3" v-for="recentDoc in recentDocuments" :key="recentDoc.id">
-                    <a-card>
-                        <template #title>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>{{ recentDoc.title }}</span>
-                                <a-tag color="green">Đã sử dụng</a-tag>
-                            </div>
+        <div class="row">
+            <div class="col-12">
+                <a-table 
+                    :dataSource="document_templates" 
+                    :columns="columns" 
+                    :scroll="{ x: 576 }" 
+                    bordered
+                    :customRow="customRow"
+                    >
+                    <template #bodyCell="{ column, index, record }">
+                        <template v-if="column.key === 'type'">
+                            <a-tooltip>
+                                <template #title>
+                                    <span class="">{{ record.document_type.description }}</span>
+                                </template>
+                                <span>{{ record.document_type.name }}</span>
+                            </a-tooltip>
                         </template>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <CheckSquareOutlined style="font-size: 1.2rem; margin-right: 10px; color: #666;" />
-                                <div>
-                                    <p class="mb-0 small">Sử dụng lần cuối: {{ recentDoc.lastUsed }}</p>
-                                    <p class="mb-0 small text-secondary">Đã tạo {{ recentDoc.createdCount }} văn bản</p>
+
+                        <template v-if="column.key === 'status'">
+                            <a-tag v-if="record.status === 'active'" color="green">
+                                {{ 'Hoạt động'}}
+                            </a-tag>
+                            <a-tag v-else-if="record.status === 'pending'" color="orange">
+                                {{ 'Chờ duyệt'}}
+                            </a-tag>
+                            <a-tag v-else-if="record.status === 'inactive'" color="red">
+                                {{ 'Không hoạt động'}}
+                            </a-tag>
+                        </template>
+
+                        <template v-else-if="column.key === 'created_by'">
+                            <a-tooltip>
+                                <template #title>
+                                    <span class="">{{ record.creator.position_title }}</span>
+                                </template>
+                                <span>{{ record.creator.name }}</span>
+                            </a-tooltip>
+                        </template>
+
+                        <template v-else-if="column.key === 'created_at'">
+                            <span>{{ formatDateTime(record.created_at) }}</span>
+                        </template>
+                    </template>
+                </a-table>
+            </div>
+        </div>
+    </a-card>
+
+    <!-- Modal add new template -->
+    <a-modal 
+        v-model:open="templateModalVisible" 
+        width="500px" 
+        centered
+        :z-index="1003"
+        > 
+        <template #title>
+            <span class="fw-bold">Thêm mẫu mới</span>
+        </template>
+        <template #footer>
+            <div class="row d-flex justify-content-end g-2">
+                <a-button 
+                    type="primary" 
+                    class="col-3"
+                    @click="handleAddTemplate"
+                    :loading="loading"
+                    >
+                    <i class="fa-solid fa-plus me-2"></i> Thêm mới
+                </a-button>
+                <a-button 
+                    type="default" 
+                    class="col-2"
+                    @click="templateModalVisible = false"
+                    >
+                    <i class="fa-solid fa-xmark me-2"></i> Đóng
+                </a-button>
+            </div>
+            
+        </template>
+        <div class="row">
+            <div class="col-12">
+                <a-form
+                ref="formRef"
+                :model="formData"
+                :rules="rules"
+                layout="vertical"
+                >
+                <a-form-item 
+                    label="Tên mẫu văn bản" 
+                    name="name"
+                    has-feedback
+                >
+                    <a-input
+                    v-model:value="formData.name"
+                    allow-clear
+                    placeholder="Nhập tên mẫu văn bản"
+                    />
+                </a-form-item>
+
+                <a-form-item 
+                    label="Loại văn bản" 
+                    name="document_type_id"
+                    has-feedback
+                >
+                    <a-select
+                    v-model:value="formData.document_type_id"
+                    show-search
+                    placeholder="Chọn loại văn bản"
+                    :options="document_types"
+                    :filter-option="filterOption"
+                    allow-clear
+                    :list-height="200"
+                    :dropdown-style="{ 
+                        position: 'absolute',
+                        zIndex: 10000,
+                        background: 'white',
+                        border: '1px solid #ccc'
+                    }"
+                    />
+                </a-form-item>
+
+                <a-form-item 
+                    label="Mô tả" 
+                    name="description"
+                >
+                    <a-textarea 
+                    v-model:value="formData.description"
+                    rows="4" 
+                    placeholder="Nhập mô tả cho mẫu văn bản" 
+                    />
+                </a-form-item>
+                </a-form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <h6>Tệp tin đính kèm</h6>
+                <a-form
+                ref="uploadFormRef"
+                :model="uploadData"
+                :rules="uploadRules"
+                >
+                <a-form-item name="file">
+                    <a-upload
+                        v-model:file-list="uploadData.file"
+                        name="file"
+                        accept=".pdf"
+                        :headers="headers"
+                        :show-upload-list="true"
+                        :custom-request="handleCustomRequest"
+                        :before-upload="beforeUpload"
+                        :max-count="1"
+                        @preview="handlePreview"
+                        @change="handleFileChange"
+                        >
+                        <a-button>
+                            <span>
+                            <i class="bi bi-upload me-2"></i>Chọn file PDF
+                            </span>
+                        </a-button>
+                    </a-upload>
+                </a-form-item>
+                </a-form>
+            </div>
+        </div>
+    </a-modal>
+
+    <!-- Modal detail template -->
+    <a-modal 
+        v-model:open="detailModalVisible" 
+        width="600px" 
+        centered
+        :z-index="1003"
+    >
+        <template #title>
+            <span class="fw-bold">Chi tiết mẫu văn bản</span>
+        </template>
+        
+        <template #footer>
+            <div class="row d-flex justify-content-end g-2">
+                <a-button 
+                    type="primary" 
+                    class="col-3"
+                    @click="detailModalVisible = false"
+                >
+                    <i class="fa-solid fa-check me-2"></i> Đóng
+                </a-button>
+            </div>
+        </template>
+
+        <!-- Modal Content -->
+        <div v-if="selectedTemplate" class="template-detail">
+            <!-- Tên mẫu văn bản -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h5 class="text-primary mb-2">
+                        <i class="fa-solid fa-file-text me-2"></i>
+                        {{ selectedTemplate.name }}
+                    </h5>
+                </div>
+            </div>
+
+            <!-- Thông tin cơ bản -->
+            <div class="row mb-3">
+                <div class="col-6">
+                    <div class="info-item">
+                        <label class="fw-bold text-muted">Loại văn bản:</label>
+                        <div class="mt-1">
+                            <a-tag 
+                                class="px-2 py-1"
+                            >
+                                {{ selectedTemplate.document_type?.name }}
+                            </a-tag>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <div class="info-item">
+                        <label class="fw-bold text-muted">Trạng thái:</label>
+                        <div class="mt-1">
+                            <a-tag 
+                                :color="getStatusColor(selectedTemplate.status)"
+                                class="px-2 py-1"
+                            >
+                                {{ getStatusText(selectedTemplate.status) }}
+                            </a-tag>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mô tả -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="info-item">
+                        <label class="fw-bold text-muted">Mô tả:</label>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            <p class="mb-0" v-if="selectedTemplate.description">
+                                {{ selectedTemplate.description }}
+                            </p>
+                            <p class="mb-0 text-muted" v-else>
+                                <i>Chưa có mô tả</i>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File đính kèm -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="info-item">
+                        <label class="fw-bold text-muted">File đính kèm:</label>
+                        <div class="mt-2">
+                            <div v-if="selectedTemplate.file_path" 
+                                class="file-item d-flex align-items-center justify-content-between p-3 border rounded bg-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa-solid fa-file-pdf text-danger me-2 fs-4"></i>
+                                    <div>
+                                        <div class="fw-medium">{{ getFileName(selectedTemplate.file_path) }}</div>
+                                        <small class="text-muted">{{ formatFileSize(selectedTemplate.file_size) }}</small>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <a-button 
+                                        type="link" 
+                                        size="small"
+                                        @click="previewFile(selectedTemplate)"
+                                        class="me-2"
+                                    >
+                                        <i class="fa-solid fa-eye me-1"></i> Xem
+                                    </a-button>
+                                    <!-- <a-button 
+                                        type="link" 
+                                        size="small"
+                                        @click="fetchFileUrl(selectedTemplate)"
+                                    >
+                                        <i class="fa-solid fa-download me-1"></i> Tải xuống
+                                    </a-button> -->
                                 </div>
                             </div>
-                            <a-button>
-                                <template #icon>
-                                    <FileAddOutlined />
-                                </template>
-                                Tạo mới
-                            </a-button>
+                            <div v-else class="text-muted text-center p-3 border rounded bg-light">
+                                <i class="fa-solid fa-file-slash me-2"></i>
+                                Không có file đính kèm
+                            </div>
                         </div>
-                    </a-card>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thống kê -->
+            <div class="row mb-3">
+                <div class="col-6">
+                    <div class="stat-card text-center p-3 border rounded bg-primary bg-opacity-10">
+                        <div class="stat-number text-primary fs-4 fw-bold">
+                            {{ selectedTemplate.downloaded || 0 }}
+                        </div>
+                        <div class="stat-label text-muted">
+                            <span class="text-primary">
+                                <i class="fa-solid fa-eye me-1"></i>
+                                Lượt xem
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <div class="stat-card text-center p-3 border rounded bg-opacity-10" style="background-color: rgba(247, 82, 123, 0.3);">
+                        <div class="stat-number fs-4 fw-bold" style="color: #f7527b;">
+                            {{ selectedTemplate.liked || 0 }}
+                        </div>
+                        <div class="stat-label text-muted">
+                            <span style="color: #f7527b;">
+                                <i class="fa-solid fa-heart me-1"></i>
+                                Lượt thích
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin người tạo và thời gian -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="creator-info p-3 border rounded bg-light">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <a-avatar 
+                                    :src="getAvatarUrl(selectedTemplate.creator?.avatar, selectedTemplate.creator?.id)" 
+                                    :size="40"
+                                    class="me-3"
+                                >
+                                    {{ selectedTemplate.creator?.name?.charAt(0) }}
+                                </a-avatar>
+                            </div>
+                            <div class="col">
+                                <div class="fw-medium">
+                                    <span>{{ selectedTemplate.creator?.name }} - {{ selectedTemplate.creator?.full_name_with_role }}</span>
+                                </div>
+                                <small class="text-muted">
+                                    Tạo lúc: {{ formatDateTime(selectedTemplate.created_at) }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Loading state -->
+        <div v-else class="text-center py-5">
+            <a-spin size="large" />
+            <div class="mt-3 text-muted">Đang tải thông tin...</div>
+        </div>
+    </a-modal>
 </template>
 
-
 <script>
-import { defineComponent, ref, computed, reactive } from 'vue';
-import { Pagination, Select } from 'ant-design-vue';
-import {
-    PlusOutlined,
-    FilterOutlined,
-    DownOutlined,
-    FileAddOutlined,
-    CheckSquareOutlined
-} from '@ant-design/icons-vue';
-import pdfFile from '@/assets/files/ĐCĐA_TrầnTuấnMinh_63CNTT4_2151062831.pdf';
-import TemplateDocument from '@/components/TemplateDocument.vue';
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
+import { useMenu } from '@/stores/use-menu.js';
+import { UploadOutlined } from '@ant-design/icons-vue';
+import {useDocumentStore} from '@/stores/admin/document-store.js';
+import { useAuth } from '@/stores/use-auth.js';
+import axiosInstance from "@/lib/axios.js";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
     components: {
-        PlusOutlined,
-        FilterOutlined,
-        DownOutlined,
-        FileAddOutlined,
-        CheckSquareOutlined,
-        TemplateDocument,
+        UploadOutlined,
     },
     setup() {
-        const pagination = ref({
-            current: 1,
-            total: 0,
-            pageSize: 6
-        });
+        useMenu().onSelectedKeys(["admin-documents-template"]);
+        const documentStore = useDocumentStore();
+        const authStore = useAuth();
 
-        const templates = ref([
-            { id: 1, title: 'Đơn xin nghỉ phép', updated: '15/04/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin nghỉ phép cho sinh viên, giảng viên.', used: 5 },
-            { id: 2, title: 'Đơn xin cấp bảng điểm', updated: '20/03/2023', isOfficial: true, isFavorite: false, description: 'Mẫu đơn xin cấp bảng điểm.', used: 5 },
-            { id: 3, title: 'Đề xuất mua thiết bị', updated: '05/05/2023', isOfficial: false, isFavorite: true, description: 'Mẫu đề xuất mua thiết bị cho phòng lab.', used: 5 },
-            { id: 4, title: 'Báo cáo kết quả học tập', updated: '10/02/2023', isOfficial: true, isFavorite: false, description: 'Mẫu báo cáo kết quả học tập.', used: 5 },
-            { id: 5, title: 'Đơn xin chuyển ngành', updated: '25/01/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin chuyển ngành học.', used: 5 },
-            { id: 6, title: 'Đề xuất tổ chức sự kiện', updated: '18/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tổ chức sự kiện.', used: 5 },
-            { id: 7, title: 'Đơn xin gia hạn thời gian học', updated: '12/04/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin gia hạn thời gian học.', used: 5 },
-            { id: 8, title: 'Đơn xin miễn giảm học phí', updated: '30/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đơn xin miễn giảm học phí.', used: 5 },
-            { id: 9, title: 'Đề xuất tham gia hội thảo', updated: '22/02/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đề xuất tham gia hội thảo.', used: 5 },
-            { id: 10, title: 'Đơn xin nghỉ học', updated: '28/01/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đơn xin nghỉ học.', used: 5 },
-            { id: 11, title: 'Đơn xin cấp thẻ sinh viên', updated: '15/03/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp thẻ sinh viên.', used: 5 },
-            { id: 12, title: 'Đề xuất tham gia nghiên cứu khoa học', updated: '10/04/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tham gia nghiên cứu khoa học.', used: 5 },
-            { id: 13, title: 'Đơn xin chuyển lớp', updated: '05/02/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin chuyển lớp học.', used: 5 },
-            { id: 14, title: 'Đề xuất tổ chức buổi học ngoại khóa', updated: '20/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tổ chức buổi học ngoại khóa.', used: 5 },
-            { id: 15, title: 'Đơn xin cấp giấy chứng nhận tốt nghiệp', updated: '12/04/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tốt nghiệp.', used: 5 },
-            { id: 16, title: 'Đề xuất tham gia chương trình trao đổi sinh viên', updated: '30/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tham gia chương trình trao đổi sinh viên.', used: 5 },
-            { id: 17, title: 'Đơn xin cấp giấy phép thực tập', updated: '22/02/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy phép thực tập.', used: 5 },
-            { id: 18, title: 'Đề xuất tổ chức buổi hội thảo', updated: '28/01/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tổ chức buổi hội thảo.', used: 5 },
-            { id: 19, title: 'Đơn xin cấp giấy chứng nhận tham gia hoạt động ngoại khóa', updated: '15/03/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tham gia hoạt động ngoại khóa.', used: 5 },
-            { id: 20, title: 'Đề xuất tham gia chương trình học bổng', updated: '10/04/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tham gia chương trình học bổng.', used: 5 },
-            { id: 21, title: 'Đơn xin cấp giấy chứng nhận tham gia nghiên cứu khoa học', updated: '05/02/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tham gia nghiên cứu khoa học.', used: 5 },
-            { id: 22, title: 'Đề xuất tổ chức buổi giao lưu sinh viên', updated: '20/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tổ chức buổi giao lưu sinh viên.', used: 5 },
-            { id: 23, title: 'Đơn xin cấp giấy chứng nhận tham gia hoạt động tình nguyện', updated: '12/04/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tham gia hoạt động tình nguyện.', used: 5 },
-            { id: 24, title: 'Đề xuất tham gia chương trình thực tập sinh', updated: '30/03/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tham gia chương trình thực tập sinh.', used: 5 },
-            { id: 25, title: 'Đơn xin cấp giấy chứng nhận tham gia hoạt động thể thao', updated: '22/02/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tham gia hoạt động thể thao.', used: 5 },
-            { id: 26, title: 'Đề xuất tổ chức buổi hội thảo khoa học', updated: '28/01/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tổ chức buổi hội thảo khoa học.', used: 5 },
-            { id: 27, title: 'Đơn xin cấp giấy chứng nhận tham gia hoạt động văn hóa', updated: '15/03/2023', isOfficial: true, isFavorite: true, description: 'Mẫu đơn xin cấp giấy chứng nhận tham gia hoạt động văn hóa.', used: 5 },
-            { id: 28, title: 'Đề xuất tham gia chương trình giao lưu văn hóa', updated: '10/04/2023', isOfficial: false, isFavorite: false, description: 'Mẫu đề xuất tham gia chương trình giao lưu văn hóa.', used: 5 }
-        ]);
-
-        const recentDocuments = ref([
-            { id: 1, title: 'Đơn xin nghỉ phép', lastUsed: '10/04/2023', createdCount: 5 },
-            { id: 2, title: 'Đề xuất mua thiết bị', lastUsed: '05/05/2023', createdCount: 2 }
-        ]);
-
-        const paginatedTemplates = computed(() => {
-            const start = (pagination.value.current - 1) * pagination.value.pageSize;
-            const end = start + pagination.value.pageSize;
-            return templates.value.slice(start, end);
-        });
-
-        const handlePageChange = (page) => {
-            pagination.value.current = page;
+        const templateModalVisible = ref(false);
+        const upload_files = ref([]);
+        const headers = {
+            authorization: 'authorization-text',
         };
 
-        const handlePageSizeChange = (size) => {
-            pagination.value.pageSize = size;
-            pagination.value.current = 1; // Reset về trang 1 khi đổi pageSize
+        const document_templates = ref([]);
+
+        const document_types = ref([]);    
+
+        const formRef = ref();
+        const uploadFormRef = ref();
+        const loading = ref(false);
+
+        const formData = ref({
+            name: "",
+            document_type_id: null,
+            description: "",
+        });
+
+        const uploadData = ref({
+            file: null,
+        });
+
+        onMounted(async () => {
+            await documentStore.fetchDocumentTemplates();
+            document_templates.value = documentStore.document_templates;
+            // Chỉ lấy các văn bản có trạng thái 'active' hoặc là trạng thái 'pending' và mình là người tạo
+            // document_templates.value = document_templates.value.filter(template => 
+            //     template.status === 'active' || 
+            //     (template.status === 'pending' && template.created_by === authStore.user.id)
+            // );
+
+            await documentStore.fetchDocumentTypes();
+            document_types.value = documentStore.document_types;
+
+        });
+
+        const rules = {
+            name: [
+                { required: true, message: "Vui lòng nhập tên mẫu văn bản" },
+                { max: 100, message: "Tên mẫu văn bản không được quá 100 ký tự" },
+            ],
+            document_type_id: [
+                { required: true, message: "Vui lòng chọn loại văn bản" },
+            ],
         };
 
-        pagination.value.total = templates.value.length; // gán tổng số lượng
+        const uploadRules = {
+        file: [
+            // Uncomment nếu muốn bắt buộc upload file
+            { 
+              required: true, 
+              message: 'Vui lòng chọn file PDF', 
+              trigger: 'blur' 
+            }
+        ]
+        }        
 
-        function toggleFavorite(template) {
-            template.isFavorite = !template.isFavorite;
-        }
+        const filterOption = (input, option) => {
+            return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+        };        
 
-        function openPdf() {
-            console.log('Opening PDF file...');
-            window.open(pdfFile, '_blank');
-        }
+        const showModalAddTemplate = () => {
+            templateModalVisible.value = true;
+        };
 
-    // Event handlers
-    const handleAddTemplate = () => {
-    message.info('Mở form thêm mẫu văn bản mới');
-    // Logic để mở modal/form thêm mẫu mới
-    };
+        function handleCustomRequest({ onSuccess }) {
+            setTimeout(() => {
+                onSuccess('ok'); // Giả vờ thành công để upload_files cập nhật
+            }, 0);
+        };
 
-    const handleToggleFavorite = (template) => {
-    // Tìm và cập nhật template trong array
-    const index = templates.value.findIndex(t => t.id === template.id);
-    if (index !== -1) {
-        templates.value[index].isFavorite = !templates.value[index].isFavorite;
+        function beforeUpload(file) {
+            const isPDF = file.type === 'application/pdf';
+            if (!isPDF) {
+                message.error('Bạn chỉ có thể upload file PDF!');
+            }
+            return isPDF;
+        };
+
+        function handlePreview(file) {
+            let fileBlob;
+            if (file.originFileObj) {
+                fileBlob = file.originFileObj;
+            } else if (file.url) {
+                window.open(file.url, '_blank');
+                return;
+            }
+
+            const blobUrl = URL.createObjectURL(fileBlob);
+            window.open(blobUrl, '_blank');
+        };        
+
+        const handleFileChange = (info) => {
+            uploadData.file = info.fileList.length > 0 ? info.fileList[0] : null
+            
+            // Trigger validation cho upload form
+            uploadFormRef.value?.validateFields(['file'])
+        }      
         
-        if (templates.value[index].isFavorite) {
-        message.success(`Đã thêm "${template.title}" vào danh sách yêu thích`);
-        } else {
-        message.info(`Đã xóa "${template.title}" khỏi danh sách yêu thích`);
+        // Hàm upload file
+        const handleUploadFile = async ({ file, documentTemplateId }) => {
+            try {
+                const formData = new FormData();
+                formData.append('upload_file', file);
+                formData.append('document_template_id', documentTemplateId);
+
+                const res = await axiosInstance.post('/api/document-templates/upload-file', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                return {
+                    status: 200,
+                    message: "File uploaded successfully",
+                    data: res.data,
+                };
+
+                // console.log('Đường dẫn file:', res.data.file_url);
+            } catch (error) {
+                // console.error(error);
+                return {
+                    status: 500,
+                    message: "Lỗi khi upload file",
+                };
+            }
+        };
+
+        const handleAddTemplate = async () => {
+            try {
+                await formRef.value.validateFields();
+                await uploadFormRef.value.validateFields(['file']);
+
+                loading.value = true;
+
+                const status = authStore.role === 'admin' ? 'active' : 'pending';
+                // Giả lập thêm mẫu văn bản
+                const newTemplate = {
+                    ...formData.value,
+                    created_by: authStore.user.id,
+                    document_type_id: formData.value.document_type_id,
+                    status: status,
+                };
+
+                console.log("New Template Data:", newTemplate);
+                // return;
+
+                const response = await axiosInstance.post('/api/document-templates', newTemplate)
+                if (response.status !== 201) {
+                    throw new Error("Failed to create document template");
+                }
+
+                const fileObj = uploadData.file.originFileObj;
+                // console.log("File Object:", fileObj);
+                // console.log("Response Data:", response.data.document_template.id);
+                // return;
+                const newTemplateId = response.data.document_template.id;
+                const responseUpload = await handleUploadFile({
+                    file: fileObj,
+                    documentTemplateId: newTemplateId
+                });
+
+                if (responseUpload.status !== 200) {
+                    throw new Error("Failed to upload file");
+                }
+                message.success("Thêm mẫu văn bản thành công!");
+                document_templates.value.push(newTemplate);
+                formData.value = {
+                    name: "",
+                    document_type_id: null,
+                    description: "",
+                };
+                uploadData.value = {
+                    file: null,
+                };
+                templateModalVisible.value = false;
+            } catch (error) {
+                console.error("Validation failed:", error);
+                message.error("Đã xảy ra lỗi khi thêm mẫu văn bản. Vui lòng kiểm tra lại thông tin.");
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const sendNotification = async (notification) => {
+            try {
+                const response = await axiosInstance.post('/api/notifications', notification);
+                if (response.status === 201) {
+                    console.log("Notification sent successfully:", response.data);
+                } else {
+                    console.error("Failed to send notification:", response);
+                }
+            } catch (error) {
+                console.error("Error sending notification:", error);
+            }
+        };
+
+        const handleChangeStatus = async (record, action) => {
+            try {
+                loading.value = true;
+                const old_status = record.status;
+                const response = await axiosInstance.post(`/api/document-templates/${record.id}/change-status`, {
+                    status: action,
+                });
+
+                if (response.status === 200) {
+                    if (old_status === 'pending') {
+                        await sendNotification({
+                            notification_category_id: 1, 
+                            from_user_id: authStore.user.id,
+                            receiver_id: record.creator.id,
+                            title: `Mẫu văn bản "${record.name}" của bạn đã được chấp thuận`,
+                            content: `Mẫu văn bản "${record.name}" đã được chấp thuận và có thể sử dụng.`,
+                        });
+                        message.success(`Mẫu văn bản "${record.name}" đã được chấp thuận để sử dụng.`);
+                    } else if (action === 'active') {
+                        message.success(`Mẫu văn bản "${record.name}" đã có thể kích hoạt.`);
+                    } else if (action === 'inactive') {
+                        message.success(`Mẫu văn bản "${record.name}" đã tạm ngừng sử dụng.`);
+                    }
+                    // Cập nhật lại trạng thái mẫu văn bản trong danh sách
+                    const index = document_templates.value.findIndex(item => item.id === record.id);
+                    if (index !== -1) {
+                        document_templates.value[index].status = action;
+                    }
+                } else {
+                    message.error('Đã xảy ra lỗi khi thay đổi trạng thái mẫu văn bản.');
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+                message.error('Không thể thay đổi trạng thái mẫu văn bản. Vui lòng thử lại sau.');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const showConfirmActive = (record) => {
+            // Hiển thị modal xác nhận kích hoạt mẫu văn bản
+            console.log("Showing confirm active for:", record);
+            handleChangeStatus(record, 'active');
+        };
+
+        const showConfirmInactive = (record) => {
+            // Hiển thị modal xác nhận tạm ngừng mẫu văn bản
+            console.log("Showing confirm inactive for:", record);
+            handleChangeStatus(record, 'inactive');
+        };
+
+        const detailModalVisible = ref(false);
+
+        const selectedTemplate = ref(null);
+        const selectedTemplateIndex = ref(null);
+
+        const viewDetail = async (record, index) => {
+            // Hiển thị chi tiết mẫu văn bản
+            console.log("Viewing details for:", record);
+            detailModalVisible.value = true;
+            selectedTemplateIndex.value = index;
+            try {
+                loading.value = true;
+                detailModalVisible.value = true;
+                
+                // Nếu template đã có đầy đủ thông tin
+                if (record.creator && record.document_type) {
+                    selectedTemplate.value = record;
+                } else {
+                    // Fetch chi tiết từ API
+                    const response = await axiosInstance.get(`/api/document-templates/${record.id}`);
+                    selectedTemplate.value = response.data.document_template;
+                }
+            } catch (error) {
+                console.error('Error loading template details:', error);
+                message.error('Không thể tải thông tin chi tiết');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        // Hàm xem chi tiết văn bản khi click vào dòng
+        const customRow = (record, index) => {
+            return {
+                onClick: () => {
+                    viewDetail(record, index);
+                },
+                style: {
+                    cursor: 'pointer'
+                }
+            };
+        };        
+
+        const getStatusColor = (status) => {
+            const colors = {
+                'active': 'green',
+                'pending': 'orange',
+                'inactive': 'red'
+            };
+            return colors[status] || 'default';
+        };        
+
+        const getStatusText = (status) => {
+            const texts = {
+                'active': 'Được sử dụng',
+                'pending': 'Chờ duyệt',
+                'inactive': 'Tạm ngừng sử dụng'
+            };
+            return texts[status] || status;
+        };     
+        
+        const getFileName = (filePath) => {
+            if (!filePath) return '';
+            return filePath.split('/').pop() || filePath;
+        };
+
+        // Format file size
+        const formatFileSize = (bytes) => {
+            if (!bytes) return '';
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        };        
+
+        const previewFile = async (template) => {
+            if (template.file_path) {
+                const fileUrl = `http://localhost:8000/documents/${template.file_path}`;
+                const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
+                window.open(fileUrl, '_blank');
+                document_templates.value[selectedTemplateIndex.value].downloaded += 1; // Tăng lượt xem
+            } else {
+                message.warning('Không có file để xem');
+            }
+        };     
+
+        const formatDateTime = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };        
+
+        const downloadUrl = ref('');
+        const fetchFileUrl = async (template) => {
+            try {
+                const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
+                downloadUrl.value = response.data.download_url; // Giả sử API trả về { download_url: "..." }
+                await axiosInstance.get(`/documents/${downloadUrl.value}`)
+            } catch (error) {
+                message.error('Không thể tải file');
+            }
+        };
+
+        const downloadFile = async (url) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Không thể tải file');
+                const blob = await response.blob();
+                const fileUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = fileUrl;
+                link.download = 'document.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(fileUrl);
+            } catch (err) {
+                console.error('Download error:', err);
+                message.error('Không thể tải file. Vui lòng thử lại sau.');
+            }
         }
-    }
-    };
 
-    const handleViewTemplate = (template) => {
-    message.info(`Đang mở xem mẫu: ${template.title}`);
-    // Logic để mở preview mẫu văn bản
-    // Có thể mở modal hoặc navigate đến trang chi tiết
-    };
+        const randomAvatar = (id) => {
+            if (id > 100 || id == null) {
+                return `https://avatar.iran.liara.run/public`;
+            }
+            return `https://avatar.iran.liara.run/public/${id}`;
+        };
 
-    const handleCreateFromTemplate = (template) => {
-    message.success(`Đang tạo văn bản mới từ mẫu: ${template.title}`);
-    // Logic để tạo văn bản mới từ mẫu
-    // Có thể navigate đến trang soạn thảo với dữ liệu từ mẫu
-    };
+        const API_BASE_URL = 'http://localhost:8000';
+
+        const getAvatarUrl = (avatar, id) => {
+            if (!avatar) return randomAvatar(id);
+            return `${API_BASE_URL}/images/avatars/${avatar}`
+        }        
+
+        // using watch to download file when downloadUrl changes
+        // watch(downloadUrl, (newUrl) => {
+        //     if (newUrl) {
+        //         downloadFile(newUrl);
+        //     }
+        // });
+
+        const columns = [
+            {
+                title: "Tên văn bản mẫu",
+                dataIndex: "name",
+                key: "name",
+                width: 200,
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            },
+            {
+                title: "Loại văn bản",
+                dataIndex: "type",
+                key: "type",
+                width: 150,
+                align: "center",
+            },
+            {
+                title: "Mô tả",
+                dataIndex: "description",
+                key: "description",
+                width: 200,
+                customHeaderCell: () => {
+                    return { style: { textAlign: 'center' } };
+                }
+            },
+            {
+                title: "Trạng thái",
+                dataIndex: "status",
+                key: "status",
+                width: 100,
+                align: "center",
+            },
+            {
+                title: "Người tạo",
+                dataIndex: "created_by",
+                key: "created_by",
+                width: 150,
+                align: "center",
+            },
+            {
+                title: "Ngày tạo",
+                dataIndex: "created_at",
+                key: "created_at",
+                width: 150,
+                align: "center",
+            }
+        ];
 
         return {
-            pagination,
-            templates,
-            recentDocuments,
-            paginatedTemplates,
-            handlePageChange,
-            handlePageSizeChange,
-            openPdf,
-            toggleFavorite,
+            document_templates,
+            document_types,
+            columns,
+            templateModalVisible,
+            upload_files,
+            headers,
+            rules,
+            uploadRules,
+            formRef,
+            uploadFormRef,
+            formData,
+            uploadData,
+            loading,
+
+            filterOption,
+            showModalAddTemplate,
+            handleCustomRequest,
+            beforeUpload,
+            handlePreview,
+            handleFileChange,
             handleAddTemplate,
-            handleToggleFavorite,
-            handleViewTemplate,
-            Pagination,
-            Select
+            showConfirmActive,
+            showConfirmInactive,
+            customRow,
+
+            detailModalVisible,
+            selectedTemplate,
+            viewDetail,
+            getStatusColor,
+            getStatusText,
+            previewFile,
+            getFileName,
+            formatFileSize,
+            formatDateTime,
+            fetchFileUrl,
+            getAvatarUrl,
         };
-    }
+    },
 });
 </script>
-
-
-
-<style scoped>
-.description-truncate {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-height: 2.5em;
-}
-</style>

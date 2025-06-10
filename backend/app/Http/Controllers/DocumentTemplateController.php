@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use App\Http\Resources\DocumentTemplateResource;
 
 class DocumentTemplateController extends Controller
 {
@@ -130,9 +131,11 @@ class DocumentTemplateController extends Controller
     public function getAllTemplates()
     {
         $documentTemplates = DocumentTemplate::with([
-            'creator' => function($query) {
-                $query->select('id', 'name', 'avatar', 'role_id');
-            },
+            'creator.role', // Load role để biết user thuộc loại nào
+            'creator.creator.rollAtDepartment', // Load rollAtDepartment cho creator
+            'creator.creator.department', // Load department cho creator
+            'creator.approver.rollAtDepartment', // Load rollAtDepartment cho approver
+            'creator.approver.department', // Load department cho approver
             'documentType:id,name,description',
         ])
         ->select(
@@ -144,8 +147,9 @@ class DocumentTemplateController extends Controller
         ->get();
 
         return response()->json([
-            'document_templates' => $documentTemplates,
-        ])->setStatusCode(200, 'Templates retrieved successfully.');
+            'document_templates' => DocumentTemplateResource::collection($documentTemplates),
+        ])->setStatusCode(200, 'Document templates retrieved successfully.');
+        // return response() DocumentTemplateResource::collection($documentTemplates);
     }
 
     // Hàm xử lý upload file văn bản

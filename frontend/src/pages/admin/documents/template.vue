@@ -61,7 +61,13 @@
 
         <div class="row">
             <div class="col-12">
-                <a-table :dataSource="document_templates" :columns="columns" :scroll="{ x: 576 }" bordered>
+                <a-table 
+                    :dataSource="document_templates" 
+                    :columns="columns" 
+                    :scroll="{ x: 576 }" 
+                    bordered
+                    :customRow="customRow"
+                    >
                     <template #bodyCell="{ column, index, record }">
                         <template v-if="column.key === 'type'">
                             <a-tooltip>
@@ -87,7 +93,7 @@
                         <template v-else-if="column.key === 'created_by'">
                             <a-tooltip>
                                 <template #title>
-                                    <span class="">{{ record.creator.full_name_with_role }}</span>
+                                    <span class="">{{ record.creator.position_title }}</span>
                                 </template>
                                 <span>{{ record.creator.name }}</span>
                             </a-tooltip>
@@ -152,6 +158,7 @@
         v-model:open="templateModalVisible" 
         width="500px" 
         centered
+        :z-index="1003"
         > 
         <template #title>
             <span class="fw-bold">Thêm mẫu mới</span>
@@ -199,7 +206,6 @@
                 <a-form-item 
                     label="Loại văn bản" 
                     name="document_type_id"
-                    has-feedback
                 >
                     <a-select
                     v-model:value="formData.document_type_id"
@@ -209,6 +215,12 @@
                     :filter-option="filterOption"
                     allow-clear
                     :list-height="200"
+                    :dropdown-style="{ 
+                        position: 'absolute',
+                        zIndex: 10000,
+                        background: 'white',
+                        border: '1px solid #ccc'
+                    }"
                     />
                 </a-form-item>
 
@@ -264,6 +276,7 @@
         v-model:open="detailModalVisible" 
         width="600px" 
         centered
+        :z-index="1003"
     >
         <template #title>
             <span class="fw-bold">Chi tiết mẫu văn bản</span>
@@ -497,6 +510,7 @@ export default defineComponent({
 
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;
+            console.log("Document Types:", document_types.value);
         });
 
         const rules = {
@@ -845,6 +859,18 @@ export default defineComponent({
         //     }
         // });
 
+        // Hàm xem chi tiết văn bản khi click vào dòng
+        const customRow = (record, index) => {
+            return {
+                onClick: () => {
+                    viewDetail(record, index);
+                },
+                style: {
+                    cursor: 'pointer'
+                }
+            };
+        };         
+
         const columns = [
             {
                 title: "Tên văn bản mẫu",
@@ -890,7 +916,7 @@ export default defineComponent({
                 title: "Thao tác",
                 key: "action",
                 fixed: "right",
-                width: 100,
+                width: 150,
                 align: "center",
             }
         ];
@@ -919,6 +945,7 @@ export default defineComponent({
             handleAddTemplate,
             showConfirmActive,
             showConfirmInactive,
+            customRow,
 
             detailModalVisible,
             selectedTemplate,
