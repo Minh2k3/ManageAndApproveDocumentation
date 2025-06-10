@@ -11,6 +11,7 @@ window.axios = axios;
 import App from './App.vue'
 import {
     Avatar,
+    Badge,
     Button,
     Card,
     Carousel,
@@ -66,6 +67,7 @@ app.use(router)
 
 // Ant Design Vue Components - Alphabetical Order
 app.use(Avatar)
+app.use(Badge)
 app.use(Button)
 app.use(Card)
 app.use(Carousel)

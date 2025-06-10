@@ -107,7 +107,7 @@
                             @preview="handlePreview"
                             >
                             <a-button>
-                                <UploadOutlined />
+                                <i class="bi bi-upload me-2"></i>
                                 Chọn file PDF
                             </a-button>
                         </a-upload>
@@ -262,40 +262,40 @@
                             <div class="col-md col">
                                 <div class="row">
                                     <div class="col-md col mb-md-2">
-                                        <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center justify-content-md-center">
-                                            <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0">
+                                        <div class="d-flex flex-wrap justify-content-center gap-2 align-items-center justify-content-md-center">
+                                            <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0" placement="left">
                                                 <span>
                                                     <a-button type="primary"
                                                         :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
                                                         @click="addStep(step.step, index)"
                                                         class="text-center align-self-center bg-success">
                                                         <template #icon>
-                                                            <PlusCircleOutlined />
+                                                            <i class="bi bi-plus-circle"></i>
                                                         </template>
                                                     </a-button>
                                                 </span>
                                             </a-tooltip>
 
-                                            <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0">
+                                            <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0" placement="left">
                                                 <span>
                                                     <a-button type="primary"
                                                         :disabled="!step.department_id || !step.approver_id"
                                                         @click="addSameStep(step.step, index)"
                                                         class="text-center align-self-center bg-warning">
                                                         <template #icon>
-                                                            <DownCircleOutlined />
+                                                            <i class="bi bi-arrow-down-circle"></i>
                                                         </template>
                                                     </a-button>
                                                 </span>
                                             </a-tooltip>
 
-                                            <a-tooltip title="Xóa cấp duyệt này">
+                                            <a-tooltip title="Xóa cấp duyệt này" placement="left">
                                                 <span>
                                                     <a-button type="primary" :disabled="current_flow_step.length <= 1"
                                                         @click="removeStep(index)"
                                                         class="text-center align-self-center bg-danger">
                                                         <template #icon>
-                                                            <MinusCircleOutlined />
+                                                            <i class="bi bi-dash-circle"></i>
                                                         </template>
                                                     </a-button>
                                                 </span>

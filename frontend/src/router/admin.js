@@ -88,12 +88,12 @@ const admin = [
             {
                 path: "approval-flows",
                 name: "admin-approval-flows",
-                component: () => import('@/pages/admin/approval-flows/template.vue')
+                component: () => import('@/pages/admin/approval-flows/index.vue')
             },
             {
-                path: "approval-flows/template",
-                name: "admin-approval-flows-template",
-                component: () => import('@/pages/admin/approval-flows/template.vue')
+                path: "approval-flows/:id",
+                name: "admin-approval-flows-detail",
+                component: () => import('@/pages/admin/approval-flows/detail.vue')
             },
             {
                 path: "approval-flows/create",

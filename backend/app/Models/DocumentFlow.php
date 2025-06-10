@@ -52,7 +52,7 @@ class DocumentFlow extends Model
     /**
      * Get the user that created the document flow.
      */
-    public function creator()
+    public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }

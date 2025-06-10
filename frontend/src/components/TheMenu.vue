@@ -113,8 +113,12 @@
 				</span>
 			</template>
 
-			<a-menu-item key="approval-flows-template">
-				<router-link  class="text-decoration-none" :to="{ name: 'admin-approval-flows-template' }">Mẫu luồng phê duyệt</router-link>
+			<a-menu-item key="admin-approval-flows">
+				<router-link  class="text-decoration-none" :to="{ name: 'admin-approval-flows' }">Mẫu luồng phê duyệt</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="admin-approval-flows-detail" :disabled="!isDetailPageFlowTemplate" :selectable="isDetailPageFlowTemplate">
+				Chi tiết luồng
 			</a-menu-item>
 
 			<a-menu-item key="approval-flows-create">

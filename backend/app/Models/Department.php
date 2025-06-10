@@ -19,12 +19,12 @@ class Department extends Model
     protected $fillable = [
         'name',
         'description',
+        'group',
+        'status',
         'avatar',
         'phone_number',
         'position',
         'can_approve',
-        'status',
-        'group',
         'created_at',
         'updated_at',
     ];

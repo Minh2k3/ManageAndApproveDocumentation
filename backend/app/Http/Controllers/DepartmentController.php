@@ -157,6 +157,9 @@ class DepartmentController extends Controller
             ->select(
                 'id as value',
                 'name as label',
+                'status',
+                'avatar as avatar_path',
+                'group',
             )
             ->where('can_approve', 1)
             ->get();

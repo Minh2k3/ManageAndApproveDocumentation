@@ -169,6 +169,10 @@ Route::get('/document-flows/{id}/steps', [DocumentFlowController::class, 'getSte
     // ->middleware('auth:sanctum')
     ->name('document-flows.getStepsByDocumentFlow');
 
+Route::post('/document-flows-template', [DocumentFlowController::class, 'createFlowTemplate'])
+    // ->middleware('auth:sanctum')
+    ->name('document-flows.createFlowTemplate');
+
 
 // Document Flow Step
 Route::get('/document-flow-steps', [DocumentFlowStepController::class, 'index'])
