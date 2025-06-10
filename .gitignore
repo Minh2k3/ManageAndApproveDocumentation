@@ -1,3 +1,2 @@
 docker-compose.yml
 nginx
-backup_before_signature.sql
