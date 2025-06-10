@@ -88,6 +88,9 @@
                             <a-tag v-else-if="record.status === 'inactive'" color="red">
                                 {{ 'Không hoạt động'}}
                             </a-tag>
+                            <a-tag v-else-if="record.status === 'reject'" color="volcano">
+                                {{ 'Bị từ chối'}}
+                            </a-tag>
                         </template>
 
                         <template v-else-if="column.key === 'created_by'">
@@ -119,8 +122,21 @@
                                     </template>
                                     <a-button
                                         class="bg-success text-white"
+                                        @click.stop
                                     >
                                         <i class="bi bi-check"></i>
+                                    </a-button>
+                                </a-popconfirm>
+
+                                <a-popconfirm v-if="record.status === 'pending'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="showConfirmReject(record)">
+                                    <template #title>
+                                        <span class="">Bạn có chắc chắn từ chối mẫu văn này?</span>
+                                    </template>
+                                    <a-button
+                                        class="bg-danger text-white"
+                                        @click.stop
+                                    >
+                                        <i class="bi bi-dash-circle"></i>
                                     </a-button>
                                 </a-popconfirm>
 
@@ -130,6 +146,7 @@
                                     </template>
                                     <a-button
                                         class="bg-danger text-white"
+                                        @click.stop
                                     >
                                         <i class="bi bi-ban"></i>
                                     </a-button>
@@ -141,6 +158,7 @@
                                     </template>
                                     <a-button
                                         class="bg-danger-subtle border-danger text-white"
+                                        @click.stop
                                     >
                                         <i class="bi bi-ban"></i>
                                     </a-button>
@@ -692,9 +710,18 @@ export default defineComponent({
                         });
                         message.success(`Mẫu văn bản "${record.name}" đã được chấp thuận để sử dụng.`);
                     } else if (action === 'active') {
-                        message.success(`Mẫu văn bản "${record.name}" đã có thể kích hoạt.`);
+                        message.success(`Mẫu văn bản "${record.name}" đã có thể sử dụng.`);
                     } else if (action === 'inactive') {
                         message.success(`Mẫu văn bản "${record.name}" đã tạm ngừng sử dụng.`);
+                    } else if (action === 'reject') {
+                        message.success(`Mẫu văn bản "${record.name}" đã bị từ chối.`);
+                        await sendNotification({
+                            notification_category_id: 2, 
+                            from_user_id: authStore.user.id,
+                            receiver_id: record.creator.id,
+                            title: `Mẫu văn bản "${record.name}" của bạn đã bị từ chối`,
+                            content: `Mẫu văn bản "${record.name}" đã bị từ chối và không thể sử dụng.`,
+                        });
                     }
                     // Cập nhật lại trạng thái mẫu văn bản trong danh sách
                     const index = document_templates.value.findIndex(item => item.id === record.id);
@@ -716,6 +743,12 @@ export default defineComponent({
             // Hiển thị modal xác nhận kích hoạt mẫu văn bản
             console.log("Showing confirm active for:", record);
             handleChangeStatus(record, 'active');
+        };
+
+        const showConfirmReject = (record) => {
+            // Hiển thị modal xác nhận từ chối mẫu văn bản
+            console.log("Showing confirm reject for:", record);
+            handleChangeStatus(record, 'reject');
         };
 
         const showConfirmInactive = (record) => {
@@ -945,6 +978,7 @@ export default defineComponent({
             handleAddTemplate,
             showConfirmActive,
             showConfirmInactive,
+            showConfirmReject,
             customRow,
 
             detailModalVisible,

@@ -176,15 +176,15 @@
 				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
 			</a-menu-item>
 
-		</a-sub-menu>
+			<a-menu-item key="creator-documents-template">
+				<router-link class="text-decoration-none" :to="{ name: 'creator-documents-template' }">
+					<span>
+						<i class="fa-solid fa-file me-2"></i>Văn bản mẫu
+					</span>
+				</router-link>
+			</a-menu-item>
 
-		<a-menu-item key="creator-documents-template">
-			<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-template' }">
-				<span>
-					<i class="fa-solid fa-file me-2"></i>Văn bản mẫu
-				</span>
-			</router-link>
-		</a-menu-item>
+		</a-sub-menu>
 
 		<a-menu-item key="creator-signatures">
 			<router-link  class="text-decoration-none" :to="{ name: 'creator-signatures' }">
@@ -246,6 +246,14 @@
 
 			<a-menu-item key="approver-documents-approve">
 				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-approve' }">Phê duyệt văn bản</router-link>
+			</a-menu-item>
+
+			<a-menu-item key="approver-documents-template">
+				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-template' }">
+					<span>
+						<i class="fa-solid fa-file me-2"></i>Văn bản mẫu
+					</span>
+				</router-link>
 			</a-menu-item>
 		</a-sub-menu>
 

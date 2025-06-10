@@ -254,6 +254,14 @@ Route::post('/notifications', [NotificationController::class, 'store'])
     // ->middleware('auth:sanctum')
     ->name('notifications.store');
 
+Route::post('/notifications/all-admins', [NotificationController::class, 'sendNotificationToAllAdmins'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.sendNotificationToAllAdmins');
+
+Route::post('/notifications/all-users', [NotificationController::class, 'sendNotificationToAllUsers'])
+    // ->middleware('auth:sanctum')
+    ->name('notifications.sendNotificationToAllUsers');
+
 // Statistics
 Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
     // ->middleware('auth:sanctum')

@@ -45,11 +45,11 @@ const approver = [
                 name: "approver-documents-edit",
                 component: () => import('@/pages/approver/documents/edit.vue')
             },
-            // {
-            //     path: "documents/approve/:id",
-            //     name: "approver-documents-approve-detail",
-            //     component: () => import('@/pages/approver/documents/approve.vue')
-            // },
+            {
+                path: "documents/template",
+                name: "approver-documents-template",
+                component: () => import('@/pages/approver/documents/template.vue')
+            },
             {
                 path: "documents/approve",
                 name: "approver-documents-approve",

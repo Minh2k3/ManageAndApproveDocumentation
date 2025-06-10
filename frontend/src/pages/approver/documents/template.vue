@@ -90,7 +90,7 @@
                             </a-tag>
                             <a-tag v-else-if="record.status === 'reject'" color="volcano">
                                 {{ 'Bị từ chối'}}
-                            </a-tag>                            
+                            </a-tag>                                    
                         </template>
 
                         <template v-else-if="column.key === 'created_by'">
@@ -429,14 +429,13 @@ import {useDocumentStore} from '@/stores/admin/document-store.js';
 import { useAuth } from '@/stores/use-auth.js';
 import axiosInstance from "@/lib/axios.js";
 import { message } from "ant-design-vue";
-import { fr } from "date-fns/locale";
 
 export default defineComponent({
     components: {
         UploadOutlined,
     },
     setup() {
-        useMenu().onSelectedKeys(["creator-documents-template"]);
+        useMenu().onSelectedKeys(["approver-documents-template"]);
         const documentStore = useDocumentStore();
         const authStore = useAuth();
 
@@ -569,20 +568,6 @@ export default defineComponent({
             }
         };
 
-
-        const sendNotificationToAdmins = async (notification) => {
-            try {
-                const response = await axiosInstance.post('/api/notifications/all-admins', notification);
-                if (response.status === 201) {
-                    console.log("Notification sent successfully:", response.data);
-                } else {
-                    console.error("Failed to send notification:", response);
-                }
-            } catch (error) {
-                console.error("Error sending notification:", error);
-            }
-        };
-
         const handleAddTemplate = async () => {
             try {
                 await formRef.value.validateFields();
@@ -608,6 +593,9 @@ export default defineComponent({
                 }
 
                 const fileObj = uploadData.file.originFileObj;
+                // console.log("File Object:", fileObj);
+                // console.log("Response Data:", response.data.document_template.id);
+                // return;
                 const newTemplateId = response.data.document_template.id;
                 const responseUpload = await handleUploadFile({
                     file: fileObj,
@@ -617,14 +605,6 @@ export default defineComponent({
                 if (responseUpload.status !== 200) {
                     throw new Error("Failed to upload file");
                 }
-
-                await sendNotificationToAdmins({
-                    notification_category_id: 1,
-                    from_user_id: authStore.user.id,
-                    title: "Mẫu văn bản mới",
-                    content: `Đề xuất mẫu văn bản "${newTemplate.name}".`,
-                });
-
                 message.success("Thêm mẫu văn bản thành công!");
                 document_templates.value.push(newTemplate);
                 formData.value = {
@@ -642,6 +622,70 @@ export default defineComponent({
             } finally {
                 loading.value = false;
             }
+        };
+
+        const sendNotification = async (notification) => {
+            try {
+                const response = await axiosInstance.post('/api/notifications', notification);
+                if (response.status === 201) {
+                    console.log("Notification sent successfully:", response.data);
+                } else {
+                    console.error("Failed to send notification:", response);
+                }
+            } catch (error) {
+                console.error("Error sending notification:", error);
+            }
+        };
+
+        const handleChangeStatus = async (record, action) => {
+            try {
+                loading.value = true;
+                const old_status = record.status;
+                const response = await axiosInstance.post(`/api/document-templates/${record.id}/change-status`, {
+                    status: action,
+                });
+
+                if (response.status === 200) {
+                    if (old_status === 'pending') {
+                        await sendNotification({
+                            notification_category_id: 1, 
+                            from_user_id: authStore.user.id,
+                            receiver_id: record.creator.id,
+                            title: `Mẫu văn bản "${record.name}" của bạn đã được chấp thuận`,
+                            content: `Mẫu văn bản "${record.name}" đã được chấp thuận và có thể sử dụng.`,
+                        });
+                        message.success(`Mẫu văn bản "${record.name}" đã được chấp thuận để sử dụng.`);
+                    } else if (action === 'active') {
+                        message.success(`Mẫu văn bản "${record.name}" đã có thể kích hoạt.`);
+                    } else if (action === 'inactive') {
+                        message.success(`Mẫu văn bản "${record.name}" đã tạm ngừng sử dụng.`);
+                    }
+                    // Cập nhật lại trạng thái mẫu văn bản trong danh sách
+                    const index = document_templates.value.findIndex(item => item.id === record.id);
+                    if (index !== -1) {
+                        document_templates.value[index].status = action;
+                    }
+                } else {
+                    message.error('Đã xảy ra lỗi khi thay đổi trạng thái mẫu văn bản.');
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+                message.error('Không thể thay đổi trạng thái mẫu văn bản. Vui lòng thử lại sau.');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const showConfirmActive = (record) => {
+            // Hiển thị modal xác nhận kích hoạt mẫu văn bản
+            console.log("Showing confirm active for:", record);
+            handleChangeStatus(record, 'active');
+        };
+
+        const showConfirmInactive = (record) => {
+            // Hiển thị modal xác nhận tạm ngừng mẫu văn bản
+            console.log("Showing confirm inactive for:", record);
+            handleChangeStatus(record, 'inactive');
         };
 
         const detailModalVisible = ref(false);
@@ -862,6 +906,8 @@ export default defineComponent({
             handlePreview,
             handleFileChange,
             handleAddTemplate,
+            showConfirmActive,
+            showConfirmInactive,
             customRow,
 
             detailModalVisible,

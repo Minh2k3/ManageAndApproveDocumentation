@@ -15,45 +15,45 @@
             <a-tab-pane key="1" tab="Chữ ký người dùng">
                 <div class="row mt-2">
                     <div class="col">
-                        <div class="border border-1 border-dark rounded-2 bg-light p-2">
+                        <div class="border border-1 border-primary rounded-2 bg-light p-3">
                             <div class="row">
-                                <span>Tổng số chữ ký</span>
+                                <span class="text-primary">Tổng số chữ ký</span>
                             </div>
                             <div class="row">
-                                <span class="fw-bold fs-4">{{ totalUserSignatures }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col">
-                        <div class="border border-1 border-dark rounded-2 bg-light p-2">
-                            <div class="row">
-                                <span>Đang xin cấp</span>
-                            </div>
-                            <div class="row">
-                                <span class="fw-bold fs-4">{{ renewalCount }}</span>
+                                <span class="fw-bold fs-4 text-primary">{{ totalUserSignatures }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="col">
-                        <div class="border border-1 border-dark rounded-2 bg-light p-2">
+                        <div class="border border-1 border-warning rounded-2 bg-light p-3">
                             <div class="row">
-                                <span>Bị thu hồi</span>
+                                <span class="text-warning">Đang xin cấp</span>
                             </div>
                             <div class="row">
-                                <span class="fw-bold fs-4">{{ revokedCount }}</span>
+                                <span class="fw-bold fs-4 text-warning">{{ renewalCount }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="col">
-                        <div class="border border-1 border-dark rounded-2 bg-light p-2">
+                        <div class="border border-1 border-danger rounded-2 bg-light p-3">
                             <div class="row">
-                                <span>Hết hạn</span>
+                                <span class="text-danger">Bị thu hồi</span>
                             </div>
                             <div class="row">
-                                <span class="fw-bold fs-4">{{ expiredCount }}</span>
+                                <span class="fw-bold fs-4 text-danger">{{ revokedCount }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="border border-1 border-dark rounded-2 bg-light p-3">
+                            <div class="row">
+                                <span class="text-dark">Hết hạn</span>
+                            </div>
+                            <div class="row">
+                                <span class="fw-bold fs-4 text-dark">{{ expiredCount }}</span>
                             </div>
                         </div>
                     </div>
@@ -108,60 +108,93 @@
 
                         <!-- Bảng danh sách -->
                         <a-table
-                        :columns="columns"
-                        :data-source="filteredData"
-                        :pagination="pagination"
-                        :loading="loading"
-                        :scroll="{ x: 1200 }"
-                        row-key="id"
-                        @change="handleTableChange"
-                        >
-                        <!-- Cột người dùng -->
-                        <template #user="{ record }">
-                            <div class="user-info">
-                            <a-avatar :size="40" class="mr-3">
-                                {{ record.user.name.charAt(0) }}
-                            </a-avatar>
-                            <div>
-                                <div class="font-weight-bold">{{ record.user.name }}</div>
-                                <div class="text-muted small">{{ record.user.email }}</div>
-                                <div class="text-muted small">{{ record.user.department }}</div>
-                            </div>
-                            </div>
-                        </template>
-
-                        <!-- Cột chữ ký -->
-                        <template #signature="{ record }">
-                            <div class="signature-info">
-                            <div class="font-weight-bold text-primary">{{ record.signature.name }}</div>
-                            <div class="text-muted small">
-                                Public Key: {{ record.signature.publicKey.substring(0, 20) }}...
-                            </div>
-                            </div>
-                        </template>
-
-                        <!-- Cột trạng thái -->
-                        <template #status="{ record }">
-                            <span :class="getStatusClass(record.status)">
-                            {{ getStatusText(record.status) }}
-                            </span>
-                        </template>
-
-                        <!-- Cột thao tác -->
-                        <template #action="{ record }">
-                            <a-dropdown :trigger="['click']" placement="bottomRight">
-                            <a-button type="text" @click="e => e.preventDefault()">
-                                ⋮
-                            </a-button>
-                            <template #overlay>
-                                <a-menu @click="handleMenuClick($event, record)">
-                                <a-menu-item key="view">👁️ Xem chi tiết</a-menu-item>
-                                <a-menu-item key="edit">✏️ Chỉnh sửa</a-menu-item>
-                                <a-menu-item key="delete" class="text-danger">🗑️ Xóa</a-menu-item>
-                                </a-menu>
+                            :columns="columns"
+                            :data-source="filteredData"
+                            :pagination="pagination"
+                            :loading="loading"
+                            :scroll="{ x: 1200 }"
+                            row-key="id"
+                            @change="handleTableChange"
+                            >
+                            <!-- Cột người dùng -->
+                            <template #user="{ record }">
+                                <div class="user-info">
+                                <a-avatar :size="40" class="mr-3">
+                                    {{ record.user.name.charAt(0) }}
+                                </a-avatar>
+                                <div>
+                                    <div class="font-weight-bold">{{ record.user.name }}</div>
+                                    <div class="text-muted small">{{ record.user.email }}</div>
+                                    <div class="text-muted small">{{ record.user.department }}</div>
+                                </div>
+                                </div>
                             </template>
-                            </a-dropdown>
-                        </template>
+
+                            <!-- Cột chữ ký -->
+                            <template #signature="{ record }">
+                                <div class="signature-info">
+                                <div class="font-weight-bold text-primary">{{ record.signature.name }}</div>
+                                <div class="text-muted small">
+                                    Public Key: {{ record.signature.publicKey.substring(0, 20) }}...
+                                </div>
+                                </div>
+                            </template>
+
+                            <!-- Cột trạng thái -->
+                            <template #status="{ record }">
+                                <a-tag v-if="record.status === 'active'" color="green">
+                                    <span>
+                                        Đang sử dụng
+                                    </span>
+                                </a-tag>
+
+                                <a-tag v-else-if="record.status === 'renewal'" color="orange">
+                                    <span>
+                                        Xin cấp lại
+                                    </span>
+                                </a-tag>
+
+                                <a-tag v-else-if="record.status === 'revoked'" color="red">
+                                    <span>
+                                        Bị thu hồi
+                                    </span>
+                                </a-tag>
+
+                                <a-tag v-else-if="record.status === 'expired'" color="gray">
+                                    <span>
+                                        Hết hạn
+                                    </span>
+                                </a-tag>
+                            </template>
+
+                            <!-- Cột thao tác -->
+                            <template #action="{ record }">
+                                <a-space class="d-flex justify-content-center gap-3">
+                                    <a-tooltip>
+                                        <template #title>
+                                            <span class="">Xem chi tiết</span>
+                                        </template>
+                                        <a-button 
+                                            @click="viewDetail(record, index)"
+                                            class="bg-primary text-white"
+                                            >
+                                            <i class="bi bi-eye"></i>
+                                        </a-button>
+                                    </a-tooltip>
+
+                                    <a-popconfirm v-if="record.status === 'active'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="handleConfirmRevoke(record)">
+                                        <template #title>
+                                            <span class="">Bạn có chắc chắn thu hồi chữ ký này?</span>
+                                        </template>
+                                        <a-button
+                                            class="bg-danger text-white"
+                                            @click.stop
+                                        >
+                                            <i class="bi bi-dash-circle"></i>
+                                        </a-button>
+                                    </a-popconfirm>
+                                </a-space>
+                            </template>
                         </a-table>
                     </div>
                 </div>
@@ -575,6 +608,7 @@
 <script>
 import { useMenu } from '@/stores/use-menu.js';
 import { MoreOutlined } from '@ant-design/icons-vue'
+import { fi } from 'date-fns/locale';
 import { 
     ref, 
     defineComponent, 
@@ -776,25 +810,29 @@ export default defineComponent({
             title: 'Người dùng',
             dataIndex: 'user',
             key: 'user',
-            width: 280,
+            width: 180,
             slots: { customRender: 'user' },
+            customHeaderCell: () => {
+                return { style: { textAlign: 'center' } };
+            },
             responsive: ['xs', 'sm', 'md', 'lg', 'xl']
         },
-        {
-            title: 'Chữ ký',
-            dataIndex: 'signature',
-            key: 'signature',
-            width: 200,
-            slots: { customRender: 'signature' },
-            responsive: ['md', 'lg', 'xl']
-        },
+        // {
+        //     title: 'Chữ ký',
+        //     dataIndex: 'signature',
+        //     key: 'signature',
+        //     width: 200,
+        //     slots: { customRender: 'signature' },
+        //     responsive: ['md', 'lg', 'xl']
+        // },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
             width: 140,
             slots: { customRender: 'status' },
-            responsive: ['xs', 'sm', 'md', 'lg', 'xl']
+            responsive: ['xs', 'sm', 'md', 'lg', 'xl'],
+            align: 'center'
         },
         {
             title: 'Sử dụng',
@@ -802,7 +840,8 @@ export default defineComponent({
             key: 'usageCount',
             width: 100,
             customRender: ({ text }) => `${text} lần`,
-            responsive: ['lg', 'xl']
+            responsive: ['lg', 'xl'],
+            align: 'center'
         },
         {
             title: 'Ngày tạo',
@@ -810,14 +849,25 @@ export default defineComponent({
             key: 'createdAt',
             width: 120,
             customRender: ({ text }) => formatDate(text),
-            responsive: ['xl']
+            responsive: ['xl'],
+            align: 'center'
+        },
+        {
+            title: 'Ngày hết hạn',
+            dataIndex: 'expires_at',
+            key: 'expires_at',
+            width: 150,
+            responsive: ['md', 'lg', 'xl'],
+            align: 'center',
         },
         {
             title: 'Thao tác',
             key: 'action',
-            width: 80,
+            width: 150,
+            responsive: ['xs', 'sm', 'md', 'lg', 'xl'],
             slots: { customRender: 'action' },
-            responsive: ['xs', 'sm', 'md', 'lg', 'xl']
+            align: 'center',
+            fixed: 'right',
         }
         ]
 

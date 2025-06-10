@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Pusher\Pusher;
+
 class NotificationController extends Controller
 {
     /**
@@ -131,5 +135,94 @@ class NotificationController extends Controller
         return response()->json([
             'message' => 'All notifications marked as read',
         ]);
+    }
+
+    public function sendNotificationToAllAdmins(Request $request)
+    {
+        $options = [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true
+            ];
+        $pusher = new \Pusher\Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
+
+        try {
+            $admins = User::where('role_id', 1)->get(); // Assuming role_id 1 is for admins
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'notification_category_id' => $request->notification_category_id,
+                    'from_user_id' => $request->from_user_id,
+                    'receiver_id' => $admin->id,
+                    'title' => $request->title,
+                    'content' => $request->content,
+                    'data' => $request->data ? json_encode($request->data) : null,
+                    'is_read' => false,
+                    'created_at' => now(),
+                ]);
+
+                $data['notification'] = $notification;
+                $pusher->trigger('user.' . $admin->id, 'new-notification', $data);
+            }
+
+            return response()->json([
+                'message' => 'Notification sent to all admins successfully',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error sending notification: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function sendNotificationToAllUsers(Request $request)
+    {
+        $options = [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true
+        ];
+
+        $pusher = new \Pusher\Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
+
+        $data = [
+            'title' => $request->title,
+            'content' => $request->content,
+            'data' => $request->data ? json_encode($request->data) : null,
+        ];
+
+        try {
+            $users = User::all(); // Fetch all users
+
+            foreach ($users as $user) {
+                Notification::create([
+                    'notification_category_id' => $request->notification_category_id,
+                    'from_user_id' => $request->from_user_id,
+                    'receiver_id' => $user->id,
+                    'title' => $request->title,
+                    'content' => $request->content,
+                    'data' => $request->data ? json_encode($request->data) : null,
+                    'is_read' => false,
+                    'created_at' => now(),
+                ]);
+
+                $pusher->trigger('user.' . $user->id, 'new-notification', $data);
+            }
+
+            return response()->json([
+                'message' => 'Notification sent to all users successfully',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error sending notification: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
