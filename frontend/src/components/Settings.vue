@@ -238,7 +238,8 @@
                     </div>
                 </a-card>
             </a-tab-pane>
-            <a-tab-pane key="notification" tab="Thông báo" force-render>
+            
+            <a-tab-pane v-if="false" key="notification" tab="Thông báo" force-render>
                 <a-card class="mt-2">
                     <h3 class="fw-bold">Tùy</h3>
                     <span class="text-secondary">Cập nhật thông tin cá nhân của bạn</span>

@@ -23,7 +23,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuth();
     if (!authStore.isAuthenticated) {
-        await authStore.fetchUser();
+        await authStore.initAuth();
     }
 
     if (!authStore.isAuthenticated) {

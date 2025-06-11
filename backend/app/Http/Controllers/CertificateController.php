@@ -12,6 +12,7 @@ use App\Models\DocumentPermission;
 use phpseclib3\Crypt\RSA;
 use phpseclib3\File\X509;
 use Carbon\Carbon;
+use App\Http\Resources\CertificateResource;
 
 class CertificateController extends Controller
 {
@@ -258,6 +259,61 @@ class CertificateController extends Controller
             'document_id' => $documentId,
             'signatures' => $results,
             'verified_at' => Carbon::now()->toDateTimeString(),
+        ]);
+    }
+
+    public function getAllCertificates(Request $request)
+    {
+        $certificates = Certificate::with([
+            'user.role', // Load role để biết user thuộc loại nào
+            'user.creator.rollAtDepartment', // Load rollAtDepartment cho creator
+            'user.creator.department', // Load department cho creator
+            'user.approver.rollAtDepartment', // Load rollAtDepartment cho approver
+            'user.approver.department', // Load department cho approver
+        ])
+        ->select(
+            'id',
+            'user_id',
+            'public_key',
+            'private_key',
+            'certificate',
+            'issued_at',
+            'expires_at',
+            'status',
+            'required_renewal',
+            'used_count',
+            'created_at',
+            'updated_at'
+        )
+        ->orderBy('updated_at', 'desc')
+        ->get();
+
+        return response()->json([
+            'certificates' => CertificateResource::collection($certificates),
+        ])->setStatusCode(200, 'Certificates retrieved successfully.');
+    }
+
+    public function getCertificateById($certificateId)
+    {
+        $certificate = Certificate::with([
+            'user.role',
+            'user.creator.rollAtDepartment',
+            'user.creator.department',
+            'user.approver.rollAtDepartment',
+            'user.approver.department',
+        ])
+        ->findOrFail($certificateId);
+
+        return response()->json([
+            'certificate' => new CertificateResource($certificate),
+        ])->setStatusCode(200, 'Certificate retrieved successfully.');
+    }
+
+    public function getCertificate($certificateId)
+    {
+        $certificate = Certificate::findOrFail($certificateId);
+        return response()->json([
+            'certificate' => $certificate,
         ]);
     }
 }

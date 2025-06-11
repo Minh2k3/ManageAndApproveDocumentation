@@ -70,7 +70,7 @@
         <template v-else-if="column.key === 'process'">
             <a-badge 
                 :count="record.process || 0" 
-                :number-style="{ backgroundColor: '#52c41a' }" 
+                :number-style="{ backgroundColor: '#0099bf' }" 
                 show-zero
             />
         </template>

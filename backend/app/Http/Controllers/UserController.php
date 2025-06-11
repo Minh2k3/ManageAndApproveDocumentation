@@ -53,6 +53,8 @@ class UserController extends Controller
                 'users.avatar as avatar',
                 'users.phone as phone',
                 'users.sex as sex',
+                'departments.name as department_name',
+                'departments.id as department_id',
             )
             ->orderBy('users.updated_at', 'desc')
             ->get();
@@ -72,6 +74,8 @@ class UserController extends Controller
                 'users.avatar as avatar',
                 'users.phone as phone',
                 'users.sex as sex',
+                'departments.name as department_name',
+                'departments.id as department_id',
             )
             ->orderBy('users.updated_at', 'desc')
             ->get();

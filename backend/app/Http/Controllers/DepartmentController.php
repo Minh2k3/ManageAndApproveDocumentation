@@ -16,12 +16,23 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = \DB::table('departments')
-            ->select(
-                'id as value',
-                'name as label',
-            )
-            ->get();
+        $departments = Department::all()->map(function ($department) {
+            return [
+                'value' => $department->id,
+                'id' => $department->id,
+                'label' => $department->name,
+                'name' => $department->name,
+                'description' => $department->description,
+                'group' => $department->group,
+                'status' => $department->status,
+                'avatar_path' => $department->avatar,
+                'phone' => $department->phone_number,
+                'position' => $department->position,
+                'number_of_users' => $department->number_of_users, // Gọi accessor
+                'created_at' => $department->created_at,
+                'updated_at' => $department->updated_at,
+            ];
+        });
 
         return response()->json([
             'departments' => $departments,

@@ -22,7 +22,7 @@
                     <!-- Toggle Button attached to menu -->
                     <button 
                         @click="toggleMenu"
-                        class="menu-toggle-btn ms-3 mt-3 d-none d-lg-block"
+                        class="menu-toggle-btn mt-3 d-none d-lg-block"
                         type="button"
                         :title="isMenuVisible ? 'Ẩn menu' : 'Hiện menu'"
                     >

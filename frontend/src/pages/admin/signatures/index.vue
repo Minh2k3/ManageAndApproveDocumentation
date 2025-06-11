@@ -120,7 +120,7 @@
                             <template #user="{ record }">
                                 <div class="user-info">
                                 <a-avatar :size="40" class="mr-3">
-                                    {{ record.user.name.charAt(0) }}
+                                    {{ getCharOfName(record.user.name) }}
                                 </a-avatar>
                                 <div>
                                     <div class="font-weight-bold">{{ record.user.name }}</div>
@@ -198,7 +198,7 @@
                         </a-table>
                     </div>
                 </div>
-                    <a-modal
+                    <!-- <a-modal
                         v-model:open="showGenerateSignatureUserModal"
                         title="Tạo chữ ký người dùng mới"
                         :width="600"
@@ -245,7 +245,7 @@
                                 <option value="4096">4096 bit (Khuyến nghị)</option>
                             </select>
                         </div>
-                    </a-modal>
+                    </a-modal> -->
             </a-tab-pane>
 
             <a-tab-pane key="2" tab="Chứng chỉ tổ chức" force-render>
@@ -602,23 +602,309 @@
             </div>
         </a-modal>
 
+        <!-- Modal cấp chữ ký cho người dùng -->
+        <a-modal
+            v-model:open="showGenerateSignatureUserModal"
+            title="Cấp chữ ký cho người dùng"
+            :width="800"
+            @ok="generateNewUserSignature"
+            ok-text="Cấp chữ ký"
+            cancel-text="Hủy"
+            :confirm-loading="isGenerating"
+            :z-index="3103"
+        >
+            <div class="signature-grant-form">
+                <!-- Lựa chọn loại cấp chữ ký -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Chọn loại cấp chữ ký:</label>
+                    <a-radio-group v-model:value="grantType" class="d-block mt-2">
+                        <a-radio value="user" class="d-block mb-2">
+                            <span class="ms-2">Cấp cho người dùng cụ thể (theo ID)</span>
+                        </a-radio>
+                        <a-radio value="department" class="d-block mb-2">
+                            <span class="ms-2">Cấp cho tổ chức/khoa</span>
+                        </a-radio>
+                        <a-radio value="all" class="d-block">
+                            <span class="ms-2">Cấp cho tất cả người dùng</span>
+                        </a-radio>
+                    </a-radio-group>
+                </div>
+
+                <!-- Form cấp cho người dùng cụ thể -->
+                <div v-if="grantType === 'user'" class="user-specific-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tìm kiếm người dùng:</label>
+                                <a-select
+                                    v-model:value="selectedUserId"
+                                    show-search
+                                    placeholder="Nhập tên hoặc email để tìm kiếm"
+                                    :filter-option="false"
+                                    :loading="userSearchLoading"
+                                    @search="handleUserSearch"
+                                    @change="handleUserSelect"
+                                    style="width: 100%"
+                                    :dropdown-style="{ 
+                                        position: 'absolute',
+                                        zIndex: 10000,
+                                        background: 'white',
+                                        border: '1px solid #ccc'
+                                    }"
+                                >
+                                    <a-select-option 
+                                        v-for="user in searchedUsers" 
+                                        :key="user.id" 
+                                        :value="user.id"
+                                    >
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <div class="">{{ user.name }}</div>
+                                            </div>
+                                        </div>
+                                    </a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Hoặc nhập User ID:</label>
+                                <a-input 
+                                    v-model:value="manualUserId" 
+                                    placeholder="Nhập ID người dùng"
+                                    @change="handleManualUserIdChange"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hiển thị thông tin người dùng đã chọn -->
+                    <div v-if="selectedUserInfo" class="selected-user-info">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <a-avatar :size="40" class="me-3">
+                                    {{ getCharOfName(selectedUserInfo.name) }}
+                                </a-avatar>
+                                <div>
+                                    <div class="fw-bold">{{ selectedUserInfo.name }} ({{ selectedUserInfo.roll }})</div>
+                                    <div class="text-muted">{{ selectedUserInfo.email }}</div>
+                                    <div class="text-muted small">{{ selectedUserInfo.department }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form cấp cho tổ chức -->
+                <div v-if="grantType === 'department'" class="department-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Chọn tổ chức/khoa:</label>
+                                <a-select
+                                    v-model:value="selectedDepartment"
+                                    placeholder="Chọn tổ chức"
+                                    style="width: 100%"
+                                    @change="handleDepartmentSelect"
+                                    :dropdown-style="{ 
+                                        position: 'absolute',
+                                        zIndex: 10000,
+                                        background: 'white',
+                                        border: '1px solid #ccc'
+                                    }"                                    
+                                >
+                                    <a-select-option 
+                                        v-for="dept in departments" 
+                                        :key="dept.id" 
+                                        :value="dept.id"
+                                    >
+                                        {{ dept.name }}
+                                    </a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng người dùng:</label>
+                                <a-input 
+                                    :value="departmentUserCount" 
+                                    disabled
+                                    class="text-center fw-bold"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hiển thị danh sách người dùng trong tổ chức -->
+                    <div v-if="departmentUsers.length > 0" class="department-users">
+                        <label class="form-label">Danh sách người dùng sẽ được cấp chữ ký:</label>
+                        <div class="user-preview-list">
+                            <div 
+                                v-for="user in departmentUsers.slice(0, 5)" 
+                                :key="user.id"
+                                class="user-preview-item"
+                            >
+                                <a-avatar :size="24" class="me-2">{{ getCharOfName(user.name) }}</a-avatar>
+                                <span>{{ user.name }} - {{ user.email }}</span>
+                            </div>
+                            <div v-if="departmentUsers.length > 5" class="text-muted small">
+                                ... và {{ departmentUsers.length - 5 }} người dùng khác
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form cấp cho tất cả -->
+                <div v-if="grantType === 'all'" class="all-users-form">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Cảnh báo</h6>
+                        <p class="mb-2">Bạn đang chọn cấp chữ ký cho <strong>TẤT CẢ</strong> người dùng trong hệ thống.</p>
+                        <p class="mb-0">Thao tác này sẽ tạo chữ ký cho <strong>{{ totalUsersInSystem }}</strong> người dùng.</p>
+                    </div>
+                    
+                    <div class="confirmation-section">
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                id="confirmGrantAll"
+                                v-model="confirmGrantAll"
+                            >
+                            <label class="form-check-label fw-bold text-danger" for="confirmGrantAll">
+                                Tôi xác nhận muốn cấp chữ ký cho tất cả người dùng
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cấu hình chữ ký -->
+                <!-- <div class="signature-config mt-4">
+                    <h6 class="fw-bold">Cấu hình chữ ký:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Thuật toán mã hóa:</label>
+                                <a-select v-model:value="signatureConfig.algorithm" style="width: 100%">
+                                    <a-select-option value="RSA-2048">RSA 2048 bit</a-select-option>
+                                    <a-select-option value="RSA-4096">RSA 4096 bit (Khuyến nghị)</a-select-option>
+                                    <a-select-option value="ECDSA-P256">ECDSA P-256</a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Thời hạn hiệu lực:</label>
+                                <a-select v-model:value="signatureConfig.validityPeriod" style="width: 100%">
+                                    <a-select-option value="1">1 năm</a-select-option>
+                                    <a-select-option value="2">2 năm</a-select-option>
+                                    <a-select-option value="3">3 năm (Khuyến nghị)</a-select-option>
+                                    <a-select-option value="5">5 năm</a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Loại chữ ký:</label>
+                                <a-select v-model:value="signatureConfig.signatureType" style="width: 100%">
+                                    <a-select-option value="document">Ký văn bản</a-select-option>
+                                    <a-select-option value="email">Ký email</a-select-option>
+                                    <a-select-option value="universal">Đa năng</a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Mức độ bảo mật:</label>
+                                <a-select v-model:value="signatureConfig.securityLevel" style="width: 100%">
+                                    <a-select-option value="standard">Tiêu chuẩn</a-select-option>
+                                    <a-select-option value="high">Cao</a-select-option>
+                                    <a-select-option value="enterprise">Doanh nghiệp</a-select-option>
+                                </a-select>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Tùy chọn thông báo
+                <div class="notification-options mt-3">
+                    <h6 class="fw-bold">Tùy chọn thông báo:</h6>
+                    <div class="form-check">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            id="emailNotification"
+                            v-model="notificationOptions.email"
+                        >
+                        <label class="form-check-label" for="emailNotification">
+                            Gửi email thông báo cho người dùng
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            id="smsNotification"
+                            v-model="notificationOptions.sms"
+                        >
+                        <label class="form-check-label" for="smsNotification">
+                            Gửi SMS thông báo (nếu có số điện thoại)
+                        </label>
+                    </div>
+                </div> -->
+
+                <!-- Tóm tắt -->
+                <!-- <div class="summary-section mt-4">
+                    <div class="alert alert-light border">
+                        <h6 class="fw-bold mb-3">Tóm tắt:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="summary-item">
+                                    <span class="text-muted">Loại cấp:</span>
+                                    <span class="fw-bold ms-2">{{ getGrantTypeText() }}</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="text-muted">Số lượng:</span>
+                                    <span class="fw-bold ms-2 text-primary">{{ getTargetUserCount() }} người dùng</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="summary-item">
+                                    <span class="text-muted">Thuật toán:</span>
+                                    <span class="fw-bold ms-2">{{ signatureConfig.algorithm }}</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="text-muted">Thời hạn:</span>
+                                    <span class="fw-bold ms-2">{{ signatureConfig.validityPeriod }} năm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </a-modal>
+
     </div>
 </template>
 
 <script>
 import { useMenu } from '@/stores/use-menu.js';
 import { MoreOutlined } from '@ant-design/icons-vue'
-import { fi } from 'date-fns/locale';
+import { useCertificateStore } from '@/stores/admin/certificate-store';
+import { useAuth } from '@/stores/use-auth.js';
+import {useDepartmentStore} from '@/stores/admin/department-store.js';
+import { useUserStore } from '@/stores/admin/user-store';
+import { message } from 'ant-design-vue';
+
 import { 
     ref, 
     defineComponent, 
     computed, 
-    reactive, 
     watch, 
     onMounted, 
     onUnmounted,
-    createVNode,
-    h 
 } from 'vue';
 
 export default defineComponent({
@@ -627,6 +913,10 @@ export default defineComponent({
     },
     setup() {
         useMenu().onSelectedKeys(["admin-signatures"]);
+        const authStore = useAuth();
+        const certificateStore = useCertificateStore();
+        const departmentStore = useDepartmentStore();
+        const userStore = useUserStore();
         
         const activeKey = ref("1");
 
@@ -637,106 +927,161 @@ export default defineComponent({
         const typeFilter = ref(undefined)
 
         const showGenerateSignatureUserModal = ref(false)
-
-        const generateNewUserSignature = () => {
-            // Logic to generate new user signature
-            console.log("Generating new user signature...");
-            showGenerateSignatureUserModal.value = false;
-        }
         
-        // Mock data cho user signatures
-        const originalData = ref([
-        {
-            id: 1,
-            user: {
-            name: 'Nguyễn Văn An',
-            email: 'an.nguyen@tlu.edu.vn',
-            department: 'Khoa Công nghệ thông tin'
-            },
-            type: 'document',
-            signature: {
-            name: 'Nguyễn Văn An',
-            publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7QjK...',
-            privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w...'
-            },
-            status: 'active',
-            usageCount: 15,
-            createdAt: '2024-01-15',
-            lastUsed: '2024-01-20'
-        },
-        {
-            id: 2,
-            user: {
-            name: 'Trần Thị Bình',
-            email: 'binh.tran@tlu.edu.vn',
-            department: 'Khoa Kinh tế'
-            },
-            type: 'personal',
-            signature: {
-            name: 'Trần Thị Bình',
-            publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8RmL...',
-            privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w...'
-            },
-            status: 'renewal',
-            usageCount: 0,
-            createdAt: '2024-01-18',
-            lastUsed: null
-        },
-        {
-            id: 3,
-            user: {
-            name: 'Lê Minh Châu',
-            email: 'chau.le@tlu.edu.vn',
-            department: 'Khoa Xây dựng'
-            },
-            type: 'digital',
-            signature: {
-            name: 'Lê Minh Châu',
-            publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9TnP...',
-            privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w...'
-            },
-            status: 'renewal',
-            usageCount: 3,
-            createdAt: '2024-01-10',
-            lastUsed: '2024-01-15'
-        },
-        {
-            id: 4,
-            user: {
-            name: 'Phạm Hoàng Dũng',
-            email: 'dung.pham@tlu.edu.vn',
-            department: 'Khoa Môi trường'
-            },
-            type: 'document',
-            signature: {
-            name: 'Phạm Hoàng Dũng',
-            publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6KlM...',
-            privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w...'
-            },
-            status: 'revoked',
-            usageCount: 8,
-            createdAt: '2024-01-05',
-            lastUsed: '2024-01-12'
-        },
-        {
-            id: 5,
-            user: {
-            name: 'Võ Thị Hoa',
-            email: 'hoa.vo@tlu.edu.vn',
-            department: 'Khoa Ngoại ngữ'
-            },
-            type: 'personal',
-            signature: {
-            name: 'Võ Thị Hoa',
-            publicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5NmQ...',
-            privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w...'
-            },
-            status: 'renewal',
-            usageCount: 12,
-            createdAt: '2024-01-01',
-            lastUsed: '2024-01-18'
+        // Chữ ký người dùng
+        const originalData = ref([]);
+        const departments = ref([]);
+        const allUsers = ref([]);
+        onMounted(async() => {
+            await certificateStore.fetchCertificates();
+            originalData.value = certificateStore.certificates;
+            console.log("Đã fetch xong");
+
+            await departmentStore.fetchDepartments();
+            departments.value = departmentStore.departments.filter(dept => dept.group !== 'Khác');
+            console.log("Đã fetch xong departments: ", departments.value);
+
+            await userStore.fetchUsers();
+            allUsers.value = userStore.users;
+            console.log("Đã fetch xong users: ", allUsers.value);
+        });
+
+        const grantType = ref('user'); // 'user', 'department', 'all'
+        const selectedUserId = ref(null);
+        const manualUserId = ref('');
+        const selectedUserInfo = ref(null);
+        const selectedDepartment = ref(null);
+        const departmentUserCount = ref(0);
+        const departmentUsers = ref([]);
+        const confirmGrantAll = ref(false);
+        const totalUsersInSystem = computed(() => allUsers.value.length);
+        const isGenerating = ref(false);
+
+        // Search states
+        const userSearchLoading = ref(false);
+        const searchedUsers = ref([]);
+
+        // Functions to Modal Issue User Certificate
+        const handleUserSearch = (searchValue) => {
+            if (!searchValue) {
+                searchedUsers.value = []
+                return
+            }
+            
+            userSearchLoading.value = true
+            
+            // Simulate API call
+            setTimeout(() => {
+                searchedUsers.value = allUsers.value.filter(user => 
+                    user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                    user.email.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                userSearchLoading.value = false
+            }, 300)
         }
-        ])
+
+        const handleUserSelect = (userId) => {
+            selectedUserInfo.value = allUsers.value.find(user => user.id === userId)
+            manualUserId.value = userId.toString()
+        }
+
+        const handleManualUserIdChange = () => {
+            if (manualUserId.value) {
+                const userId = parseInt(manualUserId.value)
+                selectedUserInfo.value = allUsers.value.find(user => user.id === userId)
+                selectedUserId.value = userId
+            } else {
+                selectedUserInfo.value = null
+                selectedUserId.value = null
+            }
+        }
+
+        const handleDepartmentSelect = () => {
+            departmentUsers.value = allUsers.value.filter(user => user.department_id === selectedDepartment.value);
+            console.log("Department users: ", departmentUsers);
+            departmentUserCount.value = departmentUsers.value.length;
+        }
+
+        const getGrantTypeText = () => {
+            const typeMap = {
+                user: 'Người dùng cụ thể',
+                department: 'Theo tổ chức',
+                all: 'Tất cả người dùng'
+            }
+            return typeMap[grantType.value]
+        }
+
+        const getTargetUserCount = () => {
+            if (grantType.value === 'user') {
+                return selectedUserInfo.value ? 1 : 0
+            } else if (grantType.value === 'department') {
+                return departmentUserCount.value
+            } else {
+                return totalUsersInSystem.value
+            }
+        }
+
+        // Cập nhật hàm generateNewUserSignature
+        const generateNewUserSignature = () => {
+            // Validation
+            if (grantType.value === 'user' && !selectedUserInfo.value) {
+                message.error('Vui lòng chọn người dùng');
+                return;
+            }
+            
+            if (grantType.value === 'department' && !selectedDepartment.value) {
+                message.error('Vui lòng chọn tổ chức');
+                return;
+            }
+            
+            if (grantType.value === 'all' && !confirmGrantAll.value) {
+                message.error('Vui lòng xác nhận cấp chữ ký cho tất cả người dùng');
+                return;
+            }
+            
+            isGenerating.value = true
+            
+            // TODO: Gọi API tương ứng với từng loại
+            const requestData = {
+                grantType: grantType.value,
+                targetUserId: grantType.value === 'user' ? selectedUserId.value : null,
+                targetDepartmentId: grantType.value === 'department' ? selectedDepartment.value : null,
+            }
+            
+            console.log('Request data:', requestData)
+            
+            // Simulate API call
+            setTimeout(() => {
+                isGenerating.value = false
+                showGenerateSignatureUserModal.value = false
+                
+                // Reset form
+                resetSignatureForm()
+                
+                // Show success message
+                // TODO: Replace with proper notification
+                alert(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng`)
+            }, 2000)
+        }
+
+        const resetSignatureForm = () => {
+            grantType.value = 'user'
+            selectedUserId.value = null
+            manualUserId.value = ''
+            selectedUserInfo.value = null
+            selectedDepartment.value = null
+            departmentUserCount.value = 0
+            departmentUsers.value = []
+            confirmGrantAll.value = false
+            searchedUsers.value = []
+        }
+
+        const getCharOfName = (name) => {
+            const parts = name.split(' ');
+            if (parts.length === 0) return '';
+            const lastPart = parts[parts.length - 1];
+            return lastPart.charAt(0).toUpperCase();
+        }
 
         // Root CA data
         const rootCALoading = ref(false)
@@ -1243,10 +1588,33 @@ export default defineComponent({
             expiredCount,
 
             // User signatures modals
+            // Signature grant form
+            allUsers,
+            grantType,
+            selectedUserId,
+            manualUserId,
+            selectedUserInfo,
+            selectedDepartment,
+            departmentUserCount,
+            departmentUsers,
+            confirmGrantAll,
+            totalUsersInSystem,
+            isGenerating,
+            userSearchLoading,
+            searchedUsers,
+            departments,
             showGenerateSignatureUserModal,
-
-            // User signatures methods
+            
+            // Methods
+            handleUserSearch,
+            handleUserSelect,
+            handleManualUserIdChange,
+            handleDepartmentSelect,
+            getGrantTypeText,
+            getTargetUserCount,
+            resetSignatureForm,
             generateNewUserSignature,
+            getCharOfName,
 
             // Root CA
             rootCALoading,
@@ -1406,6 +1774,74 @@ export default defineComponent({
 
 .ant-dropdown-menu-item:hover {
     background-color: #f5f5f5 !important;
+}
+
+.signature-grant-form {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.selected-user-info {
+    margin-top: 10px;
+}
+
+.user-preview-list {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 10px;
+    background-color: #fafafa;
+}
+
+.user-preview-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-preview-item:last-child {
+    border-bottom: none;
+}
+
+.summary-section {
+    border-top: 1px solid #e8e8e8;
+    padding-top: 20px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.confirmation-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #fff3cd;
+    border-radius: 6px;
+    border: 1px solid #ffeaa7;
+}
+
+.signature-config,
+.notification-options {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+
+/* Custom select dropdown styling */
+.ant-select-dropdown {
+    z-index: 9999 !important;
+}
+
+.ant-select-item-option-content {
+    height: auto !important;
+}
+
+/* Loading spinner */
+.ant-spin-container {
+    min-height: 40px;
 }
 
 @media (max-width: 768px) {

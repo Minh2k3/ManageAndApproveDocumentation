@@ -4,6 +4,7 @@ import router from './router/index.js'
 import axios from 'axios'
 import '@/lib/echo';
 import { useThemeStore } from '@/stores/use-theme.js';  
+import { useAuth } from '@/stores/use-auth.js';
 
 window.axios = axios;
 
@@ -108,4 +109,17 @@ const themeStore = useThemeStore();
 themeStore.applyTheme();
 themeStore.listenToSystemChange();
 
-app.mount('#app')
+const authStore = useAuth();
+authStore.setupAuthListener();
+
+authStore.initAuth().then(() => {
+    console.log('App initialized with auth state:', authStore.isLoggedIn);
+    
+    // Mount app sau khi auth đã được khởi tạo
+    app.mount('#app')
+}).catch((error) => {
+    console.error('Auth initialization failed:', error);
+    
+    // Vẫn mount app ngay cả khi auth init failed
+    app.mount('#app')
+})

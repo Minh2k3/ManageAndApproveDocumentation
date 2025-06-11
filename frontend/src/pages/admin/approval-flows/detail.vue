@@ -10,7 +10,7 @@ import { useAuth } from '@/stores/use-auth.js';
 export default defineComponent({
     name: 'ApprovalFlowsDetail',
     setup() {
-        useMenu().setCurrentMenu('admin-approval-flows-detail');
+        useMenu().onSelectedKeys(['admin-approval-flows-detail']);
     }
 });
 </script>

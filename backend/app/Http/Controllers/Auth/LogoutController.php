@@ -14,6 +14,10 @@ class LogoutController extends Controller
         $user = $request->user();
         
         if ($user) {
+            // Xoá token của người dùng
+            $user->remember_token = null; // Xoá remember token nếu có
+            $user->save();
+            // Xoá tất cả các token cá nhân
             $user->tokens()->delete();
             Auth::guard('web')->logout();
             $cookie = cookie('XSRF-TOKEN', '', -1);

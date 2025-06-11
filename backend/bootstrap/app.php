@@ -18,9 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->prependToGroup('global', [
+        $middleware->append([
             // \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\LogUserAccess::class,
+            \App\Http\Middleware\CheckRememberToken::class,
         ]);
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,

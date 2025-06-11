@@ -224,7 +224,7 @@ export default defineComponent({
             await axiosInstance.get("/sanctum/csrf-cookie");
 
             try {
-                const result = await authStore.login({ email: email.value, password: password.value });
+                const result = await authStore.login({ email: email.value, password: password.value, remember: rememberMe.value });
                 if (result.status === 'error') {
                     message.error(result.message);
                 }

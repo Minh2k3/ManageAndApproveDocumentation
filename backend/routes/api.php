@@ -30,6 +30,8 @@ use App\Http\Controllers\DocumentCommentController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserAccessLogController;
+use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CaCertificateController;
 use App\Http\Controllers\Api\PDFProxyController;
 
 // 
@@ -54,16 +56,15 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])
     ->name('verification.verify');
 
-// Route::get('user/{identifier}', [UserController::class, 'show'])
-//     ->middleware('auth:sanctum')
-//     ->name('user.show');
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return response()->json($request->user());
-});
+Route::middleware('auth:sanctum')->get('/user', [CustomAuthenticatedSessionController::class, 'user'])
+    ->name('user.user');
 
 Route::post('/login', [CustomAuthenticatedSessionController::class, 'store'])
     ->name('login');
+
+Route::post('/login-remember', [CustomAuthenticatedSessionController::class, 'loginWithRememberToken'])
+    ->name('login.loginWithRememberToken');
 
 Route::middleware('auth:sanctum')->post('/logout', [LogoutController::class, 'logout']);
 
@@ -75,7 +76,7 @@ RateLimiter::for('api', function (Request $request) {
 // User
 Route::get('/users', [UserController::class, 'getUsers'])
     // ->middleware('auth:sanctum')
-    ->name('users.index');
+    ->name('users.getUsers');
 
 Route::post('/users/active', [UserController::class, 'activeUser'])
     ->middleware('auth:sanctum')
@@ -287,3 +288,25 @@ Route::get('/download-document', function (Request $request) {
     
     return response()->download($fullPath);
 });
+
+// Certificate
+Route::get('/certificates', [CertificateController::class, 'getAllCertificates'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.getAllCertificates');
+
+Route::get('/certificates/{id}', [CertificateController::class, 'getCertificateById'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.getCertificateById');
+
+Route::post('/certificates/issue-certificate', [CertificateController::class, 'issueCertificate'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.issueCertificate');
+
+Route::post('/certificates/renew-certificate', [CertificateController::class, 'renewCertificate'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.renewCertificate');
+
+Route::post('/certificates/revoke-certificate', [CertificateController::class, 'revokeCertificate'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.revokeCertificate');
+
