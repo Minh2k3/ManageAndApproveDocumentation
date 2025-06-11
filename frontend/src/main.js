@@ -103,7 +103,6 @@ app.use(Tag)
 app.use(TimePicker)
 app.use(Tooltip)
 app.use(Upload)
-app.use(message)
 
 const themeStore = useThemeStore();
 themeStore.applyTheme();

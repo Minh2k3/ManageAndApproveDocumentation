@@ -116,85 +116,113 @@
                             row-key="id"
                             @change="handleTableChange"
                             >
-                            <!-- Cột người dùng -->
-                            <template #user="{ record }">
-                                <div class="user-info">
-                                <a-avatar :size="40" class="mr-3">
-                                    {{ getCharOfName(record.user.name) }}
-                                </a-avatar>
-                                <div>
-                                    <div class="font-weight-bold">{{ record.user.name }}</div>
-                                    <div class="text-muted small">{{ record.user.email }}</div>
-                                    <div class="text-muted small">{{ record.user.department }}</div>
-                                </div>
-                                </div>
+                            <template #headerCell="{ column }">
+                                <span class="text-uppercase">{{ column.title }}</span>
                             </template>
 
-                            <!-- Cột chữ ký -->
-                            <template #signature="{ record }">
-                                <div class="signature-info">
-                                <div class="font-weight-bold text-primary">{{ record.signature.name }}</div>
-                                <div class="text-muted small">
-                                    Public Key: {{ record.signature.publicKey.substring(0, 20) }}...
-                                </div>
-                                </div>
-                            </template>
+                            <template #bodyCell="{ column, index, record }">
+                                <template v-if="column.key === 'user'">
+                                    <div class="user-info">
+                                    <a-avatar :size="40" class="mr-3" :src="getAvatarUrl(record.user.avatar, record.user.id)">
+                                        <!-- {{ getCharOfName(record.user.name) }} -->
+                                    </a-avatar>
+                                    <div>
+                                        <div class="font-weight-bold">{{ record.user.name }}</div>
+                                        <div class="text-muted small">{{ record.user.email }}</div>
+                                        <div class="text-muted small">{{ record.user.department }}</div>
+                                    </div>
+                                    </div>
+                                </template>
 
-                            <!-- Cột trạng thái -->
-                            <template #status="{ record }">
-                                <a-tag v-if="record.status === 'active'" color="green">
-                                    <span>
-                                        Đang sử dụng
+                                <!-- Cột chữ ký -->
+                                <template v-if="column.key === 'signature'">
+                                    <div class="signature-info">
+                                    <div class="font-weight-bold text-primary">{{ record.signature.name }}</div>
+                                    <div class="text-muted small">
+                                        Public Key: {{ record.signature.publicKey.substring(0, 20) }}...
+                                    </div>
+                                    </div>
+                                </template>
+
+                                <!-- Cột trạng thái -->
+                                <template v-if="column.key === 'status'">
+                                    <a-tag v-if="record.status === 'active'" color="green">
+                                        <span>
+                                            Đang sử dụng
+                                        </span>
+                                    </a-tag>
+
+                                    <a-tag v-else-if="record.status === 'renewal'" color="orange">
+                                        <span>
+                                            Xin cấp lại
+                                        </span>
+                                    </a-tag>
+
+                                    <a-tag v-else-if="record.status === 'revoked'" color="red">
+                                        <span>
+                                            Bị thu hồi
+                                        </span>
+                                    </a-tag>
+
+                                    <a-tag v-else-if="record.status === 'expired'" color="gray">
+                                        <span>
+                                            Hết hạn
+                                        </span>
+                                    </a-tag>
+                                </template>
+
+                                <template v-if="column.key === 'used_count'">
+                                    <span class="text-primary">{{ record.used_count }}</span>
+                                    <span> lần</span>
+                                </template>
+
+
+                                <!-- Cột ngày cấp -->
+                                <template v-if="column.key === 'createdAt'">
+                                    <span class="">
+                                        {{ record.issued_at }} 
                                     </span>
-                                </a-tag>
+                                </template>
 
-                                <a-tag v-else-if="record.status === 'renewal'" color="orange">
-                                    <span>
-                                        Xin cấp lại
+                                <!-- Cột ngày hết hạn -->
+                                <template v-if="column.key === 'expires_at'">
+                                    <span class="">
+                                        {{ record.expires_at }}
                                     </span>
-                                </a-tag>
+                                </template>
 
-                                <a-tag v-else-if="record.status === 'revoked'" color="red">
-                                    <span>
-                                        Bị thu hồi
-                                    </span>
-                                </a-tag>
+                                <!-- Cột thao tác -->
+                                <template v-if="column.key === 'action'">
+                                    <a-space class="d-flex justify-content-center gap-3">
+                                        <a-tooltip>
+                                            <template #title>
+                                                <span class="">Xem chi tiết</span>
+                                            </template>
+                                            <a-button 
+                                                @click="viewDetail(record, index)"
+                                                class="bg-primary text-white"
+                                                >
+                                                <i class="bi bi-eye"></i>
+                                            </a-button>
+                                        </a-tooltip>
 
-                                <a-tag v-else-if="record.status === 'expired'" color="gray">
-                                    <span>
-                                        Hết hạn
-                                    </span>
-                                </a-tag>
-                            </template>
-
-                            <!-- Cột thao tác -->
-                            <template #action="{ record }">
-                                <a-space class="d-flex justify-content-center gap-3">
-                                    <a-tooltip>
-                                        <template #title>
-                                            <span class="">Xem chi tiết</span>
-                                        </template>
-                                        <a-button 
-                                            @click="viewDetail(record, index)"
-                                            class="bg-primary text-white"
+                                        <a-popconfirm v-if="record.status === 'active'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="handleConfirmRevoke(record)">
+                                            <template #title>
+                                                <span class="">Bạn có chắc chắn thu hồi chữ ký này?</span>
+                                            </template>
+                                            <a-button
+                                                class="bg-danger text-white"
+                                                @click.stop
                                             >
-                                            <i class="bi bi-eye"></i>
-                                        </a-button>
-                                    </a-tooltip>
+                                                <i class="bi bi-dash-circle"></i>
+                                            </a-button>
+                                        </a-popconfirm>
+                                    </a-space>
+                                </template>
 
-                                    <a-popconfirm v-if="record.status === 'active'" placement="topRight" ok-text="Yes" cancel-text="No" @confirm="handleConfirmRevoke(record)">
-                                        <template #title>
-                                            <span class="">Bạn có chắc chắn thu hồi chữ ký này?</span>
-                                        </template>
-                                        <a-button
-                                            class="bg-danger text-white"
-                                            @click.stop
-                                        >
-                                            <i class="bi bi-dash-circle"></i>
-                                        </a-button>
-                                    </a-popconfirm>
-                                </a-space>
                             </template>
+                        
+                            
                         </a-table>
                     </div>
                 </div>
@@ -897,7 +925,6 @@ import { useAuth } from '@/stores/use-auth.js';
 import {useDepartmentStore} from '@/stores/admin/department-store.js';
 import { useUserStore } from '@/stores/admin/user-store';
 import { message } from 'ant-design-vue';
-
 import { 
     ref, 
     defineComponent, 
@@ -1013,55 +1040,66 @@ export default defineComponent({
 
         const getTargetUserCount = () => {
             if (grantType.value === 'user') {
-                return selectedUserInfo.value ? 1 : 0
+                return selectedUserInfo.value ? 1 : 0;
             } else if (grantType.value === 'department') {
-                return departmentUserCount.value
+                return departmentUserCount.value;
             } else {
-                return totalUsersInSystem.value
+                return totalUsersInSystem.value;
             }
         }
 
         // Cập nhật hàm generateNewUserSignature
-        const generateNewUserSignature = () => {
+        const generateNewUserSignature = async () => {
             // Validation
             if (grantType.value === 'user' && !selectedUserInfo.value) {
-                message.error('Vui lòng chọn người dùng');
+                message.error('Vui lòng chọn người dùng', 2);
                 return;
             }
             
             if (grantType.value === 'department' && !selectedDepartment.value) {
-                message.error('Vui lòng chọn tổ chức');
+                message.error('Vui lòng chọn tổ chức', 2);
                 return;
             }
             
             if (grantType.value === 'all' && !confirmGrantAll.value) {
-                message.error('Vui lòng xác nhận cấp chữ ký cho tất cả người dùng');
+                message.error('Vui lòng xác nhận cấp chữ ký cho tất cả người dùng', 2);
                 return;
             }
             
             isGenerating.value = true
             
-            // TODO: Gọi API tương ứng với từng loại
-            const requestData = {
-                grantType: grantType.value,
-                targetUserId: grantType.value === 'user' ? selectedUserId.value : null,
-                targetDepartmentId: grantType.value === 'department' ? selectedDepartment.value : null,
+            // const requestData = {
+            //     grantType: grantType.value,
+            //     targetUserId: grantType.value === 'user' ? selectedUserId.value : null,
+            //     targetDepartmentId: grantType.value === 'department' ? selectedDepartment.value : null,
+            // }
+            
+            // console.log('Request data:', requestData);
+            try {
+                let response = null;
+                if (grantType.value === 'user') {
+                    console.log(`Cấp chữ ký cho người dùng: ${selectedUserInfo.value.name} (${selectedUserInfo.value.email})`);
+                    console.log(`User ID: ${selectedUserInfo.value.id}`);
+                    response = await certificateStore.issueCertificate(selectedUserInfo.value.id);
+                } else if (grantType.value === 'department') {
+                    console.log(`Cấp chữ ký cho tổ chức: ${selectedDepartment.value} với ${departmentUserCount.value} người dùng`);
+                } else {
+                    console.log(`Cấp chữ ký cho tất cả người dùng (${totalUsersInSystem.value})`);
+                }
+                console.log('Response:', response);
+                if (response.success === true) {
+                    isGenerating.value = false;
+                    showGenerateSignatureUserModal.value = false;
+                    message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng`)
+                    resetSignatureForm();
+                    await certificateStore.fetchCertificates();
+                }
+            } catch (error) {
+                message.error('Đã xảy ra lỗi khi cấp chữ ký. Vui lòng thử lại sau.');
+            } finally {
+                isGenerating.value = false
             }
             
-            console.log('Request data:', requestData)
-            
-            // Simulate API call
-            setTimeout(() => {
-                isGenerating.value = false
-                showGenerateSignatureUserModal.value = false
-                
-                // Reset form
-                resetSignatureForm()
-                
-                // Show success message
-                // TODO: Replace with proper notification
-                alert(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng`)
-            }, 2000)
         }
 
         const resetSignatureForm = () => {
@@ -1082,6 +1120,20 @@ export default defineComponent({
             const lastPart = parts[parts.length - 1];
             return lastPart.charAt(0).toUpperCase();
         }
+
+        const API_BASE_URL = 'http://localhost:8000';
+
+        const randomAvatar = (id) => {
+            if (id > 100 || id == null) {
+                return `https://avatar.iran.liara.run/public`;
+            }
+            return `https://avatar.iran.liara.run/public/${id}`;
+        };
+
+        const getAvatarUrl = (avatar, id) => {
+            if (!avatar) return randomAvatar(id);
+            return `${API_BASE_URL}/images/avatars/${avatar}`;
+        };        
 
         // Root CA data
         const rootCALoading = ref(false)
@@ -1156,35 +1208,24 @@ export default defineComponent({
             dataIndex: 'user',
             key: 'user',
             width: 180,
-            slots: { customRender: 'user' },
             customHeaderCell: () => {
                 return { style: { textAlign: 'center' } };
             },
             responsive: ['xs', 'sm', 'md', 'lg', 'xl']
         },
-        // {
-        //     title: 'Chữ ký',
-        //     dataIndex: 'signature',
-        //     key: 'signature',
-        //     width: 200,
-        //     slots: { customRender: 'signature' },
-        //     responsive: ['md', 'lg', 'xl']
-        // },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
             width: 140,
-            slots: { customRender: 'status' },
             responsive: ['xs', 'sm', 'md', 'lg', 'xl'],
             align: 'center'
         },
         {
             title: 'Sử dụng',
-            dataIndex: 'usageCount',
-            key: 'usageCount',
+            dataIndex: 'used_count',
+            key: 'used_count',
             width: 100,
-            customRender: ({ text }) => `${text} lần`,
             responsive: ['lg', 'xl'],
             align: 'center'
         },
@@ -1193,7 +1234,6 @@ export default defineComponent({
             dataIndex: 'createdAt',
             key: 'createdAt',
             width: 120,
-            customRender: ({ text }) => formatDate(text),
             responsive: ['xl'],
             align: 'center'
         },
@@ -1210,7 +1250,6 @@ export default defineComponent({
             key: 'action',
             width: 150,
             responsive: ['xs', 'sm', 'md', 'lg', 'xl'],
-            slots: { customRender: 'action' },
             align: 'center',
             fixed: 'right',
         }
@@ -1615,6 +1654,7 @@ export default defineComponent({
             resetSignatureForm,
             generateNewUserSignature,
             getCharOfName,
+            getAvatarUrl,
 
             // Root CA
             rootCALoading,
@@ -1677,6 +1717,21 @@ export default defineComponent({
     },
 });
 </script>
+
+<style>
+/* Global message z-index override - KHÔNG scoped */
+.ant-message {
+    z-index: 10000 !important;
+}
+
+.ant-message-notice {
+    z-index: 10000 !important;
+}
+
+.ant-message-notice-wrapper {
+    z-index: 10000 !important;
+}
+</style>
 
 <style scoped>
 .user-info {

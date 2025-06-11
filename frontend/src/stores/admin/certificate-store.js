@@ -25,8 +25,18 @@ export const useCertificateStore = defineStore("certificate", () => {
         }
     }
 
+    async function issueCertificate(user_id) {
+        try {
+            const response = await axiosInstance.post("/api/certificates/issue-certificate", { user_id });
+            console.log("response issue certificate: ", response.data);
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error issuing certificate:", error);
+        }
+    }
     
-
     // Reset state if needed
     function resetCertificates() {
         certificates.value = [];
@@ -36,6 +46,8 @@ export const useCertificateStore = defineStore("certificate", () => {
     return {
         certificates,
         fetchCertificates,
+
+        issueCertificate,
 
         resetCertificates,
     };

@@ -37,53 +37,105 @@ class CertificateController extends Controller
     // Issue the certificate to user by user_id
     public function issueCertificate(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
+        try {
+            // Validate request
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+            ]);
 
-        $user = User::findOrFail($request->user_id);
-        $ca = CaCertificate::firstOrFail();
+            // Find user and CA certificate
+            $user = User::findOrFail($request->user_id);
+            $ca = CaCertificate::firstOrFail();
 
-        // Tạo khóa riêng và công khai
-        $privateKey = RSA::createKey(2048);
-        $publicKey = $privateKey->getPublicKey();
+            // Generate private and public keys
+            $privateKey = RSA::createKey(2048);
+            $publicKey = $privateKey->getPublicKey();
 
-        // Tạo CSR
-        $x509 = new X509();
-        $x509->setPrivateKey($privateKey);
-        $x509->setPublicKey($publicKey);
-        $x509->setDN([
-            'id-at-commonName' => $user->name,
-            'id-at-emailAddress' => $user->email,
-            'id-at-organizationName' => config('certificate.organization', 'Dai hoc Thuy loi'),
-            'id-at-countryName' => 'VN',
-        ]);
-        $x509->setStartDate('-1 day');
-        $x509->setEndDate('+1 year');
-        $x509->setSerialNumber($user->id, 10);
+            // Create and configure X509 certificate
+            $x509 = new X509();
+            $x509->setPrivateKey($privateKey);
+            $x509->setPublicKey($publicKey);
+            $x509->setDN([
+                'id-at-commonName' => $user->name,
+                'id-at-emailAddress' => $user->email,
+                'id-at-organizationName' => config('certificate.organization', 'Dai hoc Thuy loi'),
+                'id-at-countryName' => 'VN',
+            ]);
+            $x509->setStartDate('-1 day');
+            $x509->setEndDate('+1 year');
+            $x509->setSerialNumber($user->id, 10);
 
-        // Ký chứng chỉ
-        $caX509 = new X509();
-        $caPrivate = RSA::loadPrivateKey(decrypt($ca->private_key));
-        $caCert = $caX509->loadX509($ca->certificate);
-        $userCert = $x509->sign($caX509, $caPrivate, ['digest_alg' => 'sha256']);
-        $certPem = $x509->saveX509($userCert);
+            // Load CA certificate and private key
+            $caX509 = new X509();
+            $caPrivate = RSA::loadPrivateKey(decrypt($ca->private_key));
+            $caCert = $caX509->loadX509($ca->certificate);
+            
+            // Set CA as issuer and sign the certificate
+            $caX509->setPrivateKey($caPrivate);
+            $userCert = $x509->sign($caX509, $x509, 'sha256');
+            $certPem = $x509->saveX509($userCert);            
 
-        // Lưu vào database
-        $certificate = Certificate::create([
-            'user_id' => $user->id,
-            'public_key' => $certPem,
-            'private_key' => encrypt($privateKey->toString('PKCS8')),
-            'certificate' => $certPem,
-            'issued_at' => Carbon::now(),
-            'expires_at' => Carbon::now()->addYear(),
-            'status' => 'active',
-        ]);
+            $old_certificate = Certificate::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->first();
 
-        return response()->json([
-            'message' => 'Chứng chỉ đã được cấp',
-            'certificate_id' => $certificate->id,
-        ]);
+            if ($old_certificate) {
+                // If user already has an active certificate, revoke it
+                $old_certificate->update(['status' => 'revoked']);
+            };
+
+            // Save certificate to database
+            $certificate = Certificate::create([
+                'user_id' => $user->id,
+                'public_key' => $certPem,
+                'private_key' => encrypt($privateKey->toString('PKCS8')),
+                'certificate' => $certPem,
+                'issued_at' => Carbon::now(),
+                'expires_at' => Carbon::now()->addYear(),
+                'status' => 'active',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Chứng chỉ đã được cấp thành công',
+                'certificate_id' => $certificate->id,
+            ], 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy người dùng hoặc CA certificate',
+                'error' => $e->getMessage(),
+            ], 404);
+
+        } catch (DecryptException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể giải mã private key của CA',
+                'error' => 'CA certificate may be corrupted',
+            ], 500);
+
+        } catch (Exception $e) {
+            // Log the error for debugging
+            Log::error('Certificate issuance failed', [
+                'user_id' => $request->user_id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cấp chứng chỉ',
+                'error' => 'Internal server error',
+            ], 500);
+        }
     }
 
     // 
@@ -285,7 +337,13 @@ class CertificateController extends Controller
             'created_at',
             'updated_at'
         )
-        ->orderBy('updated_at', 'desc')
+        ->orderByRaw("CASE 
+            WHEN status = 'active' THEN 1 
+            WHEN status = 'revoked' THEN 2 
+            WHEN status = 'expired' THEN 3 
+            ELSE 4 
+        END")
+        ->orderBy('created_at', 'desc')
         ->get();
 
         return response()->json([
