@@ -18,6 +18,8 @@ export const useDocumentStore = defineStore("document", () => {
     const isFetchedDocuments = ref(false)
     const document_comments = ref([])
     const current_document_flow_steps = ref([]);
+    const current_document_versions = ref([]);
+    const current_document_data = ref([]);
 
     // Actions
     async function fetchDocumentTypes(force = false) {
@@ -118,6 +120,7 @@ export const useDocumentStore = defineStore("document", () => {
             if (response.data) {
                 console.log("response.data", response.data);
                 documents.value = response.data.documents;
+                isFetchedDocuments.value = true;
             }
         }
         catch (error) {
@@ -147,6 +150,34 @@ export const useDocumentStore = defineStore("document", () => {
         } catch (error) {
             console.error("Error fetching document flow steps:", error);
         }
+    }
+
+    async function getDocumentVersions(documentId) {
+        try {
+            const response = await axiosInstance.get(`api/documents/${documentId}/versions`);
+            if (response.data) {
+                console.log("Document version: " + JSON.stringify(response.data.versions, null, 2));
+                current_document_versions.value = [...response.data.versions];
+                console.log("Current document versions: ", current_document_versions.value);
+            }
+        } catch (error) {
+            console.error("Error fetching document version:", error);
+        }
+    }
+
+    function setCurrentDocumentData(data) {
+        console.log('data bên nhận:', data);
+        console.log('typeof data:', typeof data);
+        
+        current_document_data.value = JSON.parse(JSON.stringify(data));
+        
+        console.log('sau gán:', current_document_data.value);
+    }
+
+    function getCurrentDocumentData() {
+        const data = current_document_data.value;
+        current_document_data.value = [];
+        return data;
     }
 
     function reset() {
@@ -188,6 +219,8 @@ export const useDocumentStore = defineStore("document", () => {
         isFetchedDocuments,
         document_comments,
         current_document_flow_steps,
+        current_document_versions,
+        current_document_data,
 
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
@@ -197,6 +230,9 @@ export const useDocumentStore = defineStore("document", () => {
         fetchDocuments,
         fetchDocumentComments,
         fetchStepsByDocumentFlowId,
+        getDocumentVersions,
+        setCurrentDocumentData,
+        getCurrentDocumentData,
         fetchAll,
         reset,
     };

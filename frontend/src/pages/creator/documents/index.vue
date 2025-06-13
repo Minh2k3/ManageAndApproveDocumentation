@@ -180,8 +180,9 @@
     </a-card>
 
     <a-modal
-        v-model:visible="detailVisible"
+        v-model:open="detailVisible"
         width="600px"
+        :zIndex="10000"
         >
         <div>
             <h5>📄 Thông tin văn bản</h5>
@@ -193,8 +194,8 @@
             <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
             <p>
                 <strong>Tệp:</strong>
-                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank">
-                    Xem tệp
+                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank" class="text-decoration-none">
+                    <span class="ms-1 fst-italic">Xem tệp</span>
                 </a>
             </p>
 

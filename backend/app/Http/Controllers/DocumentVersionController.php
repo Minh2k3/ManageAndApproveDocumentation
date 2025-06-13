@@ -34,9 +34,18 @@ class DocumentVersionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DocumentVersion $documentVersion)
+    public function show($id)
     {
-        //
+        $documentVersion = null;
+        if (!is_numeric($id)) {
+            return response()->json(['error' => 'Invalid ID'], 400);
+        }
+        try {
+            $documentVersion = DocumentVersion::findOrFail($id);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Document version not found'], 404);
+        }
+        return response()->json($documentVersion);
     }
 
     /**

@@ -47,5 +47,8 @@ export default defineConfig({
         secure: false,
       }
     },
+    allowedHosts: [
+      'd65e-116-106-97-2.ngrok-free.app', // Thêm domain ngrok của bạn vào đây
+    ],
   },
 });

@@ -213,8 +213,6 @@ class DocumentController extends Controller
         ];
     }
 
-
-
     // Hàm lấy các văn bản của một người gửi yêu cầu
     public function getDocumentsByCreator($id)
     {
@@ -635,7 +633,7 @@ class DocumentController extends Controller
         ]);
     }
 
-    // Hàm gửi yêu cầu phê duyệt
+    // Hàm gửi yêu cầu phê duyệt mới
     public function storeRequestDocument(Request $request)
     {
         $document = $request['document'];
@@ -777,6 +775,149 @@ class DocumentController extends Controller
         ]);
     }
 
+    // Hàm tạo mới version cho văn bản
+    public function storeNewVersionDocument(Request $request, $id)
+    {
+        $document = $request['document'];
+        $document_flow = $request['document_flow'];
+        $document_flow_step = $document_flow['current_flow_step'];
+
+        \DB::beginTransaction();
+
+        try {
+            $new_document_flow = DocumentFlow::create([
+                'name' => $document_flow['document_flow_name'],
+                'created_by' => $document_flow['created_by'],
+                'is_active' => false,
+                'is_template' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $document_flow_id = $new_document_flow['id'];
+            foreach ($document_flow_step as $step) {
+                $status = ($step['step'] == 1) ? 'in_review' : 'pending';
+
+                DocumentFlowStep::create([
+                    'document_flow_id' => $document_flow_id,
+                    'step' => $step['step'],
+                    'department_id' => $step['department_id'],
+                    'approver_id' => $step['approver_id'],
+                    'multichoice' => $step['multichoice'],
+                    'status' => $status,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $new_document = Document::find($id);
+            $new_document->update([
+                'title' => $document['title'],
+                'description' => $document['description'],
+                'document_type_id' => $document['document_type_id'],
+                'document_flow_id' => $new_document_flow['id'],
+                'status' => 'in_review',
+                'is_public' => $document['is_public'],
+                'updated_at' => now(),
+            ]);
+
+            $new_document->refresh();
+
+            $next_version = $request['next_version'];
+            DocumentVersion::create([
+                'document_id' => $id,
+                'version' => $next_version,
+                'document_data' => $new_document,
+                'status' => 'in_review',
+                'created_at' => now(),
+            ]);
+
+            // \Log::info('New document created: ', $new_document->toArray());
+
+            $user = auth()->user();
+            // \Log::info('User info: ', $user->toArray());
+
+            $admins = User::where('role_id', '1')->get();
+            // \Log::info('Admins: ', $admins->toArray());
+
+            foreach ($admins as $admin) {
+                $notification = Notification::create([
+                    'notification_category_id' => 2,
+                    'from_user_id' => $user['id'],
+                    'receiver_id' => $admin['id'],
+                    'title' => "Tạo phiên bản văn bản",
+                    'content' => "Tạo một phiên bản mới cho văn bản '" . $new_document['title'] . "'",
+                    'is_read' => false,
+                    'created_at' => now(),
+                ]); 
+
+                // \Log::info('Hereeeeeeeeeee 3333333333333333');
+
+                $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+                $pusher = new \Pusher\Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    $options
+                );
+
+                $data['notification'] = $notification;
+                $data['document'] = $new_document;
+                $pusher->trigger('user.' . $admin['id'], 'new-notification', $data);
+            }
+
+            // \Log::info('Hereeeeeeeeeee');
+
+            foreach ($document_flow_step as $step) {
+                $approver = Approver::find($step['approver_id']);
+                $content = "Thêm bạn vào luồng phê duyệt cho phiên bản mới của văn bản '" . $new_document['title'] . "'";
+                if ($step['step'] == 1) {
+                    $content = "Bạn là người phê duyệt đầu tiên cho phiên bản mới của văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                }
+                $notification = Notification::create([
+                    'notification_category_id' => 3,
+                    'from_user_id' => $user['id'],
+                    'receiver_id' => $approver['user_id'],
+                    'title' => "Thêm vào luồng phê duyệt phiên bản mới văn bản",
+                    'content' => $content,
+                    'is_read' => false,
+                    'created_at' => now(),
+                ]);
+
+                $options = [
+                    'cluster' => env('PUSHER_APP_CLUSTER'),
+                    'useTLS' => true
+                ];
+                $pusher = new \Pusher\Pusher(
+                    env('PUSHER_APP_KEY'),
+                    env('PUSHER_APP_SECRET'),
+                    env('PUSHER_APP_ID'),
+                    $options
+                );
+
+                $data['notification'] = $notification;
+                $data['document'] = $new_document;
+                $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
+            }
+
+            \DB::commit();
+        } catch (\Exception $e) {
+            \Log::error('Error in storeRequestDocument: ' . $e->getMessage());
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi gửi phê duyệt: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => 'Luồng phê duyệt phiên bản mới cho tài liệu đã được lưu thành công.',
+            'id' => $id,
+        ]);
+    }
+
     // Hàm xử lý upload file văn bản
     public function uploadFile(Request $request)
     {
@@ -802,7 +943,6 @@ class DocumentController extends Controller
             'file_url' => url(`/documents/` . $filename),
         ]);
     }
-
 
     // Mấy hàm dưới đây để hiển thị file PDF nhưng không rõ có dùng nữa hay không
     public function viewPdf($filename)
@@ -890,5 +1030,26 @@ class DocumentController extends Controller
         
         // Production: return specific domain
         return env('FRONTEND_URL', 'http://localhost:5173');
+    }
+
+    public function getVersionsByDocumentId($documentId)
+    {
+        try {
+            $versions = DocumentVersion::where('document_id', $documentId)
+                ->orderBy('version', 'desc')
+                ->get(['id', 'version', 'document_data', 'status', 'created_at']);
+
+            if ($versions->isEmpty()) {
+                return response()->json(['message' => 'No versions found for this document'], 404);
+            }
+
+            return response()->json([
+                'versions' => $versions,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving versions: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

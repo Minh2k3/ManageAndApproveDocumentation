@@ -2,9 +2,13 @@
     <div class="container py-4">
         <!-- Header section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
+            <div v-if="!is_new_version">
                 <h1 class="h3 fw-bold">Đề xuất văn bản</h1>
                 <p class="text-secondary">Thêm văn bản và tạo luồng phê duyệt</p>
+            </div>
+            <div v-else>
+                <h1 class="h3 fw-bold">Tạo phiên bản mới</h1>
+                <p class="text-secondary">Tạo phiên bản mới cho văn bản đã có</p>
             </div>
         </div>
 
@@ -327,7 +331,7 @@
                 </div>
 
                 <!-- Gửi yêu cầu và lưu nháp -->
-                <div class="row mt-1">
+                <div v-if="!is_new_version" class="row mt-1">
                     <div class="col d-flex justify-content-center align-items-center gap-3">
                         <!-- Gửi yêu cầu phê duyệt -->
                         <a-tooltip
@@ -353,6 +357,24 @@
                                     class="text-center align-self-center bg-secondary"
                                 >
                                     <span><i class="bi bi-floppy me-2"></i>Lưu nháp</span>
+                                </a-button>
+                            </span>
+                        </a-tooltip>
+                    </div>
+                </div>
+
+                <div v-else class="row mt-1">
+                    <div class="col d-flex justify-content-center align-items-center gap-3">
+                        <!-- Gửi yêu cầu phê duyệt -->
+                        <a-tooltip
+                            title="Gửi yêu cầu phê duyệt theo luồng đã tạo">
+                            <span>
+                                <a-button 
+                                    type="primary" 
+                                    @click="handleMakeNewVersion"
+                                    class="text-center align-self-center bg-primary"
+                                >
+                                    <span><i class="bi bi-send me-2"></i>Tạo mới</span>
                                 </a-button>
                             </span>
                         </a-tooltip>
@@ -396,7 +418,7 @@ import { useDepartmentStore } from '@/stores/creator/department-store.js';
 import { useApproverStore } from '@/stores/approver/approver-store.js';
 import { useAuth } from '@/stores/use-auth.js';
 
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 export default defineComponent({
     components: {
@@ -409,7 +431,7 @@ export default defineComponent({
     },
 
     setup() {
-        // Router
+        // Router, route
         const router = useRouter();
 
         // Store
@@ -432,6 +454,28 @@ export default defineComponent({
         let listDocumentFlows = ref([]);
         let listApprovers = ref([]);
         let listDepartments = ref([]);
+
+        const document_flow_id = ref(null);
+        const document_description = ref('');
+        const department_id = ref(null);
+        const approver_id = ref(null);
+
+        // New version
+        const is_new_version = ref(false);
+        let test = null;
+
+        let document_flow_steps = ref([]);
+        // console.log("Document_flow_step: " + JSON.stringify(document_flow_steps.value, null, 2));
+
+        let current_flow_step = ref([
+            {
+                step: 1,
+                multichoice: false,
+                department_id: null,
+                approver_id: null,
+            },
+        ]);
+
         onMounted(async () => {
             await documentStore.fetchDocumentTypes();
             listDocumentTypes.value = documentStore.document_types;
@@ -447,6 +491,13 @@ export default defineComponent({
             listDepartments.value = departmentStore.departments_can_approve;
             // console.log("Departments: " + JSON.stringify(listDepartments.value, null, 2));
             // console.log("Departments: " + JSON.stringify(listDepartmentsForNewFlow.value, null, 2));
+
+            test = documentStore.getCurrentDocumentData();
+            console.log("Test: " + test);
+            if (test['id'] !== undefined) {
+                console.log("Current Document Data: " + test['version']);
+                is_new_version.value = true;
+            }
         });
 
         const listDepartmentsForNewFlow = computed(() => {
@@ -498,23 +549,6 @@ export default defineComponent({
             return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
         };
 
-        const document_flow_id = ref(null);
-        const document_description = ref('');
-        const department_id = ref(null);
-        const approver_id = ref(null);
-
-        let document_flow_steps = ref([]);
-        // console.log("Document_flow_step: " + JSON.stringify(document_flow_steps.value, null, 2));
-
-        let current_flow_step = ref([
-            {
-                step: 1,
-                multichoice: false,
-                department_id: null,
-                approver_id: null,
-            },
-        ]);
-
         const isUseTemplate = ref(false);
         watch(document_flow_id, () => {
             if (!document_flow_id.value) {
@@ -529,6 +563,43 @@ export default defineComponent({
                 return;
             }
             isUseTemplate.value = true;
+        });
+
+        watch(is_new_version, async (newValue) => {
+            if (newValue) {
+                document_name.value = test['title'];
+                document_type.value = test['document_type_id'];
+                document_public.value = test['is_public'] ? 1 : 0;
+                document_description.value = test['description'];
+                await documentStore.fetchStepsByDocumentFlowId(test['document_flow_id']);
+                const flowData = documentStore.current_document_flow_steps;
+                console.log("Flow data:", flowData);
+
+                if (flowData && flowData.steps) {
+                    const get_steps = flowData.steps;
+                    console.log("get_steps:", get_steps);
+                    console.log("get_steps length:", get_steps.length);
+                    
+                    if (Array.isArray(get_steps) && get_steps.length > 0) {
+                        document_flow_steps.value = [];
+                        for (let i = 0; i < get_steps.length; i++) {
+                            const step = get_steps[i];
+                            document_flow_steps.value.push({
+                                step: step.step,
+                                multichoice: step.multichoice,
+                                department_id: step.department.id,
+                                approver_id: step.approver.id || null,
+                            });
+                        }
+                    } else {
+                        document_flow_steps.value = [];
+                    }
+                } else {
+                    document_flow_steps.value = [];
+                }
+                console.log("document_flow_steps: " + document_flow_steps.value);
+                current_flow_step.value = [...document_flow_steps.value];
+            }
         });
 
         // Hàm lấy ra các bước phê duyệt trong luồng mẫu
@@ -795,6 +866,101 @@ export default defineComponent({
             }
         }
 
+        // Validate cho gửi yêu cầu
+        function validateMakeNewVersion() {
+            if (!document_name.value.trim()) {
+                message.error("Hãy điền tên văn bản!");
+                return false;
+            }
+
+            if (document_type.value === null) {
+                message.error("Không được để trống");
+                return false;
+            }
+
+            if (upload_files.value.length === 0) {
+                message.error("Chưa có văn bản đưa lên");
+                return false;
+            }
+
+            if (current_flow_step.value[0].department_id === null) {
+                message.error("Chưa có đơn vị phê duyệt nào!");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Hàm xử lý gửi yêu cầu phê duyệt (Hàm gửi thông tin lên server)
+        async function MakeNewVersion() {
+            const documentData = {
+                id: test['id'],
+                title: document_name.value,
+                document_type_id: document_type.value,
+                description: document_description.value,
+                created_by: user.id,
+                is_public: document_public.value,
+            }
+
+            const documentFlowData = {
+                document_flow_name: "Luồng phê duyệt cho '" + document_name.value + "' của " + user.name + " - " + new Date().toLocaleString(),
+                created_by: user.id,
+                current_flow_step: current_flow_step.value,
+            }
+
+            const requestData = {
+                document: documentData,
+                document_flow: documentFlowData,
+                next_version: test['version'] + 1,
+            };
+
+            console.log("Request data: " + JSON.stringify(requestData, null, 2));
+
+            try {
+                const res = await axiosInstance.post(`/api/documents/new-version/${test['id']}`, requestData);
+                console.log(res);
+                const documentId = res.data.id;
+                await handleUploadFile({
+                    file: upload_files.value[0]?.originFileObj,
+                    documentId: documentId,
+                });
+                message.success("Gửi yêu cầu phê duyệt thành công");
+                router.push({ name: 'creator-documents' });    
+            } catch (error) {
+                message.error("Gửi yêu cầu phê duyệt thất bại");
+                console.error("Lỗi khi gửi yêu cầu phê duyệt:", error);
+            }
+        }
+
+        // Hàm xác nhận gửi yêu cầu phê duyệt
+        function showConfirmMakeNewVersion() {
+            Modal.confirm({
+                title: 'Bạn có chắc chắn tạo phiên bản mới không?',
+                icon: createVNode(ExclamationCircleOutlined),
+                content: createVNode(
+                    'div',
+                    {
+                        style: 'color:red;',
+                    },
+                    // 'Some descriptions',
+                ),
+                onOk() {
+                    MakeNewVersion();
+                },
+                onCancel() {
+                    return;
+                },
+                
+            });
+        };
+
+        // Hàm bắt sự kiện gửi yêu cầu phê duyệt
+        function handleMakeNewVersion() {
+            if (validateMakeNewVersion()) {
+                showConfirmMakeNewVersion();
+            }
+        }
+
         // Validate cho lưu nháp: Yêu cầu phải điền đủ ở phần form văn bản
         function validateSaveDraft() {
             if (!document_name.value.trim()) {
@@ -904,6 +1070,9 @@ export default defineComponent({
             department_id,
             approver_id,
 
+            // New version
+            is_new_version,
+
             // Form Functions
             handleChange,
             beforeUpload,
@@ -919,6 +1088,7 @@ export default defineComponent({
             removeStep,
             handleSendRequest,
             handleSaveDraft,
+            handleMakeNewVersion,
         };
     },
 });

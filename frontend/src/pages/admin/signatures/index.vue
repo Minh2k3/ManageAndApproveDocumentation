@@ -978,6 +978,7 @@ export default defineComponent({
         const manualUserId = ref('');
         const selectedUserInfo = ref(null);
         const selectedDepartment = ref(null);
+        const selectedDepartmentName = ref('');
         const departmentUserCount = ref(0);
         const departmentUsers = ref([]);
         const confirmGrantAll = ref(false);
@@ -1025,6 +1026,7 @@ export default defineComponent({
 
         const handleDepartmentSelect = () => {
             departmentUsers.value = allUsers.value.filter(user => user.department_id === selectedDepartment.value);
+            selectedDepartmentName.value = departments.value.find(dept => dept.id === selectedDepartment.value)?.name || '';
             console.log("Department users: ", departmentUsers);
             departmentUserCount.value = departmentUsers.value.length;
         }
@@ -1076,24 +1078,39 @@ export default defineComponent({
             
             // console.log('Request data:', requestData);
             try {
-                let response = null;
+                
                 if (grantType.value === 'user') {
-                    console.log(`Cấp chữ ký cho người dùng: ${selectedUserInfo.value.name} (${selectedUserInfo.value.email})`);
-                    console.log(`User ID: ${selectedUserInfo.value.id}`);
-                    response = await certificateStore.issueCertificate(selectedUserInfo.value.id);
+                    const response = await certificateStore.issueCertificate(selectedUserInfo.value.id);
+                    if (response.success === true) {
+                        isGenerating.value = false;
+                        showGenerateSignatureUserModal.value = false;
+                        message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng`)
+                        resetSignatureForm();
+                        await certificateStore.fetchCertificates();
+                    }
                 } else if (grantType.value === 'department') {
-                    console.log(`Cấp chữ ký cho tổ chức: ${selectedDepartment.value} với ${departmentUserCount.value} người dùng`);
-                } else {
-                    console.log(`Cấp chữ ký cho tất cả người dùng (${totalUsersInSystem.value})`);
-                }
-                console.log('Response:', response);
-                if (response.success === true) {
+                    const count = ref(0);
+                    for (const user of departmentUsers.value) {
+                        const response = await certificateStore.issueCertificate(user.id);
+                        if (response.success === true) {
+                            count.value++;
+                        }
+                    }
                     isGenerating.value = false;
                     showGenerateSignatureUserModal.value = false;
-                    message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng`)
-                    resetSignatureForm();
-                    await certificateStore.fetchCertificates();
+                    message.success(`Đã cấp chữ ký thành công cho ${count.value} người dùng trong ${selectedDepartmentName.value}`);
+                } else {
+                    const response = await certificateStore.issueCertificateToAllUsers();
+                    if (response.success === true) {
+                        isGenerating.value = false;
+                        showGenerateSignatureUserModal.value = false;
+                        message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng trong hệ thống`);
+                        resetSignatureForm();
+                        await certificateStore.fetchCertificates();
+                    }
                 }
+                console.log('Response:', response);
+                
             } catch (error) {
                 message.error('Đã xảy ra lỗi khi cấp chữ ký. Vui lòng thử lại sau.');
             } finally {

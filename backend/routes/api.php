@@ -69,7 +69,7 @@ Route::post('/login-remember', [CustomAuthenticatedSessionController::class, 'lo
 Route::middleware('auth:sanctum')->post('/logout', [LogoutController::class, 'logout']);
 
 RateLimiter::for('api', function (Request $request) {
-    return Limit::perMinute(60)->by($request->ip());
+    return Limit::perMinute(100)->by($request->ip());
 });
 
 // User api
@@ -135,7 +135,6 @@ Route::get('/document/{id}/nm', [DocumentController::class, 'getDocumentNeedMeBy
     // ->middleware('auth:sanctum')
     ->name('documents.getDocumentNeedMeById');
     
-
 Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeDraftDocument');
@@ -143,6 +142,10 @@ Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'
 Route::post('/documents/request', [DocumentController::class, 'storeRequestDocument'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeRequestDocument');
+
+Route::post('/documents/new-version/{id}', [DocumentController::class, 'storeNewVersionDocument'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.storeNewVersionDocument');
 
 Route::post('/documents/upload-file', [DocumentController::class, 'uploadFile'])
     // ->middleware('auth:sanctum')
@@ -157,6 +160,10 @@ Route::get('/documents/{id}/comments', [DocumentCommentController::class, 'getCo
 Route::post('/documents/{document_id}/comments', [DocumentCommentController::class, 'storeComment'])
     // ->middleware('auth:sanctum')
     ->name('documents.storeComment');
+
+Route::get('documents/{id}/versions', [DocumentController::class, 'getVersionsByDocumentId'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.getVersionsByDocumentId');
 
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
@@ -218,6 +225,11 @@ Route::get('/document-templates/{id}/download', [DocumentTemplateController::cla
 Route::post('/document-templates/{id}/change-status', [DocumentTemplateController::class, 'changeStatus'])
     // ->middleware('auth:sanctum')
     ->name('document-templates.changeStatus');
+
+// Document Version
+Route::get('/document-versions/{id}', [DocumentVersionController::class, 'show'])
+    // ->middleware('auth:sanctum')
+    ->name('document-versions.show');
 
 // Approver 
 Route::get('/approvers', [ApproverController::class, 'index'])
