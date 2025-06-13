@@ -204,7 +204,7 @@
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button v-if="selectedDocument.status !== 'in_review'" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <!-- <a-button v-if="selectedDocument.status !== 'in_review'" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button> -->
             <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>

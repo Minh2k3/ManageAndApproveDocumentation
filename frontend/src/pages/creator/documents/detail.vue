@@ -2,7 +2,6 @@
     <div class="container-fluid">
         <h2 class="fw-bold mb-3">Chi tiết văn bản</h2>
 
-        <!-- Giao diện khi văn bản là của tôi -->
         <div>
             <div class="container py-1">
                 <div class="row justify-content-between gap-3">
@@ -43,9 +42,9 @@
                                     </div>
                                 </div>
                             </a-tab-pane>
-                            <a-tab-pane key="comment" :tab="`Nhận xét (${document_comments.total_comments})`" force-render>
+                            <a-tab-pane key="comment" :tab="`Nhận xét (${document_comments.total_current_comments})`" force-render>
                                 <!-- Comments Section -->
-                                <div v-if="document_comments.total_comments > 0" v-for="(comment, index) in document_comments.current_comments" :key="index">
+                                <div v-if="document_comments.total_current_comments > 0" v-for="(comment, index) in document_comments.current_comments" :key="index">
                                     <div class="row mb-3 border-1 border border-dark rounded-3 bg-light py-1">
                                         <div class="col align-self-center">
                                             <a-avatar class="" v-if="comment.user['avatar']" :src="getAvatarUrl(comment.user['avatar'])"/>
@@ -54,7 +53,7 @@
                                         <div class="col-10">
                                             <div class="row">
                                                 <span class="fw-bold">
-                                                    {{ comment.user['name'] }}
+                                                    {{ comment.user['id'] === user['id'] ? `Tôi (${comment.user['name']})` : comment.user['name'] }}
                                                 </span>
                                             </div>
                                             <div class="row">
@@ -91,7 +90,7 @@
                             </a-tab-pane>
                             <a-tab-pane key="versions" :tab="`Phiên bản (${document.version_count})`">
                                 <div class="row mb-3">
-                                    <h4 class="fw-bold">Các phiên bản:</h4>
+                                    <h4 class="fw-bold">Các phiên bản</h4>
                                 </div>
                                 <div class="row mb-3">
                                     <a-table 
@@ -153,6 +152,9 @@
                                                 <a-tag v-if="record.status === 'rejected'" color="red">
                                                     <span>Bị từ chối</span>
                                                 </a-tag>
+                                                <a-tag v-if="record.status === 'draft'" color="blue">
+                                                    <span>Bản nháp</span>
+                                                </a-tag>
                                             </template>
 
                                             <template v-if="column.key === 'action'">
@@ -170,7 +172,7 @@
                                                     </a-tooltip>
 
                                                     <a-tooltip
-                                                        v-if="record.status === 'rejected' && record.version === max_version"
+                                                        v-if="record.status === 'rejected' && record.version === max_version || record.status === 'draft'"
                                                         >
                                                         <template #title>
                                                             <span class="">Tạo phiên bản mới</span>
@@ -217,8 +219,13 @@
                                             class="border border-2 rounded-2 w-100 py-2 bg-secondary text-white button-click-effect" 
                                             style="--bs-bg-opacity: .9;"
                                             @click="handleSendComment"
+                                            :disabled="loadingSendComment"
                                             >
-                                            <span>
+                                            <span v-if="loadingSendComment">
+                                                <i class="spinner-border spinner-border-sm me-2"></i>
+                                                Đang gửi nhận xét...
+                                            </span>
+                                            <span v-else>
                                                 <i class="bi bi-chat-square-dots me-2"></i>Gửi nhận xét
                                             </span>
                                         </button>
@@ -510,16 +517,14 @@ export default defineComponent({
             }
         };
 
+        const loadingSendComment = ref(false);
         const handleSendComment = async () => {
             if (comment.value === '') {
                 message.error('Vui lòng nhập bình luận');
                 return;
             }
 
-            // console.log(documentData.value.creator_id);
-            console.log(comment.value);
-            // console.log(parseInt(documentData.value['document_flow_step_id']));
-            // return;
+            loadingSendComment.value = true;
             try {
                 const id = parseInt(route.params.id);
                 await axiosInstance.post(`/api/documents/${id}/comments`, {
@@ -551,7 +556,7 @@ export default defineComponent({
 
         const version_columns = [
             {
-                title: 'STT',
+                title: 'Bản',
                 dataIndex: 'version',
                 key: 'version',
                 width: 60,
@@ -603,8 +608,12 @@ export default defineComponent({
             return type ? type.label : 'Không xác định';
         };
 
+        const version_data = ref([]);
         const changeVersion = (record) => {
             console.log('Changing version to:', record);
+            version_data.value = JSON.parse(JSON.stringify(record.document_data));
+            console.log('Version data:', version_data.value);
+
         };
 
         const customRow = (record) => {
@@ -627,7 +636,7 @@ export default defineComponent({
                 onOk: () => {
                     try {
                         console.log(record.document_data);
-                        record.document_data['version'] = record.version;
+                        record.document_data['version'] = record.status === 'draft' ? 0 : record.version;
                         documentStore.setCurrentDocumentData(record.document_data);
                         // let test = documentStore.getCurrentDocumentData();
                         // console.log('Giá trị test:', test);
@@ -647,6 +656,7 @@ export default defineComponent({
         };
 
         return {
+            user,
             document: documentData,
             pdfUrl,
             process_of_document,

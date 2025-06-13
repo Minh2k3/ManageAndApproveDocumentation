@@ -230,7 +230,6 @@ class DocumentFlowStepController extends Controller
         try {
             // 1. Lock và kiểm tra document flow step hiện tại
             $currentStep = DocumentFlowStep::where('id', $id)
-                ->lockForUpdate()
                 ->first();
                 
             if (!$currentStep) {
@@ -238,10 +237,10 @@ class DocumentFlowStepController extends Controller
             }
             
             // Kiểm tra quyền
-            $checkPermission = $this->authorizeApproval($currentStep);
-            if (!$checkPermission) {
-                throw new \Exception('You do not have permission to reject this step.', 403);
-            }
+            // $checkPermission = $this->authorizeApproval($currentStep);
+            // if (!$checkPermission) {
+            //     throw new \Exception('You do not have permission to reject this step.', 403);
+            // }
 
             \Log::info('Current step status: ' . $currentStep->status);
             
@@ -251,31 +250,46 @@ class DocumentFlowStepController extends Controller
             }
             
             // Lock các resources liên quan
-            $resources = $this->lockRelatedResources($currentStep);
-            \Log::info('Resources locked successfully.');
+            // $resources = $this->lockRelatedResources($currentStep);
+            // \Log::info('Resources locked successfully.');
             
             // 2. Cập nhật trạng thái rejection
             $currentStep->update([
                 'status' => 'rejected',
-                'decision' => 'reject',
+                'decision' => 'rejected',
                 'reason' => $validated['reason'],
                 'signed_at' => now()
             ]);
             \Log::info('Current step updated to rejected.');
             
             // Lưu lý do từ chối
-            $this->saveComment($resources['documentVersion']->id, $validated['reason']);
+            // $this->saveComment($resources['documentVersion']->id, $validated['reason']);
             
             // 3. Cập nhật tất cả các step sau và document
             // $this->rejectSubsequentSteps($currentStep);
             
             // Update document và version status
-            $resources['documentVersion']->update(['status' => 'rejected']);
-            $resources['document']->update(['status' => 'rejected']);
+            $document_version = DocumentVersion::where('id', $request['document_version_id'])
+                ->first();
+            if (!$document_version) {
+                throw new \Exception('Document version not found.', 404);
+            }
+            
+            $document = Document::where('id', $document_version->document_id)
+                ->first();
+            if (!$document) {
+                throw new \Exception('Document not found.', 404);
+            }
+            $document->status = 'rejected';
+            $document->save();
+            $document->refresh();
+            $document_version->document_data = $document;
+            $document_version->status = 'rejected';
+            $document_version->save();
             \Log::info('Document and version updated to rejected.');
             
             // 4. Gửi thông báo
-            $this->sendRejectionNotifications($resources['document'], $currentStep, $validated['reason']);
+            $this->sendRejectionNotifications($document, $currentStep, $validated['reason']);
             \Log::info('Rejection notifications sent.');
             
             DB::commit();
@@ -283,13 +297,13 @@ class DocumentFlowStepController extends Controller
             return response()->json([
                 'message' => 'Document flow step rejected successfully.',
                 'document_flow_step' => $currentStep->fresh(),
-                'document' => $resources['document']->fresh()
+                'document' => $document->fresh()
             ]);
             
         } catch (\Exception $e) {
             DB::rollback();
             
-            $statusCode = $e->getCode() ?: 500;
+            $statusCode = 410;
             return response()->json([
                 'message' => 'Failed to reject document.',
                 'error' => $e->getMessage()
