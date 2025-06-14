@@ -24,6 +24,7 @@
             :pagination="departmentPagination"
             :loading="departmentLoading"
             row-key="id"
+            :custom-row="customRow"
             @change="onDepartmentTableChange"
             :locale="{
                         triggerDesc: 'Nhấn để sắp xếp giảm dần',
@@ -97,6 +98,7 @@
             :data-source="filteredRoles"
             :pagination="rolePagination"
             :loading="roleLoading"
+            :custom-row="customRow"
             row-key="id"
             @change="onRoleTableChange"
           >
@@ -140,6 +142,7 @@
       @ok="handleDepartmentSubmit"
       @cancel="resetDepartmentModal"
       width="600px"
+      :zIndex="10000"
     >
       <a-form
         ref="departmentFormRef"
@@ -166,7 +169,16 @@
 
           <a-col :span="8">
             <a-form-item label="Nhóm" name="group">
-              <a-select v-model:value="departmentForm.group" placeholder="Chọn nhóm">
+              <a-select 
+                v-model:value="departmentForm.group" 
+                placeholder="Chọn nhóm"
+                :dropdown-style="{ 
+                  position: 'absolute',
+                  zIndex: 10000,
+                  background: 'white',
+                  border: '1px solid #ccc'
+                }"
+                >
                 <a-select-option value="faculty">Khoa/Trung tâm</a-select-option>
                 <a-select-option value="lcd">LCĐ</a-select-option>
                 <a-select-option value="lch">LCH</a-select-option>
@@ -255,6 +267,8 @@
       :title="roleModalTitle"
       @ok="handleRoleSubmit"
       @cancel="resetRoleModal"
+      width="600px"
+      :zIndex="10000"
     >
       <a-form
         ref="roleFormRef"
@@ -311,7 +325,7 @@ export default {
     const registerStore = useRegisterStore();
 
     // Reactive data
-    const activeTab = ref('departments');
+    const activeTab = ref('roles');
     
     // Mock data cho phòng ban
     const departments = ref([
@@ -436,7 +450,13 @@ export default {
         dataIndex: 'created_at',
         key: 'createdAt',
         width: 120,
-        sorter: true,
+        sorter: (a, b) => {
+                    // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
+                    const dateA = a.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.created_at.split(' ')[0];
+                    const dateB = b.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.created_at.split(' ')[0];
+
+                    return dateA.localeCompare(dateB);
+                },
         align: "center",
       },
       {
@@ -449,45 +469,47 @@ export default {
 
     const roleColumns = [
       {
-        title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
-        width: 80,
-        sorter: true
-      },
-      {
         title: 'Tên vai trò',
-        dataIndex: 'name',
-        key: 'name',
-        sorter: true
+        dataIndex: 'label',
+        key: 'label',
+        sorter: true,
+        customHeaderCell: () => {
+          return { style: { textAlign: 'center' } };
+        }
       },
       {
         title: 'Mô tả',
         dataIndex: 'description',
-        key: 'description'
+        key: 'description',
+        customHeaderCell: () => {
+          return { style: { textAlign: 'center' } };
+        }
       },
       {
-        title: 'Quyền hạn',
-        dataIndex: 'permissions',
-        key: 'permissions'
-      },
-      {
-        title: 'Trạng thái',
-        dataIndex: 'status',
-        key: 'status',
-        width: 120
+        title: 'Thứ bậc',
+        dataIndex: 'level',
+        key: 'level',
+        align: "center",
       },
       {
         title: 'Ngày tạo',
-        dataIndex: 'createdAt',
-        key: 'createdAt',
+        dataIndex: 'created_at',
+        key: 'created_at',
         width: 120,
-        sorter: true
+        sorter: (a, b) => {
+          // Chuyển đổi định dạng 'HH:mm:ss DD/MM/YYYY' thành 'YYYY-MM-DD HH:mm:ss' để dễ dàng so sánh
+          const dateA = a.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + a.created_at.split(' ')[0];
+          const dateB = b.created_at.split(' ')[1].split('/').reverse().join('-') + ' ' + b.created_at.split(' ')[0];
+
+          return dateA.localeCompare(dateB);
+        },
+        align: "center",
       },
       {
         title: 'Thao tác',
         key: 'actions',
-        width: 120
+        width: 120,
+        align: "center",
       }
     ];
 
@@ -781,6 +803,18 @@ export default {
       reader.readAsDataURL(info.file.originFileObj || info.file);
     };
 
+    const customRow = (record) => {
+        return {
+            onClick: () => {
+              console.log('Row clicked:', record);
+                // viewDetail(record);
+            },
+            style: {
+                cursor: 'pointer'
+            }
+        };
+    };
+
     return {
       activeTab,
       departments,
@@ -824,6 +858,7 @@ export default {
       beforeUpload,
       handleCustomRequest,
       handleImageChange,
+      customRow,
     };
   }
 };

@@ -341,6 +341,80 @@
             </div>
         </div>
     </div>
+
+    <a-modal 
+        v-model:open="detailVersion.visible" 
+        width="480px" 
+        :zIndex="10000"
+        :footer="null"
+        centered
+        class="document-modal"
+    >
+        <div class="modal-content">
+            <!-- Header with icon and title -->
+            <div class="modal-header">
+                <div class="header-content">
+                    <span class="header-icon">📄</span>
+                    <h3 class="modal-title">Thông tin văn bản</h3>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="modal-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">📝 Tiêu đề</div>
+                        <div class="info-value">{{ detailVersion.title }}</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">📋 Mô tả</div>
+                        <div class="info-value">{{ detailVersion.description ?? "Không có mô tả" }}</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-item half">
+                            <div class="info-label">🏷️ Loại văn bản</div>
+                            <div class="info-value">
+                                <span class="document-type-badge">{{ detailVersion.type }}</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item half">
+                            <div class="info-label">🔢 Phiên bản</div>
+                            <div class="info-value">
+                                <span class="version-badge">v{{ detailVersion.version }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">📎 Tệp đính kèm</div>
+                        <div class="info-value">
+                            <a 
+                                :href="`http://localhost:8000/documents/${detailVersion.file_path}`" 
+                                target="_blank" 
+                                class="file-link"
+                            >
+                                📂 Xem tệp 🔗
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <a-button 
+                    type="primary" 
+                    @click="detailVersion.visible = false"
+                    class="close-button"
+                >
+                    Đóng
+                </a-button>
+            </div>
+        </div>
+    </a-modal>
 </template>
 
 <script>
@@ -609,11 +683,26 @@ export default defineComponent({
         };
 
         const version_data = ref([]);
+        const detailVersion = ref({
+            visible: false,
+            title: '',
+            description: '',
+            type: '',
+            version: 0,
+            file_path: ''
+        });
         const changeVersion = (record) => {
             console.log('Changing version to:', record);
             version_data.value = JSON.parse(JSON.stringify(record.document_data));
             console.log('Version data:', version_data.value);
-
+            detailVersion.value = {
+                visible: true,
+                title: version_data.value.title,
+                description: version_data.value.description,
+                type: mapTypeIdToName(version_data.value.document_type_id),
+                version: record.version,
+                file_path: version_data.value.file_path
+            };
         };
 
         const customRow = (record) => {
@@ -673,6 +762,7 @@ export default defineComponent({
             document_versions,
             version_columns,
             max_version,
+            detailVersion,
 
             getAvatarUrl,
             randomAvatar,
@@ -701,4 +791,166 @@ export default defineComponent({
     transition: transform 0.1s ease;
 }
 
+.document-modal :deep(.ant-modal-content) {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.document-modal :deep(.ant-modal-body) {
+    padding: 0;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 16px 24px;
+    text-align: center;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.header-icon {
+    font-size: 20px;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    gap: 12px;
+}
+
+.info-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.info-item.half {
+    flex: 1;
+}
+
+.info-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.info-value {
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.document-type-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.version-badge {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.file-link {
+    display: inline-block;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.file-link:hover {
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    text-align: center;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.close-button {
+    background: #6b7280;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 20px;
+    font-size: 14px;
+}
+
+.close-button:hover {
+    background: #4b5563;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .modal-header {
+        padding: 12px 16px;
+    }
+    
+    .modal-body {
+        padding: 16px;
+    }
+    
+    .modal-footer {
+        padding: 12px 16px;
+    }
+    
+    .info-item {
+        padding: 10px;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
 </style>

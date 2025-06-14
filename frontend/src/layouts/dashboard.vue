@@ -328,7 +328,7 @@ export default defineComponent({
         // Particle System Methods
         initParticles() {
             const canvas = this.$refs.particleCanvas;
-            console.log('Canvas element:', canvas); // Debug
+            // console.log('Canvas element:', canvas); // Debug
             if (!canvas) {
                 console.error('Canvas not found!');
                 return;
@@ -336,11 +336,11 @@ export default defineComponent({
             
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            console.log('Canvas size:', canvas.width, 'x', canvas.height); // Debug
+            // console.log('Canvas size:', canvas.width, 'x', canvas.height); // Debug
             
             this.particles = [];
-            const particleCount = Math.floor((canvas.width * canvas.height) / 15000);
-            console.log('Particle count:', particleCount); // Debug
+            const particleCount = Math.floor((canvas.width * canvas.height) / 12000); // Số lượng particles
+            // console.log('Particle count:', particleCount); 
             
             for (let i = 0; i < particleCount; i++) {
                 this.particles.push({
@@ -353,7 +353,7 @@ export default defineComponent({
                     originalSize: Math.random() * 2 + 1
                 });
             }
-            console.log('Particles initialized:', this.particles.length); // Debug
+            // console.log('Particles initialized:', this.particles.length); // Debug
         },
         
         animate() {
@@ -418,7 +418,7 @@ export default defineComponent({
                 
                 // Debug: log vị trí của particle đầu tiên
                 if (index === 0) {
-                    console.log(`Particle 0 position: ${particle.x.toFixed(1)}, ${particle.y.toFixed(1)}`);
+                    // console.log(`Particle 0 position: ${particle.x.toFixed(1)}, ${particle.y.toFixed(1)}`);
                 }
             });
             

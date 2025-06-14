@@ -168,17 +168,17 @@
 				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
-			<a-menu-item key="creator-documents-edit" :disabled="!isEditPageCreator" :selectable="isEditPageCreator">
+			<!-- <a-menu-item key="creator-documents-edit" :disabled="!isEditPageCreator" :selectable="isEditPageCreator">
 				Sửa văn bản
-			</a-menu-item>
+			</a-menu-item> -->
 			
 			<a-menu-item key="creator-documents-detail" :disabled="!isDetailPageCreator" :selectable="isDetailPageCreator">
 				Chi tiết văn bản
 			</a-menu-item>
 
-			<a-menu-item key="creator-documents-history">
+			<!-- <a-menu-item key="creator-documents-history">
 				<router-link  class="text-decoration-none" :to="{ name: 'creator-documents-history' }">Lịch sử văn bản</router-link>
-			</a-menu-item>
+			</a-menu-item> -->
 
 			<a-menu-item key="creator-documents-template">
 				<router-link class="text-decoration-none" :to="{ name: 'creator-documents-template' }">
@@ -228,7 +228,7 @@
 		<a-sub-menu key="approver-documents">
 			<template #title>
 				<span class="d-inline-flex align-items-center">
-					<FileOutlined class="me-2" /> Văn bản của tôi nè
+					<FileOutlined class="me-2" /> Văn bản
 				</span>
 			</template>
 
@@ -240,17 +240,17 @@
 				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-create' }">Thêm văn bản</router-link>
 			</a-menu-item>
 
-			<a-menu-item key="approver-documents-edit" :disabled="!isEditPageApprover" :selectable="isEditPageApprover">
+			<!-- <a-menu-item key="approver-documents-edit" :disabled="!isEditPageApprover" :selectable="isEditPageApprover">
 				Sửa văn bản
-			</a-menu-item>
+			</a-menu-item> -->
 
 			<a-menu-item key="approver-documents-detail" :disabled="!isDetailPageApprover" :selectable="isDetailPageApprover">
 				Chi tiết văn bản
 			</a-menu-item>
 
-			<a-menu-item key="approver-documents-approve">
+			<!-- <a-menu-item key="approver-documents-approve">
 				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-approve' }">Phê duyệt văn bản</router-link>
-			</a-menu-item>
+			</a-menu-item> -->
 
 			<a-menu-item key="approver-documents-template">
 				<router-link class="text-decoration-none" :to="{ name: 'approver-documents-template' }">
