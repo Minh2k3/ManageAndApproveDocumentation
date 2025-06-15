@@ -326,3 +326,10 @@ Route::post('/certificates/revoke-certificate', [CertificateController::class, '
     // ->middleware('auth:sanctum')
     ->name('certificates.revokeCertificate');
 
+Route::post('/certificates/extend-certificate', [CertificateController::class, 'extendCertificate'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.extendCertificate');
+
+Route::get('/users/{user_id}/certificates', [CertificateController::class, 'getUserCertificates'])
+    // ->middleware('auth:sanctum')
+    ->name('certificates.getUserCertificates');

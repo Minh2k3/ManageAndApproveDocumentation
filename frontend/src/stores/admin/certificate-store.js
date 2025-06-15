@@ -36,6 +36,42 @@ export const useCertificateStore = defineStore("certificate", () => {
             console.error("Error issuing certificate:", error);
         }
     }
+
+    async function revokeCertificate(certificate_id) {
+        try {
+            const response = await axiosInstance.post("/api/certificates/revoke-certificate", { certificate_id });
+            console.log("response revoke certificate: ", response.data);
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error revoking certificate:", error);
+        }
+    }
+
+    async function extendCertificate(certificate_id) {
+        try {
+            const response = await axiosInstance.post("/api/certificates/extend-certificate", { certificate_id });
+            console.log("response extend certificate: ", response.data);
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error extending certificate:", error);
+        }
+    }
+
+    async function checkExpiredCertificates() {
+        try {
+            const response = await axiosInstance.get("/api/certificates/check-expired");
+            console.log("response check expired certificates: ", response.data);
+            if (response.data) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error checking expired certificates:", error);
+        }
+    }
     
     // Reset state if needed
     function resetCertificates() {
@@ -48,6 +84,8 @@ export const useCertificateStore = defineStore("certificate", () => {
         fetchCertificates,
 
         issueCertificate,
+        revokeCertificate,
+        extendCertificate,
 
         resetCertificates,
     };

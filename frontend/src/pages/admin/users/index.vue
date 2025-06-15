@@ -201,12 +201,15 @@ import { Modal, message } from "ant-design-vue";
 import { useMenu } from "@/stores/use-menu.js";
 import axiosInstance from "@/lib/axios.js";
 import { useUserStore } from "@/stores/admin/user-store";
+import { useCertificateStore } from "@/stores/admin/certificate-store";
+
 
 export default defineComponent ({
     setup() {
-        const userStore = useUserStore();
-        const router = useRouter();
         useMenu().onSelectedKeys(["admin-users"]);
+        const userStore = useUserStore();
+        const certificateStore = useCertificateStore();
+        const router = useRouter();
         // useMenu().onOpenKeys(["admin"]);
 
         let users = ref([]);
@@ -315,7 +318,10 @@ export default defineComponent ({
                         await axiosInstance
                             .post('/api/users/active', {
                                 id: user.id,
-                            })
+                            });
+
+                        await certificateStore.issueCertificate(user.id);
+                        
                         message.success(`Đã kích hoạt ${user.name}!`);
                     }
                     const index = users.value.findIndex(u => u.id === user.id);

@@ -96,6 +96,14 @@ class CertificateController extends Controller
                 'status' => 'active',
             ]);
 
+            $this->createAndSendNotification(
+                auth()->id(),
+                $user->id,
+                'Cấp chứng chỉ mới',
+                'Chứng chỉ của bạn đã được cấp thành công. Bạn có thể sử dụng để ký tài liệu.',
+                $this->getPusherInstance()
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Chứng chỉ đã được cấp thành công',
@@ -168,8 +176,14 @@ class CertificateController extends Controller
         $caX509 = new X509();
         $caPrivate = RSA::loadPrivateKey(decrypt($ca->private_key));
         $caCert = $caX509->loadX509($ca->certificate);
-        $userCert = $x509->sign($caX509, $caPrivate, ['digest_alg' => 'sha256']);
+
+        $caX509->setPrivateKey($caPrivate);
+        // $userCert = $x509->sign($caX509, $caPrivate, ['digest_alg' => 'sha256']);
+        $userCert = $x509->sign($caX509, $x509, 'sha256');
         $certPem = $x509->saveX509($userCert);
+
+        $renewal_count = $certificate->renewal_count ?? 0;
+        $renewal_count++;
 
         // Cập nhật chứng chỉ
         $certificate->update([
@@ -179,6 +193,7 @@ class CertificateController extends Controller
             'issued_at' => Carbon::now(),
             'expires_at' => Carbon::now()->addYear(),
             'status' => 'active',
+            'renewal_count' => $renewal_count,
         ]);
 
         return response()->json([
@@ -192,6 +207,31 @@ class CertificateController extends Controller
         $certificate = Certificate::findOrFail($certificateId);
         $certificate->update(['status' => 'revoked']);
         return response()->json(['message' => 'Chứng chỉ đã được thu hồi']);
+    }
+
+    public function extendCertificate(Request $request, $certificateId)
+    {
+        $certificate = Certificate::findOrFail($certificateId);
+        $newExpiresAt = Carbon::createFromFormat('H:i:s d/m/Y', $certificate->expires_at)->addYear();
+        $certificate->update(['expires_at' => $newExpiresAt]);
+        return response()->json(['message' => 'Chứng chỉ đã được gia hạn thêm 1 năm']);
+    }
+
+    public function checkExpiredCertificates(Request $request)
+    {
+        $activeCertificates = Certificate::where('status', 'active')
+            ->get();
+
+        foreach ($activeCertificates as $certificate) {
+            if (Carbon::parse($certificate->expires_at)->isPast()) {
+                $certificate->update(['status' => 'expired']);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Đã cập nhật trạng thái chứng chỉ hết hạn',
+            'expired_count' => $expiredCertificates->count(),
+        ]);
     }
 
     public function signDocument(Request $request)
@@ -323,7 +363,7 @@ class CertificateController extends Controller
             $publicKey = $x509->getPublicKey();
 
             $signatureData = base64_decode($signature->signature);
-            $isValid = $publicKey->withHash('sha256')->verify($document->content, $signatureData);
+            $isValid = $publicKey->withHash('sha256')->verify($document->file_path, $signatureData);
 
             $caX509 = new X509();
             $caCert = $caX509->loadX509($ca->certificate);
@@ -375,7 +415,6 @@ class CertificateController extends Controller
             'issued_at',
             'expires_at',
             'status',
-            'required_renewal',
             'used_count',
             'created_at',
             'updated_at'
@@ -417,4 +456,57 @@ class CertificateController extends Controller
             'certificate' => $certificate,
         ]);
     }
+
+    public function getUserCertificates(Request $request, $user_id)
+    {
+        $certificates = Certificate::where('user_id', $user_id)
+            ->with(['user.role'])
+            ->get();
+
+        return response()->json([
+            'certificates' => CertificateResource::collection($certificates),
+        ])->setStatusCode(200, 'User certificates retrieved successfully.');
+    }
+
+    /**
+     * Create and send notification helper
+     */
+    private function createAndSendNotification($fromUserId, $toUserId, $title, $content, $pusher)
+    {
+        \Log::info("Creating notification from user ID: {$fromUserId} to user ID: {$toUserId}");
+        $notification = Notification::create([
+            'notification_category_id' => 4,
+            'from_user_id' => $fromUserId,
+            'receiver_id' => $toUserId,
+            'title' => $title,
+            'content' => $content,
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+        \Log::info('Notification created with ID: ' . $notification->id);
+        
+        $data = [
+            'notification' => $notification,
+        ];
+        
+        $pusher->trigger("user.{$toUserId}", 'new-notification', $data);
+    }
+
+    /**
+     * Get Pusher instance
+     */
+    private function getPusherInstance()
+    {
+        $options = [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true
+        ];
+        
+        return new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
+    }    
 }

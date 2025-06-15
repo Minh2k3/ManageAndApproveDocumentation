@@ -152,7 +152,7 @@
                                         </span>
                                     </a-tag>
 
-                                    <a-tag v-else-if="record.status === 'renewal'" color="orange">
+                                    <a-tag v-else-if="record.status === 'request_renewal'" color="blue">
                                         <span>
                                             Xin cấp lại
                                         </span>

@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class Certificate extends Model
 {
-    protected $fillable = ['user_id', 'public_key', 'private_key', 'certificate', 'issued_at', 'expires_at', 'status'];
+    protected $fillable = ['user_id', 'public_key', 'private_key', 'certificate', 'issued_at', 'expires_at', 'status', 'used_count', 'renewal_count'];
 
     protected $casts = [
         'issued_at' => 'datetime',

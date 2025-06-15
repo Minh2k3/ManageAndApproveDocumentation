@@ -18,7 +18,6 @@ class CertificateResource extends JsonResource
                 'issued_at' => $this->issued_at,
                 'expires_at' => $this->expires_at,
                 'status' => $this->status,
-                'required_renewal' => $this->required_renewal,
                 'used_count' => $this->used_count,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
