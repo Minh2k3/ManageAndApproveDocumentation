@@ -23,9 +23,12 @@ class DocumentSignature extends Model
      */
     protected $fillable = [
         'document_version_id',
-        'approver_id',
+        'document_flow_step_id',
+        'certificate_id',
+        'signature',
         'signed_at',
-        'signature_text',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -35,6 +38,8 @@ class DocumentSignature extends Model
      */
     protected $casts = [
         'signed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -46,10 +51,25 @@ class DocumentSignature extends Model
     }
 
     /**
-     * Get the approver that signed the document.
+     * Get the approver associated with the signature.
      */
     public function approver()
     {
-        return $this->belongsTo(Approver::class);
+        return $this->belongsTo(Approver::class, 'document_flow_step_id', 'approver_id');
+    }
+
+    /**
+     * Get the certificate associated with the signature.
+     */
+    public function certificate()
+    {
+        return $this->belongsTo(Certificate::class, 'certificate_id', 'id');
+    }
+    /**
+     * Get the document flow step associated with the signature.
+     */
+    public function documentFlowStep()
+    {
+        return $this->belongsTo(DocumentFlowStep::class, 'document_flow_step_id', 'id');
     }
 }

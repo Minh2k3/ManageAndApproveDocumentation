@@ -2,12 +2,17 @@
     <div class="document-flows-management">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Quản lý luồng phê duyệt mẫu</h2>
+        <h1 class="mb-0">Quản lý luồng phê duyệt mẫu</h1>
+    </div>
+
+    <!-- Add Flow Button -->
+    <div class="mb-3 d-flex justify-content-end">
         <button class="btn btn-primary" @click="handleClickAddFlow">
             <i class="bi bi-plus-circle me-2"></i>
             Thêm luồng mới
         </button>
     </div>
+            
 
     <!-- Search and Filter -->
     <div class="row mb-3">

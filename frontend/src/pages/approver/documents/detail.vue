@@ -992,9 +992,12 @@ export default defineComponent({
             // }, 2000); // Disable buttons for 2 seconds
             // return;
             try {
+                console.log('Approve response version:', document_versions.value[0].id);
+                // return;
+                await documentStore.signDocument(document_versions.value[0].id, step_id, document_id);
                 await documentStore.approveDocument(step_id);
                 message.success('Bạn vừa đồng ý phê duyệt');
-                window.location.reload();
+                // window.location.reload();
             } catch (error) {
                 message.error('Có lỗi xảy ra khi đồng ý phê duyệt văn bản');
                 console.error('Error approving document:', error);

@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid">
+    <a-card class="" style="width: 100%">
         <div class="row">
             <div class="col-12">
                 <h1>Quản lý chữ ký</h1>
@@ -866,7 +866,7 @@
             </div>
         </a-modal>
 
-    </div>
+    </a-card>
 </template>
 
 <script>

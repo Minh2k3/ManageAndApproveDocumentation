@@ -165,6 +165,10 @@ Route::get('documents/{id}/versions', [DocumentController::class, 'getVersionsBy
     // ->middleware('auth:sanctum')
     ->name('documents.getVersionsByDocumentId');
 
+Route::post('documents/sign-document', [CertificateController::class, 'signDocument'])
+    // ->middleware('auth:sanctum')
+    ->name('documents.signDocument');
+
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');

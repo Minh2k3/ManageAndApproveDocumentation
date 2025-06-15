@@ -167,6 +167,9 @@ class DocumentFlowStepController extends Controller
                 'signed_at' => now()
             ]);
             \Log::info('Current step updated to approved.');
+
+            // Ký văn bản
+
             
             // Lưu comment nếu có
             // if (!empty($validated['comment'])) {
@@ -202,6 +205,7 @@ class DocumentFlowStepController extends Controller
                 'message' => 'Document flow step approved successfully.',
                 'document_flow_step' => $currentStep->fresh(['approver.user', 'department']),
                 'document' => $resources['document']->fresh(),
+                'document_version' => $resources['documentVersion']->fresh(),
                 'should_proceed' => $shouldProceedToNext
             ]);
             

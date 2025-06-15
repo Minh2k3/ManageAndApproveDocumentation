@@ -196,32 +196,74 @@ class CertificateController extends Controller
 
     public function signDocument(Request $request)
     {
-        $documentFlowStepId = $request->input('document_flow_step_id');
-        $documentVersionId = $request->input('document_version_id');
-        $document = Document::findOrFail($documentId);
+        try {
+            $documentFlowStepId = $request->input('step_id');
+            $documentVersionId = $request->input('version_id');
+            $document = Document::findOrFail($request->document_id);
+            \Log::info('Signing document', [
+                'document_flow_step_id' => $documentFlowStepId,
+                'document_version_id' => $documentVersionId,
+                'document_id' => $document->id,
+            ]);
 
-        $certificate = Certificate::where('user_id', $userId)
-            ->where('status', 'active')
-            ->where('expires_at', '>', Carbon::now())
-            ->firstOrFail();
+            $user = auth()->user();
 
-        $privateKey = RSA::loadPrivateKey(decrypt($certificate->private_key));
-        $signature = $privateKey->withHash('sha256')->sign($document->content);
+            $certificate = Certificate::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->where('expires_at', '>', Carbon::now())
+                ->firstOrFail();
+            \Log::info('Found certificate', [
+                'certificate_id' => $certificate->id,
+            ]);
+            // Ký theo nội dung tài liệu
+            // $filePath = storage_path('app/' . $document->file_path); // Điều chỉnh đường dẫn nếu cần
+            //     if (!file_exists($filePath)) {
+            //         return response()->json([
+            //             'message' => 'File tài liệu không tồn tại',
+            //         ], 400);
+            //     }
 
-        $signatureRecord = DocumentSignature::create([
-            'document_flow_step_id' => $documentFlowStepId,
-            'document_version_id' => $documentVersionId,
-            'certificate_id' => $certificate->id,
-            'signature' => base64_encode($signature),
-            'signed_at' => Carbon::now(),
-        ]);
+            // $fileContent = file_get_contents($filePath);
+            // if ($fileContent === false) {
+            //     return response()->json([
+            //         'message' => 'Không thể đọc nội dung file tài liệu',
+            //     ], 400);
+            // }
 
-        return response()->json([
-            'message' => 'Tài liệu đã được ký',
-            'signature_id' => $signatureRecord->id,
-            'document_id' => $documentId,
-            'signed_at' => $signatureRecord->signed_at,
-        ]);
+            $privateKey = RSA::loadPrivateKey(decrypt($certificate->private_key));
+            $signature = $privateKey->withHash('sha256')->sign($document->file_path);
+
+            $signatureRecord = DocumentSignature::create([
+                'document_flow_step_id' => $documentFlowStepId,
+                'document_version_id' => $documentVersionId,
+                'certificate_id' => $certificate->id,
+                'signature' => base64_encode($signature),
+                'signed_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            \Log::info('Document signed', [
+                'signature_id' => $signatureRecord->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Tài liệu đã được ký',
+                'signature_id' => $signatureRecord->id,
+                'document_id' => $document->id,
+                'signed_at' => $signatureRecord->signed_at,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error signing document', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'message' => 'Có lỗi xảy ra khi ký tài liệu',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function verifyDocumentSignatures(Request $request)

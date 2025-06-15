@@ -79,10 +79,10 @@
                                 <div class="row text-capitalize">{{ role }}</div>
                             </div>
                         </h6></li>
-                        <li><a class="dropdown-item" href="#">Thông báo</a></li>
-                        <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
+                        <li><a class="dropdown-item" href="" @click="handleClickNotifications">Thông báo</a></li>
+                        <li><a class="dropdown-item" href="" @click="handleClickSettings">Cài đặt cá nhân</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="handleLogout"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
+                        <li><a class="dropdown-item" href="" @click.prevent="handleLogout"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             </div>
@@ -190,10 +190,12 @@
         createVNode,
         onMounted,
         onUnmounted,
+        computed
     } from 'vue';
     import { useRouter } from 'vue-router';
     import { useAuth } from '@/stores/use-auth';
     import { useNotificationStore } from '@/stores/use-notification';
+    import { useMenu } from '@/stores/use-menu.js';
 
     import { 
         Modal, 
@@ -204,6 +206,7 @@
     } from '@ant-design/icons-vue';
 
     const router = useRouter();
+    const selectedKeys = computed(() => useMenu().selectedKeys);
     const authStore = useAuth();
     const notificationStore = useNotificationStore();
     const user = authStore.user;
@@ -229,6 +232,10 @@
     };
 
     function pushToNotificationPage() {
+        if (JSON.stringify(selectedKeys) === JSON.stringify([role + '-notification'])) {
+            console.log('Already on notification page');
+            return;
+        }
         console.log('Navigating to notification page for role:', role + '-notification');
         router.push({ name: role + '-notification' });
     };
@@ -359,6 +366,24 @@
     // Hàm xử lý sự kiện đăng xuất
     function handleLogout() {
         showConfirmLogout();
+    }
+
+    function handleClickSettings() {
+        console.log('Cài đặt cá nhân clicked');
+        if (useMenu().selectedKeys === [role + '-settings']) {
+            console.log('Already on settings page');
+            return;
+        }
+        // Xử lý logic cài đặt cá nhân ở đây
+        useMenu().onSelectedKeys([role + '-settings']);
+        console.log('On selected keys:', useMenu().selectedKeys);
+        router.push({ name: role + '-settings' });
+    }
+
+    function handleClickNotifications() {
+        console.log('Thông báo clicked');
+        // Xử lý logic thông báo ở đây
+        pushToNotificationPage();
     }
 </script>
 

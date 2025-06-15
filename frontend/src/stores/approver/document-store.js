@@ -222,6 +222,22 @@ export const useDocumentStore = defineStore("document", () => {
         return data;
     }    
 
+    async function signDocument(version_id, step_id, document_id) {
+        try {
+            const response = await axiosInstance.post(`api/documents/sign-document`, { 
+                version_id: version_id,
+                step_id: step_id,
+                document_id: document_id
+            });
+            if (response.data) {
+                console.log("Sign document response: ", response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error signing document:", error);
+        }
+    }
+
     function reset() {
         document_types.value = []
         isFetchedDocumentTypes.value = false
@@ -249,15 +265,10 @@ export const useDocumentStore = defineStore("document", () => {
 
     return {
         document_types,
-        isFetchedDocumentTypes,
         document_flow_templates,
-        isFetchedDocumentFlowTemplates,
         document_templates,
-        isFetchedDocumentTemplates,
         template_user,
-        isFetchedTemplateUser,
         document_flow_steps,
-        isFetchedDocumentFlowSteps,
         documents,
         isFetchedDocuments,
         document_comments,
@@ -280,6 +291,7 @@ export const useDocumentStore = defineStore("document", () => {
         getDocumentVersions,
         setCurrentDocumentData, 
         getCurrentDocumentData,
+        signDocument,
         fetchAll,
         reset,
     };
