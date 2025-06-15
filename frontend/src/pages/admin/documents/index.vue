@@ -4,60 +4,57 @@
         <div class="row mb-3">
             <div class="col-12">
                 <div class="row g-2">
-                <!-- Tìm kiếm -->
-                <div class="col-12 col-md-4">
-                    <a-input-search
-                        placeholder="Tìm kiếm"
-                        allow-clear
-                        enter-button
-                        class="w-100"
-                    />
-                </div>
+                    <!-- Tìm kiếm -->
+                    <div class="col-12 col-lg-4">
+                        <a-input
+                            placeholder="Tìm kiếm"
+                            v-model:value="search"
+                            allow-clear
+                            enter-button
+                            class="w-100"
+                        >
+                        </a-input>  
+                    </div>
 
-                <!-- Bộ lọc -->
-                <div class="col-12 col-md-8">
-                    <div class="row g-2">
-                    <div class="col-6 col-md-3">
-                        <a-select
-                        v-model:value="status_id"
-                        show-search
-                        placeholder="Trạng thái"
-                        :options="documents_status"
-                        :filter-option="filterOption"
-                        allow-clear
-                        class="w-100"
-                        />
+                    <!-- Bộ lọc -->
+                    <div class="col-12 col-lg-8">
+                        <div class="row g-2">
+                            <div class="col-6 col-lg-4">
+                                <a-select
+                                v-model:value="status_filter"
+                                show-search
+                                placeholder="Trạng thái"
+                                :options="document_status"
+                                :filter-option="filterOption"
+                                allow-clear
+                                class="w-100"
+                                @change="handleStatusFilter"
+                                />
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <a-select
+                                v-model:value="type_filter"
+                                show-search
+                                placeholder="Loại văn bản"
+                                :options="document_types"
+                                :filter-option="filterOption"
+                                allow-clear
+                                class="w-100"
+                                />
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <a-select
+                                v-model:value="department_filter"
+                                show-search
+                                placeholder="Đơn vị đề xuất"
+                                :options="departments"
+                                :filter-option="filterOption"
+                                allow-clear
+                                class="w-100"
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <a-select
-                        v-model:value="type_id"
-                        show-search
-                        placeholder="Loại văn bản"
-                        :options="documents_type"
-                        :filter-option="filterOption"
-                        allow-clear
-                        class="w-100"
-                        />
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <a-select
-                        v-model:value="department_id"
-                        show-search
-                        placeholder="Đơn vị đề xuất"
-                        :options="documents_creator"
-                        :filter-option="filterOption"
-                        allow-clear
-                        class="w-100"
-                        />
-                    </div>
-                    <!-- Nút tạo -->
-                    <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
-                        <a-button type="primary" class="w-100 w-md-auto">
-                            <i class="fa-solid fa-filter "></i>
-                        </a-button>
-                    </div>
-                    </div>
-                </div>
                 </div>
             </div>
         </div>
@@ -65,7 +62,7 @@
         <div class="row">
             <div class="col-12">
                 <a-table 
-                    :dataSource="documents" 
+                    :data-source="filterData" 
                     :columns="columns" 
                     :scroll="{ x: 576 }" 
                     bordered
@@ -166,9 +163,10 @@
     </a-card>
 
     <a-modal
-        v-model:visible="detailVisible"
+        v-model:open="detailVisible"
         title="Chi tiết văn bản"
         width="600px"
+        z-index="10000"
         >
         <div>
             <h5>📄 Thông tin văn bản</h5>
@@ -206,7 +204,7 @@
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button type="primary" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>
 </template>
@@ -225,31 +223,46 @@ import {
 
 import { 
     EyeOutlined,
-
  } from '@ant-design/icons-vue';
 import { useMenu } from "@/stores/use-menu.js";
+import { useRouter } from 'vue-router';
 import {useDocumentStore} from "@/stores/admin/document-store.js";
 import { useUserStore } from "@/stores/admin/user-store.js";
-
+import { useDepartmentStore } from "@/stores/admin/department-store.js";
 export default defineComponent ({
     components: {
         EyeOutlined,
     },
     setup() {
         useMenu().onSelectedKeys(["admin-documents"]);
+        const router = useRouter();
         const documentStore = useDocumentStore();
         const userStore = useUserStore();
+        const departmentStore = useDepartmentStore();
         const users = ref([]);
+        const departments = ref([]);
         const documents = ref([]);
         const document_types = ref([]);
+        const document_status = [
+            { label: 'Bản nháp', value: 'draft' },
+            { label: 'Chờ duyệt', value: 'in_review' },
+            { label: 'Đã duyệt', value: 'approved' },
+            { label: 'Bị từ chối', value: 'rejected' }
+        ];
 
         onMounted(async () => {
-            // await documentStore.fetchAll();
+            await documentStore.fetchAll();
             documents.value = documentStore.documents;
             document_types.value = documentStore.document_types;
+            console.log(documents.value);
+            console.log(document_types.value);
 
             // await userStore.fetchAll();
             users.value = userStore.users;
+
+            await departmentStore.fetchDepartments();
+            departments.value = departmentStore.departments
+                .filter(department => department.group !== 'Khác');
         })
 
         const detailVisible = ref(false);
@@ -361,6 +374,44 @@ export default defineComponent ({
             };
         };
 
+        const search = ref('');
+        const status_filter = ref(undefined);
+        const type_filter = ref(undefined);
+        const department_filter = ref(undefined);
+
+        const filterData = computed(() => {
+            let data = [...documents.value];
+            if (search.value) {
+                const searchText = search.value.toLowerCase();
+                data = data.filter(doc => 
+                    doc.title.toLowerCase().includes(searchText) ||
+                    doc.type.toLowerCase().includes(searchText) ||
+                    doc.creator_name.toLowerCase().includes(searchText)
+                );
+            }
+
+            if (status_filter.value) {
+                data = data.filter(doc => doc.status === status_filter.value);
+            }
+
+            if (type_filter.value) {
+                data = data.filter(doc => doc.type_id === type_filter.value);
+            }
+
+            if (department_filter.value) {
+                data = data.filter(doc => doc.department_id === department_filter.value);
+            }
+
+            return data;
+        })
+
+        const goToDetailPage = (id) => {
+            router.push({
+                name: 'admin-documents-detail',
+                params: { id: id },
+            });
+        };
+
         // const getUsers = () => {
         //     axios
         //         .get('http://127.0.0.1:8000/api/users')
@@ -381,12 +432,21 @@ export default defineComponent ({
         return {
             users,
             documents,
+            document_types,
+            document_status,
+            departments,
             columns,
             detailVisible,
             selectedDocument,
+            search,
+            status_filter,
+            type_filter,
+            department_filter,
+            filterData,
 
             customRow,
             viewDetail,
+            goToDetailPage,
         };
     },
 });

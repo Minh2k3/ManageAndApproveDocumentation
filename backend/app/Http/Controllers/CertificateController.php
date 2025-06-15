@@ -16,24 +16,6 @@ use App\Http\Resources\CertificateResource;
 
 class CertificateController extends Controller
 {
-    // public function createDocument(Request $request)
-    // {
-    //     $request->validate([
-    //         'content' => 'required|string',
-    //         'title' => 'required|string',
-    //     ]);
-
-    //     $document = Document::create([
-    //         'content' => $request->input('content'),
-    //         'title' => $request->input('title'),
-    //     ]);
-
-    //     return response()->json([
-    //         'message' => 'Tài liệu đã được tạo',
-    //         'document_id' => $document->id,
-    //     ]);
-    // }
-
     // Issue the certificate to user by user_id
     public function issueCertificate(Request $request)
     {
@@ -79,10 +61,29 @@ class CertificateController extends Controller
                 ->where('status', 'active')
                 ->first();
 
+            // if ($old_certificate && Carbon::parse($old_certificate->expires_at)->isFuture()) {
+            //     // If user already has an active certificate that is not expired, return error
+            //     return response()->json([
+            //         'success' => true,
+            //         'message' => 'Người dùng đã có chứng chỉ hợp lệ',
+            //         'certificate_id' => $old_certificate->id,
+            //     ], 400);
+            // } 
+
             if ($old_certificate) {
-                // If user already has an active certificate, revoke it
-                $old_certificate->update(['status' => 'revoked']);
-            };
+                $expiresAt = Carbon::createFromFormat('H:i:s d/m/Y', $old_certificate->expires_at);
+
+                if ($expiresAt->isFuture() && $expiresAt->greaterThan(Carbon::now()->addMonth())) {
+                    // Nếu chứng chỉ còn hạn và thời hạn > 1 tháng thì không cho tạo mới
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Người dùng đã có chứng chỉ hợp lệ còn hạn trên 1 tháng',
+                        'certificate_id' => $old_certificate->id,
+                    ], 200);
+                } else {
+                    $old_certificate->update(['status' => 'expired']);
+                }
+            }
 
             // Save certificate to database
             $certificate = Certificate::create([

@@ -5,16 +5,21 @@ import axiosInstance from "@/lib/axios.js";
 export const useDepartmentStore = defineStore("department", () => {
     // State
     const departments = ref([]);
+    const isFetchedDepartments = ref(false);
     const departments_can_approve = ref([]);
 
     // Actions
-    async function fetchDepartments() {
+    async function fetchDepartments(force = false) {
+        if (isFetchedDepartments.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("/api/departments");
             if (response.data) {
                 // console.log("response department: ", response.data);
-                // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 departments.value = response.data.departments;
+                isFetchedDepartments.value = true;
             }
         } catch (error) {
             console.error("Error fetching department:", error);
@@ -36,6 +41,7 @@ export const useDepartmentStore = defineStore("department", () => {
 
     return {
         departments,
+        isFetchedDepartments,
         fetchDepartments,
 
         departments_can_approve,

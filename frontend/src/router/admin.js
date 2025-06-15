@@ -79,7 +79,7 @@ const admin = [
                 component: () => import('@/pages/admin/documents/type.vue')
             },
             {
-                path: "documents/detail",
+                path: "documents/:id",
                 name: "admin-documents-detail",
                 component: () => import('@/pages/admin/documents/detail.vue')
             },

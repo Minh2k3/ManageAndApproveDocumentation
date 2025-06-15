@@ -13,7 +13,6 @@ export const useDocumentStore = defineStore("document", () => {
     const template_user = ref([])
     const isFetchedTemplateUser = ref(false)
     const document_flow_steps = ref([])
-    const isFetchedDocumentFlowSteps = ref(false)
     const documents = ref([])
     const isFetchedDocuments = ref(false)
     const document_comments = ref([])
@@ -190,7 +189,6 @@ export const useDocumentStore = defineStore("document", () => {
         template_user.value = []
         isFetchedTemplateUser.value = false
         document_flow_steps.value = []
-        isFetchedDocumentFlowSteps.value = false
         documents.value = []
         isFetchedDocuments.value = false
     }
@@ -206,17 +204,11 @@ export const useDocumentStore = defineStore("document", () => {
 
     return {
         document_types,
-        isFetchedDocumentTypes,
         document_flow_templates,
-        isFetchedDocumentFlowTemplates,
         document_templates,
-        isFetchedDocumentTemplates,
         template_user,
-        isFetchedTemplateUser,
         document_flow_steps,
-        isFetchedDocumentFlowSteps,
         documents,
-        isFetchedDocuments,
         document_comments,
         current_document_flow_steps,
         current_document_versions,

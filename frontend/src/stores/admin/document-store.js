@@ -5,13 +5,27 @@ import axiosInstance from "@/lib/axios.js";
 export const useDocumentStore = defineStore("document", () => {
     // State
     const document_types = ref([])
+    const isFetchedDocumentTypes = ref(false)
     const document_flow_templates = ref([])
+    const isFetchedDocumentFlowTemplates = ref(false)
     const document_templates = ref([])
+    const isFetchedDocumentTemplates = ref(false)
+    const template_user = ref([])
+    const isFetchedTemplateUser = ref(false)
     const document_flow_steps = ref([])
     const documents = ref([])
-
+    const isFetchedDocuments = ref(false)
+    const document_comments = ref([])
+    const current_document_flow_steps = ref([]);
+    const current_document = ref([]);
+    const current_document_versions = ref([]);
+    const current_document_data = ref([]);
     // Actions
-    async function fetchDocumentTypes() {
+    async function fetchDocumentTypes(force = false) {
+        if (isFetchedDocumentTypes.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("/api/document-types");
             if (response.data) {
@@ -24,7 +38,11 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocumentFlowTemplates() {
+    async function fetchDocumentFlowTemplates(force = false) {
+        if (isFetchedDocumentFlowTemplates.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("api/document-flows");
             if (response.data) {
@@ -37,7 +55,11 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocumentTemplates() {
+    async function fetchDocumentTemplates(force = false) {
+        if (isFetchedDocumentTemplates.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("api/document-templates");
             if (response.data) {
@@ -67,16 +89,58 @@ export const useDocumentStore = defineStore("document", () => {
         }
     }
 
-    async function fetchDocuments() {
+    async function fetchDocuments(force = false) {
+        if (isFetchedDocuments.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get(`api/documents`);
             if (response.data) {
                 console.log("response.data", response.data);
                 documents.value = response.data.documents;
+                isFetchedDocuments.value = true;
             }
         }
         catch (error) {
             console.error("Error fetching documents:", error);
+        }
+    }
+
+    async function fetchDocumentComments(documentId) {
+        try {
+            const response = await axiosInstance.get(`api/documents/${documentId}/comments`);
+            if (response.data) {
+                console.log("Document_comments: " + JSON.stringify(response.data, null, 2));
+                document_comments.value = response.data;
+            }
+        } catch (error) {
+            console.error("Error fetching document comments:", error);
+        }
+    }    
+
+    async function fetchStepsByDocumentFlowId(documentFlowId) {
+        try {
+            const response = await axiosInstance.get(`api/document-flows/${documentFlowId}/steps`);
+            if (response.data) {
+                console.log("Document_flow_step: " + JSON.stringify(response.data, null, 2));
+                current_document_flow_steps.value = response.data;
+            }
+        } catch (error) {
+            console.error("Error fetching document flow steps:", error);
+        }
+    }
+
+    async function getDocumentVersions(documentId) {
+        try {
+            const response = await axiosInstance.get(`api/documents/${documentId}/versions`);
+            if (response.data) {
+                console.log("Document version: " + JSON.stringify(response.data.versions, null, 2));
+                current_document_versions.value = [...response.data.versions];
+                console.log("Current document versions: ", current_document_versions.value);
+            }
+        } catch (error) {
+            console.error("Error fetching document version:", error);
         }
     }
 
@@ -88,18 +152,45 @@ export const useDocumentStore = defineStore("document", () => {
         await fetchDocuments();
     }
 
+    function reset() {
+        document_types.value = [];
+        isFetchedDocumentTypes.value = false;
+        document_flow_templates.value = [];
+        isFetchedDocumentFlowTemplates.value = false;
+        document_templates.value = [];
+        isFetchedDocumentTemplates.value = false;
+        document_flow_steps.value = [];
+        documents.value = [];
+        isFetchedDocuments.value = false;
+        document_comments.value = [];
+        current_document_flow_steps.value = [];
+        current_document.value = [];
+        current_document_versions.value = [];
+        current_document_data.value = [];
+    }
+
     return {
         document_types,
         document_flow_templates,
         document_templates,
         document_flow_steps,
         documents,
-        
+        current_document_versions,
+
+        document_comments,
+        current_document_flow_steps,
+        current_document_versions,
+        current_document_data,
+
         fetchDocumentTypes,
         fetchDocumentFlowTemplates,
         fetchDocumentTemplates,
         fetchDocumentFlowSteps,
         fetchDocuments,
+        fetchDocumentComments,
+        fetchStepsByDocumentFlowId,
+        getDocumentVersions,
         fetchAll,
+        reset,
     };
 });

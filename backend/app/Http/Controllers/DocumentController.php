@@ -77,34 +77,46 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        $documents = Document::withCount('versions')
-            ->join('users', 'documents.created_by', '=', 'users.id')
-            ->join('document_types', 'documents.document_type_id', '=', 'document_types.id')
-            ->leftJoin(\DB::raw('(
-                SELECT user_id, department_id, roll_at_department_id FROM approvers
-                UNION ALL
-                SELECT user_id, department_id, roll_at_department_id FROM creators
-            ) as user_roles'), 'users.id', '=', 'user_roles.user_id')
-            ->leftJoin('departments', 'user_roles.department_id', '=', 'departments.id')
-            ->leftJoin('roll_at_departments', 'user_roles.roll_at_department_id', '=', 'roll_at_departments.id')
-            ->select(
-                'documents.id as id',
-                'documents.title as title',
-                'documents.description as description',
-                'documents.file_path as file_path',
-                'documents.status as status',
-                'documents.created_at as created_at',
-                'documents.updated_at as updated_at',
-                'users.name as creator_name',
-                'users.id as creator_id',
-                'document_types.name as type',
-                'document_types.id as type_id',
-                'departments.id as department_id',
-                'roll_at_departments.id as roll_id',
-                \DB::raw('CONCAT(roll_at_departments.name, " - ", departments.name) as roll')
-            )
-            ->orderBy('documents.updated_at', 'desc')
-            ->get();
+        $documents = Document::with([
+            'documentType:id,name',
+            'documentFlow:id,name,process',
+            'documentFlow.documentFlowSteps:id,document_flow_id',
+            'versions' => function($query) {
+                $query->select('id', 'document_id', 'version', 'document_data', 'status')
+                    ->orderBy('version', 'desc')
+                    ->limit(1);
+            }
+        ])
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->map(function($document) {
+            $latestVersion = $document->versions->first();
+            
+            // Tìm thông tin người tạo từ user_id
+            $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+            
+            return [
+                'id' => $document->id,
+                'title' => $document->title,
+                'description' => $document->description,
+                'file_path' => $document->file_path,
+                'status' => $latestVersion ? $latestVersion->status : null,
+                'created_at' => $document->created_at,
+                'updated_at' => $document->updated_at,
+                'document_flow_id' => $document->document_flow_id,
+                'type' => $document->documentType->name ?? null,
+                'type_id' => $document->documentType->id ?? null,
+                'creator_name' => $creatorInfo['name'],
+                'creator_id' => $document->created_by,
+                'process' => $document->documentFlow->process ?? 0,
+                'version_id' => $latestVersion->id ?? null,
+                'version_count' => $latestVersion->version ?? 0,
+                'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
+                'roll' => $creatorInfo['roll'],
+                'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+            ];
+        });
+
         return response()->json([
             'documents' => $documents,
         ]);

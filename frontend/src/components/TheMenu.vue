@@ -48,6 +48,10 @@
 				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents' }">Tất cả văn bản</router-link>
 			</a-menu-item>
 
+			<a-menu-item key="admin-documents-detail" :disabled="!isDetailDocumentAdmin" :selectable="isDetailDocumentAdmin">
+				Chi tiết văn bản
+			</a-menu-item>
+
 			<a-menu-item key="admin-documents-type">
 				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-type' }">Loại văn bản</router-link>
 			</a-menu-item>
@@ -350,6 +354,10 @@ export default defineComponent({
 			return route.name === 'approver-documents-edit';
 		})
 
+		const isDetailDocumentAdmin = computed(() => {
+			return route.name === 'admin-documents-detail';
+		});
+
 		function onMenuClick({ key }) {
 			console.log('Đã bấm' + key);
 			auth.role = key;
@@ -389,6 +397,7 @@ export default defineComponent({
 			isEditPageCreator,
 			isDetailPageApprover,
 			isEditPageApprover,
+			isDetailDocumentAdmin,
 			
 			onMenuClick,
 			handleLogout,

@@ -226,54 +226,6 @@
                         </a-table>
                     </div>
                 </div>
-                    <!-- <a-modal
-                        v-model:open="showGenerateSignatureUserModal"
-                        title="Tạo chữ ký người dùng mới"
-                        :width="600"
-                        @ok="generateNewUserSignature"
-                        ok-text="Tạo chữ ký"
-                        cancel-text="Hủy"
-                    >
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Common Name (CN):</label>
-                                    <input type="text" class="form-control" v-model="newCA.commonName" placeholder="Trường Đại học Thủy lợi Root CA">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Organization (O):</label>
-                                    <input type="text" class="form-control" v-model="newCA.organization" placeholder="Truong Dai hoc Thuy loi">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Country (C):</label>
-                                    <input type="text" class="form-control" v-model="newCA.country" placeholder="VN" maxlength="2">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Thời hạn (năm):</label>
-                                    <select class="form-select" v-model="newCA.validityYears">
-                                        <option value="5">5 năm</option>
-                                        <option value="10">10 năm</option>
-                                        <option value="20">20 năm</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Key Size:</label>
-                            <select class="form-select" v-model="newCA.keySize">
-                                <option value="2048">2048 bit</option>
-                                <option value="4096">4096 bit (Khuyến nghị)</option>
-                            </select>
-                        </div>
-                    </a-modal> -->
             </a-tab-pane>
 
             <a-tab-pane key="2" tab="Chứng chỉ tổ chức" force-render>
@@ -1100,23 +1052,24 @@ export default defineComponent({
                     showGenerateSignatureUserModal.value = false;
                     message.success(`Đã cấp chữ ký thành công cho ${count.value} người dùng trong ${selectedDepartmentName.value}`);
                 } else {
-                    const response = await certificateStore.issueCertificateToAllUsers();
-                    if (response.success === true) {
-                        isGenerating.value = false;
-                        showGenerateSignatureUserModal.value = false;
-                        message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng trong hệ thống`);
-                        resetSignatureForm();
-                        await certificateStore.fetchCertificates();
+                    const count = ref(0);
+                    for (const user of allUsers.value) {
+                        const response = await certificateStore.issueCertificate(user.id);
+                        if (response.success === true) {
+                            count.value++;
+                        }
                     }
+                    isGenerating.value = false;
+                    showGenerateSignatureUserModal.value = false;
+                    message.success(`Đã cấp chữ ký thành công cho ${getTargetUserCount()} người dùng trong hệ thống`);
+                    resetSignatureForm();
+                    await certificateStore.fetchCertificates(true);
                 }
-                console.log('Response:', response);
-                
             } catch (error) {
                 message.error('Đã xảy ra lỗi khi cấp chữ ký. Vui lòng thử lại sau.');
             } finally {
                 isGenerating.value = false
             }
-            
         }
 
         const resetSignatureForm = () => {
@@ -1224,7 +1177,7 @@ export default defineComponent({
             title: 'Người dùng',
             dataIndex: 'user',
             key: 'user',
-            width: 180,
+            width: 150,
             customHeaderCell: () => {
                 return { style: { textAlign: 'center' } };
             },
@@ -1234,7 +1187,7 @@ export default defineComponent({
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            width: 140,
+            width: 100,
             responsive: ['xs', 'sm', 'md', 'lg', 'xl'],
             align: 'center'
         },
