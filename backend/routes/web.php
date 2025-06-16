@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\Auth\HandlePasswordController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CreatePDFController;
 use Illuminate\Support\Facades\Response;
@@ -48,9 +49,9 @@ Route::post('/resend-verification-email', [RegisterController::class, 'resendVer
 // Route::get('/api/verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])
 //     ->name('verification.verify');
 
-Route::post('/forgot-password', [HandlePasswordController::class, 'forgotPassword'])
-    ->middleware('throttle:3,60')
-    ->name('forgot-password');
+// Route::post('/forgot-password', [HandlePasswordController::class, 'forgotPassword'])
+//     ->middleware('throttle:3,60')
+//     ->name('forgot-password');
 Route::post('/reset-password', [HandlePasswordController::class, 'resetPassword'])
     ->name('reset-password');
 Route::post('/verify-reset-token', [HandlePasswordController::class, 'verifyResetToken'])
@@ -80,8 +81,8 @@ Route::get('/direct-pusher', function () {
 // Route đơn giản để serve PDF
 // routes/web.php
 Route::prefix('documents')->group(function () {
-    Route::get('{filename}/view', [DocumentController::class, 'viewPdf'])->name('documents.view');
-    Route::get('{filename}/download', [DocumentController::class, 'downloadPdf'])->name('documents.download');
+    // Route::get('{filename}/view', [DocumentController::class, 'viewPdf'])->name('documents.view');
+    // Route::get('{filename}/download', [DocumentController::class, 'downloadPdf'])->name('documents.download');
     Route::options('{filename}/view', [DocumentController::class, 'handlePreflight']);
     Route::options('{filename}/download', [DocumentController::class, 'handlePreflight']);
 });

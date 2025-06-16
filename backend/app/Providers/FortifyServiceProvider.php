@@ -86,9 +86,9 @@ class FortifyServiceProvider extends ServiceProvider
         });
     
         // Override route xác thực email
-        \Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, '__invoke'])
-            ->middleware(['signed', 'throttle:6,1'])
-            ->name('verification.verify');
+        // \Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, '__invoke'])
+        //     ->middleware(['signed', 'throttle:6,1'])
+        //     ->name('verification.verify');
 
 
     }

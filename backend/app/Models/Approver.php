@@ -35,7 +35,7 @@ class Approver extends Model
         'updated_at' => 'datetime', 
     ];
 
-    protected $appends = ['full_role', 'full_name'];
+    protected $appends = ['full_role'];
 
     /**
      * Get the user that owns the approver.
@@ -95,10 +95,4 @@ class Approver extends Model
         $department = $this->department?->name ?? '';
         return trim("{$position} {$department}");
     }    
-
-    public function getFullNameAttribute()
-    {
-        $name = $this->user?->name ?? '';
-        return trim($name);
-    }
 }

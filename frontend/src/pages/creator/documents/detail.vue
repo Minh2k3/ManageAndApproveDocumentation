@@ -22,6 +22,16 @@
                                     </div>
                                 </div>
 
+                                    <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Chứng chỉ số
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- Information Section -->
                                 <div >
                                     <div class="col">
@@ -446,7 +456,7 @@ export default defineComponent({
     },
     setup() {
         dayjs.extend(relativeTime);
-        const activeKey = ref('versions');
+        const activeKey = ref('document');
         const commentSection = ref(false);
         useMenu().onSelectedKeys(["creator-documents-detail"]);
         const documentStore = useDocumentStore();
@@ -466,36 +476,7 @@ export default defineComponent({
         const max_version = computed(() => {
             return document_versions.value.length > 0 ? document_versions.value[0].version + 1 : 1;
         });
-        const document_steps = 
-        [
-            {
-                title: 'Bước 1',
-                description: 'Mô tả bước 1',
-                status: 'approved', // hoặc 'rejected', 'in_review', 'waiting'
-            },
-            {
-                title: 'Bước 2',
-                description: 'Mô tả bước 2',
-                status: 'in_review',
-            },
-            {
-                title: 'Bước 3',
-                description: 'Mô tả bước 3',
-                status: 'waiting',
-                subSteps: [
-                    {
-                        title: 'Bước con 3.1',
-                        description: 'Mô tả bước con 3.1', 
-                        status: 'waiting'
-                    },
-                    {
-                        title: 'Bước con 3.2',
-                        description: 'Mô tả bước con 3.2',
-                        status: 'waiting'
-                    }
-                ]
-            }
-        ]
+        const show_certificate = ref(false);
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents;
@@ -521,6 +502,13 @@ export default defineComponent({
             await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
             document_flow_steps.value = documentStore.current_document_flow_steps;
             console.log(document_flow_steps.value);
+            if (document_flow_steps.value.is_completed) {
+                const response = await documentStore.createCertificate(id);
+                console.log('Certificate response message:', response.message);
+                if (response.message) {
+                    show_certificate.value = true;
+                }
+            }
 
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;
@@ -757,12 +745,12 @@ export default defineComponent({
             btnCommentText,
             commentTextarea,
             isDownloading,
-            document_steps,
             document_flow_steps,
             document_versions,
             version_columns,
             max_version,
             detailVersion,
+            show_certificate,
 
             getAvatarUrl,
             randomAvatar,

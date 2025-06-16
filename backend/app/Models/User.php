@@ -174,6 +174,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Certificate::class);
     }
 
+    public function activeCertificates()
+    {
+        return $this->certificates()->where('status', 'active');
+    }
+
     /**
      * Check if the user is an admin.
      */

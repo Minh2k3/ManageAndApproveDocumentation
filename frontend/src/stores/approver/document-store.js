@@ -169,6 +169,18 @@ export const useDocumentStore = defineStore("document", () => {
             console.error("Error fetching document flow steps:", error);
         }
     }
+
+    async function createCertificate(documentId) {
+        try {
+            const response = await axiosInstance.get(`create-certificate/${documentId}`);
+            if (response.data) {
+                console.log("Create certificate response: ", response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.error("Error creating certificate:", error);
+        }
+    }
     
     async function approveDocument(id) {
         try {
@@ -292,6 +304,7 @@ export const useDocumentStore = defineStore("document", () => {
         setCurrentDocumentData, 
         getCurrentDocumentData,
         signDocument,
+        createCertificate,
         fetchAll,
         reset,
     };

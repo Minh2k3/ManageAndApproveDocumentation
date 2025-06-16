@@ -268,6 +268,7 @@
     <a-modal
         v-model:visible="detailVisible"
         width="600px"
+        z-index="10000"
         >
         <div>
             <h5>📄 Thông tin văn bản</h5>
@@ -289,7 +290,7 @@
 
         <template #footer>
             <a-button @click="detailVisible = false">Đóng</a-button>
-            <a-button v-if="selectedDocument.status !== 'in_review' && selectedDocument.from_me === true" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button>
+            <!-- <a-button v-if="selectedDocument.status !== 'in_review' && selectedDocument.from_me === true" class="bg-warning" @click="goToEditPage(selectedDocument.id)">Sửa</a-button> -->
             <a-button type="primary" @click="goToDetailPage(selectedDocument.id)">Chi tiết</a-button>
         </template>
     </a-modal>

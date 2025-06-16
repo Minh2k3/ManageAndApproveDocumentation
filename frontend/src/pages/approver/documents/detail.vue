@@ -23,6 +23,16 @@
                                     </div>
                                 </div>
 
+                                <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Chứng chỉ số
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- Information Section -->
                                 <div >
                                     <div class="col">
@@ -353,6 +363,16 @@
                                         <label>
                                             <a :href="`http://localhost:8000/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Mở tệp trong tab mới
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Chứng chỉ số
                                             </a>
                                         </label>
                                     </div>
@@ -779,7 +799,9 @@
                                     />
                                 </div>
                             </div>
-                        </div>                        
+                        </div> 
+                        
+                        
 
                     </div>
                 </div>               
@@ -815,6 +837,7 @@
         </template>
     </a-modal>
 
+    <!-- Modal chi tiết -->
     <a-modal 
         v-model:open="detailVersion.visible" 
         width="480px" 
@@ -941,6 +964,7 @@ export default defineComponent({
         const max_version = computed(() => {
             return document_versions.value.length > 0 ? document_versions.value[0].version + 1 : 1;
         });
+        const show_certificate = ref(false);
 
         const document_id = parseInt(route.params.id);
         onMounted(async () => {
@@ -963,6 +987,10 @@ export default defineComponent({
 
             await documentStore.fetchStepsByDocumentFlowId(documentData.value.document_flow_id);
             document_flow_steps.value = documentStore.current_document_flow_steps;
+            if (document_flow_steps.value.is_completed) {
+                await documentStore.createCertificate(document_id);
+                show_certificate.value = true;
+            }
 
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;
@@ -997,7 +1025,7 @@ export default defineComponent({
                 await documentStore.signDocument(document_versions.value[0].id, step_id, document_id);
                 await documentStore.approveDocument(step_id);
                 message.success('Bạn vừa đồng ý phê duyệt');
-                // window.location.reload();
+                window.location.reload();
             } catch (error) {
                 message.error('Có lỗi xảy ra khi đồng ý phê duyệt văn bản');
                 console.error('Error approving document:', error);
@@ -1299,6 +1327,7 @@ export default defineComponent({
             rejectVisible,
             reasonReject,
             document_flow_steps,
+            show_certificate,
 
             getAvatarUrl,
             randomAvatar,

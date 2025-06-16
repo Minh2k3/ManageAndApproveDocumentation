@@ -87,6 +87,14 @@ return [
             'visibility' => 'public',
         ],
 
+        // Dành cho lưu ảnh chữ ký của người dùng
+        'signatures' => [
+            'driver' => 'local',
+            'root' => public_path('images/signatures'),
+            'url' => env('APP_URL') . '/images/signatures',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

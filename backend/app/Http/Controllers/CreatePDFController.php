@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,7 +14,8 @@ class CreatePDFController extends Controller
         \Log::info("Creating PDF for document ID: $documentId");
         $document = Document::with('documentType')
             ->with([
-                'documentFlow.steps.approver',
+                'documentFlow.steps.approver.user.activeCertificates',
+                'creator',
             ])
             ->find($documentId);
         \Log::info("Document retrieved: " . ($document ? 'Found' : 'Not Found'));
@@ -22,54 +23,71 @@ class CreatePDFController extends Controller
             return response()->json(['error' => 'Document not found'], 404);
         }
         // Log the document details for debugging
-        \Log::info($document->toArray());
+        // \Log::info($document->toArray());
 
         if ($document->certificate_path) {
             // Nếu đã có chứng nhận, trả về thông báo
-            return response()->json(['message' => 'Document already has a certificate'], 400);
+            return response()->json([
+                'message' => 'success',
+                'certificate_path' => $document->certificate_path,
+            ]);
         }
-        return $document;
+        // return $document;
+        $current_creator = $document->creator;
+        // \Log::info("Current creator: " . ($current_creator ? $current_creator : 'Not Found'));
+        // \Log::info("Current creator: " . $current_creator->creator->full_role);
+        $creator_role = $current_creator->creator?->full_role ?? $current_creator->approver?->full_role;
+        // return $creator_role;
+        $current_steps = $document->documentFlow->steps;
+        $approvers = $current_steps->map(function ($step) {
+            \Log::info($step->approver->full_role);
+            $certificate = $step->approver->user->activeCertificates->first();
+            $path = $certificate ? $certificate->signature_image_path : null;
+            $signatureImage = $path ? public_path('images/signatures/' . $path) : "";
+            return [
+                'name' => $step->approver->user->name,
+                'department' => $step->approver->full_role,
+                'signature' => $signatureImage,
+                'signed_at' => $step->signed_at ? $step->signed_at->format('H:i d/m/Y') : 'Chưa ký',
+            ];
+        })->toArray();
+        // return $approvers;
 
         // Dữ liệu mẫu cho văn bản được ký
         $data = [
-            'logo' => public_path('images/departments/root.png'),
-            'document_title' => $document->title,
-            'description' => $document->document_type->name,
-            'creation_date' => $document->created_at,
-            'proposer_name' => 'Nguyễn Văn A',
-            'proposer_department' => 'Phòng Kế hoạch',
-            'approvers' => [
-                [
-                    'name' => 'Trần Thị B',
-                    'department' => 'Phòng Nhân sự',
-                    'signature' => public_path('images/signatures/signature-b.png'),
-                ],
-                [
-                    'name' => 'Lê Văn C',
-                    'department' => 'Phòng Tài chính',
-                    'signature' => '', // Không có chữ ký
-                ],
-                // Thêm tối đa 8-9 người phê duyệt nếu cần
-            ],
+            'logo_tlu' => public_path('images/departments/logo_tlu.png'),
+            'logo_dtn' => public_path('images/departments/logo_dtn.png'),
+            'logo_hsv' => public_path('images/departments/logo_hsv.png'),
+            'document_title' => $document->title ?? 'Chưa xác định',
+            'description' => $document->documentType->name ?? 'Chưa xác định',
+            'creation_date' => $document->created_at ?? now()->format('H:i d/m/Y'),
+            'proposer_name' => $current_creator->name ?? 'Chưa xác định',
+            'proposer_department' => $creator_role,
+            'approvers' => $approvers, // Danh sách người phê duyệt
             'generated_at' => now()->format('H:i d/m/Y'), // Thời gian tạo file
         ];
 
+        // return view('pdf.signed_document', $data);
+
         // Tải view và truyền dữ liệu
-        $pdf = PDF::loadView('pdf.signed_document', $data);
-        $pdf->setPaper('A4', 'portrait');
+        $pdfSave = Pdf::loadView('pdf.signed_document', $data);
+        $pdfSave->setPaper('A4', 'portrait');
 
         $fileName = 'document_' . $documentId . '_' . now()->timestamp . '.pdf';
+        
+        try {
+            Storage::disk('certificates')->put($fileName, $pdfSave->output());
+            
+            $document->certificate_path = $fileName;
+            $document->save();
+        } catch (\Exception $e) {
+            \Log::error("Error saving PDF: " . $e->getMessage());
+        }
 
-        Storage::disk('certificates')->put($filePath, $pdf->output());
-
-        $document->certificate_path = $filePath;
-        $document->save();
-
-        // Tùy chỉnh kích thước và hướng trang
-        return $pdf->stream();
-
-        // Tải xuống file PDF
-        return $pdf->download('ChungNhanVanBanKy.pdf');
+        return response()->json([
+            'message' => 'success',
+            'certificate_path' => $fileName,
+        ]);
     }
 
     public function downloadPDF($documentId)
