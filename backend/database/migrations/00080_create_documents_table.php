@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('file_path');
+            $table->string('certificate_path')->nullable()->comment('Path to the certificate file');
             $table->foreignId('document_type_id')->constrained();
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->enum('status', ['draft', 'in_review', 'approved', 'rejected'])->default('draft');

@@ -35,12 +35,14 @@ class Approver extends Model
         'updated_at' => 'datetime', 
     ];
 
+    protected $appends = ['full_role', 'full_name'];
+
     /**
      * Get the user that owns the approver.
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -85,5 +87,18 @@ class Approver extends Model
     public function getUpdatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('H:i:s d/m/Y');
+    }
+
+    public function getFullRoleAttribute()
+    {
+        $position = $this->rollAtDepartment?->name ?? '';
+        $department = $this->department?->name ?? '';
+        return trim("{$position} {$department}");
+    }    
+
+    public function getFullNameAttribute()
+    {
+        $name = $this->user?->name ?? '';
+        return trim($name);
     }
 }

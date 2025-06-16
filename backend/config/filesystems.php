@@ -55,6 +55,14 @@ return [
             'visibility' => 'public',
         ],
 
+        // Dành cho lưu chứng thực văn bản từ hệ thống
+        'certificates' => [
+            'driver' => 'local',
+            'root' => public_path('documents/certificates'),
+            'url' => env('APP_URL') . '/documents/certificates',
+            'visibility' => 'public',
+        ],        
+
         // Dành cho lưu hình ảnh
         'images' => [
             'driver' => 'local',
@@ -66,7 +74,7 @@ return [
         // Dành cho lưu hình ảnh đại diện
         'avatar' => [
             'driver' => 'local',
-            'root' => public_path('images'),
+            'root' => public_path('images/avatars'),
             'url' => env('APP_URL') . '/images/avatars',
             'visibility' => 'public',
         ],

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentType;
 use App\Models\DocumentFlow;
+use App\Models\DocumentFlowStep;
 use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Models\Creator;
@@ -30,6 +31,7 @@ class Document extends Model
         'title',
         'description',
         'file_path',
+        'certificate_path',
         'document_type_id',
         'created_by',
         'document_flow_id',
@@ -73,6 +75,18 @@ class Document extends Model
     public function documentFlow()
     {
         return $this->belongsTo(DocumentFlow::class);
+    }
+
+    public function documentFlowSteps()
+    {
+        return $this->hasManyThrough(
+            DocumentFlowStep::class,
+            DocumentFlow::class,
+            'id',                  // Khóa chính của bảng trung gian (document_flows)
+            'document_flow_id',   // Khóa ngoại ở bảng cuối (document_flow_steps)
+            'document_flow_id',   // Khóa ngoại ở bảng đầu (documents)
+            'id'                   // Khóa chính bảng trung gian
+        );
     }
 
     /**

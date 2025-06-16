@@ -36,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-
+            'PDF' => \Barryvdh\DomPDF\Facade\PDF::class,
         ]);
 
         //
@@ -47,5 +47,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         \Laravel\Fortify\FortifyServiceProvider::class,
         \App\Providers\FortifyServiceProvider::class,
+        \Barryvdh\DomPDF\ServiceProvider::class,
     ])
     ->create();

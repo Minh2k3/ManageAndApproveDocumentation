@@ -34,6 +34,7 @@ class Creator extends Model
         'updated_at' => 'datetime', 
     ];
 
+    protected $appends = ['full_role'];
     /**
      * Get the user that owns the creator.
      */
@@ -77,4 +78,11 @@ class Creator extends Model
     {
         return Carbon::parse($value)->format('H:i:s d/m/Y');
     }
+
+    public function getFullRoleAttribute()
+    {
+        $position = $this->rollAtDepartment?->name ?? '';
+        $department = $this->department?->name ?? '';
+        return trim("{$position} {$department}");
+    }    
 }
