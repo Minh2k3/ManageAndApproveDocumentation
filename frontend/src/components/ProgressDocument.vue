@@ -187,7 +187,7 @@ const processedSteps = computed(() => {
     return {
       ...step,
       title: `Bước ${step.step}: ${step.department.name}`,
-      description: `Phê duyệt bởi ${step.approver.name}`,
+      description: `Phê duyệt bởi: ${step.approver?.name ?? 'Bất kỳ ai'}`,
       displayStatus: displayStatus,
       originalStatus: step.status
     }

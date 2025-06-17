@@ -127,7 +127,7 @@ Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocuments
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
     // ->middleware('auth:sanctum')
-    ->middleware('role:1,3')
+    ->middleware('role:1,2,3')
     ->name('documents.getDocumentsByApprover');
 
 Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])

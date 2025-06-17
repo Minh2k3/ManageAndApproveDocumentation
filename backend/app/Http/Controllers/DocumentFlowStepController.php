@@ -167,7 +167,11 @@ class DocumentFlowStepController extends Controller
                 'signed_at' => now()
             ]);
             \Log::info('Current step updated to approved.');
-
+            if ($currentStep['approver_id'] == null) {
+                $user = auth()->user();
+                $currentStep->approver_id = $user->approver->id;
+            }
+            $currentStep->save();
             // Ký văn bản
 
             
@@ -265,6 +269,12 @@ class DocumentFlowStepController extends Controller
                 'signed_at' => now()
             ]);
             \Log::info('Current step updated to rejected.');
+
+            if ($currentStep['approver_id'] == null) {
+                $user = auth()->user();
+                $currentStep->approver_id = $user->approver->id;
+            }
+            $currentStep->save();
             
             // Lưu lý do từ chối
             // $this->saveComment($resources['documentVersion']->id, $validated['reason']);

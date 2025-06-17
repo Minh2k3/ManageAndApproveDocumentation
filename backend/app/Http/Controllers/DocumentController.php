@@ -322,17 +322,26 @@ class DocumentController extends Controller
         // Tìm approver record của user hiện tại
         $approver = Approver::where('user_id', $id)->first();
         $approver_id = $approver ? $approver->id : null;
+        $approver_department_id = $approver ? $approver->department_id : null;
 
         // Lấy các văn bản cần tôi duyệt
         $documents_need_me = collect();
         
-        if ($approver_id) {
+        if ($approver_id && $approver_department_id) {
             $documents_need_me = Document::with([
                 'documentType:id,name',
                 'documentFlow:id,name,process',
-                'documentFlow.documentFlowSteps' => function($query) use ($approver_id) {
-                    $query->where('approver_id', $approver_id)
-                        ->select('id', 'document_flow_id', 'approver_id', 'step', 'multichoice', 'status');
+                'documentFlow.documentFlowSteps' => function($query) use ($approver_id, $approver_department_id) {
+                    $query->where(function($q) use ($approver_id, $approver_department_id) {
+                        // Lấy các step được assign cho approver cụ thể
+                        $q->where('approver_id', $approver_id)
+                        // HOẶC lấy các step gửi đến phòng ban mà không có approver cụ thể
+                        ->orWhere(function($subQ) use ($approver_department_id) {
+                            $subQ->where('department_id', $approver_department_id)
+                                ->whereNull('approver_id');
+                        });
+                    })
+                    ->select('id', 'document_flow_id', 'approver_id', 'department_id', 'step', 'multichoice', 'status');
                 },
                 'versions' => function($query) {
                     $query->select('id', 'document_id', 'version', 'document_data', 'status')
@@ -340,20 +349,43 @@ class DocumentController extends Controller
                         ->limit(1);
                 }
             ])
-            ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id) {
-                $query->where('approver_id', $approver_id);
+            ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approver_id, $approver_department_id) {
+                $query->where(function($q) use ($approver_id, $approver_department_id) {
+                    // Điều kiện tương tự như trong with()
+                    $q->where('approver_id', $approver_id)
+                    ->orWhere(function($subQ) use ($approver_department_id) {
+                        $subQ->where('department_id', $approver_department_id)
+                            ->whereNull('approver_id');
+                    });
+                });
             })
             ->whereHas('versions', function($query) {
                 $query->where('status', '!=', 'draft');
             })
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function($document) use ($approver_id) {
+            ->map(function($document) use ($approver_id, $approver_department_id) {
                 $latestVersion = $document->versions->first();
-                $myStep = $document->documentFlow->documentFlowSteps->first();
+                
+                // Tìm step phù hợp cho user hiện tại
+                $myStep = $document->documentFlow->documentFlowSteps->first(function($step) use ($approver_id, $approver_department_id) {
+                    // Ưu tiên step được assign trực tiếp cho approver
+                    if ($step->approver_id == $approver_id) {
+                        return true;
+                    }
+                    // Nếu không có step trực tiếp, lấy step của phòng ban mà không có approver cụ thể
+                    if ($step->department_id == $approver_department_id && $step->approver_id === null) {
+                        return true;
+                    }
+                    return false;
+                });
                 
                 // Tìm thông tin người tạo từ user_id
                 $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+                
+                // Xác định xem đây có phải là document được assign trực tiếp hay gửi đến phòng ban
+                $isDirectAssignment = $myStep && $myStep->approver_id == $approver_id;
+                $isDepartmentAssignment = $myStep && $myStep->approver_id === null && $myStep->department_id == $approver_department_id;
                 
                 return [
                     'id' => $document->id,
@@ -381,6 +413,9 @@ class DocumentController extends Controller
                     'step' => $myStep->step ?? 0,
                     'document_status' => $document->status ?? 'pending',
                     'step_status' => $myStep->status ?? 'pending',
+                    // Thêm thông tin về loại assignment
+                    'assignment_type' => $isDirectAssignment ? 'direct' : ($isDepartmentAssignment ? 'department' : 'unknown'),
+                    'assigned_department_id' => $myStep->department_id ?? null,
                 ];
             });
         }
@@ -474,13 +509,22 @@ class DocumentController extends Controller
         }
         
         $approverId = $approver->id;
+        $approverDepartmentId = $approver->department_id;
         
         $document = Document::with([
             'documentType:id,name',
             'documentFlow:id,name,process',
-            'documentFlow.documentFlowSteps' => function($query) use ($approverId) {
-                $query->where('approver_id', $approverId)
-                    ->select('id', 'document_flow_id', 'approver_id', 'step', 'multichoice', 'status');
+            'documentFlow.documentFlowSteps' => function($query) use ($approverId, $approverDepartmentId) {
+                $query->where(function($q) use ($approverId, $approverDepartmentId) {
+                    // Lấy step được assign trực tiếp cho approver
+                    $q->where('approver_id', $approverId)
+                    // HOẶC lấy step gửi đến department mà không có approver cụ thể
+                    ->orWhere(function($subQ) use ($approverDepartmentId) {
+                        $subQ->where('department_id', $approverDepartmentId)
+                            ->whereNull('approver_id');
+                    });
+                })
+                ->select('id', 'document_flow_id', 'approver_id', 'department_id', 'step', 'multichoice', 'status');
             },
             'versions' => function($query) {
                 $query->select('id', 'document_id', 'version', 'document_data', 'status')
@@ -489,8 +533,15 @@ class DocumentController extends Controller
             }
         ])
         ->where('id', $documentId)
-        ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approverId) {
-            $query->where('approver_id', $approverId);
+        ->whereHas('documentFlow.documentFlowSteps', function ($query) use ($approverId, $approverDepartmentId) {
+            $query->where(function($q) use ($approverId, $approverDepartmentId) {
+                // Điều kiện tương tự như trong with()
+                $q->where('approver_id', $approverId)
+                ->orWhere(function($subQ) use ($approverDepartmentId) {
+                    $subQ->where('department_id', $approverDepartmentId)
+                        ->whereNull('approver_id');
+                });
+            });
         })
         ->whereHas('versions', function($query) {
             $query->where('status', '!=', 'draft');
@@ -505,10 +556,26 @@ class DocumentController extends Controller
         }
         
         $latestVersion = $document->versions->first();
-        $myStep = $document->documentFlow->documentFlowSteps->first();
+        
+        // Tìm step phù hợp cho user hiện tại
+        $myStep = $document->documentFlow->documentFlowSteps->first(function($step) use ($approverId, $approverDepartmentId) {
+            // Ưu tiên step được assign trực tiếp cho approver
+            if ($step->approver_id == $approverId) {
+                return true;
+            }
+            // Nếu không có step trực tiếp, lấy step của department mà không có approver cụ thể
+            if ($step->department_id == $approverDepartmentId && $step->approver_id === null) {
+                return true;
+            }
+            return false;
+        });
         
         // Tìm thông tin người tạo từ user_id
         $creatorInfo = $this->getCreatorInfoByUserId($document->created_by);
+        
+        // Xác định loại assignment
+        $isDirectAssignment = $myStep && $myStep->approver_id == $approverId;
+        $isDepartmentAssignment = $myStep && $myStep->approver_id === null && $myStep->department_id == $approverDepartmentId;
         
         $documentData = [
             'id' => $document->id,
@@ -537,6 +604,9 @@ class DocumentController extends Controller
             'step' => $myStep->step ?? 0,
             'document_status' => $document->status ?? 'pending',
             'step_status' => $myStep->status ?? 'pending',
+            // Thêm thông tin về loại assignment
+            'assignment_type' => $isDirectAssignment ? 'direct' : ($isDepartmentAssignment ? 'department' : 'unknown'),
+            'assigned_department_id' => $myStep->department_id ?? null,
         ];
         
         return response()->json([
@@ -671,18 +741,26 @@ class DocumentController extends Controller
             $document_flow_id = $new_document_flow['id'];
             foreach ($document_flow_step as $step) {
                 $status = ($step['step'] == 1) ? 'in_review' : 'pending';
+                \Log::info('Step: ', $step);
+
+                $approver_id = null;
+                if (isset($step['approver_id']) && $step['approver_id'] != null) {
+                    $approver_id = $step['approver_id'];
+                }
+                \Log::info('Approver ID: ', ['approver_id' => $approver_id]);
 
                 DocumentFlowStep::create([
                     'document_flow_id' => $document_flow_id,
                     'step' => $step['step'],
                     'department_id' => $step['department_id'],
-                    'approver_id' => $step['approver_id'],
+                    'approver_id' => $approver_id,
                     'multichoice' => $step['multichoice'],
                     'status' => $status,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
+            \Log::info('New document flow created: ', $new_document_flow->toArray());
 
             $new_document = Document::create([
                 'title' => $document['title'],
@@ -745,37 +823,73 @@ class DocumentController extends Controller
             // \Log::info('Hereeeeeeeeeee');
 
             foreach ($document_flow_step as $step) {
-                $approver = Approver::find($step['approver_id']);
-                $content = "Thêm bạn vào luồng phê duyệt cho văn bản '" . $new_document['title'] . "'";
-                if ($step['step'] == 1) {
-                    $content = "Bạn là người phê duyệt đầu tiên cho văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                if (!(isset($step['approver_id']) && $step['approver_id'] != null)) {
+                    $approvers = Approver::where('department_id', $step['department_id'])
+                        ->get();
+                    \Log::info('Approvers: ', $approvers->toArray());
+                    $department = Department::find($step['department_id']);
+                    
+                    $content = "Thêm " .$department['name'] . " vào luồng phê duyệt cho văn bản '" . $new_document['title'] . "'";
+                    if ($step['step'] == 1) {
+                        $content = $department['name'] . " là đơn vị phê duyệt đầu tiên cho văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                    }
+                    foreach ($approvers as $approver) {
+                        $notification = Notification::create([
+                            'notification_category_id' => 3,
+                            'from_user_id' => $user['id'],
+                            'receiver_id' => $approver['user_id'],
+                            'title' => "Thêm vào luồng phê duyệt văn bản",
+                            'content' => $content,
+                            'is_read' => false,
+                            'created_at' => now(),
+                        ]);
+
+                        $options = [
+                            'cluster' => env('PUSHER_APP_CLUSTER'),
+                            'useTLS' => true
+                        ];
+                        $pusher = new \Pusher\Pusher(
+                            env('PUSHER_APP_KEY'),
+                            env('PUSHER_APP_SECRET'),
+                            env('PUSHER_APP_ID'),
+                            $options
+                        );
+
+                        $data['notification'] = $notification;
+                        $data['document'] = $new_document;
+                        $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
+                    }
+                } else {
+                    $content = "Thêm bạn vào luồng phê duyệt cho văn bản '" . $new_document['title'] . "'";
+                    if ($step['step'] == 1) {
+                        $content = "Bạn là người phê duyệt đầu tiên cho văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                    }
+                    $notification = Notification::create([
+                        'notification_category_id' => 3,
+                        'from_user_id' => $user['id'],
+                        'receiver_id' => $approver['user_id'],
+                        'title' => "Thêm vào luồng phê duyệt văn bản",
+                        'content' => $content,
+                        'is_read' => false,
+                        'created_at' => now(),
+                    ]);
+
+                    $options = [
+                        'cluster' => env('PUSHER_APP_CLUSTER'),
+                        'useTLS' => true
+                    ];
+                    $pusher = new \Pusher\Pusher(
+                        env('PUSHER_APP_KEY'),
+                        env('PUSHER_APP_SECRET'),
+                        env('PUSHER_APP_ID'),
+                        $options
+                    );
+
+                    $data['notification'] = $notification;
+                    $data['document'] = $new_document;
+                    $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
                 }
-                $notification = Notification::create([
-                    'notification_category_id' => 3,
-                    'from_user_id' => $user['id'],
-                    'receiver_id' => $approver['user_id'],
-                    'title' => "Thêm vào luồng phê duyệt văn bản",
-                    'content' => $content,
-                    'is_read' => false,
-                    'created_at' => now(),
-                ]);
-
-                $options = [
-                    'cluster' => env('PUSHER_APP_CLUSTER'),
-                    'useTLS' => true
-                ];
-                $pusher = new \Pusher\Pusher(
-                    env('PUSHER_APP_KEY'),
-                    env('PUSHER_APP_SECRET'),
-                    env('PUSHER_APP_ID'),
-                    $options
-                );
-
-                $data['notification'] = $notification;
-                $data['document'] = $new_document;
-                $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
             }
-
             \DB::commit();
         } catch (\Exception $e) {
             \Log::error('Error in storeRequestDocument: ' . $e->getMessage());
@@ -814,11 +928,16 @@ class DocumentController extends Controller
             foreach ($document_flow_step as $step) {
                 $status = ($step['step'] == 1) ? 'in_review' : 'pending';
 
+                $approver_id = null;
+                if (isset($step['approver_id']) && $step['approver_id'] != null) {
+                    $approver_id = $step['approver_id'];
+                }
+
                 DocumentFlowStep::create([
                     'document_flow_id' => $document_flow_id,
                     'step' => $step['step'],
                     'department_id' => $step['department_id'],
-                    'approver_id' => $step['approver_id'],
+                    'approver_id' => $approver_id,
                     'multichoice' => $step['multichoice'],
                     'status' => $status,
                     'created_at' => now(),
@@ -888,35 +1007,73 @@ class DocumentController extends Controller
             // \Log::info('Hereeeeeeeeeee');
 
             foreach ($document_flow_step as $step) {
-                $approver = Approver::find($step['approver_id']);
-                $content = "Thêm bạn vào luồng phê duyệt cho phiên bản mới của văn bản '" . $new_document['title'] . "'";
-                if ($step['step'] == 1) {
-                    $content = "Bạn là người phê duyệt đầu tiên cho phiên bản mới của văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                if (isset($step['approver_id']) && $step['approver_id'] != null) {
+                    $approver = Approver::find($step['approver_id']);
+                    $content = "Thêm bạn vào luồng phê duyệt cho phiên bản mới của văn bản '" . $new_document['title'] . "'";
+                    if ($step['step'] == 1) {
+                        $content = "Bạn là người phê duyệt đầu tiên cho phiên bản mới của văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                    }
+                    $notification = Notification::create([
+                        'notification_category_id' => 3,
+                        'from_user_id' => $user['id'],
+                        'receiver_id' => $approver['user_id'],
+                        'title' => "Thêm vào luồng phê duyệt phiên bản mới văn bản",
+                        'content' => $content,
+                        'is_read' => false,
+                        'created_at' => now(),
+                    ]);
+
+                    $options = [
+                        'cluster' => env('PUSHER_APP_CLUSTER'),
+                        'useTLS' => true
+                    ];
+                    $pusher = new \Pusher\Pusher(
+                        env('PUSHER_APP_KEY'),
+                        env('PUSHER_APP_SECRET'),
+                        env('PUSHER_APP_ID'),
+                        $options
+                    );
+
+                    $data['notification'] = $notification;
+                    $data['document'] = $new_document;
+                    $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
+                } else {
+                    $approvers = Approver::where('department_id', $step['department_id'])
+                        ->get();
+                    \Log::info('Approvers: ', $approvers->toArray());
+                    $department = Department::find($step['department_id']);
+
+                    $content = "Thêm " .$department['name'] . " vào luồng phê duyệt cho phiên bản mới của văn bản '" . $new_document['title'] . "'";
+                    if ($step['step'] == 1) {
+                        $content = $department['name'] . " là đơn vị phê duyệt đầu tiên cho phiên bản mới của văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
+                    }
+                    foreach ($approvers as $approver) {
+                        $notification = Notification::create([
+                            'notification_category_id' => 3,
+                            'from_user_id' => $user['id'],
+                            'receiver_id' => $approver['user_id'],
+                            'title' => "Thêm vào luồng phê duyệt phiên bản mới văn bản",
+                            'content' => $content,
+                            'is_read' => false,
+                            'created_at' => now(),
+                        ]);
+
+                        $options = [
+                            'cluster' => env('PUSHER_APP_CLUSTER'),
+                            'useTLS' => true
+                        ];
+                        $pusher = new \Pusher\Pusher(
+                            env('PUSHER_APP_KEY'),
+                            env('PUSHER_APP_SECRET'),
+                            env('PUSHER_APP_ID'),
+                            $options
+                        );
+
+                        $data['notification'] = $notification;
+                        $data['document'] = $new_document;
+                        $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
+                    }
                 }
-                $notification = Notification::create([
-                    'notification_category_id' => 3,
-                    'from_user_id' => $user['id'],
-                    'receiver_id' => $approver['user_id'],
-                    'title' => "Thêm vào luồng phê duyệt phiên bản mới văn bản",
-                    'content' => $content,
-                    'is_read' => false,
-                    'created_at' => now(),
-                ]);
-
-                $options = [
-                    'cluster' => env('PUSHER_APP_CLUSTER'),
-                    'useTLS' => true
-                ];
-                $pusher = new \Pusher\Pusher(
-                    env('PUSHER_APP_KEY'),
-                    env('PUSHER_APP_SECRET'),
-                    env('PUSHER_APP_ID'),
-                    $options
-                );
-
-                $data['notification'] = $notification;
-                $data['document'] = $new_document;
-                $pusher->trigger('user.' . $approver['user_id'], 'new-notification', $data);
             }
 
             \DB::commit();
