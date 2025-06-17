@@ -6,7 +6,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
@@ -14,14 +14,12 @@ class CheckRole
     {
         $user = $request->user();
 
-        // Cho phép tiếp tục nếu chưa đăng nhập
         if (!$user) {
-            return $next($request);
+            return response()->json(['error' => 'Unauthenticated'], 401);
         }
 
-        // Kiểm tra role nếu đã đăng nhập
-        if (!in_array($user->role, $roles)) {
-            return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+        if (!in_array($request->user()->role_id, $roles)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         return $next($request);

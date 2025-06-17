@@ -22,17 +22,5 @@ class TemplateUser extends Model
     protected $fillable = [
         'user_id',
         'template_id',
-        'count',
-        'is_liked',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'count' => 'integer',
-        'is_liked' => 'boolean',
     ];
 }

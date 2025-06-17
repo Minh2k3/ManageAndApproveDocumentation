@@ -468,10 +468,10 @@ export default defineComponent({
             await documentStore.fetchDocumentTemplates();
             document_templates.value = documentStore.document_templates;
             // Chỉ lấy các văn bản có trạng thái 'active' hoặc là trạng thái 'pending' và mình là người tạo
-            document_templates.value = document_templates.value.filter(template => 
-                template.status === 'active' || 
-                template.creator.id === authStore.user.id
-            );
+            // document_templates.value = document_templates.value.filter(template => 
+            //     template.status === 'active' || 
+            //     template.creator.id === authStore.user.id
+            // );
 
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;

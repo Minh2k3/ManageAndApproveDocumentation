@@ -507,6 +507,7 @@ export default defineComponent({
                 console.log('Certificate response message:', response.message);
                 if (response.message) {
                     show_certificate.value = true;
+                    documentData.value.certificate_path = response.certificate_path;
                 }
             }
 

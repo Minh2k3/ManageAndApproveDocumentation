@@ -109,6 +109,7 @@ Route::post('forgot-password', [HandlePasswordController::class, 'forgotPassword
 // Document
 Route::get('/documents', [DocumentController::class, 'index'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:1')
     ->name('documents.index');
 
 Route::get('/documents/public', [DocumentController::class, 'getPublicApprovedDocuments'])
@@ -121,10 +122,12 @@ Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
 
 Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocumentsByCreator'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:1,2')
     ->name('documents.getDocumentsByCreator');
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:1,3')
     ->name('documents.getDocumentsByApprover');
 
 Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])
@@ -207,8 +210,23 @@ Route::get('/document-types', [DocumentTypeController::class, 'index'])
     ->name('document-types.index');
 
 // Document Template
-Route::get('/document-templates', [DocumentTemplateController::class, 'getAllTemplates'])
+Route::get('/admin/document-templates', [DocumentTemplateController::class, 'getAllTemplates'])
     ->name('document-templates.getAllTemplates');
+
+Route::get('/user/document-templates', [DocumentTemplateController::class, 'getAllTemplatesUser'])
+    ->name('document-templates.getAllTemplatesUser');
+
+Route::get('/document-templates/{user_id}/liked', [DocumentTemplateController::class, 'getLikedTemplatesByUserId'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.getLikedTemplatesByUserId');
+
+Route::post('/document-templates/{id}/like', [DocumentTemplateController::class, 'likeTemplate'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.likeTemplate');
+
+Route::post('/document-templates/{id}/unlike', [DocumentTemplateController::class, 'unlikeTemplate'])
+    // ->middleware('auth:sanctum')
+    ->name('document-templates.unlikeTemplate');
 
 Route::post('/document-templates', [DocumentTemplateController::class, 'store'])
     // ->middleware('auth:sanctum')

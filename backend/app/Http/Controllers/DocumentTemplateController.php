@@ -143,6 +143,12 @@ class DocumentTemplateController extends Controller
             'created_by', 'document_type_id', 'downloaded', 'liked',
             'created_at', 'updated_at'
         )
+        ->orderByRaw("CASE 
+            WHEN status = 'pending' THEN 1 
+            WHEN status = 'active' THEN 2 
+            WHEN status = 'inactive' THEN 3 
+            ELSE 4 
+        END")
         ->orderBy('updated_at', 'desc')
         ->get();
 
@@ -151,6 +157,50 @@ class DocumentTemplateController extends Controller
         ])->setStatusCode(200, 'Document templates retrieved successfully.');
         // return response() DocumentTemplateResource::collection($documentTemplates);
     }
+
+    public function getAllTemplatesUser()
+    {
+        $user = auth()->user();
+        $documentTemplates = DocumentTemplate::with([
+            'creator.role',
+            'creator.creator.rollAtDepartment',
+            'creator.creator.department',
+            'creator.approver.rollAtDepartment',
+            'creator.approver.department',
+            'documentType:id,name,description',
+        ])
+        ->select(
+            'document_templates.id',
+            'document_templates.name',
+            'document_templates.file_path',
+            'document_templates.description',
+            'document_templates.status',
+            'document_templates.created_by',
+            'document_templates.document_type_id',
+            'document_templates.downloaded',
+            'document_templates.liked',
+            'document_templates.created_at',
+            'document_templates.updated_at',
+            \DB::raw('CASE WHEN template_users.id IS NOT NULL THEN 1 ELSE 0 END as is_liked')
+        )
+        ->leftJoin('template_users', function ($join) {
+            $join->on('document_templates.id', '=', 'template_users.template_id')
+            ->where('template_users.user_id', '=', auth()->id());
+        })
+        ->addSelect(\DB::raw('template_users.id IS NOT NULL as is_liked'))
+        ->where(function ($query) use ($user) {
+            $query->where('document_templates.created_by', $user->id)
+                  ->orWhere('document_templates.status', 'active');
+        })
+        ->orderByRaw('template_users.id IS NOT NULL DESC')
+        ->orderBy('document_templates.updated_at', 'desc')
+        ->get();
+
+        return response()->json([
+            'document_templates' => DocumentTemplateResource::collection($documentTemplates),
+        ])->setStatusCode(200, 'Document templates retrieved successfully.');
+        // return response() DocumentTemplateResource::collection($documentTemplates);
+    }    
 
     // Hàm xử lý upload file văn bản
     public function uploadFile(Request $request)
@@ -261,4 +311,90 @@ class DocumentTemplateController extends Controller
             ], 500);
         }
     }    
+
+    public function getLikedTemplatesByUserId(Request $request, $user_id)
+    {
+        if (!$userId) {
+            return response()->json([
+                'message' => 'User ID is required.',
+            ])->setStatusCode(400);
+        }
+
+        $likedTemplates = DocumentTemplate::where('liked', true)
+            ->where('user_id', $user_id)
+            ->get();
+
+        return response()->json([
+            'liked_templates' => $likedTemplates,
+        ])->setStatusCode(200, 'Liked templates retrieved successfully.');
+    }
+
+    public function likeTemplate(Request $request, $id)
+    {
+        $user = auth()->user();
+        $template = DocumentTemplate::find($id);
+        if (!$template) {
+            return response()->json([
+                'message' => 'Document template not found.',
+            ])->setStatusCode(404);
+        }
+
+        \DB::beginTransaction();
+
+        try {
+            $template_user = TemplateUser::create([
+                'user_id' => $user->id,
+                'template_id' => $template->id,
+            ]);
+
+            // Cập nhật số lượng người thích
+            $template->increment('liked');
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Document template liked successfully.',
+                'template_user' => $template_user,
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to like document template: ' . $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+    }
+
+    public function unlikeTemplate(Request $request, $id)
+    {
+        $user = auth()->user();
+        $template = DocumentTemplate::find($id);
+        if (!$template) {
+            return response()->json([
+                'message' => 'Document template not found.',
+            ])->setStatusCode(404);
+        }
+
+        \DB::beginTransaction();
+
+        try {
+            // Xóa bản ghi trong bảng trung gian
+            TemplateUser::where('user_id', $user->id)
+                ->where('template_id', $template->id)
+                ->delete();
+
+            // Giảm số lượng người thích
+            $template->decrement('liked');
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Document template unliked successfully.',
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to unlike document template: ' . $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+    }
 }

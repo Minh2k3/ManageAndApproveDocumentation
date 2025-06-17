@@ -63,7 +63,7 @@ export const useDocumentStore = defineStore("document", () => {
         }
 
         try {
-            const response = await axiosInstance.get("api/document-templates");
+            const response = await axiosInstance.get("api/user/document-templates");
             if (response.data) {
                 console.log("response.data", response.data);
                 document_templates.value = response.data.document_templates;

@@ -135,6 +135,10 @@ export default {
 .sidebar-content {
     width: 100%;
     transition: all 0.3s ease-in-out;
+    position: sticky; /* Làm menu dính theo cuộn trang */
+    top: 80px; /* Khoảng cách từ đỉnh, tránh chồng lấn header */
+    max-height: calc(100vh - 60px); /* Giới hạn chiều cao để không tràn viewport */
+    overflow-y: auto; /* Cho phép cuộn nội dung trong sidebar */        
 }
 
 /* Toggle Button Styles */
