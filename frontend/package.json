@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@nghiavuive/lunar_date_vi": "^2.0.1",
     "@tato30/vue-pdf": "^1.11.3",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.8.4",

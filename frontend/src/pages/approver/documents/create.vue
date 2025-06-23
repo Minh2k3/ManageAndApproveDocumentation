@@ -266,7 +266,7 @@
                                             <a-tooltip title="Thêm cấp duyệt sau cấp hiện tại" class="mb-md-0">
                                                 <span>
                                                     <a-button type="primary"
-                                                        :disabled="!step.department_id || !step.approver_id || checkIfAfterHasSameStep(step.step, index)"
+                                                        :disabled="!step.department_id || checkIfAfterHasSameStep(step.step, index)"
                                                         @click="addStep(step.step, index)"
                                                         class="text-center align-self-center bg-success">
                                                         <template #icon>
@@ -279,7 +279,7 @@
                                             <a-tooltip title="Thêm cấp duyệt đồng cấp với cấp hiện tại" class="mb-md-0">
                                                 <span>
                                                     <a-button type="primary"
-                                                        :disabled="!step.department_id || !step.approver_id"
+                                                        :disabled="!step.department_id"
                                                         @click="addSameStep(step.step, index)"
                                                         class="text-center align-self-center bg-warning">
                                                         <template #icon>

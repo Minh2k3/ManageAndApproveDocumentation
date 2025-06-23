@@ -44,6 +44,7 @@ class HandlePasswordController extends Controller
 
     public function forgotPassword(Request $request)    
     {
+        \Log::info('Forgot password request received', ['email' => $request->input('email')]);
         $request->validate([
             'email' => 'required|email',
         ]);
@@ -64,13 +65,14 @@ class HandlePasswordController extends Controller
         }
 
         $user = User::where('email', $email)->first();
+        \Log::info('User found', ['user' => $user]);
         
         if (!$user) {
             // Vẫn increment để tránh email enumeration
             RateLimiter::hit($key, 3600); // 60 minutes
             return response()->json([
-                'message' => 'Nếu email tồn tại, link đặt lại mật khẩu đã được gửi.'
-            ], 200);
+                'message' => 'Email không tồn tại trong hệ thống'
+            ], 403);
         }
 
         // Kiểm tra xem đã gửi email gần đây chưa

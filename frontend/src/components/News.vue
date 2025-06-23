@@ -237,42 +237,72 @@
     <!-- Document Preview Modal -->
     <div v-if="selectedDocument" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
+        <!-- Modal Header -->
         <div class="modal-header">
-          <h2>{{ selectedDocument.title }}</h2>
+          <h2>Chi tiết văn bản</h2>
           <button @click="closeModal" class="btn-close">
             <i class="fas fa-times"></i>
           </button>
         </div>
+        
+        <!-- Modal Body -->
         <div class="modal-body">
-          <div class="document-details">
-            <div class="detail-item">
-              <label>Loại văn bản:</label>
-              <span>{{ selectedDocument.document_type.name }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Người ban hành:</label>
-              <span>{{ selectedDocument.creator.name }} - {{ selectedDocument.creator.position }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Ngày ban hành:</label>
-              <span>{{ formatDate(selectedDocument.created_at) }}</span>
-            </div>
-            <div class="detail-item full-width">
-              <label>Mô tả:</label>
-              <p>{{ selectedDocument.description }}</p>
+          <!-- Document Title -->
+          <div class="document-info-section">
+            <h3 class="document-title-modal">{{ selectedDocument.title }}</h3>
+            <div class="document-type-badge-modal">
+              {{ selectedDocument.document_type.name }}
             </div>
           </div>
+
+          <!-- Document Details -->
+          <div class="document-details">
+            <div class="detail-row">
+              <label>Người ban hành:</label>
+              <div class="creator-info-modal">
+                <img 
+                  :src="getAvatarUrl(selectedDocument.creator)" 
+                  :alt="selectedDocument.creator.name"
+                  class="creator-avatar-modal"
+                >
+                <div>
+                  <span class="creator-name-text">{{ selectedDocument.creator.name }}</span>
+                  <span class="creator-position-text">{{ selectedDocument.creator.position }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <label>Ngày ban hành:</label>
+              <span class="detail-value">{{ formatDate(selectedDocument.created_at) }}</span>
+            </div>
+
+            <div class="detail-row description-row">
+              <label>Mô tả:</label>
+              <p class="description-content">{{ selectedDocument.description }}</p>
+            </div>
+
+            <div class="detail-row description-row">
+              <label>Chứng chỉ số:</label>
+              <a :href="`http://localhost:8000/documents/certificates/${selectedDocument.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+                  Mở
+              </a>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
           <div class="modal-actions">
-            <button @click="downloadDocument(selectedDocument)" class="btn-primary me-2">
+            <!-- <button @click="downloadDocument(selectedDocument)" class="btn-download">
               <i class="fas fa-download"></i>
               Tải xuống
-            </button>
+            </button> -->
             <a 
-                :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" 
-                target="_blank"
-                class="text-decoration-none fst-italic bg-light border border-secondary rounded p-2"
-                >
-                Mở trong tab mới
+              :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" 
+              target="_blank"
+              class="btn-view-external"
+            >
+              <i class="fas fa-external-link-alt"></i>
+              Mở trong tab mới
             </a>
           </div>
         </div>
@@ -1030,7 +1060,7 @@ export default {
   border-color: #2563eb;
 }
 
-/* Modal */
+/* Simple Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1048,113 +1078,181 @@ export default {
   background: white;
   border-radius: 8px;
   width: 90%;
-  max-width: 700px;
+  max-width: 600px;
   max-height: 90vh;
-  overflow: auto;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  background: #007cba;
+  color: white;
+  padding: 20px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-header h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
   margin: 0;
 }
 
 .btn-close {
   background: transparent;
   border: none;
-  font-size: 24px;
+  color: white;
+  font-size: 20px;
   cursor: pointer;
-  color: #666;
   padding: 5px;
-  line-height: 1;
+  border-radius: 4px;
+  transition: background 0.3s;
 }
 
 .btn-close:hover {
-  color: #333;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 25px;
+  overflow-y: auto;
+  max-height: calc(90vh - 100px);
+}
+
+.document-info-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.document-title-modal {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.document-type-badge-modal {
+  display: inline-block;
+  background: #EBF4FF;
+  color: #1E3A8A;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .document-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.detail-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 20px;
+  margin-bottom: 25px;
 }
 
-.detail-item.full-width {
-  grid-column: 1 / -1;
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
 }
 
-.detail-item label {
+.detail-row label {
   font-weight: 600;
-  color: #555;
+  color: #374151;
+  min-width: 120px;
   font-size: 14px;
 }
 
-.detail-item span,
-.detail-item p {
-  color: #333;
-  margin: 0;
+.detail-value {
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.creator-info-modal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.creator-avatar-modal {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.creator-name-text {
+  display: block;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.creator-position-text {
+  display: block;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.description-row {
+  align-items: flex-start;
+}
+
+.description-content {
+  color: #1f2937;
+  font-size: 14px;
   line-height: 1.6;
+  margin: 0;
+  text-align: justify;
+  flex: 1;
 }
 
 .modal-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e5e7eb;
 }
 
-.btn-primary,
-.btn-secondary {
+.btn-download,
+.btn-view-external {
   padding: 10px 20px;
   border-radius: 6px;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.3s;
+  text-decoration: none;
+  border: 1px solid transparent;
 }
 
-.btn-primary {
-  background: #2563eb;
+.btn-download {
+  background: #1E3A8A;
   color: white;
   border: none;
 }
 
-.btn-primary:hover {
-  background: #1d4ed8;
+.btn-download:hover {
+  background: #1E40AF;
 }
 
-.btn-secondary {
-  background: white;
-  color: #333;
-  border: 1px solid #ddd;
+.btn-view-external {
+  background: #007cba;
+  color: white;
 }
 
-.btn-secondary:hover {
-  background: #f5f5f5;
-  border-color: #999;
+.btn-view-external:hover {
+  background: #005c89;
+  color: white;
+  text-decoration: none;
 }
 
 /* Responsive Design */
@@ -1191,13 +1289,38 @@ export default {
     min-width: 700px;
   }
   
-  .document-details {
-    grid-template-columns: 1fr;
-  }
-  
   .modal-content {
     width: 95%;
     margin: 20px;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 15px 20px;
+  }
+  
+  .modal-body {
+    padding: 10px;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .detail-row label {
+    min-width: auto;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-download,
+  .btn-view-external {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -1219,20 +1342,20 @@ export default {
 }
 
 /* Custom scrollbar for modal */
-.modal-content::-webkit-scrollbar {
-  width: 8px;
+.modal-body::-webkit-scrollbar {
+  width: 6px;
 }
 
-.modal-content::-webkit-scrollbar-track {
+.modal-body::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+.modal-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>

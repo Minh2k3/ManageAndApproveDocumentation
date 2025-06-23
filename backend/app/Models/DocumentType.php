@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\DocumentTemplate;
 use App\Models\ApprovalPermission;
+use App\Models\RollAtDepartment;
 
 class DocumentType extends Model
 {
@@ -18,6 +19,16 @@ class DocumentType extends Model
     protected $fillable = [
         'name',
         'description',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -42,5 +53,18 @@ class DocumentType extends Model
     public function documentTemplates()
     {
         return $this->hasMany(DocumentTemplate::class);
+    }
+
+    /**
+     * Relationship với RollAtDepartment thông qua ApprovalPermission
+     */
+    public function rollAtDepartments()
+    {
+        return $this->belongsToMany(
+            RollAtDepartment::class,
+            'approval_permissions',
+            'document_type_id',
+            'roll_at_department_id'
+        );
     }
 }

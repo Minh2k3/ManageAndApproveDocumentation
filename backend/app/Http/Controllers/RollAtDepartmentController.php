@@ -12,7 +12,19 @@ class RollAtDepartmentController extends Controller
      */
     public function index()
     {
-        //
+        $rollAtDepartments = RollAtDepartment::select([
+            'id',
+            'id as value',
+            'name',
+            'name as label',
+            'description',
+            'level'
+        ])
+        ->get();
+
+        return response()->json([
+            'roll_at_departments' => $rollAtDepartments,
+        ])->setStatusCode(200, 'Roll at departments retrieved successfully.');
     }
 
     /**

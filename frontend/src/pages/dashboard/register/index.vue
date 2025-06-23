@@ -355,6 +355,7 @@ export default defineComponent({
                     department_id: selectedDepartment.value,
                     roll_at_department_id: selectedRoll.value
                 });
+                
                 console.log("Đăng ký thành công:", response.data);
                 validateFrontend.value = false;
                 message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");

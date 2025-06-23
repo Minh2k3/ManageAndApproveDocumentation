@@ -20,6 +20,7 @@ export const useDocumentStore = defineStore("document", () => {
     const current_document = ref([]);
     const current_document_versions = ref([]);
     const current_document_data = ref([]);
+
     // Actions
     async function fetchDocumentTypes(force = false) {
         if (isFetchedDocumentTypes.value && !force) {
@@ -27,14 +28,30 @@ export const useDocumentStore = defineStore("document", () => {
         }
 
         try {
-            const response = await axiosInstance.get("/api/document-types");
+            const response = await axiosInstance.get("/api/document-types/all");
             if (response.data) {
-                console.log("response document types: ", response.data);
+                // console.log("response document types: ", response.data);
                 // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 document_types.value = response.data.document_types;
+                console.log("Document types: ", document_types.value);
+                isFetchedDocumentTypes.value = true;
             }
         } catch (error) {
             console.error("Error fetching document types:", error);
+        }
+    }
+
+    async function updateDocumentType(id, formData) {
+        try {
+            const response = await axiosInstance.post(`/api/document-types/update/${id}`, formData);
+            if (response.code === 200) {
+                console.log("Document types updated successfully:", response.data);
+                // Optionally, you can refetch the document types to ensure the store is up-to-date
+            } else {
+                console.error("Failed to update document types:", response.message);
+            }
+        } catch (error) {
+            console.error("Error updating document types:", error);
         }
     }
 
@@ -183,6 +200,7 @@ export const useDocumentStore = defineStore("document", () => {
         current_document_data,
 
         fetchDocumentTypes,
+        updateDocumentType,
         fetchDocumentFlowTemplates,
         fetchDocumentTemplates,
         fetchDocumentFlowSteps,

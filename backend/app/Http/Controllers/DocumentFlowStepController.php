@@ -173,9 +173,9 @@ class DocumentFlowStepController extends Controller
             }
             $currentStep->save();
             // Ký văn bản
+            
 
             
-            // Lưu comment nếu có
             // if (!empty($validated['comment'])) {
             //     $this->saveComment($currentStep->id, $validated['comment']);
             // }

@@ -149,7 +149,7 @@
 
     <!-- Forgot Password Modal -->
     <a-modal
-        :visible="modalForgotPassword"
+        :open="modalForgotPassword"
         @cancel="modalForgotPassword = false"
         class="forgot-modal"
     >
@@ -159,10 +159,11 @@
         <div class="modal-content">
             <p>Vui lòng điền email đã đăng ký để khôi phục mật khẩu.</p>
             <a-input
-                v-model:value="email"
+                v-model:value="emailForgot"
                 placeholder="Nhập email của bạn"
                 allow-clear
                 size="large"
+                ref="emailForgotInput"
             />
         </div>
         <template #footer>
@@ -176,7 +177,7 @@
 
 <script>
 import { HomeOutlined, MailOutlined } from "@ant-design/icons-vue";
-import { defineComponent, ref, watch, onMounted, onUnmounted } from "vue";
+import { defineComponent, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { message } from 'ant-design-vue';
 import { useRouter } from "vue-router";
 import axiosInstance from "@/lib/axios.js";
@@ -196,6 +197,8 @@ export default defineComponent({
         const password = ref("");
         const rememberMe = ref(false);
         const firstFieldError = ref("");
+        const emailForgot = ref("");
+        const emailForgotInput = ref(null);
 
         const validateForm = ref(false);
         const loading = ref(false);
@@ -248,7 +251,11 @@ export default defineComponent({
 
         const handleGlobalKeydown = (event) => {
             if (event.key === 'Enter') {
-                login();
+                if (modalForgotPassword.value) {
+                    handleForgotPassword();
+                } else {
+                    login();
+                }
             }
         };
 
@@ -262,18 +269,22 @@ export default defineComponent({
 
         const modalForgotPassword = ref(false);
 
-        const openModalForgotPassword = () => {
+        const openModalForgotPassword = async () => {
             modalForgotPassword.value = true;
+            emailForgot.value = ""; // Reset email input when opening modal
+            await nextTick(); // Wait for the DOM to update
+            emailForgotInput.value.focus(); // Focus on email input
         };
 
         const handleForgotPassword = async () => {
-            if (!email.value) {
+            if (!emailForgot.value) {
                 message.error("Vui lòng nhập email của bạn.");
                 return;
             }
-
+            
             try {
-                const response = await axiosInstance.post("/api/forgot-password", { email: email.value });
+                await axiosInstance.get("/sanctum/csrf-cookie");
+                const response = await axiosInstance.post("/api/forgot-password", { email: emailForgot.value });
                 message.success("Yêu cầu quên mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.");
                 modalForgotPassword.value = false;
             } catch (error) {
@@ -298,6 +309,8 @@ export default defineComponent({
             password,
             rememberMe,
             firstFieldError,
+            emailForgot,
+            emailForgotInput,
             HomeOutlined,
             MailOutlined,
             loading,

@@ -216,6 +216,7 @@
     const visible = ref(false);
     const visible_user = ref(false);
     const direction = ref("left");
+    const loading = ref(false);
 
     const notifications = ref([]);
 

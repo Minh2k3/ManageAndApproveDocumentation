@@ -38,6 +38,7 @@ import {
     Result,
     Row,
     Select,
+    Space,
     Steps,
     Switch,
     Table,
@@ -94,6 +95,7 @@ app.use(RadioGroup)
 app.use(Result)
 app.use(Row)
 app.use(Select)
+app.use(Space)
 app.use(Steps)
 app.use(Switch)
 app.use(Table)

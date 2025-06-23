@@ -161,4 +161,34 @@ class UserController extends Controller
         ]);
     }
 
+    public function deleteUser($id)
+    {
+        $user = User::find($id);
+
+        $role_id = $user->role_id;
+        if ($role_id == 2) {
+            $creator = Creator::where('user_id', $id)->first();
+            if ($creator) {
+                $creator->delete();
+            }
+        } else if ($role_id == 3) {
+            $approver = Approver::where('user_id', $id)->first();
+            if ($approver) {
+                $approver->delete();
+            }
+        }
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        // Delete the user's certificates
+        Certificate::where('user_id', $user->id)->delete();
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully.']);
+    }
+
 }

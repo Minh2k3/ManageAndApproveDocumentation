@@ -31,7 +31,6 @@
                             <!-- Upload button với icon -->
                             <a-upload
                                 :show-upload-list="false"
-                                :before-upload="beforeUpload"
                                 accept="image/*"
                             >
                                 <a-button type="primary" class="mt-2">
@@ -260,7 +259,6 @@
                             <!-- Upload button với icon -->
                             <a-upload
                                 :show-upload-list="false"
-                                :before-upload="beforeUpload"
                                 accept="image/*"
                             >
                                 <a-button type="primary" class="mt-2">
@@ -703,8 +701,8 @@ export default defineComponent({
         const description = ref(user.value.description || '');
         const role = authStore.role;
         console.log('Role:', role);
-        const selectedDepartment = ref(user_detail.value.department_id || null);
-        const selectedRoll = ref(user_detail.value.roll_at_department_id || null);
+        const selectedDepartment = ref(user_detail.value?.department_id || null);
+        const selectedRoll = ref(user_detail.value?.roll_at_department_id || null);
         const sex = ref(user.value.sex || 'Male');
         const departments = computed(() => registerStore.departments);
         const rolls = computed(() => registerStore.rolls);
@@ -733,6 +731,10 @@ export default defineComponent({
             // Logic to change user information
             console.log('Change information clicked');
         };
+
+        const showRequestNewDepartmentModal = () => {
+            console.log('Request new department clicked');
+        }
 
         // For notification tab
 
@@ -810,6 +812,7 @@ export default defineComponent({
             getAvatarUrl,
             handleClickChangeAvatar,
             changeInformation,    
+            showRequestNewDepartmentModal,
 
             changeUserInterface,
 

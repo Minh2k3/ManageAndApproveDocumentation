@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentType;
+use App\Models\User;
+use App\Models\RollAtDepartment;
 use App\Models\Approver;
 use Carbon\Carbon;
 
@@ -60,6 +62,14 @@ class ApprovalPermission extends Model
     public function documentType()
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    /**
+     * Get the roll at department that the permission is associated with.
+     */
+    public function rollAtDepartment()
+    {
+        return $this->belongsTo(RollAtDepartment::class, 'roll_at_department_id');
     }
 
     protected $dates = ['created_at', 'ended_at'];

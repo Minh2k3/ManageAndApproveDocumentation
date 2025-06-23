@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Creator;
 use App\Models\Approver;
+use App\Models\DocumentType;
 use Carbon\Carbon;
 
 class RollAtDepartment extends Model
@@ -46,6 +47,19 @@ class RollAtDepartment extends Model
     public function creators()
     {
         return $this->hasMany(Creator::class);
+    }
+
+    /**
+     * Relationship với DocumentType thông qua ApprovalPermission
+     */
+    public function documentTypes()
+    {
+        return $this->belongsToMany(
+            DocumentType::class,
+            'approval_permissions',
+            'roll_at_department_id',
+            'document_type_id'
+        );
     }
 
     /**

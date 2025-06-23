@@ -33,6 +33,7 @@ use App\Http\Controllers\UserAccessLogController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CaCertificateController;
 use App\Http\Controllers\Api\PDFProxyController;
+use App\Http\Controllers\RollAtDepartmentController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -78,6 +79,9 @@ Route::get('/users', [UserController::class, 'getUsers'])
     // ->middleware('auth:sanctum')
     ->name('users.getUsers');
 
+Route::post('forgot-password', [HandlePasswordController::class, 'forgotPassword'])
+    ->name('forgot-password');
+    
 Route::post('/users/active', [UserController::class, 'activeUser'])
     ->middleware('auth:sanctum')
     ->name('users.active');
@@ -98,12 +102,15 @@ Route::get('/users/{user_id}/creator', [UserController::class, 'getCreatorByUser
     // ->middleware('auth:sanctum')
     ->name('users.getCreatorByUserId');
 
+Route::post('/users/{user_id}/delete', [UserController::class, 'deleteUser'])
+    // ->middleware('auth:sanctum')
+    ->name('users.delete');
+
 Route::post('/users/{user_id}/change-password', [HandlePasswordController::class, 'changePassword'])
     // ->middleware('auth:sanctum')
     ->name('users.changePassword');
 
-Route::post('forgot-password', [HandlePasswordController::class, 'forgotPassword'])
-    ->name('forgot-password');
+
 
 // Document api
 // Document
@@ -127,31 +134,37 @@ Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocuments
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
     // ->middleware('auth:sanctum')
-    ->middleware('role:1,2,3')
+    ->middleware('role:1,3')
     ->name('documents.getDocumentsByApprover');
 
 Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:2,3')
     ->name('documents.getDocumentOfMeById');
 
 Route::get('/document/{id}/nm', [DocumentController::class, 'getDocumentNeedMeById'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:3')
     ->name('documents.getDocumentNeedMeById');
     
 Route::post('/documents/draft', [DocumentController::class, 'storeDraftDocument'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:2,3')
     ->name('documents.storeDraftDocument');
 
 Route::post('/documents/request', [DocumentController::class, 'storeRequestDocument'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:2,3')
     ->name('documents.storeRequestDocument');
 
 Route::post('/documents/new-version/{id}', [DocumentController::class, 'storeNewVersionDocument'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:2,3')
     ->name('documents.storeNewVersionDocument');
 
 Route::post('/documents/upload-file', [DocumentController::class, 'uploadFile'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:2,3')
     ->name('documents.uploadFile');
 
 Route::prefix('documents')->group(function () {
@@ -174,6 +187,7 @@ Route::post('documents/sign-document', [CertificateController::class, 'signDocum
 
 // Document Flow 
 Route::get('/document-flows', [DocumentFlowController::class, 'index'])
+    ->middleware('auth:sanctum')
     ->name('document-flows.index');
 
 Route::get('/document-flows/{documentFlow}', [DocumentFlowController::class, 'show'])
@@ -181,11 +195,11 @@ Route::get('/document-flows/{documentFlow}', [DocumentFlowController::class, 'sh
     ->name('document-flows.show');
 
 Route::get('/document-flows/{id}/steps', [DocumentFlowController::class, 'getStepsByDocumentFlow'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flows.getStepsByDocumentFlow');
 
 Route::post('/document-flows-template', [DocumentFlowController::class, 'createFlowTemplate'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flows.createFlowTemplate');
 
 
@@ -198,16 +212,33 @@ Route::get('document-flow-steps/{documentFlow}', [DocumentFlowStepController::cl
     ->name('document-flow-steps.getStepsByDocumentFlowId');
 
 Route::post('/document-steps/{document_flow_step_id}/approve', [DocumentFlowStepController::class, 'approveStep'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flow-steps.approveStep');
 
 Route::post('/document-steps/{document_flow_step_id}/reject', [DocumentFlowStepController::class, 'rejectStep'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flow-steps.rejectStep');
 
 // Document Type
-Route::get('/document-types', [DocumentTypeController::class, 'index'])
+Route::get('/document-types', [DocumentTypeController::class, 'getActiveDocumentTypes'])
+    // ->middleware('auth:sanctum')
     ->name('document-types.index');
+
+Route::get('/document-types/all', [DocumentTypeController::class, 'index'])    
+    // ->middleware('auth:sanctum')
+    ->name('document-types.getAllDocumentTypes');
+
+Route::post('/document-types', [DocumentTypeController::class, 'store'])
+    // ->middleware('auth:sanctum')
+    ->name('document-types.store');
+
+Route::post('/document-types/update/{id}', [DocumentTypeController::class, 'update'])
+    // ->middleware('auth:sanctum')
+    ->name('document-types.update');    
+
+Route::post('/document-types/delete/{id}', [DocumentTypeController::class, 'destroy'])
+    // ->middleware('auth:sanctum')
+    ->name('document-types.destroy');
 
 // Document Template
 Route::get('/admin/document-templates', [DocumentTemplateController::class, 'getAllTemplates'])
@@ -351,3 +382,8 @@ Route::post('/certificates/extend-certificate', [CertificateController::class, '
 Route::get('/users/{user_id}/certificates', [CertificateController::class, 'getUserCertificates'])
     // ->middleware('auth:sanctum')
     ->name('certificates.getUserCertificates');
+
+// Roll at Department
+Route::get('/roll-at-departments', [RollAtDepartmentController::class, 'index'])
+    // ->middleware('auth:sanctum')
+    ->name('roll-at-departments.index');

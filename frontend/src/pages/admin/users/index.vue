@@ -300,8 +300,11 @@ export default defineComponent ({
         
         // getUsers();
 
-        const viewDetail = (user) => {
+        const showModalDetail = ref(false);
 
+        const viewDetail = (user) => {
+            showModalDetail.value = true;
+            
         };
 
         const showConfirm = (user, action) => {

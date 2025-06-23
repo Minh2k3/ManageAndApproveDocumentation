@@ -51,6 +51,7 @@ class DocumentController extends Controller
                 'title' => $document->title,
                 'description' => $document->description,
                 'file_path' => $document->file_path,
+                'certificate_path' => $document->certificate_path,
                 'document_type' => [
                     'id' => $document->documentType->id ?? null,
                     'name' => $document->documentType->name ?? 'Không xác định'

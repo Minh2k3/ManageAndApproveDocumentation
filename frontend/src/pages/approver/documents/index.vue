@@ -266,7 +266,7 @@
     </a-card>
 
     <a-modal
-        v-model:visible="detailVisible"
+        v-model:open="detailVisible"
         width="600px"
         z-index="10000"
         >

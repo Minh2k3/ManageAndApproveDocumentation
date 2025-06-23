@@ -52,6 +52,7 @@ Route::post('/resend-verification-email', [RegisterController::class, 'resendVer
 // Route::post('/forgot-password', [HandlePasswordController::class, 'forgotPassword'])
 //     ->middleware('throttle:3,60')
 //     ->name('forgot-password');
+
 Route::post('/reset-password', [HandlePasswordController::class, 'resetPassword'])
     ->name('reset-password');
 Route::post('/verify-reset-token', [HandlePasswordController::class, 'verifyResetToken'])

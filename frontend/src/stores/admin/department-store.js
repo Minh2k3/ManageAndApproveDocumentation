@@ -1,12 +1,15 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axiosInstance from "@/lib/axios.js";
+import { ro } from "date-fns/locale";
 
 export const useDepartmentStore = defineStore("department", () => {
     // State
     const departments = ref([]);
     const isFetchedDepartments = ref(false);
     const departments_can_approve = ref([]);
+    const roll_at_department = ref([]);
+    const isFetchedRollAtDepartment = ref(false);
 
     // Actions
     async function fetchDepartments(force = false) {
@@ -39,12 +42,30 @@ export const useDepartmentStore = defineStore("department", () => {
         }
     } 
 
+    async function fetchRollAtDepartment(force = false) {
+        if (isFetchedRollAtDepartment.value && !force) {
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.get("/api/roll-at-departments");
+            if (response.data) {
+                roll_at_department.value = response.data.roll_at_departments;
+                isFetchedRollAtDepartment.value = true;
+            }
+        } catch (error) {
+            console.error("Error fetching roll at department:", error);
+        }
+    }
+
     return {
         departments,
-        isFetchedDepartments,
         fetchDepartments,
 
         departments_can_approve,
         fetchDepartmentsCanApprove,
+
+        roll_at_department,
+        fetchRollAtDepartment,
     };
 });
