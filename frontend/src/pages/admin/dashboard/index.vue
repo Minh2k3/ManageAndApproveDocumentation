@@ -114,8 +114,7 @@
                     <div class="col-lg-2 col-2 d-flex d-lg-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                            <img v-if="notification.sender?.avatar != null" :src="getAvatarUrl(notification.sender?.avatar)" class="w-100 h-100" style="object-fit: cover;" />
-                            <img v-else :src="randomAvatar(notification.sender?.id)" class="w-100 h-100" style="object-fit: cover;" />
+                            <img :src="getAvatarUrl(notification.sender)" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
@@ -146,8 +145,7 @@
                     <div class="col-lg-2 col-2 d-flex justify-content-center align-items-center px-0">
                         <div class="rounded-circle overflow-hidden border border-1 border-dark"
                             style="width: 3.5rem; height: 3.5rem;">
-                            <img v-if="user?.avatar != null" :src="getAvatarUrl(user?.avatar)" class="w-100 h-100" style="object-fit: cover;" />
-                            <img v-else :src="randomAvatar(user?.id)" class="w-100 h-100" style="object-fit: cover;" />
+                            <img :src="getAvatarUrl(user)" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                     </div>
 
@@ -483,9 +481,38 @@ export default defineComponent({
         // Methods
         const API_BASE_URL = 'http://localhost:8000';
 
-        const getAvatarUrl = (avatar) => {
-            if (!avatar) return null;
-            return `${API_BASE_URL}/images/avatars/${avatar}`;
+        const randomAvatar = (userId) =>{
+            // Sử dụng DiceBear API với nhiều style khác nhau
+            const styles = [
+                'adventurer',
+                'avataaars',
+                'big-ears',
+                'bottts',
+                'croodles',
+                'fun-emoji',
+                'identicon',
+                'initials',
+                'lorelei',
+                'micah',
+                'miniavs',
+                'open-peeps',
+                'personas',
+                'pixel-art'
+            ];
+            
+            // Chọn ngẫu nhiên một style dựa trên userId để đảm bảo tính nhất quán
+            const styleIndex = userId % styles.length;
+            const style = styles[styleIndex];
+            
+            // Tạo seed dựa trên userId để avatar luôn giống nhau cho cùng một user
+            const seed = `user-${userId}`;
+            
+            return `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&size=150`;
+        };
+
+        const getAvatarUrl = (user) => {
+            if (!user.avatar) return randomAvatar(user.id);
+            return `${API_BASE_URL}/images/avatars/${user.avatar}`;
         };
 
         const getStatusStyle = (status) => {
@@ -526,12 +553,12 @@ export default defineComponent({
             }
         };
 
-        const randomAvatar = (id) => {
-            if (id > 100 || id == null) {
-                return `https://avatar.iran.liara.run/public`;
-            }
-            return `https://avatar.iran.liara.run/public/${id}`;
-        };
+        // const randomAvatar = (id) => {
+        //     if (id > 100 || id == null) {
+        //         return `https://avatar.iran.liara.run/public`;
+        //     }
+        //     return `https://avatar.iran.liara.run/public/${id}`;
+        // };
 
         // Lifecycle
         onMounted(async () => {

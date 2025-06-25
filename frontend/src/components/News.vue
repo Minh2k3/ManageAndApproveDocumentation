@@ -585,11 +585,33 @@ export default {
       localStorage.setItem('documentViewMode', this.viewMode);
     },
 
-    randomAvatar(id){
-        if (id > 100 || id == null) {
-            return `https://avatar.iran.liara.run/public`;
-        }
-        return `https://avatar.iran.liara.run/public/${id}`;
+    randomAvatar(userId) {
+        // Sử dụng DiceBear API với nhiều style khác nhau
+        const styles = [
+            'adventurer',
+            'avataaars',
+            'big-ears',
+            'bottts',
+            'croodles',
+            'fun-emoji',
+            'identicon',
+            'initials',
+            'lorelei',
+            'micah',
+            'miniavs',
+            'open-peeps',
+            'personas',
+            'pixel-art'
+        ];
+        
+        // Chọn ngẫu nhiên một style dựa trên userId để đảm bảo tính nhất quán
+        const styleIndex = userId % styles.length;
+        const style = styles[styleIndex];
+        
+        // Tạo seed dựa trên userId để avatar luôn giống nhau cho cùng một user
+        const seed = `user-${userId}`;
+        
+        return `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&size=150`;
     },
 
     getAvatarUrl(user){
