@@ -284,7 +284,7 @@ export default {
     };
 
     const viewFlow = (record) => {
-      router.push({ name: 'admin-approval-flows-create', params: { id: record.id } });
+      router.push({ name: 'admin-approval-flows-detail', params: { id: record.id } });
     };
 
 

@@ -461,6 +461,15 @@ class CertificateController extends Controller
     {
         $certificates = Certificate::where('user_id', $user_id)
             ->with(['user.role'])
+            ->orderByRaw("CASE 
+                WHEN status = 'request_new' THEN 1
+                WHEN status = 'active' THEN 2
+                WHEN status = 'request_renewal' THEN 2
+                WHEN status = 'revoked' THEN 3 
+                WHEN status = 'expired' THEN 4 
+                ELSE 4 
+            END")
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return response()->json([

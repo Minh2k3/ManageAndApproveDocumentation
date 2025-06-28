@@ -39,6 +39,7 @@ import {
     Row,
     Select,
     Space,
+    Statistic,
     Steps,
     Switch,
     Table,
@@ -96,6 +97,7 @@ app.use(Result)
 app.use(Row)
 app.use(Select)
 app.use(Space)
+app.use(Statistic)
 app.use(Steps)
 app.use(Switch)
 app.use(Table)

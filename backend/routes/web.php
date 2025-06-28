@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CreatePDFController;
 use Illuminate\Support\Facades\Response;
+use Yaza\LaravelGoogleDriveStorage\Gdrive;
 
 // Route::get('/', function () {
 //     return ['Laravel' => app()->version()];
@@ -95,4 +96,52 @@ Route::get('download-pdf', [CreatePDFController::class, 'createPDF'])
 
 Route::get('/create-certificate/{id}', [CreatePDFController::class, 'createPDF'])
     ->name('pdf.createPDF');
+
+Route::get('/drive/{file_name}', function ($file_name) {
+        try {
+            // Lấy file từ Google Drive để kiểm tra tồn tại
+            $data = Gdrive::get($file_name);
+            if (!$data || !$data->file) {
+                return response()->json(['error' => 'File not found'], 404);
+            }
+
+            // Khởi tạo Google Client
+            $client = new Google_Client();
+            $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+            $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+            $client->setAccessToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+            $client->addScope(Google_Service_Drive::DRIVE);
+            $service = new Google_Service_Drive($client);
+
+            // Tìm file trên Google Drive
+            $files = $service->files->listFiles([
+                'q' => "name='" . basename($file_name) . "' and '" . env('GOOGLE_DRIVE_FOLDER_ID') . "' in parents",
+                'fields' => 'files(id, webViewLink)',
+            ]);
+
+            if (empty($files->getFiles())) {
+                return response()->json(['error' => 'File not found in specified folder'], 404);
+            }
+
+            $file = $files->getFiles()[0];
+            $fileId = $file->getId();
+
+
+            // Cập nhật quyền để file công khai
+            $permission = new \Google_Service_Drive_Permission([
+                'type' => 'anyone',
+                'role' => 'reader',
+            ]);
+            $service->permissions->create($fileId, $permission);
+            
+            // Lấy webViewLink
+            $webViewLink = $file->getWebViewLink();
+
+            return response()->json(['url' => $webViewLink], 200);
+        } catch (\Exception $e) {
+            Log::error("Error retrieving file URL: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve file URL'], 500);
+        }
+})->name('drive.getFile');
+
 // require __DIR__.'/auth.php';

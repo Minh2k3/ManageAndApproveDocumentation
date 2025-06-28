@@ -865,6 +865,7 @@ class DocumentController extends Controller
                     if ($step['step'] == 1) {
                         $content = "Bạn là người phê duyệt đầu tiên cho văn bản '" . $new_document['title'] . "' do " . $user['name'] . ' tạo';
                     }
+                    $approver = Approver::find($step['approver_id']);
                     $notification = Notification::create([
                         'notification_category_id' => 3,
                         'from_user_id' => $user['id'],

@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0">
         <i class="bi bi-shield-check me-2"></i>
-        Quản Lý Chữ Ký Số
+        Quản lý chữ ký số
       </h2>
       <div>
         <a-button 
@@ -13,16 +13,16 @@
           class="me-2"
         >
           <i class="bi bi-plus-circle me-1"></i>
-          Tạo Mới Chữ Ký
+          Xin cấp mới chữ ký
         </a-button>
-        <a-button 
+        <!-- <a-button 
           type="default" 
           @click="showRenewModal"
           :disabled="selectedSignatures.length === 0"
         >
           <i class="bi bi-arrow-repeat me-1"></i>
           Gia Hạn Chữ Ký
-        </a-button>
+        </a-button> -->
       </div>
     </div>
 
@@ -125,7 +125,11 @@
       row-key="id"
       @change="handleTableChange"
     >
-      <template #bodyCell="{ column, record }">
+      <template #bodyCell="{ column, record, index }">
+        <template v-if="column.key === 'id'">
+          <span>{{ index + 1 }}</span>
+        </template>
+
         <template v-if="column.key === 'status'">
           <a-tag :color="getStatusColor(record.status)">
             <i :class="getStatusIcon(record.status)" class="me-1"></i>
@@ -135,7 +139,7 @@
         
         <template v-if="column.key === 'expiryDate'">
           <span :class="getExpiryClass(record.expiryDate)">
-            {{ formatDate(record.expiryDate) }}
+            {{ record.expiryDate }}
           </span>
         </template>
         
@@ -148,14 +152,14 @@
             >
               <i class="bi bi-eye"></i>
             </a-button>
-            <a-button 
+            <!-- <a-button 
               type="link" 
               size="small" 
               @click="downloadCertificate(record)"
               :disabled="record.status === 'expired'"
             >
               <i class="bi bi-download"></i>
-            </a-button>
+            </a-button> -->
             <a-button 
               type="link" 
               size="small" 
@@ -167,6 +171,7 @@
             <a-popconfirm
               title="Bạn có chắc chắn muốn thu hồi chữ ký này?"
               @confirm="revokeSignature(record)"
+              placement="topRight"
             >
               <a-button 
                 type="link" 
@@ -185,10 +190,11 @@
     <!-- Create Modal -->
     <a-modal
       v-model:open="createModalVisible"
-      title="Tạo Mới Chữ Ký Số"
-      width="600px"
+      title="Xin Cấp Mới Chữ Ký Số"
+      width="350px"
       @ok="handleCreateSignature"
       :confirm-loading="createLoading"
+      z-index="10000"
     >
       <a-form
         ref="createFormRef"
@@ -196,7 +202,7 @@
         :rules="createFormRules"
         layout="vertical"
       >
-        <a-form-item label="Tên chữ ký" name="name">
+        <!-- <a-form-item label="Tên chữ ký" name="name">
           <a-input v-model:value="createForm.name" placeholder="Nhập tên chữ ký" />
         </a-form-item>
         
@@ -205,24 +211,44 @@
             <a-select-option value="personal">Cá nhân</a-select-option>
             <a-select-option value="organization">Tổ chức</a-select-option>
           </a-select>
-        </a-form-item>
+        </a-form-item> -->
         
         <a-form-item label="Thời hạn (năm)" name="validityPeriod">
-          <a-select v-model:value="createForm.validityPeriod" placeholder="Chọn thời hạn">
+          <a-select 
+            v-model:value="createForm.validityPeriod" 
+            placeholder="Chọn thời hạn"
+            :dropdown-style="{ 
+              position: 'absolute',
+              zIndex: 10000,
+              background: 'white',
+              border: '1px solid #ccc'
+              }"
+            >
             <a-select-option :value="1">1 năm</a-select-option>
             <a-select-option :value="2">2 năm</a-select-option>
             <a-select-option :value="3">3 năm</a-select-option>
           </a-select>
         </a-form-item>
         
-        <a-form-item label="Mô tả" name="description">
+        <!-- <a-form-item label="Mô tả" name="description">
           <a-textarea 
             v-model:value="createForm.description" 
             placeholder="Nhập mô tả (tùy chọn)"
             :rows="3"
           />
-        </a-form-item>
+        </a-form-item> -->
       </a-form>
+      <template #footer>
+        <a-button @click="createModalVisible = false">Đóng</a-button>
+        <a-button 
+          type="primary" 
+          @click="handleCreateSignature"
+          :loading="createLoading"
+        >
+          Xin Cấp Mới
+        </a-button>
+      </template>
+
     </a-modal>
 
     <!-- Renew Modal -->
@@ -257,16 +283,50 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- Detail Modal -->
+    <a-modal
+      v-model:open="modalDetailVisible"
+      title="Chi Tiết Chữ Ký Số"
+      width="600px"
+      @cancel="modalDetailVisible = false"
+      z-index="10000"
+    >
+      <div v-if="selectedSignature">
+        <p><strong>Người sở hữu:</strong> {{ selectedSignature.user.name }} - {{ selectedSignature.user.position_title }}</p>
+        <p><strong>Trạng thái: </strong> 
+          <a-tag :color="getStatusColor(selectedSignature.status)">
+            <i :class="getStatusIcon(selectedSignature.status)" class="me-1"></i>
+            {{ getStatusText(selectedSignature.status) }}
+          </a-tag>
+        </p>
+        <p><strong>Số lượt ký:</strong> {{ selectedSignature.used_count }}</p>
+        <p><strong>Ngày cấp:</strong> {{ (selectedSignature.issueDate) }}</p>
+        <p><strong>Ngày hết hạn:</strong> {{ selectedSignature.expiryDate }}</p>  
+      </div>
+      <div v-else>
+        <p>Không có thông tin chi tiết.</p>
+      </div>
+
+      <template #footer>
+        <a-button type="primary" @click="modalDetailVisible = false">Đóng</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script>
 import { defineComponent, ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
+import { useCertificateStore } from '@/stores/creator/certificate-store';
+import { useAuth } from '@/stores/use-auth.js';
 
 export default defineComponent({
   name: 'CertificateUser',
   setup() {
+    const certificateStore = useCertificateStore();
+    const auth = useAuth();
+
     // Reactive data
     const loading = ref(false)
     const searchText = ref('')
@@ -284,86 +344,80 @@ export default defineComponent({
     const renewFormRef = ref()
 
     // Sample data
-    const signatures = ref([
-      {
-        id: 1,
-        name: 'Chữ ký Nguyễn Văn A',
-        serialNumber: 'CKS001234567',
-        type: 'personal',
-        status: 'active',
-        issueDate: '2024-01-15',
-        expiryDate: '2025-01-15',
-        description: 'Chữ ký cá nhân cho ký tài liệu'
-      },
-      {
-        id: 2,
-        name: 'Chữ ký Công ty ABC',
-        serialNumber: 'CKS001234568',
-        type: 'organization',
-        status: 'expiring',
-        issueDate: '2023-06-20',
-        expiryDate: '2025-07-20',
-        description: 'Chữ ký tổ chức'
-      },
-      {
-        id: 3,
-        name: 'Chữ ký Trần Thị B',
-        serialNumber: 'CKS001234569',
-        type: 'personal',
-        status: 'expired',
-        issueDate: '2022-03-10',
-        expiryDate: '2024-03-10',
-        description: 'Chữ ký đã hết hạn'
-      }
-    ])
+    const signatures = ref([]);
+    const currentSignature = ref(null);
+
+    onMounted(async () => {
+      // Fetch signatures from store or API
+      await certificateStore.fetchCertificates(false, auth.user.id);
+      
+      signatures.value = certificateStore.certificates.map(cert => ({
+        id: cert.id,
+        name: cert.user.name,
+        status: cert.status,
+        issueDate: cert.issued_at,
+        expiryDate: cert.expires_at,
+        public_key: cert.public_key,
+        certificate: cert.certificate,
+        private_key: cert.private_key,
+        used_count: cert.used_count,
+        user: cert.user,
+      }));
+
+      currentSignature.value = signatures.value[0] || null;
+    });
 
     // Statistics
     const statistics = computed(() => {
       const total = signatures.value.length
       const active = signatures.value.filter(s => s.status === 'active').length
+      const revoked = signatures.value.filter(s => s.status === 'revoked').length
+      const requestNew = signatures.value.filter(s => s.status === 'request_new').length
+      const requestRenewal = signatures.value.filter(s => s.status === 'request_renewal').length
       const expiring = signatures.value.filter(s => s.status === 'expiring').length
       const expired = signatures.value.filter(s => s.status === 'expired').length
       
-      return { total, active, expiring, expired }
+      return { total, active, expiring, expired, revoked, requestNew, requestRenewal }
     })
 
     // Table columns
     const columns = [
       {
-        title: 'Tên chữ ký',
-        dataIndex: 'name',
-        key: 'name',
-        sorter: true
-      },
-      {
-        title: 'Serial Number',
-        dataIndex: 'serialNumber',
-        key: 'serialNumber'
-      },
-      {
-        title: 'Loại',
-        dataIndex: 'type',
-        key: 'type',
-        render: (type) => type === 'personal' ? 'Cá nhân' : 'Tổ chức'
+        title: 'STT',
+        dataIndex: 'id',
+        key: 'id',
+        sorter: true,
+        width: 50,
+        align: 'center',
       },
       {
         title: 'Trạng thái',
-        key: 'status'
+        key: 'status',
+        dataIndex: 'status',
+        align: 'center',
+        width: 150,
       },
       {
         title: 'Ngày cấp',
         dataIndex: 'issueDate',
         key: 'issueDate',
-        render: (date) => formatDate(date)
+        render: (date) => formatDate(date),
+        align: 'center',
+        width: 180,
       },
       {
         title: 'Ngày hết hạn',
-        key: 'expiryDate'
+        key: 'expiryDate',
+        dataIndex: 'expiryDate',
+        render: (date) => formatDate(date),
+        align: 'center',
+        width: 180,
       },
       {
         title: 'Thao tác',
         key: 'actions',
-        width: 150
+        width: 150,
+        align: 'center',
       }
     ]
 
@@ -400,9 +454,6 @@ export default defineComponent({
     const createFormRules = {
       name: [
         { required: true, message: 'Vui lòng nhập tên chữ ký', trigger: 'blur' }
-      ],
-      type: [
-        { required: true, message: 'Vui lòng chọn loại chứng thư', trigger: 'change' }
       ],
       validityPeriod: [
         { required: true, message: 'Vui lòng chọn thời hạn', trigger: 'change' }
@@ -448,7 +499,10 @@ export default defineComponent({
       const colors = {
         active: 'green',
         expiring: 'orange',
-        expired: 'red'
+        expired: 'red',
+        revoked: 'grey',
+        request_renewal: 'blue',
+        request_new: 'purple'
       }
       return colors[status] || 'default'
     }
@@ -457,7 +511,10 @@ export default defineComponent({
       const icons = {
         active: 'bi bi-check-circle',
         expiring: 'bi bi-exclamation-triangle',
-        expired: 'bi bi-x-circle'
+        expired: 'bi bi-x-circle',
+        revoked: 'bi bi-trash',
+        request_renewal: 'bi bi-arrow-repeat',
+        request_new: 'bi bi-plus-circle'
       }
       return icons[status] || 'bi bi-question-circle'
     }
@@ -466,19 +523,39 @@ export default defineComponent({
       const texts = {
         active: 'Hoạt động',
         expiring: 'Sắp hết hạn',
-        expired: 'Đã hết hạn'
+        revoked: 'Bị thu hồi',
+        expired: 'Đã hết hạn',
+        request_renewal: 'Yêu cầu gia hạn',
+        request_new: 'Yêu cầu cấp mới'
       }
       return texts[status] || 'Không xác định'
     }
 
-    const getExpiryClass = (expiryDate) => {
+    const getExpiryClass = async (expiryDate) => {
       const today = new Date()
       const expiry = new Date(expiryDate)
       const diffTime = expiry - today
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-      if (diffDays < 0) return 'text-danger'
-      if (diffDays <= 30) return 'text-warning'
+      if (diffDays < 0) 
+      { 
+        if (currentSignature.status !== 'expired') {
+          await certificateStore.changeStatus(currentSignature.id, 'expired');
+          signatures.value = signatures.value.map(sig => {
+            if (sig.id === currentSignature.id) {
+              sig.status = 'expired';
+            }
+            return sig;
+          });
+        }
+        return 'text-danger'
+      }  
+      if (diffDays <= 30) {
+        if (currentSignature.status !== 'expiring') {
+          await certificateStore.changeStatus(currentSignature.id, 'expiring');
+        }
+        return 'text-warning'
+      } 
       return 'text-success'
     }
 
@@ -580,8 +657,11 @@ export default defineComponent({
       }
     }
 
+    const modalDetailVisible = ref(false)
+    const selectedSignature = ref(null)
     const viewDetails = (record) => {
-      message.info(`Xem chi tiết chữ ký: ${record.name}`)
+      modalDetailVisible.value = true;
+      selectedSignature.value = record;
     }
 
     const downloadCertificate = (record) => {
@@ -617,6 +697,8 @@ export default defineComponent({
       // Modal states
       createModalVisible,
       renewModalVisible,
+      modalDetailVisible,
+      selectedSignature,
       createLoading,
       renewLoading,
       

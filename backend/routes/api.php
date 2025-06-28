@@ -129,12 +129,12 @@ Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
 
 Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocumentsByCreator'])
     // ->middleware('auth:sanctum')
-    ->middleware('role:1,2')
+    // ->middleware('role:1,2')
     ->name('documents.getDocumentsByCreator');
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
     // ->middleware('auth:sanctum')
-    ->middleware('role:1,3')
+    ->middleware('role:1,2,3')
     ->name('documents.getDocumentsByApprover');
 
 Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])
@@ -191,11 +191,11 @@ Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');
 
 Route::get('/document-flows/{documentFlow}', [DocumentFlowController::class, 'show'])
-    ->middleware('auth:sanctum')
+    // ->middleware('auth:sanctum')
     ->name('document-flows.show');
 
 Route::get('/document-flows/{id}/steps', [DocumentFlowController::class, 'getStepsByDocumentFlow'])
-    ->middleware('auth:sanctum')
+    // ->middleware('auth:sanctum')
     ->name('document-flows.getStepsByDocumentFlow');
 
 Route::post('/document-flows-template', [DocumentFlowController::class, 'createFlowTemplate'])
@@ -365,6 +365,7 @@ Route::get('/certificates/{id}', [CertificateController::class, 'getCertificateB
 
 Route::post('/certificates/issue-certificate', [CertificateController::class, 'issueCertificate'])
     // ->middleware('auth:sanctum')
+    ->middleware('role:1')
     ->name('certificates.issueCertificate');
 
 Route::post('/certificates/renew-certificate', [CertificateController::class, 'renewCertificate'])

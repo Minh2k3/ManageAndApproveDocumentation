@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
+use setasign\Fpdi\Fpdi;
 
 class CreatePDFController extends Controller
 {
@@ -80,6 +81,12 @@ class CreatePDFController extends Controller
             
             $document->certificate_path = $fileName;
             $document->save();
+
+            $fileContent = Storage::disk('certificates')->get($fileName);
+            \Log::info("PDF content size: " . strlen($fileContent));
+            // Lưu vào Google Drive
+            Storage::disk('google')->put($fileName, $fileContent);
+            \Log::info("PDF saved successfully: " . $fileName);
         } catch (\Exception $e) {
             \Log::error("Error saving PDF: " . $e->getMessage());
         }
