@@ -5,6 +5,7 @@ import login from "./login.js";
 import register from "./register.js";
 import creator from "./creator.js";
 import approver from "./approver.js";
+import retrieve from "./retrieve.js";
 import { useAuth } from "@/stores/use-auth.js";
 
 const redirectRoot = [{
@@ -12,7 +13,7 @@ const redirectRoot = [{
     redirect: {name: 'dashboard'}
 }];
 
-const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver];
+const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve];
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,12 +28,17 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (!authStore.isAuthenticated) {
-        if (to.path !== '/login' && to.path !== '/register' && to.path !== '/dashboard' && to.path !== '/reset-password') {
+        if (to.path !== '/login' 
+            && to.path !== '/register' 
+            && to.path !== '/dashboard' 
+            && to.path !== '/reset-password'
+            && to.path !== '/retrieve'
+        ) {
             return next('/login');
         }
     }
 
-    if ((to.path === '/login' || to.path === '/register' || to.path === '/dashboard') && authStore.isAuthenticated) {
+    if ((to.path === '/login' || to.path === '/register' || to.path === '/dashboard' || to.path === '/retrieve') && authStore.isAuthenticated) {
         if (authStore.user.role_id === 3) {
             return next('/approver');
         } else if (authStore.user.role_id === 2) {

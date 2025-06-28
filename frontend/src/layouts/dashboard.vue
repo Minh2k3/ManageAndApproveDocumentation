@@ -12,7 +12,7 @@
                 </div>
                 <nav class="d-none d-md-flex">
                     <router-link to="#" class="text-white mx-3 text-decoration-none fw-medium">Trang chủ</router-link>
-                    <router-link to="#" class="text-white mx-3 text-decoration-none">Giới thiệu</router-link>
+                    <router-link to="retrieve" class="text-white mx-3 text-decoration-none">Tra cứu chứng chỉ</router-link>
                     <a href="#features" @click.prevent="scrollToFeatures" class="text-white mx-3
                         text-decoration-none">Tính năng</a>
                     <a href="#process-flow" @click.prevent="scrollToProcessFlow" class="text-white mx-3

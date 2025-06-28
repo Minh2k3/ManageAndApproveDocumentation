@@ -18,7 +18,9 @@
         "maatwebsite/excel": "^3.1",
         "phpseclib/phpseclib": "^3.0",
         "pusher/pusher-php-server": "^7.2",
+        "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
+        "tecnickcom/tcpdf": "^6.10",
         "yaza/laravel-google-drive-storage": "^4.1"
     },
     "require-dev": {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Document;
+use App\Models\DocumentCertificate;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 
@@ -23,6 +24,17 @@ class CreatePDFController extends Controller
         if (!$document) {
             return response()->json(['error' => 'Document not found'], 404);
         }
+
+        $file_path = public_path('documents/' . $document->file_path);
+        $code_random = now()->timestamp;
+        $document_certificate = DocumentCertificate::create([
+            'code' => $document->creator_id . '-' . $code_random,
+            'created_at' => now(),
+        ]);
+        $output_file_path = public_path('certificates/' . $document_certificate->code . '.pdf');
+
+        $this->insertCertificate($file_path, $output_file_path, $document_certificate->code);
+
         // Log the document details for debugging
         // \Log::info($document->toArray());
 
@@ -95,6 +107,36 @@ class CreatePDFController extends Controller
             'message' => 'success',
             'certificate_path' => $fileName,
         ]);
+    }
+
+    public function insertCertificate($file, $outputFilePath, $code) 
+    {
+        $fpdi = new Fpdi();
+
+        $pageCount = $fpdi->setSourceFile($file);
+
+        for ($i = 1; $i <= $pageCount; $i++) {
+            $templateId = $fpdi->importPage($i);
+            $size = $fpdi->getTemplateSize($templateId);
+            $fpdi->AddPage($size['orientation'], [$size['width'], $size['height']]);
+            $fpdi->useTemplate($templateId);
+
+            $fpdi->SetFont('Arial', '', 12);
+            $fpdi->SetTextColor(67, 195, 250);
+
+            // Thêm mã chứng nhận vào góc dưới bên phải
+            $fpdi->SetXY($size['width'] - 50, $size['height'] - 20);
+            $fpdi->SetTextColor(67, 195, 250); // Đặt màu chữ
+            $fpdi->SetFont('Arial', 'B', 12);
+            $fpdi->Write(0, 'Mã chứng nhận: ' . $code);
+            // Thêm dòng tra cứu tại vào dưới dòng mã
+            $fpdi->SetXY($size['width'] - 50, $size['height'] - 10);
+            $fpdi->SetTextColor(0, 0, 0); // Đặt màu chữ về đen
+            $fpdi->SetFont('Arial', '', 10);
+            $fpdi->Write(0, 'Tra cứu tại: https://dtn.tlu.edu.vn/tra-cuu-chung-nhan');
+        }
+
+        return $fpdi->Output($outputFilePath, 'F');
     }
 
     public function downloadPDF($documentId)
