@@ -51,15 +51,11 @@
                     <a-input-search
                       v-model:value="searchCode"
                       placeholder="Nhập mã tài liệu cần tra cứu..."
-                      size="large"
                       enter-button="Tìm kiếm"
                       :loading="loading"
                       @search="handleSearch"
                       class="search-input"
                     >
-                      <template #prefix>
-                        <i class="anticon anticon-file-text"></i>
-                      </template>
                     </a-input-search>
                   </a-form-item>
                 </a-form>
@@ -213,7 +209,7 @@
                   Vui lòng kiểm tra lại mã tài liệu và thử lại.
                 </p>
                 <a-button type="primary" @click="clearSearch" class="mt-3">
-                  <i class="anticon anticon-reload"></i>
+                  <i class="bi bi-arrow-clockwise"></i>
                   Tìm kiếm lại
                 </a-button>
               </div>
@@ -290,7 +286,7 @@ export default {
 
     const pdfUrl = computed(() => {
       if (certificateStore.certificates?.file_path) {
-        return `${import.meta.env.VITE_API_URL}/storage/${certificateStore.certificates.file_path}`
+        return `${certificateStore.certificates.file_path}`
       }
       return null
     })

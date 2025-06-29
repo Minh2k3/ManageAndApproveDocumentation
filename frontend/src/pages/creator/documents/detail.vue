@@ -22,7 +22,7 @@
                                     </div>
                                 </div>
 
-                                    <div v-if="show_certificate" class="row">
+                                <div v-if="show_certificate" class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
                                             <a :href="`http://localhost:8000/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
@@ -31,6 +31,16 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${certificate_file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Văn bản đã ký số
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>                                
 
                                 <!-- Information Section -->
                                 <div >
@@ -442,6 +452,7 @@ import { useMenu } from '@/stores/use-menu.js';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@/stores/use-auth.js';
 import { useDocumentStore } from '@/stores/creator/document-store';
+import { useCertificateStore } from '@/stores/creator/certificate-store.js';
 import PDFViewer from '@/components/PDFViewer.vue'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -460,6 +471,7 @@ export default defineComponent({
         const commentSection = ref(false);
         useMenu().onSelectedKeys(["creator-documents-detail"]);
         const documentStore = useDocumentStore();
+        const certificateStore = useCertificateStore();
         const authStore = useAuth();
         const user = authStore.user;
 
@@ -477,6 +489,7 @@ export default defineComponent({
             return document_versions.value.length > 0 ? document_versions.value[0].version + 1 : 1;
         });
         const show_certificate = ref(false);
+        const certificate_file_path = ref('');
         onMounted(async () => {
             await documentStore.fetchDocuments(user.id);
             documents.value = documentStore.documents;
@@ -514,6 +527,7 @@ export default defineComponent({
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;
             console.log(document_types.value);
+
         });
 
         const comment = ref('');

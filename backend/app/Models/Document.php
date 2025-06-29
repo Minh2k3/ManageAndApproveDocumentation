@@ -10,6 +10,7 @@ use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Models\Creator;
 use App\Models\Approver;
+use App\Models\DocumentCertificate;
 use Carbon\Carbon;
 /**
  * Document Model
@@ -103,6 +104,11 @@ class Document extends Model
     public function latestVersion()
     {
         return $this->hasOne(DocumentVersion::class)->latest('version');
+    }
+
+    public function documentCertificates()
+    {
+        return $this->hasMany(DocumentCertificate::class, 'document_id');
     }
 
     protected $dates = ['created_at', 'updated_at'];

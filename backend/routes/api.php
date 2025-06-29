@@ -25,6 +25,7 @@ use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\DocumentVersionController;
 use App\Http\Controllers\DocumentCommentController;
+use App\Http\Controllers\DocumentCertificateController;
 
 // Other Controllers
 use App\Http\Controllers\DepartmentController;
@@ -388,3 +389,8 @@ Route::get('/users/{user_id}/certificates', [CertificateController::class, 'getU
 Route::get('/roll-at-departments', [RollAtDepartmentController::class, 'index'])
     // ->middleware('auth:sanctum')
     ->name('roll-at-departments.index');
+
+// Document Certificate
+Route::get('/document-certificates/{code}', [DocumentCertificateController::class, 'index'])
+    // ->middleware('auth:sanctum')
+    ->name('document-certificates.index');

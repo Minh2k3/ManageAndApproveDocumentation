@@ -421,6 +421,7 @@ export default defineComponent({
         const number_of_documents_by_status = computed(() => {
             const total = number_of_documents.value;
 
+            // Initialize counts for all statuses
             const counts = documents.value.reduce((acc, doc) => {
                 if (acc.has(doc.status)) {
                     acc.set(doc.status, acc.get(doc.status) + 1);
@@ -436,13 +437,26 @@ export default defineComponent({
             ]));
 
             const result = new Map();
-            for (const [status, count] of counts.entries()) {
+            let totalOtherPercentages = 0;
+
+            // Calculate percentages for approved, rejected, and in_review
+            for (const status of ["approved", "rejected", "in_review"]) {
+                const count = counts.get(status) || 0;
                 const percentage = total > 0 ? ((count / total) * 100).toFixed(2) : "0.00";
                 result.set(status, {
                     count: `${count}/${total}`,
                     percentage: Number(percentage)
                 });
+                totalOtherPercentages += Number(percentage);
             }
+
+            // Calculate draft percentage as 100 minus other percentages
+            const draftCount = counts.get("draft") || 0;
+            const draftPercentage = total > 0 ? (100 - totalOtherPercentages).toFixed(2) : "0.00";
+            result.set("draft", {
+                count: `${draftCount}/${total}`,
+                percentage: Number(draftPercentage)
+            });
 
             return result;
         });

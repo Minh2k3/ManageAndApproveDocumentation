@@ -9,6 +9,7 @@ use App\Models\DocumentCertificate;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 
+
 class CreatePDFController extends Controller
 {
     public function createPDF(Request $request, $documentId)
@@ -25,15 +26,24 @@ class CreatePDFController extends Controller
             return response()->json(['error' => 'Document not found'], 404);
         }
 
-        $file_path = public_path('documents/' . $document->file_path);
+        $file_path = public_path('documents\\' . $document->file_path);
         $code_random = now()->timestamp;
         $document_certificate = DocumentCertificate::create([
-            'code' => $document->creator_id . '-' . $code_random,
+            'code' => $document->created_by . '-' . $code_random,
+            'document_id' => $document->id,
+            'file_path' => 'Null',
             'created_at' => now(),
         ]);
-        $output_file_path = public_path('certificates/' . $document_certificate->code . '.pdf');
 
+        \Log::info("Document certificate created with code: " . $document_certificate->code);
+        $new_file_path = $document_certificate->code . '.pdf';
+        $output_file_path = public_path('documents\\certificates\\' . $new_file_path);
+        \Log::info("Output file path: " . $new_file_path);
         $this->insertCertificate($file_path, $output_file_path, $document_certificate->code);
+        \Log::info("Certificate inserted into PDF: " . $output_file_path);
+        $document_certificate->file_path = $document_certificate->code . '.pdf';
+        $document_certificate->save();
+        \Log::info("Document certificate file path updated: " . $document_certificate->id);
 
         // Log the document details for debugging
         // \Log::info($document->toArray());
@@ -45,7 +55,6 @@ class CreatePDFController extends Controller
                 'certificate_path' => $document->certificate_path,
             ]);
         }
-        // return $document;
         $current_creator = $document->creator;
         // \Log::info("Current creator: " . ($current_creator ? $current_creator : 'Not Found'));
         // \Log::info("Current creator: " . $current_creator->creator->full_role);
@@ -111,29 +120,34 @@ class CreatePDFController extends Controller
 
     public function insertCertificate($file, $outputFilePath, $code) 
     {
+        \Log::info("Inserting certificate into PDF: " . $file);
         $fpdi = new Fpdi();
 
         $pageCount = $fpdi->setSourceFile($file);
+        \Log::info("Page count: " . $pageCount);
 
         for ($i = 1; $i <= $pageCount; $i++) {
             $templateId = $fpdi->importPage($i);
             $size = $fpdi->getTemplateSize($templateId);
             $fpdi->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $fpdi->useTemplate($templateId);
+            \Log::info("Processing page: " . $i);
 
             $fpdi->SetFont('Arial', '', 12);
             $fpdi->SetTextColor(67, 195, 250);
 
             // Thêm mã chứng nhận vào góc dưới bên phải
-            $fpdi->SetXY($size['width'] - 50, $size['height'] - 20);
+            $left = $size['width'] - 80;
+            $top = $size['height'] - 20;
             $fpdi->SetTextColor(67, 195, 250); // Đặt màu chữ
-            $fpdi->SetFont('Arial', 'B', 12);
-            $fpdi->Write(0, 'Mã chứng nhận: ' . $code);
+            $fpdi->SetFont('Times', 'B', 12);
+            $fpdi->Text($left, $top, 'Certificate Code: ' . $code);
             // Thêm dòng tra cứu tại vào dưới dòng mã
-            $fpdi->SetXY($size['width'] - 50, $size['height'] - 10);
-            $fpdi->SetTextColor(0, 0, 0); // Đặt màu chữ về đen
-            $fpdi->SetFont('Arial', '', 10);
-            $fpdi->Write(0, 'Tra cứu tại: https://dtn.tlu.edu.vn/tra-cuu-chung-nhan');
+            $fpdi->SetXY($size['width'], $size['height'] - 10);
+            $fpdi->SetTextColor(67, 195, 250); // Đặt màu chữ về đen
+            $fpdi->SetFont('Times', '', 10);
+            $fpdi->Text($left, $top + 5, 'Tra cứu tại: https://vanbantlu.id.vn/retrieve/');
+            \Log::info("Added certificate code to page: " . $i);
         }
 
         return $fpdi->Output($outputFilePath, 'F');

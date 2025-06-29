@@ -231,6 +231,7 @@ class DocumentController extends Controller
     {
         $documents = Document::with([
             'documentType:id,name',
+            'documentCertificates:id,file_path,code',
             'documentFlow:id,name,process',
             'documentFlow.documentFlowSteps:id,document_flow_id',
             'versions' => function($query) {
@@ -267,6 +268,13 @@ class DocumentController extends Controller
                 'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
                 'roll' => $creatorInfo['roll'],
                 'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+                'document_certificates' => $document->documentCertificates->map(function($cert) {
+                    return [
+                        'id' => $cert->id,
+                        'file_path' => $cert->file_path,
+                        'code' => $cert->code,
+                    ];
+                })->toArray(),
             ];
         });
 
@@ -281,6 +289,7 @@ class DocumentController extends Controller
         // Lấy các văn bản do tôi tạo
         $documents_of_me = Document::with([
             'documentType:id,name',
+            'documentCertificates:id,file_path,code',
             'documentFlow:id,name,process',
             'documentFlow.documentFlowSteps:id,document_flow_id',
             'versions' => function($query) {
@@ -317,6 +326,13 @@ class DocumentController extends Controller
                 'version_data' => $latestVersion ? json_decode($latestVersion->document_data) ?? null : null,
                 'roll' => $creatorInfo['roll'],
                 'step_count' => $document->documentFlow->documentFlowSteps->count() ?? 0,
+                'document_certificates' => $document->documentCertificates->map(function($cert) {
+                    return [
+                        'id' => $cert->id,
+                        'file_path' => $cert->file_path,
+                        'code' => $cert->code,
+                    ];
+                })->toArray(),
             ];
         });
 
