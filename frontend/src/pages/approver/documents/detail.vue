@@ -33,6 +33,16 @@
                                     </div>
                                 </div>
 
+                                <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${certificate_file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Văn bản đã ký số
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>    
+
                                 <!-- Information Section -->
                                 <div >
                                     <div class="col">
@@ -377,6 +387,16 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <div v-if="show_certificate" class="row">
+                                    <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
+                                        <label>
+                                            <a :href="`http://localhost:8000/documents/certificates/${certificate_file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                                Văn bản đã ký số
+                                            </a>
+                                        </label>
+                                    </div>
+                                </div>    
 
                                 <!-- Information Section -->
                                 <div >
@@ -932,6 +952,7 @@ import { useMenu } from '@/stores/use-menu.js';
 import { useRoute } from 'vue-router';
 import { useAuth } from '@/stores/use-auth.js';
 import { useDocumentStore } from '@/stores/approver/document-store';
+import {useCertificateStore} from '@/stores/approver/certificate-store';
 import PDFViewer from '@/components/PDFViewer.vue'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -951,6 +972,7 @@ export default defineComponent({
         const commentSection = ref(false);
         useMenu().onSelectedKeys(["approver-documents-detail"]);
         const documentStore = useDocumentStore();
+        const certificateStore = useCertificateStore();
         const authStore = useAuth();
         const user = authStore.user;
 
@@ -965,6 +987,7 @@ export default defineComponent({
             return document_versions.value.length > 0 ? document_versions.value[0].version + 1 : 1;
         });
         const show_certificate = ref(false);
+        const certificate_file_path = ref('');
 
         const document_id = parseInt(route.params.id);
         onMounted(async () => {
@@ -990,6 +1013,10 @@ export default defineComponent({
             if (document_flow_steps.value.is_completed) {
                 await documentStore.createCertificate(document_id);
                 show_certificate.value = true;
+
+                const responseCertificate = await certificateStore.findCertificateByDocumentId(document_id);
+                console.log('Certificate found:', responseCertificate);
+                certificate_file_path.value = responseCertificate ? responseCertificate.file_path : '';
             }
 
             await documentStore.fetchDocumentTypes();
@@ -1328,6 +1355,7 @@ export default defineComponent({
             reasonReject,
             document_flow_steps,
             show_certificate,
+            certificate_file_path,
 
             getAvatarUrl,
             randomAvatar,

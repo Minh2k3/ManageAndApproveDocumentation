@@ -26,25 +26,27 @@ class CreatePDFController extends Controller
             return response()->json(['error' => 'Document not found'], 404);
         }
 
-        $file_path = public_path('documents\\' . $document->file_path);
-        $code_random = now()->timestamp;
-        $document_certificate = DocumentCertificate::create([
-            'code' => $document->created_by . '-' . $code_random,
-            'document_id' => $document->id,
-            'file_path' => 'Null',
-            'created_at' => now(),
-        ]);
-
-        \Log::info("Document certificate created with code: " . $document_certificate->code);
-        $new_file_path = $document_certificate->code . '.pdf';
-        $output_file_path = public_path('documents\\certificates\\' . $new_file_path);
-        \Log::info("Output file path: " . $new_file_path);
-        $this->insertCertificate($file_path, $output_file_path, $document_certificate->code);
-        \Log::info("Certificate inserted into PDF: " . $output_file_path);
-        $document_certificate->file_path = $document_certificate->code . '.pdf';
-        $document_certificate->save();
-        \Log::info("Document certificate file path updated: " . $document_certificate->id);
-
+        $documentCertificate = DocumentCertificate::where('document_id', $document->id)->first();
+        if (!$documentCertificate) {
+            $file_path = public_path('documents\\' . $document->file_path);
+            $code_random = now()->timestamp;
+            $document_certificate = DocumentCertificate::create([
+                'code' => $document->created_by . '-' . $code_random,
+                'document_id' => $document->id,
+                'file_path' => 'Null',
+                'created_at' => now(),
+            ]);
+            
+            \Log::info("Document certificate created with code: " . $document_certificate->code);
+            $new_file_path = $document_certificate->code . '.pdf';
+            $output_file_path = public_path('documents\\certificates\\' . $new_file_path);
+            \Log::info("Output file path: " . $new_file_path);
+            $this->insertCertificate($file_path, $output_file_path, $document_certificate->code);
+            \Log::info("Certificate inserted into PDF: " . $output_file_path);
+            $document_certificate->file_path = $document_certificate->code . '.pdf';
+            $document_certificate->save();
+            \Log::info("Document certificate file path updated: " . $document_certificate->id);
+        }
         // Log the document details for debugging
         // \Log::info($document->toArray());
 
@@ -142,11 +144,17 @@ class CreatePDFController extends Controller
             $fpdi->SetTextColor(67, 195, 250); // Đặt màu chữ
             $fpdi->SetFont('Times', 'B', 12);
             $fpdi->Text($left, $top, 'Certificate Code: ' . $code);
+
             // Thêm dòng tra cứu tại vào dưới dòng mã
-            $fpdi->SetXY($size['width'], $size['height'] - 10);
-            $fpdi->SetTextColor(67, 195, 250); // Đặt màu chữ về đen
+            $fpdi->SetTextColor(67, 195, 250);
             $fpdi->SetFont('Times', '', 10);
-            $fpdi->Text($left, $top + 5, 'Tra cứu tại: https://vanbantlu.id.vn/retrieve/');
+            $fpdi->Text($left, $top + 5, 'Retrieve at: https://vanbantlu.id.vn/retrieve/');
+            \Log::info("Added certificate code to page: " . $i);
+
+            // Thêm dòng tra cứu tại vào dưới dòng mã
+            $fpdi->SetTextColor(67, 195, 250);
+            $fpdi->SetFont('Times', '', 10);
+            $fpdi->Text($left - 100, $top + 5, 'Authenticated by TLU');
             \Log::info("Added certificate code to page: " . $i);
         }
 

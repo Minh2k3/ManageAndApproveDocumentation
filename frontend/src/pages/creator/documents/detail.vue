@@ -522,6 +522,10 @@ export default defineComponent({
                     show_certificate.value = true;
                     documentData.value.certificate_path = response.certificate_path;
                 }
+
+                const responseCertificate = await certificateStore.findCertificateByDocumentId(id);
+                console.log('Certificate found:', responseCertificate);
+                certificate_file_path.value = responseCertificate ? responseCertificate.file_path : '';
             }
 
             await documentStore.fetchDocumentTypes();
@@ -766,6 +770,7 @@ export default defineComponent({
             max_version,
             detailVersion,
             show_certificate,
+            certificate_file_path,
 
             getAvatarUrl,
             randomAvatar,

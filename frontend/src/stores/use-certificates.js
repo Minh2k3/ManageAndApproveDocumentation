@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 import axiosInstance from '@/lib/axios';
 
 export const useCertificateStore = defineStore("certificate", () => { 
@@ -8,22 +8,30 @@ export const useCertificateStore = defineStore("certificate", () => {
     async function findCertificateByCode(code) {
         try {
             const response = await axiosInstance.get(`api/document-certificates/${code}`);
-            if (response.data) {
-                console.log("Certificate found:", response.data);
-                certificates.value = response.data;
+            
+            if (response.data && response.data.certificate) {
+                console.log("Certificate found:", response.data.certificate);
+                
+                // Force reactive update
+                certificates.value = null; // Clear first
+                await nextTick(); // Wait for reactivity
+                certificates.value = response.data.certificate; // Then set
+                
                 console.log("Current certificate set:", certificates.value);
-                return response.data;
+                return response.data.certificate;
             } else {
-                console.warn("No certificate found with code:", code);
+                certificates.value = null;
                 return null;
             }
         } catch (error) {
-            console.error("Error fetching certificate by code:", error);
+            console.error("Error fetching certificate:", error);
+            certificates.value = null;
             throw error;
         }
     }
 
     return {
+        certificates,
         findCertificateByCode
     };
 });

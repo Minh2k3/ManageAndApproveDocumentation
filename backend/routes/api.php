@@ -338,8 +338,12 @@ Route::get('/access-logs', [UserAccessLogController::class, 'getAccessStats'])
     // ->middleware('auth:sanctum')
     ->name('access-logs.getAccessStats');
 
+// Route::get('/pdf-proxy', [PDFProxyController::class, 'proxy']);
+// Route::get('/pdf-list', [PDFProxyController::class, 'list']);
 Route::get('/pdf-proxy', [PDFProxyController::class, 'proxy']);
+Route::options('/pdf-proxy', [PDFProxyController::class, 'options']);
 Route::get('/pdf-list', [PDFProxyController::class, 'list']);
+Route::get('/pdf-info', [PDFProxyController::class, 'info']);
 
 Route::get('/access-statistics', [UserAccessLogController::class, 'dailyAccess']);
 
@@ -394,3 +398,33 @@ Route::get('/roll-at-departments', [RollAtDepartmentController::class, 'index'])
 Route::get('/document-certificates/{code}', [DocumentCertificateController::class, 'index'])
     // ->middleware('auth:sanctum')
     ->name('document-certificates.index');
+
+Route::get('/document-certificate-id/{code}', [DocumentCertificateController::class, 'findByDocumentId'])
+    // ->middleware('auth:sanctum')
+    ->name('document-certificates.findByDocumentId');
+
+// routes/api.php
+// Route::get('/pdf-proxy', function (Request $request) {
+//     $file = $request->query('file');
+    
+//     // Xử lý đường dẫn file
+//     if (filter_var($file, FILTER_VALIDATE_URL)) {
+//         // Nếu là URL đầy đủ thì proxy
+//         $content = file_get_contents($file);
+//     } else {
+//         // Nếu là đường dẫn local
+//         $filePath = public_path($file);
+        
+//         if (!file_exists($filePath)) {
+//             return response()->json(['error' => 'File not found'], 404);
+//         }
+        
+//         $content = file_get_contents($filePath);
+//     }
+    
+//     return response($content)
+//         ->header('Content-Type', 'application/pdf')
+//         ->header('Access-Control-Allow-Origin', '*')
+//         ->header('Access-Control-Allow-Methods', 'GET')
+//         ->header('Access-Control-Allow-Headers', 'Content-Type');
+// });

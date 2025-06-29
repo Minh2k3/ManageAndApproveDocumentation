@@ -72,13 +72,13 @@ export const useCertificateStore = defineStore("certificate", () => {
         }
     }
 
-    async function findCertificateByCode(code) {
+    async function findCertificateByDocumentId(id) {
         try {
-            const response = await axiosInstance.get(`api/document-certificate/${code}`);
+            const response = await axiosInstance.get(`api/document-certificate-id/${id}`);
             if (response.data) {
-                console.log("Certificate found:", response.data);
+                console.log("Certificate found:", response.data.certificate);
                 currentCertificate.value = response.data;
-                return response.data;
+                return response.data.certificate;
             } else {
                 console.warn("No certificate found with code:", code);
                 return null;
@@ -100,7 +100,7 @@ export const useCertificateStore = defineStore("certificate", () => {
         fetchCertificates,
 
         currentCertificate,
-        findCertificateByCode,
+        findCertificateByDocumentId,
 
         requestIssueCertificate,
         requestExtendCertificate,
