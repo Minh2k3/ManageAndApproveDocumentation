@@ -1,1 +1,0 @@
-import{u as t}from"./use-menu-CIRKYwAT.js";import{_ as e}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const s={setup(){t().onSelectedKeys(["admin-settings"])}};function n(r,o,a,c,i,p){return" Đây là trang cai dat "}const f=e(s,[["render",n]]);export{f as default};

@@ -1,1 +1,0 @@
-import{u as o}from"./use-menu-CIRKYwAT.js";import{_ as e,d as t,z as n}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const r=t({setup(){o().onSelectedKeys(["creator-notification"]),n()}});function s(a,c,i,p,f,u){return" Thông báo cho Creator "}const $=e(r,[["render",s]]);export{$ as default};

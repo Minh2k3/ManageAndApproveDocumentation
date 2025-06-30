@@ -1,1 +1,0 @@
-import{u as e}from"./use-menu-CIRKYwAT.js";import{_ as t}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const r={setup(){e().onSelectedKeys(["admin-roles"])}};function n(o,s,a,c,p,i){return" Đây là trang quản lý vai trò "}const f=t(r,[["render",n]]);export{f as default};

@@ -1,1 +1,0 @@
-import{u as e}from"./use-menu-CIRKYwAT.js";import{_ as t,d as r}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const n=r({setup(){return e().onSelectedKeys(["approver-documents-approve"]),{}}});function o(p,s,a,c,u,d){return" Đây là trang phê duyệt văn bản của người phê duyệt. "}const m=t(n,[["render",o]]);export{m as default};

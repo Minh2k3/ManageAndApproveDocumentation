@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-DW2wxuke.js";import{_ as t,e as n}from"./index-DelqX8ny.js";const r=n({setup(){return e().onSelectedKeys(["approver-documents-approve"]),{}}});function o(p,s,a,c,u,d){return" Đây là trang phê duyệt văn bản của người phê duyệt. "}const i=t(r,[["render",o]]);export{i as default};

@@ -1,1 +1,0 @@
-import{u as e}from"./use-menu-CIRKYwAT.js";import{_ as t}from"./index-Ba8l0gpi.js";import"./pdfjs-CqkleIqs.js";const r={setup(){e().onSelectedKeys(["admin-approval-flows-create"])}};function o(s,a,n,p,c,u){return" Đây là trang thêm mới luồng phê duyệt "}const i=t(r,[["render",o]]);export{i as default};

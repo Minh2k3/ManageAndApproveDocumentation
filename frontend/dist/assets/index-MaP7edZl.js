@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-DW2wxuke.js";import{_ as t}from"./index-DelqX8ny.js";const r={setup(){e().onSelectedKeys(["approver-signatures"])}};function n(s,o,a,c,p,u){return" Đây là trang quản lý chữ ký của người phê duyệt. "}const d=t(r,[["render",n]]);export{d as default};
