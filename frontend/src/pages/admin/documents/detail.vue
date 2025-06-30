@@ -15,7 +15,7 @@
                                 <div class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
-                                            <a :href="`http://localhost:8000/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                            <a :href="`${import.meta.env.VITE_API_URL}/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Mở tệp trong tab mới
                                             </a>
                                         </label>
@@ -392,7 +392,7 @@
                         <div class="info-label">📎 Tệp đính kèm</div>
                         <div class="info-value">
                             <a 
-                                :href="`http://localhost:8000/documents/${detailVersion.file_path}`" 
+                                :href="`${apiUrl}/documents/${detailVersion.file_path}`" 
                                 target="_blank" 
                                 class="file-link"
                             >
@@ -567,7 +567,7 @@ export default defineComponent({
             try {
                 isDownloading.value = true;
                 
-                const downloadUrl = `http://localhost:8000/documents/${filePath}`;
+                const downloadUrl = `${API_BASE_URL}/documents/${filePath}`;
                 const link = document.createElement('a');
                 
                 link.href = downloadUrl;
@@ -745,6 +745,7 @@ export default defineComponent({
         };
 
         return {
+            apiUrl: API_BASE_URL,
             user,
             document: documentData,
             pdfUrl,

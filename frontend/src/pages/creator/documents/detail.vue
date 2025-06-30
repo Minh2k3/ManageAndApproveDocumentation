@@ -15,7 +15,7 @@
                                 <div class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
-                                            <a :href="`http://localhost:8000/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                            <a :href="`${apiUrl}/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Mở tệp trong tab mới
                                             </a>
                                         </label>
@@ -25,7 +25,7 @@
                                 <div v-if="show_certificate" class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
-                                            <a :href="`http://localhost:8000/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                            <a :href="`${apiUrl}/documents/certificates/${document.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Chứng chỉ số
                                             </a>
                                         </label>
@@ -35,7 +35,7 @@
                                 <div v-if="show_certificate" class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
-                                            <a :href="`http://localhost:8000/documents/certificates/${certificate_file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                            <a :href="`${apiUrl}/documents/certificates/${certificate_file_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Văn bản đã ký số
                                             </a>
                                         </label>
@@ -412,7 +412,7 @@
                         <div class="info-label">📎 Tệp đính kèm</div>
                         <div class="info-value">
                             <a 
-                                :href="`http://localhost:8000/documents/${detailVersion.file_path}`" 
+                                :href="`${apiUrl}/documents/${detailVersion.file_path}`" 
                                 target="_blank" 
                                 class="file-link"
                             >
@@ -466,6 +466,7 @@ export default defineComponent({
         NestedProgressSteps,
     },
     setup() {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         dayjs.extend(relativeTime);
         const activeKey = ref('document');
         const commentSection = ref(false);
@@ -536,7 +537,7 @@ export default defineComponent({
 
         const comment = ref('');
 
-        const API_BASE_URL = 'http://localhost:8000'
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
         const getAvatarUrl = (avatar) => {
             if (!avatar) return null
@@ -574,7 +575,8 @@ export default defineComponent({
             try {
                 isDownloading.value = true;
                 
-                const downloadUrl = `http://localhost:8000/documents/${filePath}`;
+                // const downloadUrl = `http://localhost:8000/documents/${filePath}`;
+                const downloadUrl = `${API_BASE_URL}/documents/${filePath}`;
                 const link = document.createElement('a');
                 
                 link.href = downloadUrl;
@@ -752,6 +754,7 @@ export default defineComponent({
         };
 
         return {
+            apiUrl,
             user,
             document: documentData,
             pdfUrl,

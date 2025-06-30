@@ -818,9 +818,11 @@ export default defineComponent({
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         };        
 
+        const API_BASE_URL = 'http://localhost:8000';
+
         const previewFile = async (template) => {
             if (template.file_path) {
-                const fileUrl = `http://localhost:8000/documents/${template.file_path}`;
+                const fileUrl = `${API_BASE_URL}/documents/${template.file_path}`;
                 const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
                 window.open(fileUrl, '_blank');
                 document_templates.value[selectedTemplateIndex.value].downloaded += 1; // Tăng lượt xem
@@ -877,8 +879,6 @@ export default defineComponent({
             }
             return `https://avatar.iran.liara.run/public/${id}`;
         };
-
-        const API_BASE_URL = 'http://localhost:8000';
 
         const getAvatarUrl = (avatar, id) => {
             if (!avatar) return randomAvatar(id);

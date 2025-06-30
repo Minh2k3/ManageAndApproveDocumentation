@@ -284,7 +284,7 @@
 
             <div class="detail-row description-row">
               <label>Chứng chỉ số:</label>
-              <a :href="`http://localhost:8000/documents/certificates/${selectedDocument.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
+              <a :href="`${apiUrl}/documents/certificates/${selectedDocument.certificate_path}`" target="_blank" class="text-decoration-none fst-italic">
                   Mở
               </a>
             </div>
@@ -297,7 +297,7 @@
               Tải xuống
             </button> -->
             <a 
-              :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" 
+              :href="`${apiUrl}/documents/${selectedDocument.file_path}`" 
               target="_blank"
               class="btn-view-external"
             >
@@ -345,7 +345,9 @@ export default {
       sortOrder: 'desc',
       
       // Debounce timer
-      searchTimer: null
+      searchTimer: null,
+
+      apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000'
     };
   },
   
@@ -615,7 +617,7 @@ export default {
     },
 
     getAvatarUrl(user){
-        const API_BASE_URL = 'http://localhost:8000'
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         if (user.avatar === null) return this.randomAvatar(user.id);
         return `${API_BASE_URL}/images/avatars/${user.avatar}`
     },

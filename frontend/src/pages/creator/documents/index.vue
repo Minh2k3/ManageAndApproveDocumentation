@@ -194,7 +194,7 @@
             <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
             <p>
                 <strong>Tệp:</strong>
-                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank" class="text-decoration-none">
+                <a :href="`${apiUrl}/documents/${selectedDocument.file_path}`" target="_blank" class="text-decoration-none">
                     <span class="ms-1 fst-italic">Xem tệp</span>
                 </a>
             </p>
@@ -230,6 +230,7 @@ import { responsiveArray } from 'ant-design-vue/es/_util/responsiveObserve';
 
 export default defineComponent({
     setup() {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         useMenu().onSelectedKeys(["approver-documents"]);
 
         const authStore = useAuth();
@@ -370,6 +371,7 @@ export default defineComponent({
         }
 
         return {
+            apiUrl,
             documents,
             columns,
             document_flow_steps,

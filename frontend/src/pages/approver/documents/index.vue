@@ -280,7 +280,7 @@
             <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
             <p>
                 <strong>Tệp:</strong>
-                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank">
+                <a :href="`${apiUrl}/documents/${selectedDocument.file_path}`" target="_blank">
                     Xem tệp
                 </a>
             </p>
@@ -535,7 +535,10 @@ export default defineComponent({
             });
         };
 
+        const VITE_API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
         return {
+            apiUrl: VITE_API_BASE_URL,
             documents_need_me,
             documents_of_me,
             columns_need_me,

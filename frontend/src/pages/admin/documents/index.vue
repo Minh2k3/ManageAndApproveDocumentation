@@ -184,7 +184,7 @@
             <p><strong>Ngày cập nhật:</strong> {{ selectedDocument.updated_at }}</p>
             <p>
                 <strong>Tệp:</strong>
-                <a :href="`http://localhost:8000/documents/${selectedDocument.file_path}`" target="_blank">
+                <a :href="`${apiUrl}/documents/${selectedDocument.file_path}`" target="_blank">
                     Xem tệp
                 </a>
             </p>
@@ -234,6 +234,7 @@ export default defineComponent ({
         EyeOutlined,
     },
     setup() {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         useMenu().onSelectedKeys(["admin-documents"]);
         const router = useRouter();
         const documentStore = useDocumentStore();
@@ -430,6 +431,7 @@ export default defineComponent ({
         // getUsers();
 
         return {
+            apiUrl,
             users,
             documents,
             document_types,

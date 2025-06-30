@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-Ch1M1A0s.js";import{_ as t,e as n}from"./index-CoRCteip.js";const r=n({setup(){return e().onSelectedKeys(["approver-documents-approve"]),{}}});function o(p,s,a,c,u,d){return" Đây là trang phê duyệt văn bản của người phê duyệt. "}const i=t(r,[["render",o]]);export{i as default};
