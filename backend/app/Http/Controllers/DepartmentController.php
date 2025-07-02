@@ -172,7 +172,8 @@ class DepartmentController extends Controller
                 'avatar as avatar_path',
                 'group',
             )
-            ->where('can_approve', 1)
+            ->where('status', 'active')
+            ->where('group', '!=', 'CLB/Đội')
             ->get();
 
         return response()->json([

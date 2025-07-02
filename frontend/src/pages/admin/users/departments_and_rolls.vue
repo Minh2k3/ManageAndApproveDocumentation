@@ -1,8 +1,11 @@
 <template>
-  <div class="departments-roles-management">
-    <a-tabs v-model:activeKey="activeTab" type="card">
+  <div class="departments-roles-management card">
+    <div>
+      <h2 class="mb-3">Quản lý phòng ban và vai trò</h2>
+    </div>
+    <a-tabs v-model:activeKey="activeTab" type="card" class="">
       <!-- Tab Phòng ban -->
-      <a-tab-pane key="departments" tab="Quản lý Phòng ban">
+      <a-tab-pane key="departments" tab="Quản lý Phòng ban" class="">
         <div class="tab-content pt-0">
           <!-- Header actions -->
           <div class="header-actions">
@@ -287,6 +290,13 @@
             v-model:value="roleForm.permissions"
             mode="multiple"
             placeholder="Chọn quyền hạn"
+            :dropdown-style="{ 
+              position: 'fixed',
+              zIndex: 10000,
+              background: 'white',
+              border: '1px solid #ccc'
+            }"
+            style="width: 100%"
           >
             <a-select-option value="read">Xem</a-select-option>
             <a-select-option value="write">Tạo</a-select-option>

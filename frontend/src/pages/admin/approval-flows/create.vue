@@ -1,13 +1,12 @@
 <template>
-    <div class="container py-4">
+    <div class="container py-2 card">
         <!-- Header section với màu xanh của trường TLU -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 fw-bold text-primary">
-                    <i class="bi bi-diagram-3 me-2"></i>
+                <h1 class="">
                     Tạo luồng phê duyệt mẫu
                 </h1>
-                <p class="text-secondary">Thiết lập luồng phê duyệt có thể tái sử dụng cho các văn bản</p>
+                <span class="text-secondary">Thiết lập luồng phê duyệt có thể tái sử dụng cho các văn bản</span>
             </div>
         </div>
 

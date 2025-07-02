@@ -1,9 +1,9 @@
 <template>
-    <a-card class="" style="width: 100%">
+    <div class="card p-3">
         <div class="row">
             <div class="col-12">
-                <h1>Quản lý chữ ký</h1>
-                <p>Code nhanh còn nghỉ khỏe, đi ăn chơi xả láng</p>
+                <h1 class="py-0">Quản lý chữ ký</h1>
+                <!-- <p>Code nhanh còn nghỉ khỏe, đi ăn chơi xả láng</p> -->
             </div>
         </div>
 
@@ -626,7 +626,7 @@
                                     @change="handleUserSelect"
                                     style="width: 100%"
                                     :dropdown-style="{ 
-                                        position: 'absolute',
+                                        position: 'fixed',
                                         zIndex: 10000,
                                         background: 'white',
                                         border: '1px solid #ccc'
@@ -687,7 +687,7 @@
                                     style="width: 100%"
                                     @change="handleDepartmentSelect"
                                     :dropdown-style="{ 
-                                        position: 'absolute',
+                                        position: 'fixed',
                                         zIndex: 10000,
                                         background: 'white',
                                         border: '1px solid #ccc'
@@ -866,7 +866,7 @@
             </div>
         </a-modal>
 
-    </a-card>
+    </div>
 </template>
 
 <script>

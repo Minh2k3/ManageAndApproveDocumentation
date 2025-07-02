@@ -1,6 +1,7 @@
 <template>
     <a-card title="" style="width: 100%" class="rounded-0 mt-1">
-        <h2 class="fw-bold mb-5">Quản Lý Người Dùng</h2>
+        <h2 class="">Quản lý người dùng</h2>
+        <span class="text-secondary fst-italic">Quản lý thông tin tài khoản người dùng</span>
         <div class="row mb-3">
             <div class="col-12 align-items-center justify-content-end d-flex">
                 <a-button type="primary">

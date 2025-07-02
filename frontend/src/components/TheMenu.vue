@@ -60,9 +60,9 @@
 				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-template' }">Văn bản mẫu</router-link>
 			</a-menu-item>
 
-			<a-menu-item key="admin-documents-history">
+			<!-- <a-menu-item key="admin-documents-history">
 				<router-link  class="text-decoration-none" :to="{ name: 'admin-documents-history' }">Lịch sử văn bản</router-link>
-			</a-menu-item>
+			</a-menu-item> -->
 		</a-sub-menu>
 
 
@@ -74,7 +74,7 @@
 			</router-link>
 		</a-menu-item> -->
 
-		<a-sub-menu key="admin-roles">
+		<a-sub-menu v-if="false" key="admin-roles">
 			<template #title>
 				<span class="d-inline-flex align-items-center">
 					<TagOutlined class="me-2" /> Quản lý vai trò
@@ -338,6 +338,14 @@ export default defineComponent({
 			return route.name === 'admin-signatures-detail';
 		});
 
+		const isDetailDocumentAdmin = computed(() => {
+			return route.name === 'admin-documents-detail';
+		});
+
+		const isDetailPageFlowTemplate = computed(() => {
+			return route.name === 'admin-approval-flows-detail';
+		});
+
 		const isDetailPageCreator = computed(() => {
 			return route.name === 'creator-documents-detail';
 		});
@@ -354,9 +362,6 @@ export default defineComponent({
 			return route.name === 'approver-documents-edit';
 		})
 
-		const isDetailDocumentAdmin = computed(() => {
-			return route.name === 'admin-documents-detail';
-		});
 
 		function onMenuClick({ key }) {
 			console.log('Đã bấm' + key);
@@ -393,11 +398,12 @@ export default defineComponent({
 			...storeToRefs(store),
 			role,
 			isDetailSignatureAdmin,
+			isDetailDocumentAdmin,
+			isDetailPageFlowTemplate,
 			isDetailPageCreator,
 			isEditPageCreator,
 			isDetailPageApprover,
 			isEditPageApprover,
-			isDetailDocumentAdmin,
 			
 			onMenuClick,
 			handleLogout,

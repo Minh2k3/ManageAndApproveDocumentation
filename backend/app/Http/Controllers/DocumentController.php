@@ -109,6 +109,8 @@ class DocumentController extends Controller
                 'type_id' => $document->documentType->id ?? null,
                 'creator_name' => $creatorInfo['name'],
                 'creator_id' => $document->created_by,
+                'department_id' => $creatorInfo['department_id'] ?? null,
+                'department_name' => $creatorInfo['department_name'] ?? null,
                 'process' => $document->documentFlow->process ?? 0,
                 'version_id' => $latestVersion->id ?? null,
                 'version_count' => $latestVersion->version ?? 0,
@@ -189,6 +191,7 @@ class DocumentController extends Controller
             return [
                 'name' => $creator->user->name ?? null,
                 'department_id' => $creator->department_id,
+                'department_name' => $creator->department ? $creator->department->name : null,
                 'roll_at_department_id' => $creator->roll_at_department_id,
                 'roll' => $creator->rollAtDepartment && $creator->department 
                     ? $creator->rollAtDepartment->name . ' - ' . $creator->department->name 
