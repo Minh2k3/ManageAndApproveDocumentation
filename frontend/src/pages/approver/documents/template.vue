@@ -175,7 +175,7 @@
                     allow-clear
                     :list-height="200"
                     :dropdown-style="{ 
-                        position: 'absolute',
+                        position: 'fixed',
                         zIndex: 10000,
                         background: 'white',
                         border: '1px solid #ccc'

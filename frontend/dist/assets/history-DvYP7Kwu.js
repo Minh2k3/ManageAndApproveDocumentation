@@ -1,1 +1,0 @@
-import{u as t}from"./use-menu-Ch1M1A0s.js";import{_ as e}from"./index-CoRCteip.js";const r={setup(){t().onSelectedKeys(["creator-documents-history"])}};function s(o,c,n,a,p,u){return" Đây là trang lịch sử "}const i=e(r,[["render",s]]);export{i as default};

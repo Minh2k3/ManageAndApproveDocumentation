@@ -15,7 +15,7 @@
                                 <div class="row">
                                     <div class="col text-end mb-2 mb-xl-0 align-self-top ps-3 pt-1">
                                         <label>
-                                            <a :href="`${import.meta.env.VITE_API_URL}/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
+                                            <a :href="`${apiUrl}/documents/${document.file_path}`" target="_blank" class="text-decoration-none fst-italic">
                                                 Mở tệp trong tab mới
                                             </a>
                                         </label>
@@ -529,8 +529,7 @@ export default defineComponent({
 
         const comment = ref('');
 
-        const API_BASE_URL = 'http://localhost:8000'
-
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const getAvatarUrl = (avatar) => {
             if (!avatar) return null
             return `${API_BASE_URL}/images/avatars/${avatar}`
