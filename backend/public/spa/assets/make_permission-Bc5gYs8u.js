@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-BgazaTml.js";import{_ as s}from"./index-CqN3-FrM.js";const r={setup(){e().onSelectedKeys(["admin-roles-make_permission"])}};function n(o,t,a,c,i,p){return" Đây là trang gán quyền cho vai trò "}const u=s(r,[["render",n]]);export{u as default};

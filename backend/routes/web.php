@@ -144,4 +144,7 @@ Route::get('/drive/{file_name}', function ($file_name) {
         }
 })->name('drive.getFile');
 
+Route::fallback(function () {
+    return response()->file(public_path('spa/index.html'));
+});
 // require __DIR__.'/auth.php';

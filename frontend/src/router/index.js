@@ -16,7 +16,7 @@ const redirectRoot = [{
 const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory(import.meta.env.VITE_API_URL),
     routes,
 });
 
@@ -26,6 +26,10 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.isAuthenticated) {
         await authStore.initAuth();
     }
+
+    // if (to.path.startsWith('/api/verify-email/')) {
+    //     return next();
+    // }
 
     if (!authStore.isAuthenticated) {
         if (to.path !== '/login' 
