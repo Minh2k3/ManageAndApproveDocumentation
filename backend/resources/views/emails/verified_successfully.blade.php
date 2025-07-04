@@ -52,7 +52,7 @@
         <p>Chúc mừng tài khoản của bạn đã được phê duyệt! Vui lòng nhấp vào nút bên dưới để đăng nhập vào hệ thống:</p>
 
         @php
-            $loginUrl = config('app.frontend_url', 'http://localhost:5173') . '/login';
+            $loginUrl = config('app.frontend_url', 'http://tminh.id.vn') . '/login';
         @endphp
         
         <div style="text-align: center;">

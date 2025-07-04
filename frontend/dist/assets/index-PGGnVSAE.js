@@ -1,1 +1,0 @@
-import{u as e}from"./use-menu-BgazaTml.js";import{_ as t}from"./index-CqN3-FrM.js";const r={setup(){e().onSelectedKeys(["admin-roles"])}};function n(s,o,a,c,p,u){return" Đây là trang quản lý vai trò "}const d=t(r,[["render",n]]);export{d as default};

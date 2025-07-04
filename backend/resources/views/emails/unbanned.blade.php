@@ -52,7 +52,7 @@
         <p>Chúng tôi xin thông báo tài khoản của bạn đã được mở trở lại! Click vào nút phía dưới để đăng nhập.</p>
 
         @php
-            $loginUrl = config('app.frontend_url', 'http://localhost:5173') . '/login';
+            $loginUrl = config('app.frontend_url', 'http://tminh.id.vn') . '/login';
         @endphp
         
         <div style="text-align: center;">
