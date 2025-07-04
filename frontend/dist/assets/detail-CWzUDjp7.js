@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-CtzFreMQ.js";import{_ as e}from"./index-DDaz3FEL.js";const s={setup(){t().onSelectedKeys(["admin-signatures-detail"])}};function r(n,a,o,c,i,p){return" Đây là trang chữ ký chi tiết "}const d=e(s,[["render",r]]);export{d as default};

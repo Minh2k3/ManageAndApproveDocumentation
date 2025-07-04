@@ -778,8 +778,8 @@ export default defineComponent({
                     },
                     // 'Some descriptions',
                 ),
-                onOk() {
-                    sendRequest();
+                async onOk() {
+                    await sendRequest();
                 },
                 onCancel() {
                     return;

@@ -849,8 +849,8 @@ export default defineComponent({
                     },
                     // 'Some descriptions',
                 ),
-                onOk() {
-                    sendRequest();
+                async onOk() {
+                    await sendRequest();
                 },
                 onCancel() {
                     return;
@@ -944,8 +944,8 @@ export default defineComponent({
                     },
                     // 'Some descriptions',
                 ),
-                onOk() {
-                    MakeNewVersion();
+                async onOk() {
+                    await MakeNewVersion();
                 },
                 onCancel() {
                     return;
@@ -1030,8 +1030,8 @@ export default defineComponent({
                         style: 'color:red;',
                     },
                 ),
-                onOk() {
-                    saveDraft();
+                async onOk() {
+                    await saveDraft();
                 },
                 onCancel() {
                     return;
