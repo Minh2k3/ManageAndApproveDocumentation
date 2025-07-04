@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('document_certificates', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
             $table->string('code')->unique();
             $table->string('file_path')->nullable();
             $table->timestamp('created_at');

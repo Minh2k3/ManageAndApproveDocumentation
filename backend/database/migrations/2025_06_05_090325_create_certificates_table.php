@@ -17,11 +17,13 @@ return new class extends Migration
             $table->text('public_key');
             $table->text('private_key');
             $table->text('certificate');
-            $table->string('signature_image_path')->nullable()->comment('Đường dẫn đến hình ảnh chữ ký số');
-            $table->integer('used_count')->default(0)->comment('Số lần chứng chỉ đã được sử dụng');
             $table->timestamp('issued_at');
             $table->timestamp('expires_at');
+            $table->string('signature_image_path')->nullable()->comment('Đường dẫn đến hình ảnh chữ ký số');
             $table->enum('status', ['active', 'revoked', 'expired', 'renewal'])->default('active');
+            $table->boolean('check_expired')->default(false)->comment('Kiểm tra chứng chỉ đã hết hạn hay chưa');
+            $table->integer('used_count')->default(0)->comment('Số lần chứng chỉ đã được sử dụng');
+            $table->integer('renewal_count')->default(0)->comment('Số lần chứng chỉ đã được gia hạn');
             $table->timestamps();
 
             $table->index(['user_id', 'status'], 'idx_user_status');

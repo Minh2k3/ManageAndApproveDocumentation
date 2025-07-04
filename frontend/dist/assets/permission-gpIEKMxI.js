@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-Dt9qxgnu.js";import{_ as s}from"./index-ixtV8ZqQ.js";const n={setup(){e().onSelectedKeys(["admin-roles-permission"])}};function r(o,t,p,a,c,i){return" Đây là trang quyền hạn "}const m=s(n,[["render",r]]);export{m as default};

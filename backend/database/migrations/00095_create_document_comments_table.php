@@ -20,7 +20,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
             $table->text('comment');
-            $table->timestamp('created_at')->default(now());
+            $table->timestamp('created_at');
         });
     }
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('receiver_id')->constrained('users');
             $table->string('title');
             $table->text('content');
+            $table->json('data')->nullable()->comment('Additional data related to the notification');
             $table->boolean('is_read')->default(false);
             $table->timestamp('created_at');
         });

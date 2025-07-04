@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->enum('group', ['Khoa/Trung tâm', 'LCĐ', 'LCH', 'Phòng/Ban', 'CLB/Đội', 'Khác'])->default('Khác');
+            $table->enum('status', ['active', 'non-active'])->default('active')->comment('check if this department is active or not');
             $table->string('avatar')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('position')->nullable()->comment('where this department situated in');

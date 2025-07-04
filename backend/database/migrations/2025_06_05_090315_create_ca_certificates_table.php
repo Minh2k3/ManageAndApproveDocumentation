@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('private_key');
             $table->text('certificate');
-            $table->enum('status', ['active', 'revoked', 'expired'])->default('active');
+            // $table->enum('status', ['active', 'revoked', 'expired'])->default('active');
             $table->timestamp('issued_at');
             $table->timestamp('expires_at');
             $table->timestamps();

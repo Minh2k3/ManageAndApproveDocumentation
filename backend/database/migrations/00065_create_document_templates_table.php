@@ -20,7 +20,8 @@ return new class extends Migration
             $table->foreignId('document_type_id')->constrained();
             $table->integer('downloaded')->default(0);
             $table->integer('liked')->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->enum('status', ['active', 'inactive', 'pending', 'reject'])
+                ->default('active');
             $table->timestamps();
         });
     }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true)->comment('check if this document type is active or not');
             $table->timestamps();
         });
     }
