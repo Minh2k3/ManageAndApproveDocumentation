@@ -79,7 +79,10 @@
                         Mạnh dạn tạo văn bản mới mà gửi đi chứ, rén làm gì.
                     </span>
                     </template>
-                    <a-button type="primary">Bấm nếu bạn cần</a-button>
+                    <a-button type="primary">
+                        <router-link class="text-decoration-none" to=documents/create >Bấm nếu bạn cần
+                        </router-link>
+                    </a-button>
                 </a-empty>                
                 <a-table 
                     v-else

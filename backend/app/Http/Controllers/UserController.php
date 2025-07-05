@@ -95,8 +95,10 @@ class UserController extends Controller
             $user->save();
 
             // Generate a new certificate for the user
+            $request = new \Illuminate\Http\Request();
+            $request->merge(['user_id' => $user->id]);
             $certificateController = new CertificateController();
-            $certificateResponse = $certificateController->issueCertificate($user->id);
+            $certificateResponse = $certificateController->issueCertificate($request);
 
             Mail::to($user->email)->send(new UserAccountEmail($user, 'verify_ok', ''));
             return response()->json(['message' => 'User activated successfully.']);

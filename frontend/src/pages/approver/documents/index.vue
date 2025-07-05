@@ -86,7 +86,10 @@
                                 Bạn thuộc dạng đẳng cấp nên chả cần tạo văn bản phê duyệt nhỉ.
                             </span>
                             </template>
-                            <a-button type="primary">Bấm nếu bạn cần</a-button>
+                            <a-button type="primary">
+                                <router-link class="text-decoration-none" to=documents/create >Bấm nếu bạn cần
+                                </router-link>
+                            </a-button>
                         </a-empty>
                         <a-table 
                             v-else
@@ -176,7 +179,7 @@
                         >
                             <template #description>
                             <span>
-                                Có quyền phê duyệt mà đếch ai cần đến bạn, tội ghê gớm!
+                                Nắm quyền phê duyệt mà hình như chả ai cần đến bạn, tội ghê gớm!
                             </span>
                             </template>
                         </a-empty>
