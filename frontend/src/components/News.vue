@@ -88,8 +88,22 @@
 
     <!-- Empty State -->
     <div v-else-if="filteredDocuments.length === 0" class="empty-state">
-      <i class="fas fa-folder-open"></i>
-      <p>Không tìm thấy văn bản nào</p>
+      <a-empty
+        image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
+        :image-style="{
+          height: '60px',
+        }"
+      >
+        <template #description>
+          <span>
+            Chưa có văn bản nào được phê duyệt. Hãy tạo văn bản mới để bắt đầu.
+          </span>
+        </template>
+        <a-button type="primary">
+          <router-link class="text-decoration-none" to=documents/create >Tạo mới
+          </router-link>
+        </a-button>
+      </a-empty>
     </div>
 
     <!-- Card View -->

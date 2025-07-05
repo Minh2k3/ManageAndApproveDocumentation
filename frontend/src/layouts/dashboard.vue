@@ -51,26 +51,42 @@
                         </div>
                         <div class="col-md-6 text-center">
                             <a-carousel autoplay>
-                                <div><h3>
-                                    <img src="@/assets/images/Cosette_square.jpg" alt="Em Cosette"
-                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
-                                </h3></div>
-                                <div><h3>
-                                    <img src="@/assets/images/Retro_Punk_square.jpg" alt="Em gái Anime nằm trên giường"
-                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
-                                </h3></div>
-                                <div><h3>
-                                    <img src="@/assets/images/YourLieInApril.jpg" alt="Minh họa hệ thống"
-                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
-                                </h3></div>
-                                <div><h3>
-                                    <img src="@/assets/images/ZeroTwo.png" alt="Minh họa hệ thống"
-                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
-                                </h3></div>
-                                <div><h3>
-                                    <img src="@/assets/images/Ai_Hoshino.png" alt="Minh họa hệ thống"
-                                        class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
-                                </h3></div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/document1.jpeg" alt="Văn bản điện tử"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/Cosette_square.jpg" alt="Em Cosette"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/Retro_Punk_square.jpg" alt="Em gái Anime nằm trên giường"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/YourLieInApril.jpg" alt="Minh họa hệ thống"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/ZeroTwo.png" alt="Minh họa hệ thống"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
+                                <div>
+                                    <h3>
+                                        <img src="@/assets/images/Ai_Hoshino.png" alt="Minh họa hệ thống"
+                                            class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
+                                    </h3>
+                                </div>
                             </a-carousel>                            
                         </div>
                     </div>
