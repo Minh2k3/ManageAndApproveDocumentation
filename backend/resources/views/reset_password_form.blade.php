@@ -31,11 +31,11 @@
         @elseif (request()->get('status') === 'not_found')
             <h1 class="text-danger">Liên kết không tồn tại</h1>
             <p>Vui lòng kiểm tra và thử lại.</p>
-            <a href="http://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
+            <a href="https://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
         @else
             <h1 class="text-danger">Invalid Status</h1>
             <p>Có lỗi xảy ra. Vui lòng thử lại.</p>
-            <a href="http://tminh.id.vn" class="btn btn-primary mt-4">Trang chủ</a>
+            <a href="https://tminh.id.vn" class="btn btn-primary mt-4">Trang chủ</a>
         @endif
     </div>
 </body>

@@ -148,7 +148,7 @@ class CreatePDFController extends Controller
             // Thêm dòng tra cứu tại vào dưới dòng mã
             $fpdi->SetTextColor(67, 195, 250);
             $fpdi->SetFont('Times', '', 10);
-            $fpdi->Text($left, $top + 5, 'Retrieve at: https://vanbantlu.id.vn/retrieve/');
+            $fpdi->Text($left, $top + 5, 'Retrieve at: https://tminh.id.vn/retrieve/');
             \Log::info("Added certificate code to page: " . $i);
 
             // Thêm dòng tra cứu tại vào dưới dòng mã

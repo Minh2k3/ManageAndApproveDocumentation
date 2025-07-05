@@ -144,6 +144,11 @@ Route::get('/drive/{file_name}', function ($file_name) {
         }
 })->name('drive.getFile');
 
+
+if(app()->environment('production')){
+    URL::forceScheme('https');
+}
+
 Route::fallback(function () {
     return response()->file(public_path('spa/index.html'));
 });

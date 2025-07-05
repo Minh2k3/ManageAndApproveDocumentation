@@ -12,11 +12,11 @@
         @if (request()->get('status') === 'verified')
             <h1 class="text-success">Xác thực email thành công!</h1>
             <p>Bạn đã hoàn tất xác thực tài khoản của mình. Giờ thì hãy trải nghiệm hệ thống của chúng tôi nhé.</p>
-            <a href="http://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
+            <a href="https://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
         @elseif (request()->get('status') === 'already_verified')
             <h1 class="text-warning">Bạn đã xác thực email trước đó</h1>
             <p>Tài khoản của bạn đã được xác thực từ trước. Hãy đăng nhập để sử dụng.</p>
-            <a href="http://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
+            <a href="https://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
         @elseif (request()->get('status') === 'expired') 
             <h1 class="text-danger">Liên kết xác thực đã hết hạn</h1>
             <p>Liên kết xác thực tài khoản của bạn đã quá hạn. Vui lòng nhập lại email để nhận liên kết mới.</p>
@@ -40,11 +40,11 @@
         @elseif (request()->get('status') === 'not_found')
             <h1 class="text-danger">Không tìm thấy tài khoản của bạn</h1>
             <p>Email của bạn không kết nối tới tài khoản nào. Vui lòng kiểm tra và thử lại.</p>
-            <a href="http://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
+            <a href="https://tminh.id.vn/login" class="btn btn-primary mt-4">Đăng nhập</a>
         @else
             <h1 class="text-danger">Invalid Status</h1>
             <p>Có lỗi xảy ra. Vui lòng thử lại.</p>
-            <a href="http://tminh.id.vn" class="btn btn-primary mt-4">Trang chủ</a>
+            <a href="https://tminh.id.vn" class="btn btn-primary mt-4">Trang chủ</a>
         @endif
 
     </div>
