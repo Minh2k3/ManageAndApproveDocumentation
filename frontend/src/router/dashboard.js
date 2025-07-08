@@ -2,7 +2,7 @@ const dashboard = [
     {
         path: '/dashboard',
         name: 'dashboard',
-        component: () => import('../layouts/dashboard.vue'),
+        component: () => import('@/layouts/dashboard.vue'),
     }
 ];
 

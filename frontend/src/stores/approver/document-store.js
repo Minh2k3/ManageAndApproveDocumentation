@@ -67,6 +67,7 @@ export const useDocumentStore = defineStore("document", () => {
             if (response.data) {
                 console.log("response.data", response.data);
                 document_templates.value = response.data.document_templates;
+                isFetchedDocumentTemplates.value = true;
             }
         }
         catch (error) {
@@ -84,6 +85,7 @@ export const useDocumentStore = defineStore("document", () => {
             template_user.value = response.data;
             if (response.data) {
                 this.template_user = response.data;
+                isFetchedTemplateUser.value = true;
             } else {
                 this.template_user = null;
             }

@@ -719,7 +719,7 @@ export default defineComponent({
 
         const previewFile = async (template) => {
             if (template.file_path) {
-                const fileUrl = `${apiUrl}/documents/${template.file_path}`;
+                const fileUrl = `${API_BASE_URL}/documents/${template.file_path}`;
                 const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
                 window.open(fileUrl, '_blank');
                 document_templates.value[selectedTemplateIndex.value].downloaded += 1; // Tăng lượt xem
@@ -739,6 +739,8 @@ export default defineComponent({
                 minute: '2-digit'
             });
         };        
+
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
         const downloadUrl = ref('');
         const fetchFileUrl = async (template) => {
@@ -776,8 +778,6 @@ export default defineComponent({
             }
             return `https://avatar.iran.liara.run/public/${id}`;
         };
-
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
         const getAvatarUrl = (avatar, id) => {
             if (!avatar) return randomAvatar(id);

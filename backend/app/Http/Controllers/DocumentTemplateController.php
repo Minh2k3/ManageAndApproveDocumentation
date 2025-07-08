@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DocumentTemplate;
+use App\Models\TemplateUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -195,6 +196,16 @@ class DocumentTemplateController extends Controller
         ->orderByRaw('template_users.id IS NOT NULL DESC')
         ->orderBy('document_templates.updated_at', 'desc')
         ->get();
+
+        $templateUser = TemplateUser::where('user_id', $user->id)
+            ->pluck('template_id')
+            ->toArray();
+
+        $documentTemplates = $documentTemplates->map(function ($template) use ($templateUser) {
+            // Thêm thuộc tính userHasLike vào mỗi template
+            $template->userHasLike = in_array($template->id, $templateUser);
+            return $template;
+        });
 
         return response()->json([
             'document_templates' => DocumentTemplateResource::collection($documentTemplates),

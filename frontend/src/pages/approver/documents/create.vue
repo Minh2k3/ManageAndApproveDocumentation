@@ -758,6 +758,7 @@ export default defineComponent({
                     file: upload_files.value[0]?.originFileObj,
                     documentId: documentId,
                 });
+                await documentStore.fetchDocuments(user.id, true);
                 message.success("Gửi yêu cầu phê duyệt thành công");
                 router.push({ name: 'creator-documents' });    
             } catch (error) {

@@ -18,11 +18,11 @@
                         <span class="fs-1 fw-bold ">{{ number_of_users }}</span>
                     </div>
                 </div>
-                <div class="row mt-1">
+                <!-- <div class="row mt-1">
                     <div class="col-lg-12">
                         <span class="fs-5 text-success">+12% so với tháng trước</span>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Tổng số văn bản -->
@@ -42,11 +42,11 @@
                         <span class="fs-1 fw-bold ">{{ number_of_documents }}</span>
                     </div>
                 </div>
-                <div class="row mt-1">
+                <!-- <div class="row mt-1">
                     <div class="col-lg-12">
                         <span class="fs-5 text-success">+12% so với tháng trước</span>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Vai trò & Quyền hạn -->
@@ -66,11 +66,11 @@
                         <span class="fs-1 fw-bold ">6</span>
                     </div>
                 </div>
-                <div class="row mt-1">
+                <!-- <div class="row mt-1">
                     <div class="col-lg-12">
                         <span class="fs-5 text-success">+2 vai trò mới</span>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Luồng phê duyệt mẫu -->

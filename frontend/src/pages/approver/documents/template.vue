@@ -243,6 +243,21 @@
         
         <template #footer>
             <div class="row d-flex justify-content-end g-2">
+                <a-button v-if="selectedTemplate.userHasLike"
+                    type="primary" 
+                    class="col-3 bg-success"
+                    @click="handleLikeTemplate(selectedTemplate)"
+                >
+                    <i class="fas fa-heart me-2"></i>Thích
+                </a-button>
+                <a-button v-else
+                    type="primary" 
+                    class="col-3 bg-success"
+                    @click="handleUnikeTemplate(selectedTemplate)"
+                >
+                    <i class="fas fa-heart me-2"></i>Bỏ thích
+                    
+                </a-button>                
                 <a-button 
                     type="primary" 
                     class="col-3"
@@ -761,9 +776,11 @@ export default defineComponent({
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         };        
 
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
         const previewFile = async (template) => {
             if (template.file_path) {
-                const fileUrl = `${apiUrl}/documents/${template.file_path}`;
+                const fileUrl = `${API_BASE_URL}/documents/${template.file_path}`;
                 const response = await axiosInstance.get(`/api/document-templates/${template.id}/download`);
                 window.open(fileUrl, '_blank');
                 document_templates.value[selectedTemplateIndex.value].downloaded += 1; // Tăng lượt xem
@@ -821,7 +838,6 @@ export default defineComponent({
             return `https://avatar.iran.liara.run/public/${id}`;
         };
 
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
         const getAvatarUrl = (avatar, id) => {
             if (!avatar) return randomAvatar(id);
@@ -834,6 +850,43 @@ export default defineComponent({
         //         downloadFile(newUrl);
         //     }
         // });
+
+        const handleLikeTemplate = async (template) => {
+            try {
+                loading.value = true;
+                const response = await axiosInstance.post(`/api/document-templates/${template.id}/like`);
+                if (response.status === 200) {
+                    template.liked += 1; // Tăng lượt thích
+
+                    message.success('Đã thích mẫu văn bản này');
+                } else {
+                    message.error('Không thể thích mẫu văn bản này');
+                }
+            } catch (error) {
+                console.error('Error liking template:', error);
+                message.error('Đã xảy ra lỗi khi thích mẫu văn bản');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const handleUnikeTemplate = async (template) => {
+            try {
+                loading.value = true;
+                const response = await axiosInstance.post(`/api/document-templates/${template.id}/unlike`);
+                if (response.status === 200) {
+                    template.liked -= 1; // Giảm lượt thích
+                    message.success('Đã bỏ thích mẫu văn bản này');
+                } else {
+                    message.error('Không thể bỏ thích mẫu văn bản này');
+                }
+            } catch (error) {
+                console.error('Error unliking template:', error);
+                message.error('Đã xảy ra lỗi khi bỏ thích mẫu văn bản');
+            } finally {
+                loading.value = false;
+            }
+        };
 
         const columns = [
             {
@@ -922,6 +975,8 @@ export default defineComponent({
             formatDateTime,
             fetchFileUrl,
             getAvatarUrl,
+            handleLikeTemplate,
+            handleUnikeTemplate,
         };
     },
 });

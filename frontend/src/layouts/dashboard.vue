@@ -11,7 +11,9 @@
                     <span class="fs-4 mb-0 fw-bold">ĐH THỦY LỢI</span>
                 </div>
                 <nav class="d-none d-md-flex">
-                    <router-link to="#" class="text-white mx-3 text-decoration-none fw-medium">Trang chủ</router-link>
+                    <!-- <router-link to="#" class="text-white mx-3 text-decoration-none fw-medium ">Trang chủ</router-link> -->
+                    <a href="#home" @click.prevent="scrollToHome" class="text-white mx-3
+                        text-decoration-none fw-bold">Trang chủ</a>
                     <router-link to="retrieve" class="text-white mx-3 text-decoration-none">Tra cứu chứng chỉ</router-link>
                     <a href="#features" @click.prevent="scrollToFeatures" class="text-white mx-3
                         text-decoration-none">Tính năng</a>
@@ -53,7 +55,7 @@
                             <a-carousel autoplay>
                                 <div>
                                     <h3>
-                                        <img src="@/assets/images/document1.jpeg" alt="Văn bản điện tử"
+                                        <img src="@/assets/images/dhtl.jpg" alt="Đại học Thủy lợi"
                                             class="img-fluid rounded shadow" style="max-width: 100%; height: auto;" />
                                     </h3>
                                 </div>
@@ -156,10 +158,17 @@
                     <div class="col-md-3">
                         <h3 class="h5 fw-bold mb-3">Liên Kết</h3>
                         <ul class="list-unstyled">
-                            <li class="mb-2">
+                            <!-- <li class="mb-2">
                                 <router-link to="#" class="text-white text-decoration-none">
                                     Trang chủ
                                 </router-link>
+                            </li> -->
+                            <li class="mb-2">
+                                <a href="#home" 
+                                    @click.prevent="scrollToHome" 
+                                    class="text-white text-decoration-none">
+                                    Trang chủ
+                                </a>
                             </li>
                             <li class="mb-2">
                                 <router-link to="#" class="text-white text-decoration-none">
@@ -185,12 +194,21 @@
                     <div class="col-md-3">
                         <h3 class="h5 fw-bold mb-3">Hỗ Trợ</h3>
                         <ul class="list-unstyled">
-                            <li class="mb-2"><router-link to="#"
-                                    class="text-white text-decoration-none">FAQ</router-link></li>
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Trung tâm hỗ
-                                    trợ</router-link></li>
-                            <li class="mb-2"><router-link to="#" class="text-white text-decoration-none">Hướng dẫn sử
-                                    dụng</router-link></li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    FAQ
+                                </router-link>
+                            </li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Trung tâm hỗ trợ
+                                </router-link>
+                                </li>
+                            <li class="mb-2">
+                                <router-link to="#" class="text-white text-decoration-none">
+                                    Hướng dẫn sử dụng
+                                </router-link>
+                            </li>
                         </ul>
                     </div>
                     <div class="col-md-3">
@@ -321,6 +339,12 @@ export default defineComponent({
                 this.hideTimeout = null;
             }
             this.isHeaderHidden = false;
+        },
+        scrollToHome() {
+            const element = document.getElementById("home");
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
         },
         scrollToFeatures() {
             const element = document.getElementById("features");

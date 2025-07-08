@@ -2,7 +2,7 @@ const register = [
     {
         path: '/register',
         name: 'register',
-        component: () => import('../pages/dashboard/register/index.vue'),
+        component: () => import('@/pages/dashboard/register/index.vue'),
     }
 ];
 

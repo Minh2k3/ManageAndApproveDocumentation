@@ -371,7 +371,7 @@
 
     function handleClickSettings() {
         console.log('Cài đặt cá nhân clicked');
-        if (useMenu().selectedKeys === [role + '-settings']) {
+        if (useMenu().selectedKeys[0] === role + '-settings') {
             console.log('Already on settings page');
             return;
         }

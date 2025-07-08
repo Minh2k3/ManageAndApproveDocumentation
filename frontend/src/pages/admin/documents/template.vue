@@ -818,7 +818,7 @@ export default defineComponent({
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         };        
 
-        const API_BASE_URL = 'http://localhost:8000';
+        const API_BASE_URL = import.meta.env.VITE_API_URL;
 
         const previewFile = async (template) => {
             if (template.file_path) {
