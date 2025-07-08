@@ -1,0 +1,1 @@
+import{u as e}from"./use-menu-PhBV_0w2.js";import{_ as t}from"./index-C78nIXCd.js";const r={setup(){e().onSelectedKeys(["approver-signatures"])}};function n(s,o,a,c,p,u){return" Đây là trang quản lý chữ ký của người phê duyệt. "}const d=t(r,[["render",n]]);export{d as default};

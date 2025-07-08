@@ -243,7 +243,7 @@
         
         <template #footer>
             <div class="row d-flex justify-content-end g-2">
-                <a-button v-if="selectedTemplate.userHasLike"
+                <a-button v-if="!selectedTemplate.userHasLike"
                     type="primary" 
                     class="col-3 bg-success"
                     @click="handleLikeTemplate(selectedTemplate)"

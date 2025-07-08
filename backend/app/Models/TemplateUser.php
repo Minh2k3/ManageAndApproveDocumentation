@@ -12,7 +12,7 @@ class TemplateUser extends Model
      *
      * @var string
      */
-    protected $table = 'templates_users';
+    protected $table = 'template_users';
 
     /**
      * The attributes that are mass assignable.
