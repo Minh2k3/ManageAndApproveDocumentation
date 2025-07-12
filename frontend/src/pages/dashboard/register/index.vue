@@ -175,7 +175,12 @@
                             </div>
                             <div class="terms-link">
                                 <span class="text-secondary">Chi tiết điều khoản xem </span>
-                                <a href="#" class="link-primary">tại đây</a>
+                                <!-- <a href="#" class="link-primary">tại đây</a> -->
+                                <router-link :to="{ name: 'term' }">
+                                    <span class="link-primary">
+                                        tại đây
+                                    </span>
+                                </router-link>
                             </div>
                         </div>
 

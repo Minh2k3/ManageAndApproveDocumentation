@@ -42,7 +42,9 @@ class RegisterController extends Controller
                 ->get()
                 ->map(function ($department) {
                     return [
+                        'id' => $department->id,
                         'value' => $department->id,
+                        'name' => $department->name,
                         'label' => $department->name,
                         'description' => $department->description,
                         'status' => $department->status,

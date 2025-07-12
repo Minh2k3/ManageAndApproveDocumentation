@@ -23,9 +23,7 @@
                         text-decoration-none">Liên hệ</a>
                 </nav>
                 <div>
-                    <router-link to="/login">
-                        <a-button type="primary" ghost class="bg-white text-primary">Đăng nhập</a-button>
-                    </router-link>
+                    <a-button type="primary" ghost class="bg-white text-primary" @click="onClickLogin">Đăng nhập</a-button>
                 </div>
             </div>
         </header>
@@ -46,9 +44,7 @@
                             </p>
                             <div class="d-flex gap-3">
                                 <a-button type="primary" id="btn-moreInformation">Tìm hiểu thêm</a-button>
-                                <router-link to="/register">
-                                    <a-button ghost id="btn-register">Đăng ký</a-button>
-                                </router-link>
+                                <a-button ghost id="btn-register" @click="onClickRegister">Đăng ký</a-button>
                             </div>
                         </div>
                         <div class="col-md-6 text-center">
@@ -131,9 +127,7 @@
                         hiệu quả làm việc.
                     </p>
                     <div class="d-flex justify-content-center gap-3">
-                        <router-link to="/register">
-                            <a-button type="primary" size="large">Đăng Ký Tài Khoản</a-button>
-                        </router-link>
+                        <a-button type="primary" size="large" @click="onClickRegister">Đăng Ký Tài Khoản</a-button>
                         <a href="https://www.youtube.com/@Himakevolution" target="_blank" rel="noopener noreferrer"
                             class="border border-1 rounded-3">
                             <a-button ghost size="large" class="text-primary">Xem Demo</a-button>
@@ -232,6 +226,7 @@
 import { defineComponent } from 'vue';
 import FeatureCard from '@/components/FeatureCard.vue';
 import ProcessFlow from '@/components/ProcessFlow.vue';
+import { useAuth } from '@/stores/use-auth.js';
 
 export default defineComponent({
     name: 'App',
@@ -503,6 +498,43 @@ export default defineComponent({
             this.mouse.x = event.clientX;
             this.mouse.y = event.clientY;
         },
+
+        onClickLogin() {
+            const authStore = useAuth();
+            
+            if (authStore.isAuthenticated) {
+                // Nếu đã đăng nhập, chuyển đến dashboard tương ứng với role
+                if (authStore.user.role_id === 3) {
+                    this.$router.push('/approver');
+                } else if (authStore.user.role_id === 2) {
+                    this.$router.push('/creator');
+                } else {
+                    this.$router.push('/admin');
+                }
+            } else {
+                // Nếu chưa đăng nhập, chuyển đến trang login
+                this.$router.push('/login');
+            }
+        },
+
+        onClickRegister() {
+            const authStore = useAuth();
+            
+            if (authStore.isAuthenticated) {
+                // Nếu đã đăng nhập, chuyển đến dashboard tương ứng với role
+                if (authStore.user.role_id === 3) {
+                    this.$router.push('/approver');
+                } else if (authStore.user.role_id === 2) {
+                    this.$router.push('/creator');
+                } else {
+                    this.$router.push('/admin');
+                }
+            } else {
+                // Nếu chưa đăng nhập, chuyển đến trang register
+                this.$router.push('/register');
+            }
+            
+        }
     }
 });
 </script>

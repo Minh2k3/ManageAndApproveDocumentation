@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-vCLX-e5I.js";import{_ as e}from"./index-qeq2zkB_.js";const s={setup(){t().onSelectedKeys(["admin-signatures-detail"])}};function r(n,a,o,c,i,p){return" Đây là trang chữ ký chi tiết "}const d=e(s,[["render",r]]);export{d as default};

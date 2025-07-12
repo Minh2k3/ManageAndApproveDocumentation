@@ -70,7 +70,7 @@
             type="card"
             class="row"
             >
-            <a-tab-pane key="1" tab="Văn bản gửi đi">
+            <a-tab-pane key="1" :tab="`Văn bản của tôi (${documents_of_me.length})`">
                 <!-- Bảng văn bản gửi đến tôi -->
                 <div class="row">
                     <div class="col-12">
@@ -166,7 +166,7 @@
                     </div>
                 </div>
             </a-tab-pane>
-            <a-tab-pane key="2" tab="Văn bản đến tôi" force-render>
+            <a-tab-pane key="2" :tab="`Văn bản đến tôi (${documents_need_me.length})`" force-render>
                 <!-- Bảng văn bản cần tôi phê duyệt -->
                 <div class="row">
                     <div class="col-12">

@@ -11,6 +11,7 @@ window.axios = axios;
 // import './style.css'
 import App from './App.vue'
 import {
+    Affix,
     Avatar,
     Badge,
     Button,
@@ -69,6 +70,7 @@ app.use(pinia)
 app.use(router)
 
 // Ant Design Vue Components - Alphabetical Order
+app.use(Affix)
 app.use(Avatar)
 app.use(Badge)
 app.use(Button)

@@ -1,1 +1,0 @@
-import{u as e}from"./use-menu-PhBV_0w2.js";import{_ as s}from"./index-C78nIXCd.js";const n={setup(){e().onSelectedKeys(["admin-roles-permission"])}};function r(o,t,p,a,c,i){return" Đây là trang quyền hạn "}const m=s(n,[["render",r]]);export{m as default};

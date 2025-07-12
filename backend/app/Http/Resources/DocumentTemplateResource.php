@@ -18,7 +18,7 @@ class DocumentTemplateResource extends JsonResource
             'document_type_id' => $this->document_type_id,
             'downloaded' => $this->downloaded,
             'liked' => $this->liked,
-            'userHasLike' => $this->when(isset($this->userHasLike), $this->userHasLike, false),
+            'userHasLike' => $this->userHasLike,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'creator' => $this->when($this->creator, [

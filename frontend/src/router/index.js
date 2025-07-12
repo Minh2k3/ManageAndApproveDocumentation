@@ -16,7 +16,7 @@ const redirectRoot = [{
 const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve];
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory(''),
     routes,
 });
 
@@ -38,8 +38,11 @@ router.beforeEach(async (to, from, next) => {
             && to.path !== '/reset-password'
             && to.path !== '/retrieve'
             && to.path !== '/hoi-dong'
+            && to.path !== '/term'
         ) {
             return next('/dashboard');
+        } else {
+            return next();
         }
     }
 

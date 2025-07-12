@@ -17,34 +17,41 @@
                     <!-- Bộ lọc -->
                     <div class="col-12 col-md-8">
                         <div class="row g-2">
-                        <div class="col-6 col-md-3">
-                            <a-select
-                            v-model:value="status_id"
-                            show-search
-                            placeholder="Trạng thái"
-                            :options="documents_status"
-                            :filter-option="filterOption"
-                            allow-clear
-                            class="w-100"
-                            />
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <a-select
-                            v-model:value="type_id"
-                            show-search
-                            placeholder="Loại văn bản"
-                            :options="documents_type"
-                            :filter-option="filterOption"
-                            allow-clear
-                            class="w-100"
-                            />
-                        </div>
-                        <!-- Nút tạo -->
-                        <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
-                            <a-button type="primary" class="w-100 w-md-auto">
-                                <i class="fa-solid fa-filter "></i>
-                            </a-button>
-                        </div>
+                            <div class="col-6 col-md-3">
+                                <a-select
+                                v-model:value="status_id"
+                                show-search
+                                placeholder="Trạng thái"
+                                :options="documents_status"
+                                :filter-option="filterOption"
+                                allow-clear
+                                class="w-100"
+                                />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a-select
+                                v-model:value="type_id"
+                                show-search
+                                placeholder="Loại văn bản"
+                                :options="documents_type"
+                                :filter-option="filterOption"
+                                allow-clear
+                                class="w-100"
+                                />
+                            </div>
+                            <!-- Nút lọc -->
+                            <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
+                                <a-button type="primary" class="w-100 w-md-auto">
+                                    <i class="fa-solid fa-filter "></i>
+                                </a-button>
+                            </div>
+
+                            <!-- Nút làm mới -->
+                            <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
+                                <a-button type="default" class="w-100 w-md-auto" @click="onRefresh">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </a-button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -243,21 +250,25 @@
         
         <template #footer>
             <div class="row d-flex justify-content-end g-2">
-                <a-button v-if="!selectedTemplate.userHasLike"
-                    type="primary" 
-                    class="col-3 bg-success"
-                    @click="handleLikeTemplate(selectedTemplate)"
-                >
-                    <i class="fas fa-heart me-2"></i>Thích
-                </a-button>
-                <a-button v-else
-                    type="primary" 
-                    class="col-3 bg-success"
-                    @click="handleUnikeTemplate(selectedTemplate)"
-                >
-                    <i class="fas fa-heart me-2"></i>Bỏ thích
-                    
-                </a-button>                
+                <div v-if="selectedTemplate.status === 'active'">
+                    <a-button v-if="!selectedTemplate.userHasLike"
+                        type="primary" 
+                        class="col-3"
+                        style="background-color: rgba(247, 82, 123, 0.3);"
+                        @click="handleLikeTemplate(selectedTemplate)"
+                    >
+                        <i class="fa-regular fa-heart me-2"></i>Thích
+                    </a-button>
+                    <a-button v-else
+                        type="primary" 
+                        class="col-3"
+                        style="background-color: rgba(247, 82, 123, 0.3); color: #f7527b;"
+                        @click="handleUnikeTemplate(selectedTemplate)"
+                    >
+                        <i class="fas fa-heart me-2"></i>Bỏ thích
+                        
+                    </a-button>   
+                </div>             
                 <a-button 
                     type="primary" 
                     class="col-3"
@@ -482,10 +493,10 @@ export default defineComponent({
             await documentStore.fetchDocumentTemplates();
             document_templates.value = documentStore.document_templates;
             // Chỉ lấy các văn bản có trạng thái 'active' hoặc là trạng thái 'pending' và mình là người tạo
-            document_templates.value = document_templates.value.filter(template => 
-                template.status === 'active' || 
-                template.creator.id === authStore.user.id
-            );
+            // document_templates.value = document_templates.value.filter(template => 
+            //     template.status === 'active' || 
+            //     template.creator.id === authStore.user.id
+            // );
 
             await documentStore.fetchDocumentTypes();
             document_types.value = documentStore.document_types;
@@ -583,6 +594,19 @@ export default defineComponent({
             }
         };
 
+        const sendNotificationToAdmins = async (notification) => {
+            try {
+                const response = await axiosInstance.post('/api/notifications/all-admins', notification);
+                if (response.status === 201) {
+                    console.log("Notification sent successfully:", response.data);
+                } else {
+                    console.error("Failed to send notification:", response);
+                }
+            } catch (error) {
+                console.error("Error sending notification:", error);
+            }
+        };
+
         const handleAddTemplate = async () => {
             try {
                 await formRef.value.validateFields();
@@ -608,9 +632,6 @@ export default defineComponent({
                 }
 
                 const fileObj = uploadData.file.originFileObj;
-                // console.log("File Object:", fileObj);
-                // console.log("Response Data:", response.data.document_template.id);
-                // return;
                 const newTemplateId = response.data.document_template.id;
                 const responseUpload = await handleUploadFile({
                     file: fileObj,
@@ -620,6 +641,14 @@ export default defineComponent({
                 if (responseUpload.status !== 200) {
                     throw new Error("Failed to upload file");
                 }
+
+                await sendNotificationToAdmins({
+                    notification_category_id: 1,
+                    from_user_id: authStore.user.id,
+                    title: "Mẫu văn bản mới",
+                    content: `Đề xuất mẫu văn bản "${newTemplate.name}".`,
+                });
+
                 message.success("Thêm mẫu văn bản thành công!");
                 document_templates.value.push(newTemplate);
                 formData.value = {
@@ -637,70 +666,6 @@ export default defineComponent({
             } finally {
                 loading.value = false;
             }
-        };
-
-        const sendNotification = async (notification) => {
-            try {
-                const response = await axiosInstance.post('/api/notifications', notification);
-                if (response.status === 201) {
-                    console.log("Notification sent successfully:", response.data);
-                } else {
-                    console.error("Failed to send notification:", response);
-                }
-            } catch (error) {
-                console.error("Error sending notification:", error);
-            }
-        };
-
-        const handleChangeStatus = async (record, action) => {
-            try {
-                loading.value = true;
-                const old_status = record.status;
-                const response = await axiosInstance.post(`/api/document-templates/${record.id}/change-status`, {
-                    status: action,
-                });
-
-                if (response.status === 200) {
-                    if (old_status === 'pending') {
-                        await sendNotification({
-                            notification_category_id: 1, 
-                            from_user_id: authStore.user.id,
-                            receiver_id: record.creator.id,
-                            title: `Mẫu văn bản "${record.name}" của bạn đã được chấp thuận`,
-                            content: `Mẫu văn bản "${record.name}" đã được chấp thuận và có thể sử dụng.`,
-                        });
-                        message.success(`Mẫu văn bản "${record.name}" đã được chấp thuận để sử dụng.`);
-                    } else if (action === 'active') {
-                        message.success(`Mẫu văn bản "${record.name}" đã có thể kích hoạt.`);
-                    } else if (action === 'inactive') {
-                        message.success(`Mẫu văn bản "${record.name}" đã tạm ngừng sử dụng.`);
-                    }
-                    // Cập nhật lại trạng thái mẫu văn bản trong danh sách
-                    const index = document_templates.value.findIndex(item => item.id === record.id);
-                    if (index !== -1) {
-                        document_templates.value[index].status = action;
-                    }
-                } else {
-                    message.error('Đã xảy ra lỗi khi thay đổi trạng thái mẫu văn bản.');
-                }
-            } catch (error) {
-                console.error('Error changing status:', error);
-                message.error('Không thể thay đổi trạng thái mẫu văn bản. Vui lòng thử lại sau.');
-            } finally {
-                loading.value = false;
-            }
-        };
-
-        const showConfirmActive = (record) => {
-            // Hiển thị modal xác nhận kích hoạt mẫu văn bản
-            console.log("Showing confirm active for:", record);
-            handleChangeStatus(record, 'active');
-        };
-
-        const showConfirmInactive = (record) => {
-            // Hiển thị modal xác nhận tạm ngừng mẫu văn bản
-            console.log("Showing confirm inactive for:", record);
-            handleChangeStatus(record, 'inactive');
         };
 
         const detailModalVisible = ref(false);
@@ -812,25 +777,6 @@ export default defineComponent({
             }
         };
 
-        const downloadFile = async (url) => {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Không thể tải file');
-                const blob = await response.blob();
-                const fileUrl = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = fileUrl;
-                link.download = 'document.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(fileUrl);
-            } catch (err) {
-                console.error('Download error:', err);
-                message.error('Không thể tải file. Vui lòng thử lại sau.');
-            }
-        }
-
         const randomAvatar = (id) => {
             if (id > 100 || id == null) {
                 return `https://avatar.iran.liara.run/public`;
@@ -838,18 +784,10 @@ export default defineComponent({
             return `https://avatar.iran.liara.run/public/${id}`;
         };
 
-
         const getAvatarUrl = (avatar, id) => {
             if (!avatar) return randomAvatar(id);
             return `${API_BASE_URL}/images/avatars/${avatar}`
         }        
-
-        // using watch to download file when downloadUrl changes
-        // watch(downloadUrl, (newUrl) => {
-        //     if (newUrl) {
-        //         downloadFile(newUrl);
-        //     }
-        // });
 
         const handleLikeTemplate = async (template) => {
             try {
@@ -857,7 +795,7 @@ export default defineComponent({
                 const response = await axiosInstance.post(`/api/document-templates/${template.id}/like`);
                 if (response.status === 200) {
                     template.liked += 1; // Tăng lượt thích
-
+                    template.userHasLike = true; // Đánh dấu đã thích
                     message.success('Đã thích mẫu văn bản này');
                 } else {
                     message.error('Không thể thích mẫu văn bản này');
@@ -876,6 +814,7 @@ export default defineComponent({
                 const response = await axiosInstance.post(`/api/document-templates/${template.id}/unlike`);
                 if (response.status === 200) {
                     template.liked -= 1; // Giảm lượt thích
+                    template.userHasLike = false; // Đánh dấu đã bỏ thích
                     message.success('Đã bỏ thích mẫu văn bản này');
                 } else {
                     message.error('Không thể bỏ thích mẫu văn bản này');
@@ -883,6 +822,25 @@ export default defineComponent({
             } catch (error) {
                 console.error('Error unliking template:', error);
                 message.error('Đã xảy ra lỗi khi bỏ thích mẫu văn bản');
+            } finally {
+                loading.value = false;
+            }
+        };
+
+        const onRefresh = async () => {
+            loading.value = true;
+            try {
+                await documentStore.fetchDocumentTemplates(true);
+                document_templates.value = documentStore.document_templates;
+                // Chỉ lấy các văn bản có trạng thái 'active' hoặc là trạng thái 'pending' và mình là người tạo
+                document_templates.value = document_templates.value.filter(template => 
+                    template.status === 'active' || 
+                    template.creator.id === authStore.user.id
+                );
+                message.success("Đã làm mới danh sách mẫu văn bản");
+            } catch (error) {
+                console.error("Error refreshing templates:", error);
+                message.error("Không thể làm mới danh sách mẫu văn bản");
             } finally {
                 loading.value = false;
             }
@@ -977,6 +935,7 @@ export default defineComponent({
             getAvatarUrl,
             handleLikeTemplate,
             handleUnikeTemplate,
+            onRefresh,
         };
     },
 });

@@ -306,7 +306,13 @@
           </a-select>
         </a-form-item>
         <a-form-item label="Trạng thái" name="status">
-          <a-select v-model:value="roleForm.status">
+          <a-select v-model:value="roleForm.status"
+            :dropdown-style="{ 
+                position: 'fixed',
+                zIndex: 10000,
+                background: 'white',
+                border: '1px solid #ccc'
+            }" >
             <a-select-option value="active">Hoạt động</a-select-option>
             <a-select-option value="inactive">Ngừng hoạt động</a-select-option>
           </a-select>
@@ -335,7 +341,7 @@ export default {
     const registerStore = useRegisterStore();
 
     // Reactive data
-    const activeTab = ref('roles');
+    const activeTab = ref('departments');
     
     // Mock data cho phòng ban
     const departments = ref([

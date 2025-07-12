@@ -152,8 +152,8 @@
                             </div>
                             
                         </h6></li>
-                        <li><a class="dropdown-item" href="#">Thông báo</a></li>
-                        <li><a class="dropdown-item" href="#">Cài đặt cá nhân</a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="handleClickNotifications">Thông báo</a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="handleClickSettings">Cài đặt cá nhân</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" @click.prevent="handleLogout"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                     </ul>

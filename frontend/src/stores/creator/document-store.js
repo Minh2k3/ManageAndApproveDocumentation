@@ -65,6 +65,7 @@ export const useDocumentStore = defineStore("document", () => {
             if (response.data) {
                 console.log("response.data", response.data);
                 document_templates.value = response.data.document_templates;
+                isFetchedDocumentTemplates.value = true;
             }
         }
         catch (error) {

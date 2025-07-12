@@ -49,12 +49,12 @@
                 </div> -->
             </div>
 
-            <!-- Vai trò & Quyền hạn -->
+            <!-- Văn bản mẫu -->
             <div class="bg-light col-lg col-11 border border-1 border-dark rounded-3 p-2 mx-2 mt-lg-0 mt-3">
                 <div class="row mt-1">
                     <div class="col col-lg d-flex d-lg-flex">
                         <div class="d-flex align-items-center justify-content-start">
-                            <span class="fw-bold fs-5">Vai trò & Quyền hạn</span>
+                            <span class="fw-bold fs-5">Văn bản mẫu</span>
                         </div>
                         <div class="col-lg-3 col d-flex d-lg-flex align-items-center justify-content-end">
                             <i class="fa-solid fa-shield-halved fs-1" style="color: #B197FC;"></i>
@@ -63,7 +63,7 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-lg-12">
-                        <span class="fs-1 fw-bold ">6</span>
+                        <span class="fs-1 fw-bold ">{{ number_of_templates }}</span>
                     </div>
                 </div>
                 <!-- <div class="row mt-1">
@@ -87,7 +87,7 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-lg-12">
-                        <span class="fs-1 fw-bold ">10</span>
+                        <span class="fs-1 fw-bold ">{{ number_of_flow_templates }}</span>
                     </div>
                 </div>
                 <!-- <div class="row mt-1">
@@ -376,6 +376,8 @@ export default defineComponent({
         // Reactive data
         const users = ref([]);
         const documents = ref([]);
+        const templates = ref([]);
+        const flow_templates = ref([]);
         const notifications = ref([]);
         
         // Chart reactive data
@@ -417,6 +419,8 @@ export default defineComponent({
         // Computed properties
         const number_of_users = computed(() => users.value.length);
         const number_of_documents = computed(() => documents.value.length);
+        const number_of_templates = computed(() => templates.value.length);
+        const number_of_flow_templates = computed(() => flow_templates.value.length);
 
         const number_of_documents_by_status = computed(() => {
             const total = number_of_documents.value;
@@ -584,6 +588,8 @@ export default defineComponent({
                 // Fetch documents
                 await documentStore.fetchAll();
                 documents.value = documentStore.documents;
+                templates.value = documentStore.document_templates;
+                flow_templates.value = documentStore.document_flow_templates;
 
                 // Fetch notifications
                 await notificationStore.fetchNotifications(authStore.user.id);
