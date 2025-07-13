@@ -178,7 +178,7 @@
                                                 </a-tag>
                                             </template>
 
-                                            <template v-if="column.key === 'action'">
+                                            <template v-if="column.key === 'action'" class="action-column">
                                                 <a-space class="d-flex justify-content-center gap-3">
                                                     <a-tooltip>
                                                         <template #title>
@@ -193,7 +193,7 @@
                                                     </a-tooltip>
 
                                                     <a-tooltip
-                                                        v-if="record.status === 'rejected' && record.version === max_version || record.status === 'draft'"
+                                                        v-if="(record.status === 'rejected' || record.status === 'draft') && record.version === max_version"
                                                         >
                                                         <template #title>
                                                             <span class="">Tạo phiên bản mới</span>
@@ -544,20 +544,6 @@
                                                             class="bg-primary text-white"
                                                             >
                                                             <i class="bi bi-eye"></i>
-                                                        </a-button>
-                                                    </a-tooltip>
-
-                                                    <a-tooltip
-                                                        v-if="record.status === 'rejected' && record.version === max_version || record.status === 'draft'"
-                                                        >
-                                                        <template #title>
-                                                            <span class="">Tạo phiên bản mới</span>
-                                                        </template>
-                                                        <a-button
-                                                            @click="createNewVersion(record)"
-                                                            class="bg-success text-white"
-                                                        >
-                                                            <i class="bi bi-plus-circle"></i>
                                                         </a-button>
                                                     </a-tooltip>
                                                 </a-space>
@@ -984,7 +970,7 @@ export default defineComponent({
         const document_flow_steps = ref([]);
         const document_versions = shallowRef([]);
         const max_version = computed(() => {
-            return document_versions.value.length > 0 ? document_versions.value[0].version + 1 : 1;
+            return document_versions.value.length;
         });
         const show_certificate = ref(false);
         const certificate_file_path = ref('');
@@ -1299,7 +1285,14 @@ export default defineComponent({
 
         const customRow = (record) => {
             return {
-                onClick: () => {
+                onClick: (event) => {
+                    if (event.target.closest('.action-column') || 
+                        event.target.tagName.toLowerCase() === 'button' ||
+                        event.target.closest('button')) {
+                        // Nếu click vào button hoặc phần tử trong cột action, không làm gì cả
+                        return;
+                    }                    
+
                     changeVersion(record);
                 },
                 style: {

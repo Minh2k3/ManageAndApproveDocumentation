@@ -96,11 +96,11 @@ Route::post('/users/unban', [UserController::class, 'unbanUser'])
     ->name('users.unban');
 
 Route::get('/users/{user_id}/approver', [UserController::class, 'getApproverByUserId'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('users.getApproverByUserId');
 
 Route::get('/users/{user_id}/creator', [UserController::class, 'getCreatorByUserId'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('users.getCreatorByUserId');
 
 Route::post('/users/{user_id}/delete', [UserController::class, 'deleteUser'])
@@ -116,35 +116,35 @@ Route::post('/users/{user_id}/change-password', [HandlePasswordController::class
 // Document api
 // Document
 Route::get('/documents', [DocumentController::class, 'index'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->middleware('role:1')
     ->name('documents.index');
 
 Route::get('/documents/public', [DocumentController::class, 'getPublicApprovedDocuments'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('documents.getPublicApprovedDocuments');
 
 Route::get('/documents/{document_id}', [DocumentController::class, 'show'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('documents.show');
 
 Route::get('/creators/{id}/documents', [DocumentController::class, 'getDocumentsByCreator'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     // ->middleware('role:1,2')
     ->name('documents.getDocumentsByCreator');
 
 Route::get('/approvers/{id}/documents', [DocumentController::class, 'getDocumentsByApprover'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     // ->middleware('role:1,2,3')
     ->name('documents.getDocumentsByApprover');
 
 Route::get('/document/{id}/fm', [DocumentController::class, 'getDocumentOfMeById'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     // ->middleware('role:2,3')
     ->name('documents.getDocumentOfMeById');
 
 Route::get('/document/{id}/nm', [DocumentController::class, 'getDocumentNeedMeById'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     // ->middleware('role:3')
     ->name('documents.getDocumentNeedMeById');
     
@@ -179,7 +179,7 @@ Route::post('/documents/{document_id}/comments', [DocumentCommentController::cla
     ->name('documents.storeComment');
 
 Route::get('documents/{id}/versions', [DocumentController::class, 'getVersionsByDocumentId'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('documents.getVersionsByDocumentId');
 
 Route::post('documents/sign-document', [CertificateController::class, 'signDocument'])
@@ -192,11 +192,11 @@ Route::get('/document-flows', [DocumentFlowController::class, 'index'])
     ->name('document-flows.index');
 
 Route::get('/document-flows/{documentFlow}', [DocumentFlowController::class, 'show'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flows.show');
 
 Route::get('/document-flows/{id}/steps', [DocumentFlowController::class, 'getStepsByDocumentFlow'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-flows.getStepsByDocumentFlow');
 
 Route::post('/document-flows-template', [DocumentFlowController::class, 'createFlowTemplate'])
@@ -222,11 +222,11 @@ Route::post('/document-steps/{document_flow_step_id}/reject', [DocumentFlowStepC
 
 // Document Type
 Route::get('/document-types', [DocumentTypeController::class, 'getActiveDocumentTypes'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-types.index');
 
 Route::get('/document-types/all', [DocumentTypeController::class, 'index'])    
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-types.getAllDocumentTypes');
 
 Route::post('/document-types', [DocumentTypeController::class, 'store'])
@@ -249,7 +249,7 @@ Route::get('/user/document-templates', [DocumentTemplateController::class, 'getA
     ->name('document-templates.getAllTemplatesUser');
 
 Route::get('/document-templates/{user_id}/liked', [DocumentTemplateController::class, 'getLikedTemplatesByUserId'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-templates.getLikedTemplatesByUserId');
 
 Route::post('/document-templates/{id}/like', [DocumentTemplateController::class, 'likeTemplate'])
@@ -269,11 +269,11 @@ Route::post('/document-templates/upload-file', [DocumentTemplateController::clas
     ->name('document-templates.uploadFile');
 
 Route::get('/document-templates/{id}', [DocumentTemplateController::class, 'show'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-templates.show');
 
 Route::get('/document-templates/{id}/download', [DocumentTemplateController::class, 'downloadTemplate'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-templates.downloadTemplate');    
 
 Route::post('/document-templates/{id}/change-status', [DocumentTemplateController::class, 'changeStatus'])
@@ -282,7 +282,7 @@ Route::post('/document-templates/{id}/change-status', [DocumentTemplateControlle
 
 // Document Version
 Route::get('/document-versions/{id}', [DocumentVersionController::class, 'show'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('document-versions.show');
 
 // Approver 

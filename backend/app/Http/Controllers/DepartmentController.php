@@ -22,6 +22,7 @@ class DepartmentController extends Controller
                 'id' => $department->id,
                 'label' => $department->name,
                 'name' => $department->name,
+                'can_approve' => $department->can_approve,
                 'description' => $department->description,
                 'group' => $department->group,
                 'status' => $department->status,
@@ -149,9 +150,90 @@ class DepartmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Department $department)
+    public function update($id, Request $request)
     {
-        //
+        // Validation rules
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:departments,name',
+            'description' => 'nullable|string|max:200',
+            'phone' => 'nullable|string|regex:/^[0-9]{10}$/',
+            'location' => 'nullable|string|max:255',
+            'image' => 'nullable|string', // Base64 or URL
+            'can_approve' => 'boolean',
+        ], [
+            'name.required' => 'Tên phòng ban là bắt buộc',
+            'name.unique' => 'Tên phòng ban đã tồn tại',
+            'phone.regex' => 'Số điện thoại phải có đúng 10 chữ số',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $data = $request->all();
+            
+            // Handle image upload if provided
+            if ($request->filled('image') && $this->isBase64($request->image)) {
+                $data['image'] = $this->saveBase64Image($request->image);
+            }
+
+            $group = $request->input('group', 'default'); // Default group if not provided
+            switch ($group) {
+                case 'faculty':
+                    $data['group'] = 'Khoa/TT';
+                    break;
+                case 'lcd':
+                    $data['group'] = 'LCĐ';
+                    break;
+                case 'lch':
+                    $data['group'] = 'LCH';
+                    break;
+                case 'unit':
+                    $data['group'] = 'Phòng/Ban';
+                    break;
+                case 'club':
+                    $data['group'] = 'CLB/Đội';
+                    break;
+                default:
+                    $data['group'] = 'Khác'; // Default group
+            }
+
+            // Find the department by ID
+            $department = Department::findOrFail($id);
+            if (!$department) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Phòng ban không tồn tại',
+                ], 404);
+            }
+
+            // Update the department
+            $department->name = $data['name'];
+            $department->description = $data['description'] ?? null;
+            $department->phone_number = $data['phone'] ?? null;
+            $department->location = $data['location'] ?? null;
+            $department->avatar = $data['image'] ?? $department->avatar; // Keep existing avatar if no new image provided
+            $department->can_approve = $data['can_approve'] ?? $department->can_approve; // Keep existing value if not provided
+            $department->group = $data['group'];
+            $department->updated_at = now();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật phòng ban thành công',
+                'id' => $department['id'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể cập nhật phòng ban',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

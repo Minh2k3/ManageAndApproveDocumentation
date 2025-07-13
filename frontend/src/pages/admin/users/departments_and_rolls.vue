@@ -80,7 +80,7 @@
 
       <!-- Tab Vai trò -->
       <a-tab-pane key="roles" tab="Quản lý Vai trò">
-        <div class="tab-content">
+        <div class="tab-content pt-0">
           <!-- Header actions -->
           <div class="header-actions">
             <a-input-search
@@ -138,7 +138,6 @@
     </a-tabs>
 
     <!-- Modal thêm/sửa phòng ban -->
-<!-- Modal thêm/sửa phòng ban -->
     <a-modal
       v-model:visible="departmentModalVisible"
       :title="departmentModalTitle"
@@ -328,6 +327,7 @@ import { message } from 'ant-design-vue';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useMenu } from '@/stores/use-menu.js';
 import {useRegisterStore} from '@/stores/use-register.js';
+import { useDepartmentStore } from '@/stores/admin/department-store';
 import axiosInstance from '@/lib/axios';
 
 export default {
@@ -339,6 +339,7 @@ export default {
   setup() {
     useMenu().onSelectedKeys(["admin-users-departments-and-rolls"]);
     const registerStore = useRegisterStore();
+    const departmentStore = useDepartmentStore();
 
     // Reactive data
     const activeTab = ref('departments');

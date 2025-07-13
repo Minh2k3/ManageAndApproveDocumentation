@@ -11,6 +11,7 @@ use App\Models\Notification;
 use App\Models\DocumentComment;
 use App\Models\ApprovalPermission;
 use App\Models\Department;
+use App\Models\RollAtDepartment;
 use App\Models\Approver;
 use App\Models\DocumentType;
 use Illuminate\Http\Request;
@@ -331,6 +332,11 @@ class DocumentFlowStepController extends Controller
     private function authorizeApproval($step)
     {
         $user = auth()->user();
+
+        $department = Department::find($step->department_id);
+        if (!$department || !$department->can_approve) {
+            return false;
+        }
         
         // Lấy thông tin document để biết document_type_id
         $document = Document::where('document_flow_id', $step->document_flow_id)->first();

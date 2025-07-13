@@ -46,6 +46,7 @@ class RegisterController extends Controller
                         'value' => $department->id,
                         'name' => $department->name,
                         'label' => $department->name,
+                        'can_approve' => $department->can_approve,
                         'description' => $department->description,
                         'status' => $department->status,
                         'group' => $department->group,
