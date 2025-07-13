@@ -630,6 +630,8 @@ export default defineComponent({
             // Computed
             number_of_users,
             number_of_documents,
+            number_of_templates,
+            number_of_flow_templates,
             new_registered_users,
             number_of_documents_by_status,
             new_notifications,

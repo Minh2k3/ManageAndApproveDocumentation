@@ -623,6 +623,9 @@ export default defineComponent({
             } catch (error) {
                 message.error('Có lỗi xảy ra khi gửi nhận xét');
                 console.error('Error sending comment:', error);
+            } finally {
+                loadingSendComment.value = false;
+                commentTextarea.value.focus();
             }
         };
 

@@ -1153,9 +1153,9 @@ export default defineComponent({
             try {
                 const id = parseInt(route.params.id);
                 await axios.post(`/api/documents/${id}/comments`, {
-                    creator_id: documentData.value.creator_id,
+                    // creator_id: documentData.value.creator_id,
                     comment: comment.value,
-                    document_flow_step_id: parseInt(documentData.value['document_flow_step_id']),
+                    // document_flow_step_id: parseInt(documentData.value['document_flow_step_id']),
                 });
                 message.success('Nhận xét gửi thành công');
 

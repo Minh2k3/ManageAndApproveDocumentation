@@ -39,7 +39,7 @@ class CreatePDFController extends Controller
             
             \Log::info("Document certificate created with code: " . $document_certificate->code);
             $new_file_path = $document_certificate->code . '.pdf';
-            $output_file_path = public_path('documents\\certificates\\' . $new_file_path);
+            $output_file_path = public_path('documents/certificates/' . $new_file_path);
             \Log::info("Output file path: " . $new_file_path);
             $this->insertCertificate($file_path, $output_file_path, $document_certificate->code);
             \Log::info("Certificate inserted into PDF: " . $output_file_path);
