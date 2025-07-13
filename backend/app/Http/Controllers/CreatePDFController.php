@@ -28,7 +28,7 @@ class CreatePDFController extends Controller
 
         $documentCertificate = DocumentCertificate::where('document_id', $document->id)->first();
         if (!$documentCertificate) {
-            $file_path = public_path('documents\\' . $document->file_path);
+            $file_path = public_path('documents/' . $document->file_path);
             $code_random = now()->timestamp;
             $document_certificate = DocumentCertificate::create([
                 'code' => $document->created_by . '-' . $code_random,
