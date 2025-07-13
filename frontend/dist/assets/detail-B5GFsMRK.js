@@ -1,0 +1,1 @@
+import{u as t}from"./use-menu-CupLMQve.js";import{_ as e}from"./index-u6IXU-LR.js";const s={setup(){t().onSelectedKeys(["admin-signatures-detail"])}};function r(n,a,o,c,i,p){return" Đây là trang chữ ký chi tiết "}const d=e(s,[["render",r]]);export{d as default};

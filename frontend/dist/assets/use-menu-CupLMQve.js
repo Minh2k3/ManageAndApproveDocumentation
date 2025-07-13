@@ -1,0 +1,1 @@
+import{a0 as s}from"./index-u6IXU-LR.js";const n=s("menuId",{state:()=>({selectedKeys:[],openKeys:[]}),actions:{onSelectedKeys(e){this.selectedKeys=e},onOpenKeys(e){this.openKeys=e}}});export{n as u};

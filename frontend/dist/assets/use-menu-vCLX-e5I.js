@@ -1,1 +1,0 @@
-import{a0 as s}from"./index-qeq2zkB_.js";const n=s("menuId",{state:()=>({selectedKeys:[],openKeys:[]}),actions:{onSelectedKeys(e){this.selectedKeys=e},onOpenKeys(e){this.openKeys=e}}});export{n as u};

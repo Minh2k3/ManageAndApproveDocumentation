@@ -184,6 +184,65 @@
             </div>
         </div>
     </a-card>
+
+    <a-modal
+        v-model:visible="showModalDetail"
+        title="Thông tin chi tiết người dùng"
+        width="80%"
+        :footer="null"
+        @cancel="showModalDetail = false"
+        :zIndex="10000"
+    >
+        <div v-if="currentUser">
+            <div class="row mb-3">
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Họ tên:</span>
+                    <span>{{ currentUser.name }}</span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Email:</span>
+                    <span>{{ currentUser.email }}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Vai trò:</span>
+                    <span>{{ currentUser.roll }}</span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Trạng thái:</span>
+                    <span>
+                        <a-tag v-if="currentUser.status === 'active'" color="green">Hoạt động</a-tag>
+                        <a-tag v-if="currentUser.status === 'inactive'" color="gray">Chưa kích hoạt mail</a-tag>
+                        <a-tag v-if="currentUser.status === 'pending'" color="orange">Chờ duyệt</a-tag>
+                        <a-tag v-if="currentUser.status === 'banned'" color="red">Bị cấm</a-tag>
+                    </span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Đơn vị:</span>
+                    <span>{{ currentUser.department }}</span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <span class="fw-bold">Số điện thoại:</span>
+                    <span>{{ currentUser.phone }}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <span class="fw-bold">Địa chỉ:</span>
+                    <span>{{ currentUser.address }}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <span class="fw-bold">Ngày đăng ký:</span>
+                    <span>{{ currentUser.created_at }}</span>
+                </div>
+            </div>
+        </div>
+    </a-modal>
 </template>
 
 <script>
@@ -282,30 +341,12 @@ export default defineComponent ({
             // console.log(users.value);
         });
 
-        // const getUsers = () => {
-        //     axios
-        //         .get('http://127.0.0.1:8000/api/users')
-        //         .then(function (response) {
-        //             users.value = response.data.active_users;
-        //             console.log(users.value);
-        //         })
-        //         .catch(function (error) {
-        //             // xử trí khi bị lỗi
-        //             console.log(error);
-        //             message.error("Có lỗi xảy ra trong quá trình lấy danh sách người dùng");
-        //         })
-        //         .finally(function () {
-        //             // luôn luôn được thực thi
-        //         });
-        //     };
-        
-        // getUsers();
-
         const showModalDetail = ref(false);
+        const currentUser = ref(null);
 
         const viewDetail = (user) => {
             showModalDetail.value = true;
-            
+            currentUser.value = user;
         };
 
         const showConfirm = (user, action) => {
@@ -358,6 +399,10 @@ export default defineComponent ({
         return {
             users,
             columns,
+
+            showModalDetail,
+            currentUser,
+
             viewDetail,
             showConfirm,
             showConfirmUnban,
