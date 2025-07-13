@@ -1,1 +1,0 @@
-import{u as t}from"./use-menu-CupLMQve.js";import{_ as e}from"./index-u6IXU-LR.js";const s={setup(){t().onSelectedKeys(["admin-documents-history"])}};function n(o,r,c,a,p,u){return" Đây là trang lịch sử văn bản "}const d=e(s,[["render",n]]);export{d as default};

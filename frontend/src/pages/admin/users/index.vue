@@ -17,6 +17,7 @@
                 <!-- Tìm kiếm -->
                 <div class="col-12 col-md-4 align-items-center">
                     <a-input-search
+                        v-model:value="search"
                         placeholder="Tìm kiếm"
                         allow-clear
                         enter-button
@@ -73,7 +74,18 @@
 
         <div class="row">
             <div class="col-12">
-                <a-table :dataSource="users" :columns="columns" :scroll="{ x: 576 }">
+                <a-table 
+                    :dataSource="filterData" 
+                    :columns="columns" 
+                    :scroll="{ x: 576 }"
+                    bordered
+                    :customRow="customRow"
+                    :locale="{
+                        triggerDesc: 'Nhấn để sắp xếp giảm dần',
+                        triggerAsc: 'Nhấn để sắp xếp tăng dần',
+                        cancelSort: 'Nhấn để hủy sắp xếp'
+                    }"
+                    >
                     <!-- <template #headerCell="{ column }">
                         <span class="fw-bold align-items-center">{{ column.title }}</span>
                     </template> -->
@@ -186,31 +198,32 @@
     </a-card>
 
     <a-modal
-        v-model:visible="showModalDetail"
+        v-model:open="showModalDetail"
         title="Thông tin chi tiết người dùng"
         width="80%"
-        :footer="null"
-        @cancel="showModalDetail = false"
         :zIndex="10000"
     >
+        <template #footer>
+            <a-button @click="showModalDetail = false">Đóng</a-button>
+        </template>
         <div v-if="currentUser">
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Họ tên:</span>
+                    <span class="fw-bold">Họ tên: </span>
                     <span>{{ currentUser.name }}</span>
                 </div>
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Email:</span>
+                    <span class="fw-bold">Email: </span>
                     <span>{{ currentUser.email }}</span>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Vai trò:</span>
+                    <span class="fw-bold">Vai trò: </span>
                     <span>{{ currentUser.roll }}</span>
                 </div>
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Trạng thái:</span>
+                    <span class="fw-bold">Trạng thái: </span>
                     <span>
                         <a-tag v-if="currentUser.status === 'active'" color="green">Hoạt động</a-tag>
                         <a-tag v-if="currentUser.status === 'inactive'" color="gray">Chưa kích hoạt mail</a-tag>
@@ -221,23 +234,23 @@
             </div>
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Đơn vị:</span>
-                    <span>{{ currentUser.department }}</span>
+                    <span class="fw-bold">Đơn vị: </span>
+                    <span>{{ currentUser.department_name }}</span>
                 </div>
                 <div class="col-12 col-md-6">
-                    <span class="fw-bold">Số điện thoại:</span>
-                    <span>{{ currentUser.phone }}</span>
+                    <span class="fw-bold">Số điện thoại: </span>
+                    <span>{{ currentUser.phone ?? "Không có" }}</span>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-12">
-                    <span class="fw-bold">Địa chỉ:</span>
-                    <span>{{ currentUser.address }}</span>
+                    <span class="fw-bold">Địa chỉ: </span>
+                    <span>{{ currentUser.address ?? "Không có" }}</span>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-12">
-                    <span class="fw-bold">Ngày đăng ký:</span>
+                    <span class="fw-bold">Ngày đăng ký: </span>
                     <span>{{ currentUser.created_at }}</span>
                 </div>
             </div>
@@ -262,13 +275,14 @@ import { useMenu } from "@/stores/use-menu.js";
 import axiosInstance from "@/lib/axios.js";
 import { useUserStore } from "@/stores/admin/user-store";
 import { useCertificateStore } from "@/stores/admin/certificate-store";
-
+import { useRegisterStore } from "@/stores/use-register";
 
 export default defineComponent ({
     setup() {
         useMenu().onSelectedKeys(["admin-users"]);
         const userStore = useUserStore();
         const certificateStore = useCertificateStore();
+        const registerStore = useRegisterStore();
         const router = useRouter();
         // useMenu().onOpenKeys(["admin"]);
 
@@ -314,9 +328,9 @@ export default defineComponent ({
                 width: 150,
                 sorter: (a, b) => {
                     const statusOrder = {
-                        'active': 1,
-                        'banned': 2,
-                        'pending': 3,
+                        'pending': 1,
+                        'active': 2,
+                        'banned': 3,
                         'inactive': 4
                     };
                     return statusOrder[a.status] - statusOrder[b.status];
@@ -334,12 +348,6 @@ export default defineComponent ({
                 }
             }
         ]
-
-        onMounted(async () => {
-            await userStore.fetchUsers();
-            users.value = userStore.users;
-            // console.log(users.value);
-        });
 
         const showModalDetail = ref(false);
         const currentUser = ref(null);
@@ -396,14 +404,92 @@ export default defineComponent ({
             });
         };
 
+        const search = ref('');
+        const status_filter = ref(null);
+        const role_filter = ref(null);
+        const department_filter = ref(null);
+
+        const filterOption = (input, option) => {
+            return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+        };
+
+        const users_status = computed(() => [
+            { label: 'Tất cả trạng thái', value: null },
+            { label: 'Hoạt động', value: 'active' },
+            { label: 'Chưa kích hoạt mail', value: 'inactive' },
+            { label: 'Chờ duyệt', value: 'pending' },
+            { label: 'Bị cấm', value: 'banned' },
+        ]);
+
+        const users_role = ref();
+        const users_department = ref();
+
+        const filterData = computed(() => {
+            let data = [...users.value];
+            if (search.value) {
+                const searchText = search.value.toLowerCase();
+                data = data.filter(user => 
+                    user.name.toLowerCase().includes(searchText) ||
+                    user.email.toLowerCase().includes(searchText) ||
+                    (user.phone && user.phone.includes(searchText))
+                );
+            }
+
+            if (role_filter.value) {
+                data = data.filter(user => user.role === role_filter.value);
+            }
+
+            if (status_filter.value) {
+                data = data.filter(user => user.status === status_filter.value);
+            }
+
+            if (department_filter.value) {
+                data = data.filter(user => user.department_id === department_filter.value);
+            }
+
+            return data;
+        });
+
+        const customRow = (record) => {
+            return {
+                onClick: () => {
+                    if (columns.find(col => col.key === 'action')) return;
+                    viewDetail(record);
+                },
+                style: {
+                    cursor: 'pointer'
+                }
+            };
+        };
+
+        onMounted(async () => {
+            await userStore.fetchUsers();
+            users.value = userStore.users;
+            
+            await registerStore.fetchRegisterForm();
+            users_department.value = registerStore.departments;
+            users_role.value = registerStore.rolls;
+        });
+
         return {
             users,
             columns,
 
+            filterData,
+            search,
+            status_filter,
+            users_status,
+            role_filter,
+            users_role,
+            department_filter,
+            users_department,
+            
             showModalDetail,
             currentUser,
-
+            
+            filterOption,
             viewDetail,
+            customRow,
             showConfirm,
             showConfirmUnban,
         };
