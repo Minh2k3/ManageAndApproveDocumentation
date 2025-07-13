@@ -30,7 +30,7 @@
                     <div class="row g-2">
                     <div class="col-6 col-md-4">
                         <a-select
-                        v-model:value="status_id"
+                        v-model:value="status_filter"
                         show-search
                         placeholder="Tất cả trạng thái"
                         :options="users_status"
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-6 col-md-4">
                         <a-select
-                        v-model:value="role_id"
+                        v-model:value="role_filter"
                         show-search
                         placeholder="Tất cả vai trò"
                         :options="users_role"
@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-6 col-md-3">
                         <a-select
-                        v-model:value="department_id"
+                        v-model:value="department_filter"
                         show-search
                         placeholder="Tất cả đơn vị"
                         :options="users_department"
@@ -62,8 +62,8 @@
                         />
                     </div>
                     <div class="col-6 col-md-1 d-flex align-items-center justify-content-end">
-                        <a-button type="primary" class="">
-                            <i class="fa-solid fa-filter "></i>
+                        <a-button type="primary" class="" @click="resetFilter">
+                            <i class="fas fa-repeat"></i>
                         </a-button>
                     </div>
                     </div>
@@ -220,7 +220,7 @@
             <div class="row mb-3">
                 <div class="col-12 col-md-6">
                     <span class="fw-bold">Vai trò: </span>
-                    <span>{{ currentUser.roll }}</span>
+                    <span>{{ currentUser.roll_at_department_name }}</span>
                 </div>
                 <div class="col-12 col-md-6">
                     <span class="fw-bold">Trạng thái: </span>
@@ -436,7 +436,7 @@ export default defineComponent ({
             }
 
             if (role_filter.value) {
-                data = data.filter(user => user.role === role_filter.value);
+                data = data.filter(user => user.roll_at_department_id === role_filter.value);
             }
 
             if (status_filter.value) {
@@ -460,6 +460,13 @@ export default defineComponent ({
                     cursor: 'pointer'
                 }
             };
+        };
+
+        const resetFilter = () => {
+            search.value = '';
+            status_filter.value = null;
+            role_filter.value = null;
+            department_filter.value = null;
         };
 
         onMounted(async () => {
@@ -488,6 +495,7 @@ export default defineComponent ({
             currentUser,
             
             filterOption,
+            resetFilter,
             viewDetail,
             customRow,
             showConfirm,

@@ -45,6 +45,8 @@ class UserController extends Controller
             ->select(
                 'users.id as id',
                 'users.name as name', 
+                'roll_at_departments.name as roll_at_department_name',
+                'roll_at_departments.id as roll_at_department_id',
                 \DB::raw("CONCAT(roll_at_departments.name, ' - ', departments.name) as roll"),
                 'users.email as email',
                 'users.status as status',
