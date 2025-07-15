@@ -8,7 +8,12 @@ const retrieve = [
         path: '/hoi-dong',
         name: 'hoidong',
         component: () => import('@/pages/dashboard/retrieve/hoidong.vue'),
-    }
+    },
+    {
+        path: '/testweb',
+        name: 'test',
+        component: () => import('@/pages/dashboard/retrieve/test.vue'),
+    },
 ];
 
 export default retrieve;

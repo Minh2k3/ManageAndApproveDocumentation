@@ -2,11 +2,14 @@
     <a-card title="" style="width: 100%">
         <h2 class="fw-bold mb-3">Quản Lý Văn Bản</h2>
         <div class="row my-3">
-            <div class="d-flex justify-content-end align-items-center">
-                <a-button type="primary" class="col-6 col-sm-4">
-                    <router-link to=documents/create class="text-decoration-none">
+            <div class="d-flex justify-content-end align-items-center gap-2">
+                <a-button type="primary" class="col col-xl-3">
+                    <router-link class="text-decoration-none" to=documents/create >
                         <i class="fa-solid fa-add me-2"></i>Tạo văn bản mới
                     </router-link>
+                </a-button>
+                <a-button type="primary" class="col col-xl-3" @click="reloadDocuments">
+                        <i class="fas fa-retweet me-2"></i>Tải lại văn bản
                 </a-button>
             </div>
         </div>
@@ -540,6 +543,12 @@ export default defineComponent({
 
         const VITE_API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+        const reloadDocuments = async () => {
+            await documentStore.fetchDocuments(user.id, true);
+            documents.value = documentStore.documents;
+            message.success('Đã tải lại danh sách văn bản');
+        };
+
         return {
             apiUrl: VITE_API_BASE_URL,
             documents_need_me,
@@ -554,6 +563,7 @@ export default defineComponent({
             showProcess,
             goToEditPage,
             goToDetailPage,
+            reloadDocuments,
 
         };
     },

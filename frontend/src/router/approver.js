@@ -55,6 +55,12 @@ const approver = [
                 name: "approver-documents-approve",
                 component: () => import('@/pages/approver/documents/approve.vue')
             },
+            // Quản lý Departments
+            {
+                path: "departments",
+                name: "approver-departments",
+                component: () => import('@/pages/approver/departments/index.vue')
+            },
 
             // Quản lý Signatures
             {

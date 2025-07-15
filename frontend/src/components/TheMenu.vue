@@ -276,6 +276,14 @@
 		<a-menu-item key="approver-settings">
 			<router-link class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
 				<span class="d-inline-flex align-items-center">
+					<BankOutlined class="me-2" />Đơn vị của tôi
+				</span>
+			</router-link>
+		</a-menu-item>
+
+		<a-menu-item key="approver-settings">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
+				<span class="d-inline-flex align-items-center">
 					<SettingOutlined class="me-2" />Cài đặt
 				</span>
 			</router-link>
@@ -302,6 +310,7 @@ import {
 	BranchesOutlined,
 	ExclamationCircleOutlined,
 	NotificationOutlined,
+	BankOutlined,
 	NotificationFilled,
 } from '@ant-design/icons-vue';
 
@@ -326,6 +335,7 @@ export default defineComponent({
 		BranchesOutlined,
 		ExclamationCircleOutlined,
 		NotificationOutlined,
+		BankOutlined,
 	},
 	setup() {
 		const store = useMenu();

@@ -111,6 +111,7 @@ class CustomAuthenticatedSessionController extends Controller
 
     public function user(Request $request)
     {
+        \Log::info('User details requested', ['user' => $request->user()]);
         return response()->json([
             'success' => true,
             'data' => $request->user()

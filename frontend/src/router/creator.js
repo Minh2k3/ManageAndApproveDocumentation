@@ -62,6 +62,13 @@ const creator = [
                 name: "creator-signatures",
                 component: () => import('@/pages/creator/signatures/index.vue')
             },
+
+            // Quản lý Departments
+            {
+                path: "departments",
+                name: "creator-departments",
+                component: () => import('@/pages/creator/departments/index.vue')
+            },
                 
         ]
     }

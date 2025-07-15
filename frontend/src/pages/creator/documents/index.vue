@@ -2,11 +2,14 @@
     <a-card title="" style="width: 100%">
         <h2 class="fw-bold mb-3">Quản Lý Văn Bản</h2>
         <div class="row my-3">
-            <div class="d-flex justify-content-end align-items-center">
-                <a-button type="primary" class="col-6 col-sm-4">
+            <div class="d-flex justify-content-end align-items-center gap-2">
+                <a-button type="primary" class="col col-xl-3">
                     <router-link class="text-decoration-none" to=documents/create >
-                        <i class="fa-solid fa-add  me-2"></i>Tạo văn bản mới
+                        <i class="fa-solid fa-add me-2"></i>Tạo văn bản mới
                     </router-link>
+                </a-button>
+                <a-button type="primary" class="col col-xl-3" @click="reloadDocuments">
+                        <i class="fas fa-retweet me-2"></i>Tải lại văn bản
                 </a-button>
             </div>
         </div>
@@ -373,6 +376,12 @@ export default defineComponent({
             return record.process + '/' + record.step_count + ' bước';
         }
 
+        const reloadDocuments = async () => {
+            await documentStore.fetchDocuments(user.id, true);
+            documents.value = documentStore.documents;
+            message.success('Đã tải lại danh sách văn bản');
+        };
+
         return {
             apiUrl,
             documents,
@@ -386,6 +395,7 @@ export default defineComponent({
             goToEditPage,
             goToDetailPage,
             showProcess,
+            reloadDocuments,
         };
     },
 });

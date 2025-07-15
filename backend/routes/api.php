@@ -308,6 +308,10 @@ Route::post('departments/upload-image', [DepartmentController::class, 'uploadFil
     ->middleware('auth:sanctum')
     ->name('departments.uploadFile');
 
+Route::get('/departments/{id}', [DepartmentController::class, 'getDepartmentUsers'])
+    // ->middleware('auth:sanctum')
+    ->name('departments.getDepartmentUsers');
+
 // Notification
 Route::get('/notifications/{user_id}', [NotificationController::class, 'getAllNotificationsByUserId'])
     ->middleware('auth:sanctum')

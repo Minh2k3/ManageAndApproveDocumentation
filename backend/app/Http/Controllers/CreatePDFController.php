@@ -117,6 +117,7 @@ class CreatePDFController extends Controller
         return response()->json([
             'message' => 'success',
             'certificate_path' => $fileName,
+            
         ]);
     }
 

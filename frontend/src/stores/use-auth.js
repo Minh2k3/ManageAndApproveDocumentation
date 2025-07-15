@@ -18,6 +18,7 @@ export const useAuth = defineStore('auth', {
         rememberToken: localStorage.getItem('remember_token') || null,
         role: null,
         roll: null,
+        department_id: null,
         isAuthenticated: false,
         isInitialized: false, // ✅ THÊM FLAG ĐỂ TRACK INITIALIZATION
     }),
@@ -141,6 +142,7 @@ export const useAuth = defineStore('auth', {
             this.rememberToken = null
             this.role = null
             this.roll = null
+            this.department_id = null
             this.isAuthenticated = false
             // ✅ KHÔNG RESET isInitialized ở đây để tránh loop
             
@@ -227,6 +229,8 @@ export const useAuth = defineStore('auth', {
                 this.roll = 'Admin';
             } else if (user.role_id === 2) {
                 this.role = 'creator';
+                this.roll = 'Creator';
+                this.department_id = user.department_id;
             } else if (user.role_id === 3) {
                 this.role = 'approver';
             }

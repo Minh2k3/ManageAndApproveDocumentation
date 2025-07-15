@@ -34,11 +34,11 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.isAuthenticated) {
         if (to.path !== '/login' 
             && to.path !== '/register' 
-            && to.path !== '/dashboard' 
             && to.path !== '/reset-password'
             && to.path !== '/retrieve'
             && to.path !== '/hoi-dong'
             && to.path !== '/term'
+            && to.path !== '/testweb'
         ) {
             return next('/dashboard');
         } else {
@@ -48,6 +48,7 @@ router.beforeEach(async (to, from, next) => {
 
     if ((to.path === '/login' 
         || to.path === '/register' 
+        || to.path === '/dashboard'
         || to.path === '/reset-password'
     ) && authStore.isAuthenticated) {
         if (authStore.user.role_id === 3) {
