@@ -40,8 +40,11 @@ class DocumentTypeController extends Controller
     {
         $documentTypes = DocumentType::where('is_active', true)
             ->select([
+                'id',
                 'id as value',
+                'name',
                 'name as label',
+                'description',
             ])
             ->get();
 

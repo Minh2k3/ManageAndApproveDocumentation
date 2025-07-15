@@ -202,6 +202,14 @@
 			</router-link>
 		</a-menu-item>
 
+		<a-menu-item key="creator-departments">
+			<router-link class="text-decoration-none" :to="{ name: 'creator-departments' }" title="Đơn vị">
+				<span class="d-inline-flex align-items-center">
+					<BankOutlined class="me-2" />Đơn vị của tôi
+				</span>
+			</router-link>
+		</a-menu-item>		
+
 		<a-menu-item key="creator-settings">
 			<router-link  class="text-decoration-none" :to="{ name: 'creator-settings' }" title="Cài đặt">
 				<span class="d-inline-flex align-items-center">
@@ -273,8 +281,8 @@
 			</router-link>
 		</a-menu-item>
 
-		<a-menu-item key="approver-settings">
-			<router-link class="text-decoration-none" :to="{ name: 'approver-settings' }" title="Cài đặt">
+		<a-menu-item key="approver-departments">
+			<router-link class="text-decoration-none" :to="{ name: 'approver-departments' }" title="Đơn vị">
 				<span class="d-inline-flex align-items-center">
 					<BankOutlined class="me-2" />Đơn vị của tôi
 				</span>

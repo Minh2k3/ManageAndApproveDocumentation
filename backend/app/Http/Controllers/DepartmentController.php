@@ -686,39 +686,61 @@ class DepartmentController extends Controller
         // Lấy thông tin đơn vị
         $department = Department::findOrFail($id);
         
-        // Lấy danh sách approvers trong đơn vị
-        $approvers = Approver::with(['user:id,name,email,phone,avatar,sex,created_at', 'rollAtDepartment:id,name,level'])
-            ->where('department_id', $id)
-            ->get();
+        // Lấy danh sách approvers trong đơn vị, kèm theo thông tin về quyền phê duyệt văn bản
+        $approvers = Approver::with([
+            'user:id,name,email,phone,avatar,status,sex,created_at', 
+            'rollAtDepartment:id,name,level',
+            'rollAtDepartment.documentTypes:id,name,description' // Lấy thông tin về loại văn bản mà vai trò này có quyền phê duyệt
+        ])
+        ->where('department_id', $id)
+        ->get();
             
         // Lấy danh sách creators trong đơn vị
-        $creators = Creator::with(['user:id,name,email,phone,avatar,sex,created_at', 'rollAtDepartment:id,name,level'])
-            ->where('department_id', $id)
-            ->get();
+        $creators = Creator::with([
+            'user:id,name,email,phone,avatar,status,sex,created_at', 
+            'rollAtDepartment:id,name,level'
+        ])
+        ->where('department_id', $id)
+        ->get();
             
         // Gộp danh sách người dùng và loại bỏ trùng lặp (nếu có)
         $usersList = [];
         $processedUserIds = [];
+        $headOfDeparment = $approvers->firstWhere('rollAtDepartment.level', 1);
         
         // Xử lý approvers
         foreach ($approvers as $approver) {
             if (!in_array($approver->user_id, $processedUserIds)) {
+                // Lấy danh sách loại văn bản mà approver có quyền phê duyệt
+                $documentTypes = [];
+                if ($approver->rollAtDepartment && $approver->rollAtDepartment->documentTypes) {
+                    $documentTypes = $approver->rollAtDepartment->documentTypes->map(function($documentType) {
+                        return [
+                            'id' => $documentType->id,
+                            'name' => $documentType->name,
+                            'description' => $documentType->description
+                        ];
+                    })->toArray();
+                }
+                
                 $userInfo = [
                     'id' => $approver->user_id,
                     'name' => $approver->user->name,
                     'email' => $approver->user->email,
                     'phone' => $approver->user->phone,
                     'avatar' => $approver->user->avatar,
+                    'status' => $approver->user->status,
                     'sex' => $approver->user->sex,
                     'created_at' => $approver->user->created_at,
-                    'role' => 'approver',
-                    'position' => [
+                    'can_approve' => true,
+                    'role' => [
                         'id' => $approver->rollAtDepartment->id,
                         'name' => $approver->rollAtDepartment->name,
                         'level' => $approver->rollAtDepartment->level,
                         'is_manager' => $approver->rollAtDepartment->level === 1 // level 1 là trưởng đơn vị
                     ],
-                    'full_role' => $approver->full_role
+                    'full_role' => $approver->full_role,
+                    'document_types' => $documentTypes // Thêm thông tin về loại văn bản có quyền phê duyệt
                 ];
                 
                 $usersList[] = $userInfo;
@@ -735,16 +757,18 @@ class DepartmentController extends Controller
                     'email' => $creator->user->email,
                     'phone' => $creator->user->phone,
                     'avatar' => $creator->user->avatar,
+                    'status' => $creator->user->status,
                     'sex' => $creator->user->sex,
                     'created_at' => $creator->user->created_at,
-                    'role' => 'creator',
-                    'position' => [
+                    'can_approve' => false,
+                    'role' => [
                         'id' => $creator->rollAtDepartment->id,
                         'name' => $creator->rollAtDepartment->name,
                         'level' => $creator->rollAtDepartment->level,
                         'is_manager' => $creator->rollAtDepartment->level === 1 // level 1 là trưởng đơn vị
                     ],
-                    'full_role' => $creator->full_role
+                    'full_role' => $creator->full_role,
+                    'document_types' => [] // Creator không có quyền phê duyệt văn bản
                 ];
                 
                 $usersList[] = $userInfo;
@@ -764,7 +788,11 @@ class DepartmentController extends Controller
             'position' => $department->position,
             'can_approve' => $department->can_approve,
             'created_at' => $department->created_at,
-            'updated_at' => $department->updated_at
+            'updated_at' => $department->updated_at,
+            'head_of_department' => $headOfDeparment ? [
+                'id' => $headOfDeparment->user_id,
+                'name' => $headOfDeparment->user->name
+            ] : null
         ];
         
         return response()->json([
@@ -772,5 +800,5 @@ class DepartmentController extends Controller
             'users' => $usersList,
             'total_users' => count($usersList)
         ])->setStatusCode(200, 'Department information and users retrieved successfully.');
-    }    
+    } 
 }

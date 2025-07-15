@@ -34,6 +34,7 @@ export const useDocumentStore = defineStore("document", () => {
                 console.log("response document types: ", response.data);
                 // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 document_types.value = response.data.document_types;
+                isFetchedDocumentTypes.value = true;
             }
         } catch (error) {
             console.error("Error fetching document types:", error);
@@ -50,6 +51,7 @@ export const useDocumentStore = defineStore("document", () => {
             if (response.data) {
                 console.log("response.data", response.data);
                 document_flow_templates.value = response.data.document_flow_templates;
+                isFetchedDocumentFlowTemplates.value = true;
             }
         }
         catch (error) {

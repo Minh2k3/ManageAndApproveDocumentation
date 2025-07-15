@@ -6,33 +6,68 @@ export const useDepartmentStore = defineStore("department", () => {
     // State
     const departments = ref([]);
     const departments_can_approve = ref([]);
+    const my_department = ref([]);
+    const isFetchedDepartments = ref(false);
+    const isFetchedDepartmentsCanApprove = ref(false);
+    const isFetchedMyDepartment = ref(false);
 
     // Actions
-    async function fetchDepartments() {
+    async function fetchDepartments(force = false) {
+        // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
+        if (isFetchedDepartments.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("/api/departments");
             if (response.data) {
                 // console.log("response department: ", response.data);
                 // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 departments.value = response.data.departments;
+                isFetchedDepartments.value = true;
             }
         } catch (error) {
             console.error("Error fetching department:", error);
         }
     }
 
-    async function fetchDepartmentsCanApprove() {
+    async function fetchDepartmentsCanApprove(force = false) {
+        // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
+        if (isFetchedDepartmentsCanApprove.value && !force) {
+            return;
+        }
+
         try {
             const response = await axiosInstance.get("/api/departments/can_approve");
             if (response.data) {
                 console.log("response department can approve: ", response.data);
                 // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 departments_can_approve.value = response.data.departments;
+                isFetchedDepartmentsCanApprove.value = true;
             }
         } catch (error) {
             console.error("Error fetching department can approve:", error);
         }
     } 
+
+    async function fetchMyDepartment($id, force = false) {
+        // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
+        if (isFetchedMyDepartment.value && !force) {
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.get(`/api/departments/${$id}`);
+            if (response.data) {
+                console.log("response my department: ", response.data);
+                // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
+                my_department.value = response.data;
+                isFetchedMyDepartment.value = true;
+            }
+        } catch (error) {
+            console.error("Error fetching my department:", error);
+        }
+    }
 
     return {
         departments,
@@ -40,5 +75,8 @@ export const useDepartmentStore = defineStore("department", () => {
 
         departments_can_approve,
         fetchDepartmentsCanApprove,
+
+        my_department,
+        fetchMyDepartment,
     };
 });

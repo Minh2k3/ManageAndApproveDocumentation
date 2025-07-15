@@ -229,10 +229,10 @@ export const useAuth = defineStore('auth', {
                 this.roll = 'Admin';
             } else if (user.role_id === 2) {
                 this.role = 'creator';
-                this.roll = 'Creator';
-                this.department_id = user.department_id;
+                this.department_id = user.department?.id;
             } else if (user.role_id === 3) {
                 this.role = 'approver';
+                this.department_id = user.department?.id;
             }
         },
 

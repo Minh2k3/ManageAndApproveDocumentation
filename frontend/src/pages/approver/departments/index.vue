@@ -18,7 +18,6 @@
               <h5><i class="fa-solid fa-info-circle me-2"></i>Thông tin đơn vị</h5>
               <div class="mt-3">
                 <p><strong>Tên đơn vị:</strong> {{ departmentInfo.name }}</p>
-                <p><strong>Mã đơn vị:</strong> {{ departmentInfo.code }}</p>
                 <p><strong>Trưởng đơn vị:</strong> {{ departmentInfo.head?.name || 'Chưa có' }}</p>
                 <p><strong>Số lượng thành viên:</strong> {{ departmentInfo.memberCount }}</p>
               </div>
@@ -29,7 +28,14 @@
               <h5><i class="fa-solid fa-user me-2"></i>Vai trò của tôi</h5>
               <div class="mt-3">
                 <p><strong>Vai trò: </strong>{{ userRoleInDepartment.name }}</p>
-                <p><strong>Quyền hạn:</strong> {{ userRoleInDepartment.permissions }}</p>
+                <div>
+                    <p><strong>Quyền hạn duyệt các loại văn bản:</strong></p>
+                    <ul>
+                      <li v-for="permission in userRoleInDepartment.permissions" :key="permission">
+                        {{ permission }}
+                      </li>
+                    </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -224,15 +230,18 @@ import { defineComponent, ref, reactive, computed, onMounted, watch } from 'vue'
 import { message } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
 import { useDepartmentStore } from '@/stores/approver/department-store';
+import { useDocumentStore } from '@/stores/approver/document-store';
+import { ssrExportAllKey } from 'vite/module-runner';
 export default defineComponent({
   name: 'MyDepartment',
   
   setup() {
     useMenu().onSelectedKeys(["approver-departments"]);
     const authStore = useAuth();
-    const departmentStore = useDepartmentStore();
+    const user = authStore.user;
 
-    const department = ref();
+    const departmentStore = useDepartmentStore();
+    const documentStore = useDocumentStore();
 
     // Department data
     const departmentInfo = ref({
@@ -361,30 +370,6 @@ export default defineComponent({
         hasApprovalPermission: false,
         approvalDocumentTypes: [],
       },
-      {
-        id: 4,
-        name: 'Phạm Thị D',
-        email: 'phamthid@example.com',
-        avatar: null,
-        role: { id: 10, name: 'Sinh viên', level: 10 },
-        status: 'inactive',
-        created_at: '2025-01-05',
-        documentCount: 5,
-        hasApprovalPermission: false,
-        approvalDocumentTypes: [],
-      },
-      {
-        id: 5,
-        name: 'Hoàng Văn E',
-        email: 'hoangvane@example.com',
-        avatar: null,
-        role: { id: 10, name: 'Sinh viên', level: 10 },
-        status: 'pending',
-        created_at: '2025-06-01',
-        documentCount: 0,
-        hasApprovalPermission: false,
-        approvalDocumentTypes: [],
-      },
     ]);
 
     // Member detail modal
@@ -395,16 +380,7 @@ export default defineComponent({
     const saveLoading = ref(false);
 
     // Mock document types
-    const documentTypes = ref([
-      { id: 1, name: 'Văn bản hành chính', description: 'Các loại văn bản hành chính thông thường' },
-      { id: 2, name: 'Hợp đồng', description: 'Các loại hợp đồng với đối tác' },
-      { id: 3, name: 'Biên bản', description: 'Biên bản họp, biên bản nghiệm thu...' },
-      { id: 4, name: 'Tờ trình', description: 'Tờ trình các cấp' },
-      { id: 5, name: 'Quyết định', description: 'Quyết định bổ nhiệm, khen thưởng...' },
-      { id: 6, name: 'Công văn', description: 'Công văn đi và đến' },
-      { id: 7, name: 'Báo cáo', description: 'Báo cáo định kỳ và đột xuất' },
-      { id: 8, name: 'Kế hoạch', description: 'Kế hoạch công tác, kế hoạch dự án' },
-    ]);
+    const documentTypes = ref([]);
 
     // Filter members based on search and filters
     const filteredMembers = computed(() => {
@@ -572,12 +548,47 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => {
-      // Fetch department data, members, roles, etc.
-      // This would be API calls in a real application
-      const currentDate = '2025-07-14 16:48:21'; // From your info
-      console.log('Current date:', currentDate);
-      console.log('Current user:', 'Minh2k3'); // From your info
+    onMounted(async () => {
+        await documentStore.fetchDocumentTypes();
+        documentTypes.value = documentStore.documentTypes.map(docType => ({
+          id: docType.id,
+          name: docType.name,
+          description: docType.description
+        }));
+
+        await departmentStore.fetchMyDepartment(user.department_id);
+        const current_department = departmentStore.my_department;
+        members.value = current_department.users.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role: {
+            id: user.role.id,
+            name: user.role.name,
+            level: user.role.level,
+          },
+          status: user.status,
+          created_at: user.created_at,
+          hasApprovalPermission: user.can_approve,
+          approvalDocumentTypes: user.document_types
+        }));
+
+        const currentUser = members.value.find(m => m.id === user.id);
+
+        userRoleInDepartment.value = {
+            id: currentUser.role.id,
+            name: currentUser.role.name,
+            level: currentUser.role.level,
+            permissions: currentUser.approvalDocumentTypes.map(docType => docType.name)
+        };
+
+        departmentInfo.value = {
+            id: current_department.department.id,
+            name: current_department.department.name,
+            memberCount: current_department.total_users,
+            head: current_department.department.head_of_department,
+        };
     });
 
     return {
