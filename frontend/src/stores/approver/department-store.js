@@ -60,7 +60,6 @@ export const useDepartmentStore = defineStore("department", () => {
             const response = await axiosInstance.get(`/api/departments/${$id}`);
             if (response.data) {
                 console.log("response my department: ", response.data);
-                // Đảm bảo dữ liệu trả về có đúng định dạng { label, value }
                 my_department.value = response.data;
                 isFetchedMyDepartment.value = true;
             }

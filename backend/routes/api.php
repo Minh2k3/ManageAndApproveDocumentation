@@ -309,7 +309,7 @@ Route::post('departments/upload-image', [DepartmentController::class, 'uploadFil
     ->name('departments.uploadFile');
 
 Route::get('/departments/{id}', [DepartmentController::class, 'getDepartmentUsers'])
-    // ->middleware('auth:sanctum')
+    ->middleware('auth:sanctum')
     ->name('departments.getDepartmentUsers');
 
 // Notification

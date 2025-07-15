@@ -239,6 +239,9 @@ export default defineComponent({
     useMenu().onSelectedKeys(["approver-departments"]);
     const authStore = useAuth();
     const user = authStore.user;
+    console.log('Current user:', user);
+    const currentDepartmentId = user.approver ? user.approver.department_id : user.creator.department_id;
+    console.log('Current department ID:', currentDepartmentId);
 
     const departmentStore = useDepartmentStore();
     const documentStore = useDocumentStore();
@@ -556,39 +559,46 @@ export default defineComponent({
           description: docType.description
         }));
 
-        await departmentStore.fetchMyDepartment(user.department_id);
-        const current_department = departmentStore.my_department;
-        members.value = current_department.users.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-          role: {
-            id: user.role.id,
-            name: user.role.name,
-            level: user.role.level,
-          },
-          status: user.status,
-          created_at: user.created_at,
-          hasApprovalPermission: user.can_approve,
-          approvalDocumentTypes: user.document_types
-        }));
+        try {
+            await departmentStore.fetchMyDepartment(currentDepartmentId, true);
+            const current_department = departmentStore.my_department;
+            console.log('Current department:', current_department);
+            members.value = current_department.users.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar,
+                role: {
+                    id: user.role.id,
+                    name: user.role.name,
+                    level: user.role.level,
+                },
+                status: user.status,
+                created_at: user.created_at,
+                hasApprovalPermission: user.can_approve,
+                approvalDocumentTypes: user.document_types
+            }));
 
-        const currentUser = members.value.find(m => m.id === user.id);
+            const currentUser = members.value.find(m => m.id === user.id);
 
-        userRoleInDepartment.value = {
-            id: currentUser.role.id,
-            name: currentUser.role.name,
-            level: currentUser.role.level,
-            permissions: currentUser.approvalDocumentTypes.map(docType => docType.name)
-        };
+            userRoleInDepartment.value = {
+                id: currentUser.role.id,
+                name: currentUser.role.name,
+                level: currentUser.role.level,
+                permissions: currentUser.approvalDocumentTypes.map(docType => docType.name)
+            };
 
-        departmentInfo.value = {
-            id: current_department.department.id,
-            name: current_department.department.name,
-            memberCount: current_department.total_users,
-            head: current_department.department.head_of_department,
-        };
+            departmentInfo.value = {
+                id: current_department.department.id,
+                name: current_department.department.name,
+                memberCount: current_department.total_users,
+                head: current_department.department.head_of_department,
+            };
+        } catch (error) {
+            console.error('Error fetching department data:', error);
+            message.error('Không thể tải thông tin đơn vị. Vui lòng thử lại sau.');
+        }
+        
     });
 
     return {
