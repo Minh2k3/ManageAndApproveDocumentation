@@ -553,11 +553,7 @@ export default defineComponent({
 
     onMounted(async () => {
         await documentStore.fetchDocumentTypes();
-        documentTypes.value = documentStore.documentTypes.map(docType => ({
-          id: docType.id,
-          name: docType.name,
-          description: docType.description
-        }));
+        documentTypes.value = documentStore.documentTypes;
 
         try {
             await departmentStore.fetchMyDepartment(currentDepartmentId, true);
