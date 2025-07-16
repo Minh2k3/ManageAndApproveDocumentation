@@ -42,7 +42,7 @@ class GenerateApproverPermissions extends Command
         $this->info("Found {$totalApprovers} approvers to process");
         
         // Xóa dữ liệu cũ trong bảng ApproverHasPermission (tùy chọn)
-        DB::table('approver_has_permission')->truncate();
+        DB::table('approver_has_permissions')->truncate();
         $this->info('Cleared existing permissions');
         
         $bar = $this->output->createProgressBar($totalApprovers);
@@ -58,7 +58,7 @@ class GenerateApproverPermissions extends Command
                 // Nếu level = 1, cấp quyền cho tất cả loại văn bản
                 // Nếu level khác 1, chỉ cấp quyền cho document_type_id khác 1 và 2
                 if ($approver->level == 1 || ($documentTypeId != 1 && $documentTypeId != 2)) {
-                    DB::table('approver_has_permission')->insert([
+                    DB::table('approver_has_permissions')->insert([
                         'approver_id' => $approver->approver_id,
                         'document_type_id' => $documentTypeId,
                         'created_at' => now()
