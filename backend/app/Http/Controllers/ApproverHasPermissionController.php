@@ -22,10 +22,8 @@ class ApproverHasPermissionController extends Controller
         ])->setStatusCode(200, 'Approver permissions retrieved successfully.');
     }
 
-    public function update($approver_id, Request $request)
+    public function update($approver_id, $permissions)
     {
-        $permissions = $request->input('permissions', []);
-
         try {
             // Truncate existing permissions
             ApproverHasPermission::where('approver_id', $approver_id)->delete();
