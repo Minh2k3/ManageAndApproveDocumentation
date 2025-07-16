@@ -30,7 +30,7 @@ class GenerateApproverPermissions extends Command
         
         // Lấy danh sách tất cả approvers với level của họ
         $approvers = DB::table('approvers')
-            ->join('roll_at_departments', 'approvers.id', '=', 'roll_at_departments.approver_id')
+            ->join('roll_at_departments', 'approvers.roll_at_department_id', '=', 'roll_at_departments.id')
             ->select('approvers.id as approver_id', 'roll_at_departments.level')
             ->get();
         
