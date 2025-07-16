@@ -32,10 +32,10 @@ class ApproverHasPermissionController extends Controller
             foreach ($permissions as $permission) {
                 ApproverHasPermission::create([
                     'approver_id' => $approver_id,
-                    'document_type_id' => $permission['document_type_id'],
+                    'document_type_id' => $permission,
                     'created_at' => now()
                 ]);
-                \Log::info("Created permission for approver ID: $approver_id, Document Type ID: {$permission['document_type_id']}");
+                \Log::info("Created permission for approver ID: $approver_id, Document Type ID: {$permission}");
             }
         } catch (\Throwable $th) {
             \Log::error("Error updating permissions for approver ID: $approver_id. Error: " . $th->getMessage());
