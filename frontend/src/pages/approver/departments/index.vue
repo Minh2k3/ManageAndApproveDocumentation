@@ -487,8 +487,9 @@ export default defineComponent({
     const getStatusColor = (status) => {
       const colors = {
         'active': 'green',
-        'inactive': 'red',
-        'pending': 'gold'
+        'inactive': 'default',
+        'pending': 'gold',
+        'banned': 'red',
       };
       return colors[status] || 'default';
     };
@@ -497,7 +498,8 @@ export default defineComponent({
       const texts = {
         'active': 'Đang hoạt động',
         'inactive': 'Không hoạt động',
-        'pending': 'Chờ xác nhận'
+        'pending': 'Chờ xác nhận',
+        'banned': 'Đang bị cấm',
       };
       return texts[status] || status;
     };
@@ -559,21 +561,30 @@ export default defineComponent({
             await departmentStore.fetchMyDepartment(currentDepartmentId, true);
             const current_department = departmentStore.my_department;
             console.log('Current department:', current_department);
-            members.value = current_department.users.map(user => ({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar,
-                role: {
-                    id: user.role.id,
-                    name: user.role.name,
-                    level: user.role.level,
-                },
-                status: user.status,
-                created_at: user.created_at,
-                hasApprovalPermission: user.can_approve,
-                approvalDocumentTypes: user.document_types
-            }));
+
+            members.value = current_department.users.map(user => {
+                // Chuyển đổi mảng document_types thành mảng chỉ chứa các id
+                const approvalDocumentTypeIds = Array.isArray(user.document_types)
+                    ? user.document_types.map(docType => docType.id)
+                    : [];
+                
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    avatar: user.avatar,
+                    role: {
+                        id: user.role.id,
+                        name: user.role?.name,
+                        level: user.role?.level,
+                    },
+                    status: user.status,
+                    created_at: user.created_at,
+                    documentCount: 0,
+                    hasApprovalPermission: user.role === 'approver',
+                    approvalDocumentTypes: approvalDocumentTypeIds // Chỉ chứa các id
+                };
+            });
 
             const currentUser = members.value.find(m => m.id === user.id);
 
@@ -581,7 +592,10 @@ export default defineComponent({
                 id: currentUser.role.id,
                 name: currentUser.role.name,
                 level: currentUser.role.level,
-                permissions: currentUser.approvalDocumentTypes.map(docType => docType.name)
+                permissions: currentUser.approvalDocumentTypes.map(docTypeId => {
+                    const docType = documentTypes.value.find(dt => dt.id === docTypeId);
+                    return docType ? docType.name : 'Không rõ';
+                })
             };
 
             departmentInfo.value = {

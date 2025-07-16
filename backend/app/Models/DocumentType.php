@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Document;
 use App\Models\DocumentTemplate;
 use App\Models\ApprovalPermission;
+use App\Models\ApproverHasPermission;
+use App\Models\Approver;
 use App\Models\RollAtDepartment;
 
 class DocumentType extends Model
@@ -66,5 +68,26 @@ class DocumentType extends Model
             'document_type_id',
             'roll_at_department_id'
         );
+    }
+
+    /**
+     * Get the approvers associated with the document type through permissions.
+     */
+    public function approvers()
+    {
+        return $this->belongsToMany(
+            Approver::class,
+            'approver_has_permissions',
+            'document_type_id',
+            'approver_id'
+        );  
+    }
+
+    /**
+     * Get the permissions associated with the document type.
+     */
+    public function permissions()
+    {
+        return $this->hasMany(ApproverHasPermission::class, 'document_type_id');
     }
 }

@@ -690,7 +690,7 @@ class DepartmentController extends Controller
         $approvers = Approver::with([
             'user:id,name,email,phone,avatar,status,sex,created_at', 
             'rollAtDepartment:id,name,level',
-            'rollAtDepartment.documentTypes:id,name,description' // Lấy thông tin về loại văn bản mà vai trò này có quyền phê duyệt
+            'documentTypes:id,name,description' // Lấy thông tin về loại văn bản mà vai trò này có quyền phê duyệt
         ])
         ->where('department_id', $id)
         ->get();

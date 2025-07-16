@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Department;
-use App\Models\ApprovalPermission;
-// use App\Models\DocumentSignature;
 use App\Models\RollAtDepartment;
+use App\Models\ApproverHasPermission;
+use App\Models\DocumentType;
 use Carbon\Carbon;
 
 class Approver extends Model
@@ -54,20 +54,25 @@ class Approver extends Model
     }
 
     /**
-     * Get the approval permissions for the approver.
+     * Get the permissions associated with the approver.
      */
-    public function approvalPermissions()
+    public function permissions()
     {
-        return $this->hasMany(ApprovalPermission::class, 'user_id');
+        return $this->hasMany(ApproverHasPermission::class, 'approver_id');
     }
 
-    // /**
-    //  * Get the document signatures for the approver.
-    //  */
-    // public function documentSignatures()
-    // {
-    //     return $this->hasMany(DocumentSignature::class);
-    // }
+    /**
+     * Get the document types associated with the approver through permissions.
+     */
+    public function documentTypes()
+    {
+        return $this->belongsToMany(
+            DocumentType::class,
+            'approver_has_permissions',
+            'approver_id',
+            'document_type_id'
+        );
+    }
 
     /**
      * Get the roll at department that the approver belongs to.
