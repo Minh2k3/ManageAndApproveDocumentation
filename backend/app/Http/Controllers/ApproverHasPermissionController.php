@@ -27,6 +27,7 @@ class ApproverHasPermissionController extends Controller
         try {
             // Truncate existing permissions
             ApproverHasPermission::where('approver_id', $approver_id)->delete();
+            \Log::info("Deleted existing permissions for approver ID: $approver_id");
             // Create new permissions
             foreach ($permissions as $permission) {
                 ApproverHasPermission::create([
@@ -34,8 +35,10 @@ class ApproverHasPermissionController extends Controller
                     'document_type_id' => $permission['document_type_id'],
                     'created_at' => now()
                 ]);
+                \Log::info("Created permission for approver ID: $approver_id, Document Type ID: {$permission['document_type_id']}");
             }
         } catch (\Throwable $th) {
+            \Log::error("Error updating permissions for approver ID: $approver_id. Error: " . $th->getMessage());
             return response()->json(['message' => 'Error updating permissions: ' . $th->getMessage()], 500);
         }
 
