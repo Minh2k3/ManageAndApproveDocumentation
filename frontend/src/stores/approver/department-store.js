@@ -12,7 +12,8 @@ export const useDepartmentStore = defineStore("department", () => {
     const isFetchedMyDepartment = ref(false);
 
     // Actions
-    async function fetchDepartments(force = false) {
+    async function fetchDepartments(force = false) 
+    {
         // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
         if (isFetchedDepartments.value && !force) {
             return;
@@ -31,7 +32,8 @@ export const useDepartmentStore = defineStore("department", () => {
         }
     }
 
-    async function fetchDepartmentsCanApprove(force = false) {
+    async function fetchDepartmentsCanApprove(force = false) 
+    {
         // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
         if (isFetchedDepartmentsCanApprove.value && !force) {
             return;
@@ -50,7 +52,8 @@ export const useDepartmentStore = defineStore("department", () => {
         }
     } 
 
-    async function fetchMyDepartment($id, force = false) {
+    async function fetchMyDepartment($id, force = false) 
+    {
         // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
         if (isFetchedMyDepartment.value && !force) {
             return;
@@ -68,6 +71,20 @@ export const useDepartmentStore = defineStore("department", () => {
         }
     }
 
+    async function updateApproverPermissions(approverId, permissions) 
+    {
+        try {
+            const response = await axiosInstance.post(`/api/approver-has-permissions/${approverId}/update`, {
+                permissions: permissions,
+            });
+            if (response.data) {
+                console.log("Updated approver permissions:", response.data);
+            }
+        } catch (error) {
+            console.error("Error updating approver permissions:", error);
+        }
+    }
+
     return {
         departments,
         fetchDepartments,
@@ -77,5 +94,7 @@ export const useDepartmentStore = defineStore("department", () => {
 
         my_department,
         fetchMyDepartment,
+
+        updateApproverPermissions,
     };
 });

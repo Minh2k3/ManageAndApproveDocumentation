@@ -7,6 +7,8 @@ use App\Models\Approver;
 use App\Models\Creator;
 use App\Models\RoleAtDepartment;
 use App\Models\User;
+use App\Models\DocumentType;
+use App\Models\ApproverHasPermission;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -713,15 +715,18 @@ class DepartmentController extends Controller
             if (!in_array($approver->user_id, $processedUserIds)) {
                 // Lấy danh sách loại văn bản mà approver có quyền phê duyệt
                 $documentTypes = [];
-                if ($approver->rollAtDepartment && $approver->rollAtDepartment->documentTypes) {
-                    $documentTypes = $approver->rollAtDepartment->documentTypes->map(function($documentType) {
+                $approverPermissions = $approver->permissions()->with('documentType')->get();
+
+                if ($approverPermissions->count() > 0) {
+                    $documentTypes = $approverPermissions->map(function($permission) {
                         return [
-                            'id' => $documentType->id,
-                            'name' => $documentType->name,
-                            'description' => $documentType->description
+                            'id' => $permission->documentType->id,
+                            'name' => $permission->documentType->name,
+                            'description' => $permission->documentType->description
                         ];
                     })->toArray();
                 }
+
                 
                 $userInfo = [
                     'id' => $approver->user_id,
@@ -740,7 +745,8 @@ class DepartmentController extends Controller
                         'is_manager' => $approver->rollAtDepartment->level === 1 // level 1 là trưởng đơn vị
                     ],
                     'full_role' => $approver->full_role,
-                    'document_types' => $documentTypes // Thêm thông tin về loại văn bản có quyền phê duyệt
+                    'document_types' => $documentTypes, // Thêm thông tin về loại văn bản có quyền phê duyệt
+                    'role_id' => $approver->id, // Thêm ID của approver để dễ dàng quản lý
                 ];
                 
                 $usersList[] = $userInfo;
@@ -768,7 +774,8 @@ class DepartmentController extends Controller
                         'is_manager' => $creator->rollAtDepartment->level === 1 // level 1 là trưởng đơn vị
                     ],
                     'full_role' => $creator->full_role,
-                    'document_types' => [] // Creator không có quyền phê duyệt văn bản
+                    'document_types' => [], // Creator không có quyền phê duyệt văn bản
+                    'role_id' => $creator->id, // Thêm ID của creator để dễ dàng quản lý
                 ];
                 
                 $usersList[] = $userInfo;

@@ -32,7 +32,7 @@
                     <p><strong>Quyền hạn duyệt các loại văn bản:</strong></p>
                     <ul>
                       <li v-for="permission in userRoleInDepartment.permissions" :key="permission">
-                        {{ permission }}
+                        {{ getDocumentTypeName(permission) }}
                       </li>
                     </ul>
                 </div>
@@ -382,8 +382,7 @@ export default defineComponent({
     const selectedDocumentTypes = ref([]);
     const saveLoading = ref(false);
 
-    // Mock document types
-    const documentTypes = ref([]);
+    const documentTypes = ref();
 
     // Filter members based on search and filters
     const filteredMembers = computed(() => {
@@ -448,25 +447,34 @@ export default defineComponent({
       }
     };
 
-    const saveApprovalPermissions = () => {
+    const saveApprovalPermissions = async () => {
       saveLoading.value = true;
-      
-      // Simulate API call
-      setTimeout(() => {
-        saveLoading.value = false;
-        
-        // Update the member in the list
-        const index = members.value.findIndex(m => m.id === selectedMember.value.id);
-        if (index !== -1) {
-          members.value[index].hasApprovalPermission = hasApprovalPermission.value;
-          members.value[index].approvalDocumentTypes = [...selectedDocumentTypes.value];
+      console.log('Saving approval permissions for member:', selectedMember.value.role_id);
+      console.log('Selected document types:', selectedDocumentTypes.value);
+      // return;
+
+      try {
+        const response = await departmentStore.updateApproverPermissions(
+          selectedMember.value.role_id,
+          selectedDocumentTypes.value
+        );
+        if (response.success) {
+          message.success('Lưu quyền phê duyệt thành công!');
+          // Update the selected member's approval permissions
+          selectedMember.value.hasApprovalPermission = hasApprovalPermission.value;
+          selectedMember.value.approvalDocumentTypes = [...selectedDocumentTypes.value];
+          // Refresh the members list
+          members.value = members.value.map(member => 
+            member.id === selectedMember.value.id ? { ...selectedMember.value } : member
+          );
         }
-        
+      } catch (error) {
+        console.error('Error saving approval permissions:', error);
+        message.error('Lưu quyền phê duyệt thất bại. Vui lòng thử lại sau.');
+      } finally {
+        saveLoading.value = false;
         memberDetailModalVisible.value = false;
-        message.success(`Đã cập nhật quyền phê duyệt cho ${selectedMember.value.name}`);
-        
-        // In a real app, you would call an API to save the permissions
-      }, 1000);
+      }
     };
 
     const formatDate = (dateString) => {
@@ -549,13 +557,14 @@ export default defineComponent({
     watch(selectedMember, (newVal) => {
       if (newVal) {
         hasApprovalPermission.value = newVal.hasApprovalPermission || false;
-        selectedDocumentTypes.value = [...(newVal.approvalDocumentTypes || [])];
+        selectedDocumentTypes.value = newVal.approvalDocumentTypes;
       }
     });
 
     onMounted(async () => {
         await documentStore.fetchDocumentTypes();
-        documentTypes.value = documentStore.documentTypes;
+        documentTypes.value = documentStore.document_types;
+        console.log('documentTypes.value:', JSON.stringify(documentTypes.value, null, 2));
 
         try {
             await departmentStore.fetchMyDepartment(currentDepartmentId, true);
@@ -582,7 +591,8 @@ export default defineComponent({
                     created_at: user.created_at,
                     documentCount: 0,
                     hasApprovalPermission: user.can_approve,
-                    approvalDocumentTypes: approvalDocumentTypeIds // Chỉ chứa các id
+                    approvalDocumentTypes: approvalDocumentTypeIds, // Chỉ chứa các id
+                    role_id: user.role_id,
                 };
             });
 
@@ -592,10 +602,7 @@ export default defineComponent({
                 id: currentUser.role.id,
                 name: currentUser.role.name,
                 level: currentUser.role.level,
-                permissions: currentUser.approvalDocumentTypes.map(docTypeId => {
-                    const docType = documentTypes.value.find(dt => dt.id === docTypeId);
-                    return docType ? docType.name : 'Không rõ';
-                })
+                permissions: currentUser.approvalDocumentTypes
             };
 
             departmentInfo.value = {
@@ -608,8 +615,32 @@ export default defineComponent({
             console.error('Error fetching department data:', error);
             message.error('Không thể tải thông tin đơn vị. Vui lòng thử lại sau.');
         }
-        
     });
+
+    const getDocumentTypeName = (id) => {
+      if (!documentTypes.value) {
+        return 'Không xác định';
+      }
+      
+      if (Array.isArray(documentTypes.value)) {
+        for (let i = 0; i < documentTypes.value.length; i++) {
+          const type = documentTypes.value[i];
+          if (type && type.id === id) {
+            return type.name;
+          }
+        }
+      } else if (typeof documentTypes.value === 'object') {
+        // Kiểm tra từng key trong object
+        for (const key in documentTypes.value) {
+          const type = documentTypes.value[key];
+          if (type && type.id === id) {
+            return type.name;
+          }
+        }
+      }
+      
+      return 'Không xác định';
+    };
 
     return {
       departmentInfo,
@@ -642,6 +673,7 @@ export default defineComponent({
       getStatusText,
       getDefaultAvatar,
       getAvatarUrl,
+      getDocumentTypeName,
     };
   }
 });

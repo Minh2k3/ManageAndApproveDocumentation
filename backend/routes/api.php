@@ -35,6 +35,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CaCertificateController;
 use App\Http\Controllers\Api\PDFProxyController;
 use App\Http\Controllers\RollAtDepartmentController;
+use App\Http\Controllers\ApproverHasPermissionController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -406,6 +407,15 @@ Route::get('/document-certificates/{code}', [DocumentCertificateController::clas
 Route::get('/document-certificate-id/{code}', [DocumentCertificateController::class, 'findByDocumentId'])
     // ->middleware('auth:sanctum')
     ->name('document-certificates.findByDocumentId');
+
+// Approver Has Permission
+Route::get('/approver-has-permissions', [ApproverHasPermissionController::class, 'index'])
+    ->middleware('auth:sanctum')
+    ->name('approver-has-permissions.index');
+
+Route::post('/approver-has-permissions/{approver_id}/update', [ApproverHasPermissionController::class, 'update'])
+    ->middleware('auth:sanctum')
+    ->name('approver-has-permissions.update');
 
 // routes/api.php
 // Route::get('/pdf-proxy', function (Request $request) {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\ApproverHasPermissionController;
 
 use App\Mail\UserAccountEmail;
 use App\Models\User;
@@ -37,7 +38,8 @@ class UserController extends Controller
         
     }
 
-    public function getUsers() {
+    public function getUsers() 
+    {
         $approvers = \DB::table('approvers')
             ->join('users', 'approvers.user_id', '=', 'users.id')
             ->join('departments', 'approvers.department_id', '=', 'departments.id')
@@ -103,6 +105,11 @@ class UserController extends Controller
             $request->merge(['user_id' => $user->id]);
             $certificateController = new CertificateController();
             $certificateResponse = $certificateController->issueCertificate($request);
+
+            $approver = Approver::where('user_id', $user->id)->first();
+            $roll_at_department = RollAtDepartment::find($approver->roll_at_department_id);
+            $approverHasPermissionController = new ApproverHasPermissionController();
+            $approverHasPermissionController->create($approver->id, $roll_at_department->level);
 
             Mail::to($user->email)->send(new UserAccountEmail($user, 'verify_ok', ''));
             return response()->json(['message' => 'User activated successfully.']);
