@@ -211,6 +211,12 @@ export default defineComponent({
                 return;
             }
 
+            // if (!/^[^@]+@(e\.tlu\.edu\.vn|tlu\.edu\.vn)$/.test(email.value)) {
+            //     message.error("Vui lòng kiểm tra lại email");
+            //     validateFrontend.value = false;
+            //     return;
+            // }
+
             validateForm.value = true;
             loading.value = true;
         }

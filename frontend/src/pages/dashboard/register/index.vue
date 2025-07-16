@@ -330,6 +330,18 @@ export default defineComponent({
                 validateFrontend.value = false;
                 return;
             }
+
+            if (!/^[^@]+@(e\.tlu\.edu\.vn|tlu\.edu\.vn)$/.test(email.value)) {
+                message.error("Email không hợp lệ. Vui lòng nhập email trường Đại học Thủy lợi cấp.");
+                validateFrontend.value = false;
+                return;
+            }
+
+            if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password.value)) {
+                message.error("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ cái và số.");
+                validateFrontend.value = false;
+                return;
+            }
             
             if (!ok.value) {
                 message.error("Vui lòng đồng ý với các điều khoản và chính sách của hệ thống!");

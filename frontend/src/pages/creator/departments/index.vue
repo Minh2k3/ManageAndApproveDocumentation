@@ -18,7 +18,6 @@
               <h5><i class="fa-solid fa-info-circle me-2"></i>Thông tin đơn vị</h5>
               <div class="mt-3">
                 <p><strong>Tên đơn vị:</strong> {{ departmentInfo.name }}</p>
-                <p><strong>Mã đơn vị:</strong> {{ departmentInfo.code }}</p>
                 <p><strong>Trưởng đơn vị:</strong> {{ departmentInfo.head?.name || 'Chưa có' }}</p>
                 <p><strong>Số lượng thành viên:</strong> {{ departmentInfo.memberCount }}</p>
               </div>
@@ -29,7 +28,14 @@
               <h5><i class="fa-solid fa-user me-2"></i>Vai trò của tôi</h5>
               <div class="mt-3">
                 <p><strong>Vai trò: </strong>{{ userRoleInDepartment.name }}</p>
-                <p><strong>Quyền hạn:</strong> {{ userRoleInDepartment.permissions }}</p>
+                <div>
+                    <p><strong>Quyền hạn duyệt các loại văn bản:</strong></p>
+                    <ul>
+                      <li v-for="permission in userRoleInDepartment.permissions" :key="permission">
+                        {{ getDocumentTypeName(permission) }}
+                      </li>
+                    </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -222,13 +228,23 @@
 import { useMenu } from '@/stores/use-menu.js';
 import { defineComponent, ref, reactive, computed, onMounted, watch } from 'vue';
 import { message } from 'ant-design-vue';
-
-
+import { useAuth } from '@/stores/use-auth.js';
+import { useDepartmentStore } from '@/stores/approver/department-store';
+import { useDocumentStore } from '@/stores/approver/document-store';
+import { ssrExportAllKey } from 'vite/module-runner';
 export default defineComponent({
   name: 'MyDepartment',
   
   setup() {
     useMenu().onSelectedKeys(["creator-departments"]);
+    const authStore = useAuth();
+    const user = authStore.user;
+    console.log('Current user:', user);
+    const currentDepartmentId = user.approver ? user.approver.department_id : user.creator.department_id;
+    console.log('Current department ID:', currentDepartmentId);
+
+    const departmentStore = useDepartmentStore();
+    const documentStore = useDocumentStore();
 
     // Department data
     const departmentInfo = ref({
@@ -357,30 +373,6 @@ export default defineComponent({
         hasApprovalPermission: false,
         approvalDocumentTypes: [],
       },
-      {
-        id: 4,
-        name: 'Phạm Thị D',
-        email: 'phamthid@example.com',
-        avatar: null,
-        role: { id: 10, name: 'Sinh viên', level: 10 },
-        status: 'inactive',
-        created_at: '2025-01-05',
-        documentCount: 5,
-        hasApprovalPermission: false,
-        approvalDocumentTypes: [],
-      },
-      {
-        id: 5,
-        name: 'Hoàng Văn E',
-        email: 'hoangvane@example.com',
-        avatar: null,
-        role: { id: 10, name: 'Sinh viên', level: 10 },
-        status: 'pending',
-        created_at: '2025-06-01',
-        documentCount: 0,
-        hasApprovalPermission: false,
-        approvalDocumentTypes: [],
-      },
     ]);
 
     // Member detail modal
@@ -390,17 +382,7 @@ export default defineComponent({
     const selectedDocumentTypes = ref([]);
     const saveLoading = ref(false);
 
-    // Mock document types
-    const documentTypes = ref([
-      { id: 1, name: 'Văn bản hành chính', description: 'Các loại văn bản hành chính thông thường' },
-      { id: 2, name: 'Hợp đồng', description: 'Các loại hợp đồng với đối tác' },
-      { id: 3, name: 'Biên bản', description: 'Biên bản họp, biên bản nghiệm thu...' },
-      { id: 4, name: 'Tờ trình', description: 'Tờ trình các cấp' },
-      { id: 5, name: 'Quyết định', description: 'Quyết định bổ nhiệm, khen thưởng...' },
-      { id: 6, name: 'Công văn', description: 'Công văn đi và đến' },
-      { id: 7, name: 'Báo cáo', description: 'Báo cáo định kỳ và đột xuất' },
-      { id: 8, name: 'Kế hoạch', description: 'Kế hoạch công tác, kế hoạch dự án' },
-    ]);
+    const documentTypes = ref();
 
     // Filter members based on search and filters
     const filteredMembers = computed(() => {
@@ -465,25 +447,34 @@ export default defineComponent({
       }
     };
 
-    const saveApprovalPermissions = () => {
+    const saveApprovalPermissions = async () => {
       saveLoading.value = true;
-      
-      // Simulate API call
-      setTimeout(() => {
-        saveLoading.value = false;
-        
-        // Update the member in the list
-        const index = members.value.findIndex(m => m.id === selectedMember.value.id);
-        if (index !== -1) {
-          members.value[index].hasApprovalPermission = hasApprovalPermission.value;
-          members.value[index].approvalDocumentTypes = [...selectedDocumentTypes.value];
+      console.log('Saving approval permissions for member:', selectedMember.value.role_id);
+      console.log('Selected document types:', selectedDocumentTypes.value);
+      // return;
+
+      try {
+        const response = await departmentStore.updateApproverPermissions(
+          selectedMember.value.role_id,
+          selectedDocumentTypes.value
+        );
+        if (response.success) {
+          message.success('Lưu quyền phê duyệt thành công!');
+          // Update the selected member's approval permissions
+          selectedMember.value.hasApprovalPermission = hasApprovalPermission.value;
+          selectedMember.value.approvalDocumentTypes = [...selectedDocumentTypes.value];
+          // Refresh the members list
+          members.value = members.value.map(member => 
+            member.id === selectedMember.value.id ? { ...selectedMember.value } : member
+          );
         }
-        
+      } catch (error) {
+        console.error('Error saving approval permissions:', error);
+        message.error('Lưu quyền phê duyệt thất bại. Vui lòng thử lại sau.');
+      } finally {
+        saveLoading.value = false;
         memberDetailModalVisible.value = false;
-        message.success(`Đã cập nhật quyền phê duyệt cho ${selectedMember.value.name}`);
-        
-        // In a real app, you would call an API to save the permissions
-      }, 1000);
+      }
     };
 
     const formatDate = (dateString) => {
@@ -504,8 +495,9 @@ export default defineComponent({
     const getStatusColor = (status) => {
       const colors = {
         'active': 'green',
-        'inactive': 'red',
-        'pending': 'gold'
+        'inactive': 'default',
+        'pending': 'gold',
+        'banned': 'red',
       };
       return colors[status] || 'default';
     };
@@ -514,7 +506,8 @@ export default defineComponent({
       const texts = {
         'active': 'Đang hoạt động',
         'inactive': 'Không hoạt động',
-        'pending': 'Chờ xác nhận'
+        'pending': 'Chờ xác nhận',
+        'banned': 'Đang bị cấm',
       };
       return texts[status] || status;
     };
@@ -564,17 +557,90 @@ export default defineComponent({
     watch(selectedMember, (newVal) => {
       if (newVal) {
         hasApprovalPermission.value = newVal.hasApprovalPermission || false;
-        selectedDocumentTypes.value = [...(newVal.approvalDocumentTypes || [])];
+        selectedDocumentTypes.value = newVal.approvalDocumentTypes;
       }
     });
 
-    onMounted(() => {
-      // Fetch department data, members, roles, etc.
-      // This would be API calls in a real application
-      const currentDate = '2025-07-14 16:48:21'; // From your info
-      console.log('Current date:', currentDate);
-      console.log('Current user:', 'Minh2k3'); // From your info
+    onMounted(async () => {
+        await documentStore.fetchDocumentTypes();
+        documentTypes.value = documentStore.document_types;
+        console.log('documentTypes.value:', JSON.stringify(documentTypes.value, null, 2));
+
+        try {
+            await departmentStore.fetchMyDepartment(currentDepartmentId, true);
+            const current_department = departmentStore.my_department;
+            console.log('Current department:', current_department);
+
+            members.value = current_department.users.map(user => {
+                // Chuyển đổi mảng document_types thành mảng chỉ chứa các id
+                const approvalDocumentTypeIds = Array.isArray(user.document_types)
+                    ? user.document_types.map(docType => docType.id)
+                    : [];
+                
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    avatar: user.avatar,
+                    role: {
+                        id: user.role.id,
+                        name: user.role?.name,
+                        level: user.role?.level,
+                    },
+                    status: user.status,
+                    created_at: user.created_at,
+                    documentCount: 0,
+                    hasApprovalPermission: user.can_approve,
+                    approvalDocumentTypes: approvalDocumentTypeIds, // Chỉ chứa các id
+                    role_id: user.role_id,
+                };
+            });
+
+            const currentUser = members.value.find(m => m.id === user.id);
+
+            userRoleInDepartment.value = {
+                id: currentUser.role.id,
+                name: currentUser.role.name,
+                level: currentUser.role.level,
+                permissions: currentUser.approvalDocumentTypes
+            };
+
+            departmentInfo.value = {
+                id: current_department.department.id,
+                name: current_department.department.name,
+                memberCount: current_department.total_users,
+                head: current_department.department.head_of_department,
+            };
+        } catch (error) {
+            console.error('Error fetching department data:', error);
+            message.error('Không thể tải thông tin đơn vị. Vui lòng thử lại sau.');
+        }
     });
+
+    const getDocumentTypeName = (id) => {
+      if (!documentTypes.value) {
+        return 'Không xác định';
+      }
+      
+      if (Array.isArray(documentTypes.value)) {
+        for (let i = 0; i < documentTypes.value.length; i++) {
+          const type = documentTypes.value[i];
+          if (type && type.id === id) {
+            return type.name;
+          }
+        }
+      } else if (typeof documentTypes.value === 'object') {
+        // Kiểm tra từng key trong object
+        for (const key in documentTypes.value) {
+          const type = documentTypes.value[key];
+          if (type && type.id === id) {
+            return type.name;
+          }
+        }
+      }
+      
+      return 'Không xác định';
+    };
 
     return {
       departmentInfo,
@@ -607,6 +673,7 @@ export default defineComponent({
       getStatusText,
       getDefaultAvatar,
       getAvatarUrl,
+      getDocumentTypeName,
     };
   }
 });

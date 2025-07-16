@@ -77,8 +77,8 @@ export const useDepartmentStore = defineStore("department", () => {
             const response = await axiosInstance.post(`/api/approver-has-permissions/${approverId}/update`, {
                 permissions: permissions,
             });
-            if (response.data) {
-                console.log("Updated approver permissions:", response.data);
+            if (response.data.success) {
+                return response.data;
             }
         } catch (error) {
             console.error("Error updating approver permissions:", error);
