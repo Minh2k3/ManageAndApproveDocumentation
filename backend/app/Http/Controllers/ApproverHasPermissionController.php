@@ -44,6 +44,7 @@ class ApproverHasPermissionController extends Controller
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Permissions updated successfully',
         ])->setStatusCode(200, 'Permissions updated successfully.');
     }
