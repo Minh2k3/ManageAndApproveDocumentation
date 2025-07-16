@@ -581,7 +581,7 @@ export default defineComponent({
                     status: user.status,
                     created_at: user.created_at,
                     documentCount: 0,
-                    hasApprovalPermission: user.role === 'approver',
+                    hasApprovalPermission: user.can_approve,
                     approvalDocumentTypes: approvalDocumentTypeIds // Chỉ chứa các id
                 };
             });
