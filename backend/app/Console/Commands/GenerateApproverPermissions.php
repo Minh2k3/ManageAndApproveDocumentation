@@ -30,8 +30,8 @@ class GenerateApproverPermissions extends Command
         
         // Lấy danh sách tất cả approvers với level của họ
         $approvers = DB::table('approvers')
-            ->join('roll_at_department', 'approvers.id', '=', 'roll_at_department.approver_id')
-            ->select('approvers.id as approver_id', 'roll_at_department.level')
+            ->join('roll_at_departments', 'approvers.id', '=', 'roll_at_departments.approver_id')
+            ->select('approvers.id as approver_id', 'roll_at_departments.level')
             ->get();
         
         // Lấy tất cả document types
@@ -61,8 +61,7 @@ class GenerateApproverPermissions extends Command
                     DB::table('approver_has_permission')->insert([
                         'approver_id' => $approver->approver_id,
                         'document_type_id' => $documentTypeId,
-                        'created_at' => now(),
-                        'updated_at' => now()
+                        'created_at' => now()
                     ]);
                     
                     $permissionsCreated++;
