@@ -27,9 +27,10 @@ return [
         'localhost:5173', 
         'http://localhost:5173',
         '*',
+        'https://embed.tawk.to',
     ],
 
-    'allowed_origins_patterns' => ['*'],
+    'allowed_origins_patterns' => ['*', '#^https://embed\.tawk\.to#'],
 
     'allowed_headers' => ['*'],
 
