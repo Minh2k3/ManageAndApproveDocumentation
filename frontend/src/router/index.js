@@ -40,7 +40,7 @@ router.beforeEach(async (to, from, next) => {
             && to.path !== '/term'
             && to.path !== '/testweb'
         ) {
-            return next('/dashboard');
+            return next('/');
         } else {
             return next();
         }
@@ -62,15 +62,15 @@ router.beforeEach(async (to, from, next) => {
 
     const user = authStore.user;
     if (to.path.startsWith('/admin') && user.role_id !== 1) {
-        return next('/login');
+        return next('/');
     }
 
     if (to.path.startsWith('/creator') && user.role_id !== 2) {
-        return next('/login');
+        return next('/');
     }
 
     if (to.path.startsWith('/approver') && user.role_id !== 3) {
-        return next('/login');
+        return next('/');
     }
 
     next();

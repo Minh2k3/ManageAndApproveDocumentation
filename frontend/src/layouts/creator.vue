@@ -94,7 +94,7 @@ export default {
             s1.async = true;
             s1.src='https://embed.tawk.to/686807d55894ea190b17cc55/1ivb5t6qh';
             s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
+            s1.setAttribute('crossorigin', 'anonymous');
 
             s0.parentNode.insertBefore(s1, s0);
         },

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Notification;
 use App\Models\DocumentComment;
 use App\Models\ApprovalPermission;
+use App\Models\ApproverHasPermission;
 use App\Models\Department;
 use App\Models\RollAtDepartment;
 use App\Models\Approver;
@@ -370,7 +371,7 @@ class DocumentFlowStepController extends Controller
         }
         
         // Kiểm tra quyền ký trong approval_permissions
-        $hasPermission = ApprovalPermission::where('roll_at_department_id', $approver->roll_at_department_id)
+        $hasPermission = ApproverHasPermission::where('approver_id', $approver->id)
             ->where('document_type_id', $document->document_type_id)
             ->where(function($query) {
                 $query->whereNull('ended_at')
