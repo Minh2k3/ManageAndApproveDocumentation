@@ -61,6 +61,7 @@
                                 :options="listDocumentTypes" 
                                 :filter-option="filterOption"
                                 :default-value="listDocumentTypes[0]?.value"
+                                @change="handleDocumentTypeChange"
                                 >
                             </a-select>
                         </div>
@@ -206,8 +207,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <a-tooltip 
-                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
-                                                    :visible="isChooseDocumentType === false"
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : null"
                                                 >
                                                     <a-select 
                                                         v-model:value="step.approver_id" 
@@ -264,8 +264,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <a-tooltip 
-                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
-                                                    :visible="isChooseDocumentType === false"
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : null"
                                                 >
                                                     <a-select 
                                                         v-model:value="step.approver_id" 
@@ -473,6 +472,7 @@ export default defineComponent({
         let listDocumentFlows = ref([]);
         let listApprovers = ref([]);
         let listDepartments = ref([]);
+        let listApproverHasPermissions = ref([]);
 
         const document_flow_id = ref(null);
         const document_description = ref('');
@@ -517,6 +517,9 @@ export default defineComponent({
                 console.log("Current Document Data: " + test['version']);
                 is_new_version.value = true;
             }
+
+            await departmentStore.fetchApproverHasPermissions();
+            listApproverHasPermissions.value = departmentStore.approver_has_permissions;
         });
 
         const listDepartmentsForNewFlow = computed(() => {
@@ -686,14 +689,59 @@ export default defineComponent({
         // Hàm lấy ra các người phê duyệt trong một đơn vị
         function getApproversByDepartment(departmentId) {
             if (!departmentId) return [];
-            const approver_of_department = ref(listApprovers.value.filter(item => item.department_id === departmentId));
-            return approver_of_department.value.map(item => ({ value: item.value, label: item.label }));
+
+            // Không dùng ref() cho biến tạm
+            let approver_of_department = listApprovers.value.filter(item => item.department_id === departmentId);
+            console.log("Approvers of department:", approver_of_department);
+
+            // Chỉ thực hiện lọc theo loại văn bản nếu document_type có giá trị
+            if (document_type && document_type.value) {
+                // Không dùng ref() cho biến tạm
+                const approver_ids = [];
+                
+                for (let i = 0; i < listApproverHasPermissions.value.length; i++) {
+                    const approver = listApproverHasPermissions.value[i];
+                    
+                    // Kiểm tra nếu người phê duyệt có document_types và là mảng
+                    if (approver.document_types && Array.isArray(approver.document_types)) {
+                        // Dùng some() để kiểm tra nhanh hơn thay vì vòng lặp for
+                        const hasPermission = approver.document_types.some(
+                            docType => docType.id === document_type.value
+                        );
+                        
+                        if (hasPermission) {
+                            approver_ids.push(approver.id);
+                        }
+                    }
+                }
+                
+                console.log("Approver IDs with permission:", approver_ids);
+
+                // Lọc lại approver_of_department chỉ giữ những người có id nằm trong approver_ids
+                approver_of_department = approver_of_department.filter(
+                    item => approver_ids.includes(item.value)
+                );
+            }
+
+            // Trả về danh sách người phê duyệt đã lọc
+            return approver_of_department.map(item => ({ 
+                value: item.value, 
+                label: item.label 
+            }));
         }
 
         // Hàm reset lại người phê duyệt khi chọn đơn vị
         function handleDepartmentChange(step) {
             step.approver_id = null;
             console.log("multichoice: " + step.multichoice);
+        }
+
+        function handleDocumentTypeChange() {
+            // Reset lại người phê duyệt khi thay đổi loại văn bản
+            current_flow_step.value.forEach(step => {
+                step.approver_id = null;
+            });
+            isChooseDocumentType.value = true; // Đặt lại trạng thái đã chọn loại văn bản
         }
 
         // Hàm linh tinh
@@ -1112,6 +1160,7 @@ export default defineComponent({
             filterOption,
             getApproversByDepartment,
             handleDepartmentChange,
+            handleDocumentTypeChange,
             createNewWorkflow,
             addStep,
             checkIfAfterHasSameStep,

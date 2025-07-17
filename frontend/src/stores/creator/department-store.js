@@ -5,11 +5,14 @@ import axiosInstance from "@/lib/axios.js";
 export const useDepartmentStore = defineStore("department", () => {
     // State
     const departments = ref([]);
-    const departments_can_approve = ref([]);
-    const my_department = ref([]);
     const isFetchedDepartments = ref(false);
+    const departments_can_approve = ref([]);
     const isFetchedDepartmentsCanApprove = ref(false);
+    const my_department = ref([]);
     const isFetchedMyDepartment = ref(false);
+    const approver_has_permissions = ref([]);
+    const isFetchedApproverHasPermissions = ref(false);
+
 
     // Actions
     async function fetchDepartments(force = false) 
@@ -83,7 +86,27 @@ export const useDepartmentStore = defineStore("department", () => {
         } catch (error) {
             console.error("Error updating approver permissions:", error);
         }
-    }    
+    }
+
+    async function fetchApproverHasPermissions(force = false)
+    {
+        // Kiểm tra nếu đã fetch và không cần force thì không gọi lại API
+        if (isFetchedApproverHasPermissions.value && !force) {
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.get("/api/approver-has-permissions");
+            if (response.data) {
+                console.log("response approver has permissions: ", response.data);
+                approver_has_permissions.value = response.data.approver_has_permissions;
+                isFetchedApproverHasPermissions.value = true;
+            }
+        } catch (error) {
+            console.error("Error fetching approver has permissions:", error);
+        }
+    }
+    
 
     return {
         departments,
@@ -95,6 +118,9 @@ export const useDepartmentStore = defineStore("department", () => {
         my_department,
         fetchMyDepartment,
 
-        updateApproverPermissions,        
+        updateApproverPermissions,
+
+        approver_has_permissions,
+        fetchApproverHasPermissions,
     };
 });
