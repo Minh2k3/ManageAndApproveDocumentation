@@ -49,8 +49,16 @@
                     <div class="col-sm-4">
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex">
-                            <a-select v-model:value="document_type" show-search placeholder="Loại" style="width: 100%"
-                                :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
+                            <a-select 
+                                v-model:value="document_type" 
+                                show-search 
+                                placeholder="Loại" 
+                                style="width: 100%"
+                                :options="listDocumentTypes" 
+                                :filter-option="filterOption"
+                                :default-value="listDocumentTypes[0]?.value"
+                                >
+                            </a-select>
                         </div>
 
                         <!-- Lỗi nằm dưới hàng mới -->
@@ -193,13 +201,19 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select 
-                                                    v-model:value="step.approver_id" 
-                                                    style="width: 100%"
-                                                    :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" 
-                                                    allowClear 
-                                                />
+                                                <a-tooltip 
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
+                                                    :visible="isChooseDocumentType === false"
+                                                >
+                                                    <a-select 
+                                                        v-model:value="step.approver_id" 
+                                                        style="width: 100%"
+                                                        :options="getApproversByDepartment(step.department_id)"
+                                                        placeholder="Chọn người duyệt" 
+                                                        allowClear 
+                                                        :disabled="step.department_id === null || isChooseDocumentType === false"
+                                                    />
+                                                </a-tooltip>
                                             </div>
                                         </div>
                                     </div>
@@ -245,14 +259,19 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select 
-                                                    v-model:value="step.approver_id" 
-                                                    style="width: 100%"
-                                                    :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" 
-                                                    allowClear 
-                                                    :disabled="step.department_id === null"
-                                                />
+                                                <a-tooltip 
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
+                                                    :visible="isChooseDocumentType === false"
+                                                >
+                                                    <a-select 
+                                                        v-model:value="step.approver_id" 
+                                                        style="width: 100%"
+                                                        :options="getApproversByDepartment(step.department_id)"
+                                                        placeholder="Chọn người duyệt" 
+                                                        allowClear 
+                                                        :disabled="step.department_id === null || isChooseDocumentType === false"
+                                                    />
+                                                </a-tooltip>
                                             </div>
                                         </div>
                                     </div>
@@ -391,8 +410,8 @@ import { message, Modal } from 'ant-design-vue';
 import axiosInstance from '@/lib/axios.js';
 
 import { useMenu } from '@/stores/use-menu.js';
-import { useDocumentStore } from '@/stores/creator/document-store.js';
-import { useDepartmentStore } from '@/stores/creator/department-store.js';
+import { useDocumentStore } from '@/stores/approver/document-store.js';
+import { useDepartmentStore } from '@/stores/approver/department-store.js';
 import { useApproverStore } from '@/stores/approver/approver-store.js';
 import { useAuth } from '@/stores/use-auth.js';
 
@@ -432,6 +451,7 @@ export default defineComponent({
         let listDocumentFlows = ref([]);
         let listApprovers = ref([]);
         let listDepartments = ref([]);
+        let listApproverHasPermissions = ref([]);
         onMounted(async () => {
             await documentStore.fetchDocumentTypes();
             listDocumentTypes.value = documentStore.document_types;
@@ -447,6 +467,10 @@ export default defineComponent({
             listDepartments.value = departmentStore.departments_can_approve;
             // console.log("Departments: " + JSON.stringify(listDepartments.value, null, 2));
             // console.log("Departments: " + JSON.stringify(listDepartmentsForNewFlow.value, null, 2));
+
+            await departmentStore.fetchApproverHasPermissions();
+            listApproverHasPermissions.value = departmentStore.approver_has_permissions;
+
         });
 
         const listDepartmentsForNewFlow = computed(() => {
@@ -584,10 +608,30 @@ export default defineComponent({
             isUseTemplate.value = false;
         }
 
+        const isChooseDocumentType = ref(false);
+        watch(document_type, (newValue) => {
+            if (newValue !== null) {
+                isChooseDocumentType.value = true;
+            } else {
+                isChooseDocumentType.value = false;
+            }
+        });
+
         // Hàm lấy ra các người phê duyệt trong một đơn vị
         function getApproversByDepartment(departmentId) {
             if (!departmentId) return [];
+
             const approver_of_department = ref(listApprovers.value.filter(item => item.department_id === departmentId));
+
+            if (document_type.value !== null) {
+                // Lọc người phê duyệt theo quyền hạn của loại văn bản
+                return approver_of_department.value.filter(item => {
+                    return listApproverHasPermissions.value.some(permission => {
+                        return permission.approver_id === item.value && permission.document_type_id === document_type.value;
+                    });
+                }).map(item => ({ value: item.value, label: item.label }));
+            }
+
             return approver_of_department.value.map(item => ({ value: item.value, label: item.label }));
         }
 
@@ -898,6 +942,7 @@ export default defineComponent({
             listDocumentFlows,
 
             headers,
+            isChooseDocumentType,
 
             // Current Form Value
             document_flow_id,

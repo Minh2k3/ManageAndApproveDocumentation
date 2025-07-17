@@ -12,13 +12,13 @@ class ApproverHasPermissionController extends Controller
 {
     public function index() 
     {
-        $approverHasPermissions = ApproverHasPermission::with([
-            'approver.user:id,name,email,phone,avatar,status',
-            'documentType:id,name,description',
+        $approvers = Approver::with([
+            'user:id',
+            'documentTypes:id'
         ])->get();
 
         return response()->json([
-            'approver_has_permissions' => $approverHasPermissions,
+            'approver_has_permissions' => $approvers,
         ])->setStatusCode(200, 'Approver permissions retrieved successfully.');
     }
 

@@ -53,8 +53,16 @@
                     <div class="col-sm-4">
                         <!-- Nhóm select + button chung hàng -->
                         <div class="d-flex">
-                            <a-select v-model:value="document_type" show-search placeholder="Loại" style="width: 100%"
-                                :options="listDocumentTypes" :filter-option="filterOption" allow-clear></a-select>
+                            <a-select 
+                                v-model:value="document_type" 
+                                show-search 
+                                placeholder="Loại" 
+                                style="width: 100%"
+                                :options="listDocumentTypes" 
+                                :filter-option="filterOption"
+                                :default-value="listDocumentTypes[0]?.value"
+                                >
+                            </a-select>
                         </div>
 
                         <!-- Lỗi nằm dưới hàng mới -->
@@ -197,13 +205,19 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select 
-                                                    v-model:value="step.approver_id" 
-                                                    style="width: 100%"
-                                                    :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" 
-                                                    allowClear 
-                                                />
+                                                <a-tooltip 
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
+                                                    :visible="isChooseDocumentType === false"
+                                                >
+                                                    <a-select 
+                                                        v-model:value="step.approver_id" 
+                                                        style="width: 100%"
+                                                        :options="getApproversByDepartment(step.department_id)"
+                                                        placeholder="Chọn người duyệt" 
+                                                        allowClear 
+                                                        :disabled="step.department_id === null || isChooseDocumentType === false"
+                                                    />
+                                                </a-tooltip>
                                             </div>
                                         </div>
                                     </div>
@@ -249,14 +263,19 @@
                                                 <label class="mb-1 mb-md-0">Người duyệt:</label>
                                             </div>
                                             <div class="col-12">
-                                                <a-select 
-                                                    v-model:value="step.approver_id" 
-                                                    style="width: 100%"
-                                                    :options="getApproversByDepartment(step.department_id)"
-                                                    placeholder="Chọn người duyệt" 
-                                                    allowClear 
-                                                    :disabled="step.department_id === null"
-                                                />
+                                                <a-tooltip 
+                                                    :title="isChooseDocumentType === false ? 'Phải chọn loại văn bản trước' : ''"
+                                                    :visible="isChooseDocumentType === false"
+                                                >
+                                                    <a-select 
+                                                        v-model:value="step.approver_id" 
+                                                        style="width: 100%"
+                                                        :options="getApproversByDepartment(step.department_id)"
+                                                        placeholder="Chọn người duyệt" 
+                                                        allowClear 
+                                                        :disabled="step.department_id === null || isChooseDocumentType === false"
+                                                    />
+                                                </a-tooltip>
                                             </div>
                                         </div>
                                     </div>
@@ -654,6 +673,15 @@ export default defineComponent({
             document_flow_id.value = null;
             isUseTemplate.value = false;
         }
+
+        const isChooseDocumentType = ref(false);
+        watch(document_type, (newValue) => {
+            if (newValue !== null) {
+                isChooseDocumentType.value = true;
+            } else {
+                isChooseDocumentType.value = false;
+            }
+        });        
 
         // Hàm lấy ra các người phê duyệt trong một đơn vị
         function getApproversByDepartment(departmentId) {
@@ -1065,6 +1093,7 @@ export default defineComponent({
             listDocumentFlows,
 
             headers,
+            isChooseDocumentType,
 
             // Current Form Value
             document_flow_id,
