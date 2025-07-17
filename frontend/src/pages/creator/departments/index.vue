@@ -180,7 +180,7 @@
 
         <a-divider />
 
-        <div v-if="isHeadOfDepartment" class="approval-permissions mb-4">
+        <!-- <div v-if="isHeadOfDepartment" class="approval-permissions mb-4">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="mb-0">Quyền phê duyệt tài liệu</h5>
             <a-switch
@@ -209,12 +209,12 @@
           <div v-else>
             <a-empty description="Thành viên này không có quyền phê duyệt tài liệu" />
           </div>
-        </div>
+        </div> -->
 
         <div class="d-flex justify-content-end mt-3">
-          <a-button v-if="isHeadOfDepartment && hasApprovalPermission" type="primary" @click="saveApprovalPermissions" :loading="saveLoading">
+          <!-- <a-button v-if="isHeadOfDepartment && hasApprovalPermission" type="primary" @click="saveApprovalPermissions" :loading="saveLoading">
             Lưu quyền phê duyệt
-          </a-button>
+          </a-button> -->
           <a-button class="ms-2" @click="memberDetailModalVisible = false">
             Đóng
           </a-button>
