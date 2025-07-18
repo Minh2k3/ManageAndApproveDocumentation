@@ -824,10 +824,10 @@
             <h5>❌ Từ chối văn bản</h5>
             <a-divider />
             <div>
-                <span>Lý do chia tay là gì, em có biết không???</span>
+                <span>Lý do mà bạn từ chối văn bản này?</span>
                 <a-textarea 
                     v-model:value="reasonReject" 
-                    placeholder="Vì em không yêu anh như anh yêu em, vì em xem anh chỉ là nhất thời." 
+                    placeholder="Vì anh chẳng muốn thấy em khóc&#10;Càng không thể nói cho em biết&#10;Tình yêu này vẫn cứ vẹn nguyên&#10;Như ngày đầu tiên ngày ta mới biết" 
                     show-count
                     :maxlength="1000"
                     rows="4"

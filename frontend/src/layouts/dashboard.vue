@@ -31,7 +31,7 @@
         <!-- Vùng cảm ứng để hiện header khi di chuột lên trên -->
         <div class="header-trigger" @mouseenter="showHeader"></div>
 
-        <main class="flex-grow-1">
+        <main class="flex-grow-1" id="home">
             <section class="bg-primary text-white py-5" style="z-index: 3;">
                 <div class="container">
                     <div class="row align-items-center">
@@ -277,6 +277,13 @@ export default defineComponent({
         };
     },
     mounted() {
+        const canvas = this.$refs.particleCanvas;
+        if (!canvas || !canvas.getContext) {
+            console.warn('Canvas not supported in this browser');
+            this.enableParticles = false;
+            return;
+        }
+
         window.addEventListener('scroll', this.handleScroll);
         
         // Sử dụng nextTick để đảm bảo DOM đã render
@@ -374,7 +381,7 @@ export default defineComponent({
             // console.log('Canvas size:', canvas.width, 'x', canvas.height); // Debug
             
             this.particles = [];
-            const particleCount = Math.floor((canvas.width * canvas.height) / 12000); // Số lượng particles
+            const particleCount = Math.min(150, Math.floor((canvas.width * canvas.height) / 15000)); // Số lượng particles
             // console.log('Particle count:', particleCount); 
             
             for (let i = 0; i < particleCount; i++) {
@@ -392,79 +399,84 @@ export default defineComponent({
         },
         
         animate() {
-            const canvas = this.$refs.particleCanvas;
-            if (!canvas) {
-                console.error('Canvas not found in animate!');
-                return;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.error('Canvas context not found!');
-                return;
-            }
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // // Test: Vẽ một hình tròn lớn màu đỏ
-            // ctx.fillStyle = 'red';
-            // ctx.beginPath();
-            // ctx.arc(100, 100, 20, 0, Math.PI * 2);
-            // ctx.fill();
-            
-            // // Test: Vẽ một hình tròn khác
-            // ctx.fillStyle = 'blue';
-            // ctx.beginPath();
-            // ctx.arc(200, 200, 15, 0, Math.PI * 2);
-            // ctx.fill();
-            
-            // Update và vẽ particles với màu sáng hơn
-            this.particles.forEach((particle, index) => {
-                // Di chuyển particle
-                particle.x += particle.vx;
-                particle.y += particle.vy;
-                
-                // Bounce off edges
-                if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-                if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
-                
-                // Tương tác với chuột
-                const dx = this.mouse.x - particle.x;
-                const dy = this.mouse.y - particle.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < 100) {
-                    const force = (100 - distance) / 100;
-                    particle.x -= dx * force * 0.01;
-                    particle.y -= dy * force * 0.01;
-                    particle.size = particle.originalSize * (1 + force);
-                    particle.opacity = Math.min(1, particle.opacity + force * 0.3);
-                } else {
-                    particle.size = particle.originalSize;
-                    particle.opacity = Math.max(0.2, particle.opacity - 0.01);
+            try {
+                const canvas = this.$refs.particleCanvas;
+                if (!canvas) {
+                    console.error('Canvas not found in animate!');
+                    return;
                 }
                 
-                // Vẽ particle với màu sáng để dễ thấy
-                ctx.beginPath();
-                ctx.arc(particle.x, particle.y, Math.max(particle.size, 3), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(128, 125, 125, ${Math.max(particle.opacity, 0.8)})`; // Đỏ sáng
-                ctx.fill();
-                
-                // Debug: log vị trí của particle đầu tiên
-                if (index === 0) {
-                    // console.log(`Particle 0 position: ${particle.x.toFixed(1)}, ${particle.y.toFixed(1)}`);
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('Canvas context not found!');
+                    return;
                 }
-            });
-            
-            // Vẽ connections với màu sáng hơn
-            this.drawConnections(ctx);
-            
-            this.animationId = requestAnimationFrame(this.animate);
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // // Test: Vẽ một hình tròn lớn màu đỏ
+                // ctx.fillStyle = 'red';
+                // ctx.beginPath();
+                // ctx.arc(100, 100, 20, 0, Math.PI * 2);
+                // ctx.fill();
+                
+                // // Test: Vẽ một hình tròn khác
+                // ctx.fillStyle = 'blue';
+                // ctx.beginPath();
+                // ctx.arc(200, 200, 15, 0, Math.PI * 2);
+                // ctx.fill();
+                
+                // Update và vẽ particles với màu sáng hơn
+                this.particles.forEach((particle, index) => {
+                    // Di chuyển particle
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    // Bounce off edges
+                    if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+                    if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+                    
+                    // Tương tác với chuột
+                    const dx = this.mouse.x - particle.x;
+                    const dy = this.mouse.y - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        const force = (100 - distance) / 100;
+                        particle.x -= dx * force * 0.01;
+                        particle.y -= dy * force * 0.01;
+                        particle.size = particle.originalSize * (1 + force);
+                        particle.opacity = Math.min(1, particle.opacity + force * 0.3);
+                    } else {
+                        particle.size = particle.originalSize;
+                        particle.opacity = Math.max(0.2, particle.opacity - 0.01);
+                    }
+                    
+                    // Vẽ particle với màu sáng để dễ thấy
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, Math.max(particle.size, 3), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(128, 125, 125, ${Math.max(particle.opacity, 0.8)})`; // Đỏ sáng
+                    ctx.fill();
+                    
+                    // Debug: log vị trí của particle đầu tiên
+                    if (index === 0) {
+                        // console.log(`Particle 0 position: ${particle.x.toFixed(1)}, ${particle.y.toFixed(1)}`);
+                    }
+                });
+                
+                // Vẽ connections với màu sáng hơn
+                this.drawConnections(ctx);
+                
+                this.animationId = requestAnimationFrame(this.animate);
+            } catch (error) {
+                console.error('Animation error:', error);
+                cancelAnimationFrame(this.animationId);
+            }
         },
         
         drawConnections(ctx) {
-            const maxDistance = 120;
+            const maxDistance = Math.min(this.particles.length, 80);
             
             for (let i = 0; i < this.particles.length; i++) {
                 for (let j = i + 1; j < this.particles.length; j++) {

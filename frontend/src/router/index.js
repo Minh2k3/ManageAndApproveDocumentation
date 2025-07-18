@@ -39,8 +39,9 @@ router.beforeEach(async (to, from, next) => {
             && to.path !== '/hoi-dong'
             && to.path !== '/term'
             && to.path !== '/testweb'
+            && to.path !== '/dashboard'
         ) {
-            return next('/');
+            return next('/dashboard');
         } else {
             return next();
         }

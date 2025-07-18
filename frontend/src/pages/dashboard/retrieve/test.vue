@@ -214,6 +214,18 @@
           </a-button>
         </div>
       </div>
+
+      <div>
+          <span>Lý do mà bạn từ chối văn bản này?</span>
+          <a-textarea 
+              v-model:value="reasonReject" 
+              placeholder="Vì anh chẳng muốn thấy em khóc&#10;Càng không thể nói cho em biết&#10;Tình yêu này vẫn cứ vẹn nguyên&#10;Như ngày đầu tiên ngày ta mới biết" 
+              show-count
+              :maxlength="1000"
+              rows="4"
+              class="mb-5"
+          />
+      </div>
     </a-modal>
   </div>
 </template>
@@ -572,6 +584,10 @@ export default defineComponent({
       console.log('Current user:', 'Minh2k3'); // From your info
     });
 
+
+    // Expose properties and methods to the template
+    const rejectDocument = ref('');
+    const reasonReject = ref('');
     return {
       departmentInfo,
       userRoleInDepartment,
@@ -589,6 +605,8 @@ export default defineComponent({
       selectedDocumentTypes,
       saveLoading,
       documentTypes,
+
+      reasonReject,
       
       handleSearch,
       handleRoleFilter,
