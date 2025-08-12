@@ -315,14 +315,17 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/approver/document-store';
+import { useDepartmentStore } from '@/stores/approver/department-store';
 import { useAuth } from '@/stores/use-auth.js';
+
 export default defineComponent({
     setup() {
         const activeKey = ref("1");
         useMenu().onSelectedKeys(["approver-documents"]);
         const documentStore = useDocumentStore();
         const authStore = useAuth();
-
+        const departmentStore = useDepartmentStore();
+        
         const documents_need_me = ref([]);
         const documents_of_me = ref([]);
 
@@ -544,9 +547,11 @@ export default defineComponent({
         const VITE_API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
         const reloadDocuments = async () => {
-            await documentStore.fetchDocuments(user.id, true);
+            await documentStore.fetchDocuments(authStore.user.id, true);
             documents.value = documentStore.documents;
             message.success('Đã tải lại danh sách văn bản');
+
+            await departmentStore.fetchApproverHasPermissions(true);
         };
 
         return {

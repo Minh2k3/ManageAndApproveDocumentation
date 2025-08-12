@@ -230,6 +230,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/creator/document-store.js';
+import { useDepartmentStore } from '@/stores/creator/department-store.js';
 import { message, Modal } from 'ant-design-vue';
 import { useAuth } from '@/stores/use-auth.js';
 import { responsiveArray } from 'ant-design-vue/es/_util/responsiveObserve';
@@ -241,6 +242,7 @@ export default defineComponent({
 
         const authStore = useAuth();
         const user = authStore.user;
+        const departmentStore = useDepartmentStore();
 
         const detailVisible = ref(false);
         const selectedDocument = ref({});
@@ -380,6 +382,8 @@ export default defineComponent({
             await documentStore.fetchDocuments(user.id, true);
             documents.value = documentStore.documents;
             message.success('Đã tải lại danh sách văn bản');
+
+            await departmentStore.fetchApproverHasPermissions(true);
         };
 
         return {

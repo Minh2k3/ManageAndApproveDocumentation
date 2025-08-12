@@ -518,7 +518,7 @@ export default defineComponent({
                 is_new_version.value = true;
             }
 
-            await departmentStore.fetchApproverHasPermissions();
+            await departmentStore.fetchApproverHasPermissions(true);
             listApproverHasPermissions.value = departmentStore.approver_has_permissions;
         });
 
@@ -845,7 +845,7 @@ export default defineComponent({
                 // console.log('Đường dẫn file:', res.data.file_url);
             } catch (error) {
                 // console.error(error);
-                message.error('Lỗi khi upload file');
+                // message.error('Lỗi khi upload file');
             }
         };
 

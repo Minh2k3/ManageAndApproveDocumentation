@@ -6,6 +6,7 @@ import register from "./register.js";
 import creator from "./creator.js";
 import approver from "./approver.js";
 import retrieve from "./retrieve.js";
+import graduation from "./graduation.js";
 import { useAuth } from "@/stores/use-auth.js";
 
 const redirectRoot = [{
@@ -13,7 +14,7 @@ const redirectRoot = [{
     redirect: {name: 'dashboard'}
 }];
 
-const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve];
+const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve, ...graduation];
 
 const router = createRouter({
     history: createWebHistory(''),
@@ -39,7 +40,9 @@ router.beforeEach(async (to, from, next) => {
             && to.path !== '/hoi-dong'
             && to.path !== '/term'
             && to.path !== '/testweb'
+            && to.path !== '/graduation'
             && to.path !== '/dashboard'
+            && to.path !== '/'
         ) {
             return next('/dashboard');
         } else {
