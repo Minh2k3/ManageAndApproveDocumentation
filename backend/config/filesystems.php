@@ -87,6 +87,14 @@ return [
             'visibility' => 'public',
         ],
 
+        'wishes' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         // Dành cho lưu ảnh chữ ký của người dùng
         'signatures' => [
             'driver' => 'local',

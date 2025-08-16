@@ -41,6 +41,7 @@ router.beforeEach(async (to, from, next) => {
             && to.path !== '/term'
             && to.path !== '/testweb'
             && to.path !== '/graduation'
+            && to.path !== '/graduation-yearbook'
             && to.path !== '/dashboard'
             && to.path !== '/'
         ) {

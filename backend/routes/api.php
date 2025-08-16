@@ -36,6 +36,7 @@ use App\Http\Controllers\CaCertificateController;
 use App\Http\Controllers\Api\PDFProxyController;
 use App\Http\Controllers\RollAtDepartmentController;
 use App\Http\Controllers\ApproverHasPermissionController;
+use App\Http\Controllers\WishController;
 
 // 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -416,6 +417,11 @@ Route::get('/approver-has-permissions', [ApproverHasPermissionController::class,
 Route::post('/approver-has-permissions/{approver_id}/update', [ApproverHasPermissionController::class, 'update'])
     ->middleware('auth:sanctum')
     ->name('approver-has-permissions.update');
+
+Route::prefix('wishes')->group(function () {
+    Route::get('/', [WishController::class, 'index']);
+    Route::post('/', [WishController::class, 'store']);
+});
 
 // routes/api.php
 // Route::get('/pdf-proxy', function (Request $request) {
