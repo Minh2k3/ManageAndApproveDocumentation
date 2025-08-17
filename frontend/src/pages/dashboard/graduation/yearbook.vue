@@ -147,7 +147,6 @@
         <a-form-item
           label="Lời chúc"
           name="text"
-          :rules="[{ required: true, message: 'Vui lòng nhập lời chúc!' }]"
         >
           <a-textarea
             v-model:value="newWish.content.text"
@@ -243,7 +242,7 @@
               Hủy
             </a-button>
             <a-button type="primary" html-type="submit" size="large" :loading="submitting">
-              <i class="fas fa-paper-plane"></i>
+              <i class="fas fa-paper-plane me-2"></i>
               Gửi lời chúc
             </a-button>
           </a-space>
@@ -337,15 +336,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import axios from 'axios'
+import { useWishStore } from '@/stores/use-wish'
 
-// 📊 Reactive data
+// 🏪 Initialize Store
+const wishStore = useWishStore()
+
+// 📊 Reactive data from store
+const wishes = computed(() => wishStore.wishes)
+const loading = computed(() => wishStore.loading)
+const submitting = computed(() => wishStore.submitting)
+
+// 🎯 Local reactive data (UI state only)
 const searchId = ref('')
-const wishes = ref([])
-const loading = ref(false)
-const submitting = ref(false)
 
 // Modals
 const addWishModalVisible = ref(false)
@@ -353,9 +357,9 @@ const viewWishModalVisible = ref(false)
 const successModalVisible = ref(false)
 const imagePreviewVisible = ref(false)
 
-// Form data
+// Form data - ✅ Fixed: Use computed for currentUser
 const newWish = reactive({
-  senderName: '',
+  senderName: '', // Will be set in resetForm
   content: {
     text: '',
     images: [],
@@ -394,172 +398,105 @@ const mouseDownPos = ref({ x: 0, y: 0 })
 const DRAG_THRESHOLD = 5
 const DRAG_TIME_THRESHOLD = 150
 
-// 🌐 API Methods
-const fetchWishes = async () => {
-  loading.value = true
-  try {
-    console.log('🔄 Fetching wishes from API...')
-    const response = await axios.get('/api/wishes')
-    
-    if (response.data.success) {
-      wishes.value = response.data.data.map(wish => ({
-        id: wish.id,
-        code: wish.code,
-        senderName: wish.senderName,
-        content: {
-          text: wish.content.text,
-          images: wish.content.images || [],
-          audio: wish.content.audio || null
-        },
-        createdAt: new Date(wish.createdAt),
-        position: {
-          x: wish.position.x || 50,
-          y: wish.position.y || 50,
-          rotation: wish.position.rotation || 0
-        }
-      }))
-      
-      console.log(`✅ Loaded ${wishes.value.length} wishes`)
-    } else {
-      message.error('Không thể tải danh sách lời chúc!')
-    }
-  } catch (error) {
-    console.error('❌ Error fetching wishes:', error)
-    message.error('Lỗi kết nối server!')
-  } finally {
-    loading.value = false
-  }
-}
-
+// 🌐 API Methods using store
 const submitWish = async () => {
-  submitting.value = true
-  
   try {
-    // Validate required text content
+    // Validate required fields
     if (!newWish.content.text.trim()) {
       message.error('Vui lòng nhập lời chúc!')
-      submitting.value = false
       return
     }
 
-    console.log('📤 Sending wish to API...')
-    
-    // Prepare FormData
-    const formData = new FormData()
-    formData.append('sender_name', newWish.senderName.trim())
-    formData.append('content', newWish.content.text.trim())
-    
-    // Generate random position
-    const randomPosition = generateRandomPosition()
-    formData.append('position_x', randomPosition.x)
-    formData.append('position_y', randomPosition.y)
-    formData.append('rotation', randomPosition.rotation)
-
-    // Add base64 images if any
-    if (newWish.content.images.length > 0) {
-      newWish.content.images.forEach((imageBase64, index) => {
-        formData.append(`base64_images[${index}]`, imageBase64)
-      })
+    if (!newWish.senderName.trim()) {
+      message.error('Vui lòng nhập tên người gửi!')
+      return
     }
 
-    // Add audio blob if recorded
-    if (audioBlob.value) {
-      // Convert blob to base64
-      const reader = new FileReader()
-      reader.onloadend = async () => {
-        formData.append('audio_blob', reader.result)
-        await sendWishData(formData)
-      }
-      reader.readAsDataURL(audioBlob.value)
-    } else {
-      await sendWishData(formData)
-    }
+    console.log('📤 Bắt đầu gửi lời chúc qua store...')
 
-  } catch (error) {
-    console.error('❌ Error submitting wish:', error)
-    message.error('Có lỗi xảy ra khi gửi lời chúc!')
-    submitting.value = false
-  }
-}
-
-const sendWishData = async (formData) => {
-  try {
-    const response = await axios.post('/api/wishes', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+    // Prepare wish data for store
+    const wishData = {
+      senderName: newWish.senderName.trim(),
+      content: {
+        text: newWish.content.text.trim(),
+        images: [...newWish.content.images], // Copy array
+        audioBlob: audioBlob.value // Pass the blob directly
       },
-      timeout: 30000
-    })
+      position: wishStore.generateRandomPosition() // Use store method
+    }
 
-    if (response.data.success) {
-      // Transform and add new wish to the beginning
-      const newWishData = {
-        id: response.data.data.id,
-        code: response.data.data.code,
-        senderName: response.data.data.senderName,
-        content: {
-          text: response.data.data.content.text,
-          images: response.data.data.content.images || [],
-          audio: response.data.data.content.audio || null
-        },
-        createdAt: new Date(response.data.data.createdAt),
-        position: response.data.data.position
-      }
-      
-      wishes.value.unshift(newWishData)
-      
-      // Show success modal
-      generatedCode.value = response.data.data.code
+    // Send via store
+    const result = await wishStore.sendWish(wishData)
+
+    if (result.success) {
+      // Show success modal with generated code
+      generatedCode.value = result.wish.code
       addWishModalVisible.value = false
       successModalVisible.value = true
       resetForm()
+
+      // ✅ No need to refresh - store already updated the list
       
-      message.success(response.data.message || 'Lời chúc đã được gửi thành công!')
-      console.log(`✅ Wish created with code: ${newWishData.code}`)
+      // Show success message
+      message.success(result.message)
+      console.log(`✅ Đã tạo lời chúc với mã: ${result.wish.code}`)
     } else {
-      message.error('Không thể gửi lời chúc!')
+      // Handle specific errors
+      let errorMessage = result.error
+      if (result.error.includes('CSRF') || result.error.includes('XSRF-TOKEN')) {
+        errorMessage += ' Vui lòng làm mới trang và thử lại!'
+      } else if (result.error.includes('kết nối') || result.error.includes('TIMEOUT')) {
+        errorMessage += ' Vui lòng kiểm tra mạng và thử lại.'
+      }
+      message.error(errorMessage)
+      console.error('❌ Lỗi khi tạo lời chúc:', result.error)
     }
+    
   } catch (error) {
-    console.error('❌ API Error:', error)
-    if (error.response?.data?.errors) {
-      // Laravel validation errors
-      const errors = error.response.data.errors
-      Object.keys(errors).forEach(field => {
-        message.error(errors[field][0])
-      })
-    } else {
-      message.error('Lỗi server khi gửi lời chúc!')
-    }
-  } finally {
-    submitting.value = false
+    // Handle unexpected errors with more detail
+    const errorMessage = error.response?.status === 419 
+      ? 'Lỗi CSRF token không hợp lệ, vui lòng làm mới trang!'
+      : 'Có lỗi không mong muốn xảy ra khi gửi lời chúc!'
+    message.error(errorMessage)
+    console.error('💥 Lỗi không mong muốn:', error)
   }
 }
 
-// 🔍 Search Methods (Local search - giữ nguyên)
+// 🔍 Search Methods (Local search in store data)
 const searchWishById = () => {
   if (!searchId.value.trim()) {
     message.warning('Vui lòng nhập ID để tìm kiếm!')
     return
   }
   
+  // Search in store data
   const wish = wishes.value.find(w => w.id.toString() === searchId.value.trim())
   if (wish) {
     viewWishDetail(wish)
     searchId.value = ''
+    message.success('Tìm thấy lời chúc!')
   } else {
     message.error('Không tìm thấy lời chúc với ID này!')
   }
 }
 
-// 🎨 Helper Methods
-const generateRandomPosition = () => {
-  return {
-    x: Math.random() * 80 + 5,      // 5% to 85%
-    y: Math.random() * 75 + 5,      // 5% to 80%
-    rotation: (Math.random() - 0.5) * 40  // -20° to +20°
+// 🔄 Refresh data manually (optional)
+const refreshWishes = async () => {
+  console.log('🔄 Manual refresh requested...')
+  const result = await wishStore.fetchWishes(true) // Force refresh
+  
+  if (result.success) {
+    if (result.fromCache) {
+      message.info('Dữ liệu đã được tải từ cache')
+    } else {
+      message.success(`Đã tải ${result.count} lời chúc mới`)
+    }
+  } else {
+    message.error('Không thể tải dữ liệu mới')
   }
 }
 
+// 🎨 Helper Methods
 const getNoteStyle = (wish) => {
   const baseZIndex = wishes.value.length - wishes.value.findIndex(w => w.id === wish.id)
   
@@ -660,10 +597,10 @@ const viewWishDetail = (wish) => {
   viewWishModalVisible.value = true
 }
 
-// 📝 Form handling
+// 📝 Form handling - ✅ Fixed: Proper initialization
 const resetForm = () => {
   Object.assign(newWish, {
-    senderName: 'Minh2k3',
+    senderName: wishStore.currentUser || '', // ✅ Fixed: Fallback value
     content: {
       text: '',
       images: [],
@@ -791,18 +728,50 @@ const hasMedia = (wish) => {
   return (wish.content.images && wish.content.images.length > 0) || wish.content.audio
 }
 
+// 📊 Debug methods (for development)
+const showStoreStats = () => {
+  const stats = wishStore.getStats
+  console.log('📊 Store Stats:', stats)
+  message.info(`Total: ${stats.total}, Today: ${stats.today}, With Images: ${stats.withImages}`)
+}
+
 // 🚀 Lifecycle
+// yearbook.vue - script setup
 onMounted(async () => {
   console.log('📱 Yearbook page mounted')
-  await fetchWishes()
+  console.log(`👤 Current user: ${wishStore.currentUser}`)
+  console.log(`📅 Current time: ${new Date().toLocaleString('vi-VN')}`)
+  console.log(`🌐 API base URL: ${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}`)
+  
+  // Initialize form with current user
+  resetForm()
+  
+  // Initialize store and load wishes
+  const result = await wishStore.initialize()
+  
+  if (result.success) {
+    if (result.fromCache) {
+      console.log('📋 Loaded wishes from cache')
+      message.success('Đã tải dữ liệu từ cache')
+    } else {
+      console.log(`✅ Loaded ${result.count} wishes from API`)
+      message.success(`Đã tải ${result.count} lời chúc`)
+    }
+  } else {
+    console.error('❌ Failed to initialize store')
+    message.error('Không thể tải dữ liệu ban đầu')
+  }
 })
 
 onBeforeUnmount(() => {
+  // Cleanup
   if (recordingTimer.value) {
     clearInterval(recordingTimer.value)
   }
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onMouseUp)
+  
+  console.log('📱 Yearbook page unmounted')
 })
 </script>
 

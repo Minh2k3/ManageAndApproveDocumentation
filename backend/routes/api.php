@@ -418,10 +418,15 @@ Route::post('/approver-has-permissions/{approver_id}/update', [ApproverHasPermis
     ->middleware('auth:sanctum')
     ->name('approver-has-permissions.update');
 
-Route::prefix('wishes')->group(function () {
-    Route::get('/', [WishController::class, 'index']);
-    Route::post('/', [WishController::class, 'store']);
-});
+// Route::prefix('wishes')->group(function () {
+//     Route::get('/', [WishController::class, 'index']);
+//     Route::post('/', [WishController::class, 'store']);
+// });
+
+Route::get('/wishes', [WishController::class, 'index'])
+    ->name('wishes.index');
+Route::post('/wishes', [WishController::class, 'store'])
+    ->name('wishes.store');
 
 // routes/api.php
 // Route::get('/pdf-proxy', function (Request $request) {

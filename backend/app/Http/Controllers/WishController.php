@@ -13,27 +13,53 @@ class WishController extends Controller
 {
     public function index(Request $request)
     {
-        $wishes = Wish::with(['media', 'user'])
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc');
-
-        return response()->json([
-            'success' => true,
-            'data' => $wishes->map(function ($wish) {
+        try {
+            \Log::info('Fetching wishes with filters', $request->all());
+            
+            // Get wishes as collection (not query builder)
+            $wishes = Wish::with(['media', 'user'])
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->get(); // <- Quan trọng: phải gọi get() trước khi map()
+            
+            // Transform collection
+            $transformedWishes = $wishes->map(function ($wish) {
                 return [
                     'id' => $wish->id,
                     'code' => $wish->code,
                     'senderName' => $wish->sender_name,
                     'content' => [
                         'text' => $wish->content,
-                        'images' => $wish->images->map(fn($img) => Storage::disk('wishes')->url($img->file_path)),
+                        'images' => $wish->images->map(function($img) {
+                            return Storage::disk('wishes')->url($img->file_path);
+                        })->values()->toArray(),
                         'audio' => $wish->audio->first() ? Storage::disk('wishes')->url($wish->audio->first()->file_path) : null
                     ],
-                    'position' => $wish->position,
+                    'position' => [
+                        'x' => (float) ($wish->position_x ?? 50.0),
+                        'y' => (float) ($wish->position_y ?? 50.0), 
+                        'rotation' => (float) ($wish->rotation ?? 0.0)
+                    ],
                     'createdAt' => $wish->created_at->toISOString()
                 ];
-            }),
-        ]);
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $transformedWishes,
+                'count' => $transformedWishes->count(),
+                'message' => "Successfully loaded {$transformedWishes->count()} wishes"
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error fetching wishes: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not fetch wishes',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)

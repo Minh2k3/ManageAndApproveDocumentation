@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'api/*/*', 'api/documents/*', 'sanctum/csrf-cookie', 'login', 'logout', 'password/reset', 'password/email', 'password/confirm', 'user/verify-email/*', 'user/*', 'documents/*', 'reset-password', 'verify-reset-token', 'forgot-password', 'direct-pusher', '*' ],
+    'paths' => ['api/*', 'api/*/*', 'api/documents/*', 'sanctum/csrf-cookie', 'login', 'logout', 'password/reset', 'password/email', 'password/confirm', 'user/verify-email/*', 'user/*', 'documents/*', 'reset-password', 'verify-reset-token', 'forgot-password', 'direct-pusher', '*', 'wishes' ],
 
     'allowed_methods' => ['PUT', 'POST', 'GET', 'DELETE', 'OPTIONS', '*'],   
 
@@ -24,6 +24,7 @@ return [
         'http://localhost:3000',
         'http://localhost:8080',
         'http://127.0.0.1:5173',
+        'http://127.0.0.1:8000',
         'localhost:5173', 
         'http://localhost:5173',
         '*',
