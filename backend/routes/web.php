@@ -145,6 +145,20 @@ Route::get('/drive/{file_name}', function ($file_name) {
 })->name('drive.getFile');
 
 
+// Yearbook routes for web interface
+Route::get('/yearbook', [App\Http\Controllers\YearbookController::class, 'index'])
+    ->name('yearbook.index');
+Route::post('/yearbook', [App\Http\Controllers\YearbookController::class, 'store'])
+    ->name('yearbook.store');
+Route::post('/yearbook/search', [App\Http\Controllers\YearbookController::class, 'searchById'])
+    ->name('yearbook.search');
+Route::post('/yearbook/upload-image', [App\Http\Controllers\YearbookController::class, 'uploadImage'])
+    ->name('yearbook.upload-image');
+Route::post('/yearbook/upload-audio', [App\Http\Controllers\YearbookController::class, 'uploadAudio'])
+    ->name('yearbook.upload-audio');
+Route::put('/yearbook/{id}/position', [App\Http\Controllers\YearbookController::class, 'updatePosition'])
+    ->name('yearbook.update-position');
+
 if(app()->environment('production')){
     URL::forceScheme('https');
 }
