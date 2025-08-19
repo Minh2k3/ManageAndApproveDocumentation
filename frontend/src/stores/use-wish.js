@@ -143,7 +143,14 @@ export const useWishStore = defineStore('wish', () => {
         }
       }
 
-      await axiosInstance.get('/sanctum/csrf-cookie')
+      try {
+        await axiosInstance.get('/sanctum/csrf-cookie');
+        // Optional: Small delay to ensure cookie is set (rarely needed)
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (csrfError) {
+        console.error('Failed to fetch CSRF cookie:', csrfError);
+        throw new Error('Không thể lấy token bảo mật. Vui lòng thử lại.');
+      }
 
       // ✅ Simple POST request (no CSRF token needed)
       const response = await axiosInstance.post('/api/wishes', formData, {

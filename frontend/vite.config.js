@@ -29,23 +29,21 @@ export default defineConfig({
   //   }
   // },
   server: {
-    host: '0.0.0.0',  // Cho phép truy cập từ mọi IP
-    port: 5173, 
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000/', // URL backend của bạn
+        target: 'https://tminh.id.vn/', // URL backend của bạn
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api'), // Tùy chọn: giữ nguyên đường dẫn
       },
       '/sanctum': {
-        target: 'http://127.0.0.1:8000/', // URL backend của bạn
+        target: 'https://tminh.id.vn/', // URL backend của bạn
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/sanctum/, '/sanctum'), // Tùy chọn: giữ nguyên đường dẫn
       },
       '/documents': {
-        target: 'http://127.0.0.1:8000/',
+        target: 'https://tminh.id.vn/', // URL backend của bạn
         changeOrigin: true,
         secure: false,
       }

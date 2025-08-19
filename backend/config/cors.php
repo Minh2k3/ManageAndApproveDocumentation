@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*', 'api/*/*', 'api/documents/*', 'sanctum/csrf-cookie', 'login', 'logout', 'password/reset', 'password/email', 'password/confirm', 'user/verify-email/*', 'user/*', 'documents/*', 'reset-password', 'verify-reset-token', 'forgot-password', 'direct-pusher', '*', 'wishes' ],
 
-    'allowed_methods' => ['PUT', 'POST', 'GET', 'DELETE', 'OPTIONS', '*'],   
+    'allowed_methods' => ['PUT', 'POST', 'GET', 'DELETE'],   
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
