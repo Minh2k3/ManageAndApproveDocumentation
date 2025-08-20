@@ -4,16 +4,78 @@
     <header class="fixed-header">
       <nav class="navbar navbar-expand-lg">
         <div class="container">
-          <div class="navbar-nav mx-auto">
+          <!-- Logo/Brand -->
+          <div class="navbar-brand">
+            <span class="brand-text">Himakevolution</span>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <div class="navbar-nav mx-auto d-none d-lg-flex">
             <a class="nav-link" href="#gioi-thieu" @click="scrollTo('gioi-thieu')">Giới thiệu</a>
             <a class="nav-link" href="#thiep-moi" @click="scrollTo('thiep-moi')">Thiệp mời</a>
             <a class="nav-link" href="#nam-thang" @click="scrollTo('nam-thang')">Năm tháng đi qua</a>
             <a class="nav-link" href="#ky-niem" @click="scrollTo('ky-niem')">Kỷ niệm</a>  
             <a class="nav-link" href="#lien-he" @click="scrollTo('lien-he')">Liên hệ</a>
           </div>
-          <button type="primary" class="send-wishes-btn text-white" @click="goToSendWishes">
+          
+          <!-- Desktop Send Wishes Button -->
+          <button type="primary" class="send-wishes-btn text-white d-none d-lg-block" @click="goToSendWishes">
             Gửi lời chúc
           </button>
+          
+          <!-- Mobile Menu Toggle Button -->
+          <button 
+            class="mobile-menu-toggle d-lg-none" 
+            @click="toggleMobileMenu"
+            :class="{ 'active': isMobileMenuOpen }"
+          >
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-menu d-lg-none" :class="{ 'show': isMobileMenuOpen }">
+          <div class="mobile-menu-overlay" @click="closeMobileMenu"></div>
+          <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+              <span class="mobile-brand">Himakevolution</span>
+              <button class="mobile-close-btn" @click="closeMobileMenu">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <div class="mobile-nav-links">
+              <a class="mobile-nav-link" href="#gioi-thieu" @click="scrollToMobile('gioi-thieu')">
+                <i class="fas fa-info-circle"></i>
+                Giới thiệu
+              </a>
+              <a class="mobile-nav-link" href="#thiep-moi" @click="scrollToMobile('thiep-moi')">
+                <i class="fas fa-envelope"></i>
+                Thiệp mời
+              </a>
+              <a class="mobile-nav-link" href="#nam-thang" @click="scrollToMobile('nam-thang')">
+                <i class="fas fa-calendar-alt"></i>
+                Năm tháng đi qua
+              </a>
+              <a class="mobile-nav-link" href="#ky-niem" @click="scrollToMobile('ky-niem')">
+                <i class="fas fa-heart"></i>
+                Kỷ niệm
+              </a>
+              <a class="mobile-nav-link" href="#lien-he" @click="scrollToMobile('lien-he')">
+                <i class="fas fa-phone"></i>
+                Liên hệ
+              </a>
+            </div>
+            
+            <div class="mobile-menu-footer">
+              <button type="primary" class="mobile-send-wishes-btn text-white" @click="goToSendWishesMobile">
+                <i class="fas fa-paper-plane"></i>
+                Gửi lời chúc
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
     </header>
@@ -68,7 +130,7 @@
           <div class="row align-items-center">
             <div class="col-lg-6">
               <div class="invitation-image">
-                <img src="https://picsum.photos/600/500?random=4" alt="Thiệp mời" class="img-fluid rounded" />
+                <img :src="images['Thiệp']" alt="Thiệp mời" class="img-fluid rounded" />
               </div>
             </div>
             <div class="col-lg-6">
@@ -158,16 +220,21 @@
                       :key="`${periodIndex}-${eventIndex}`" 
                       :id="`timeline-item-${periodIndex}-${eventIndex}`"
                       class="timeline-item" 
-                      :class="{ 'timeline-item-right': eventIndex % 2 === 0, 'timeline-item-left': eventIndex % 2 === 1 }"
+                      :class="{ 
+                        'timeline-item-left': eventIndex % 2 === 0, 
+                        'timeline-item-right': eventIndex % 2 === 1 
+                      }"
                       :ref="el => { if (el) timelineItems.push(el) }"
                     >
-                      
                       <!-- Timeline Date and Number -->
                       <div class="timeline-marker">
-                        <div class="timeline-date" :class="{ 'timeline-date-left': eventIndex % 2 === 0, 'timeline-date-right': eventIndex % 2 === 1 }">
+                        <div class="timeline-number">{{ getEventNumber(periodIndex, eventIndex) }}</div>
+                        <div class="timeline-date" :class="{ 
+                          'timeline-date-left': eventIndex % 2 === 0, 
+                          'timeline-date-right': eventIndex % 2 === 1 
+                        }">
                           {{ event.date }}
                         </div>
-                        <div class="timeline-number">{{ getEventNumber(periodIndex, eventIndex) }}</div>
                       </div>
 
                       <!-- Timeline Content -->
@@ -192,7 +259,7 @@
                         
                         <!-- Key Events -->
                         <div v-if="event.keyEvents && event.keyEvents.length > 0" class="key-events">
-                          <h4><i class="fas fa-star"></i> Điểm nổi bật:</h4>
+                          <h4 class="text-danger"><i class="fas fa-star"></i> Điểm nổi bật:</h4>
                           <ul>
                             <li v-for="keyEvent in event.keyEvents" :key="keyEvent">{{ keyEvent }}</li>
                           </ul>
@@ -200,9 +267,9 @@
                         
                         <!-- Historical Figures -->
                         <div v-if="event.figures && event.figures.length > 0" class="historical-figures">
-                          <h4><i class="fas fa-crown"></i> Nhân vật liên quan:</h4>
+                          <h4 class="text-danger"><i class="fas fa-crown"></i> Nhân vật liên quan:</h4>
                           <div class="figures-list">
-                            <span v-for="figure in event.figures" :key="figure" class="figure-tag">{{ figure }}</span>
+                            <a-tag v-for="figure in event.figures" :key="figure" color="blue" class="figure-tag">{{ figure }}</a-tag>
                           </div>
                         </div>
                         
@@ -236,107 +303,52 @@
           </h2>
           <p class="memories-subtitle text-center mb-5">Mãi trong tim</p>
           
-          <!-- Memories Slider -->
-          <div class="memories-slider">
-            <div class="slider-container" ref="sliderContainer">
-              <div class="slider-track" :style="{ transform: `translateX(-${currentSlide * slideWidth}px)` }">
-                <div 
-                  v-for="(memory, index) in lastSlides" 
-                  :key="`duplicate-end-${index}`"
-                  class="memory-card"
-                  :class="{ 'featured': memory.featured }"
-                >
-                  <div class="memory-avatar">
-                    <img :src="memory.avatar" :alt="memory.name" />
-                    <div v-if="memory.featured" class="featured-badge">
-                      <i class="fas fa-check"></i>
-                    </div>
-                  </div>
-                  <div class="memory-content">
-                    <h3 class="memory-name">{{ memory.name }}</h3>
-                    <span class="memory-role" :class="memory.roleClass">{{ memory.role }}</span>
-                    <p class="memory-description">{{ memory.description }}</p>
-                    <button type="primary" class="contact-btn text-white" @click="contactMemory(memory)">
-                      <i class="fas fa-comments"></i>
-                      Liên hệ
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Original slides -->
-                <div 
-                  v-for="(memory, index) in memories" 
-                  :key="`original-${index}`"
-                  class="memory-card"
-                  :class="{ 'featured': memory.featured }"
-                >
-                  <div class="memory-avatar">
-                    <img :src="memory.avatar" :alt="memory.name" />
-                    <div v-if="memory.featured" class="featured-badge">
-                      <i class="fas fa-check"></i>
-                    </div>
-                  </div>
-                  <div class="memory-content">
-                    <h3 class="memory-name">{{ memory.name }}</h3>
-                    <span class="memory-role" :class="memory.roleClass">{{ memory.role }}</span>
-                    <p class="memory-description">{{ memory.description }}</p>
-                    <button type="primary" class="contact-btn text-white" @click="contactMemory(memory)">
-                      <i class="fas fa-comments"></i>
-                      Liên hệ
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Duplicate slides đầu vào cuối (để scroll từ phải sang trái) -->
-                <div 
-                  v-for="(memory, index) in firstSlides" 
-                  :key="`duplicate-start-${index}`"
-                  class="memory-card"
-                  :class="{ 'featured': memory.featured }"
-                >
-                  <div class="memory-avatar">
-                    <img :src="memory.avatar" :alt="memory.name" />
-                    <div v-if="memory.featured" class="featured-badge">
-                      <i class="fas fa-check"></i>
-                    </div>
-                  </div>
-                  <div class="memory-content">
-                    <h3 class="memory-name">{{ memory.name }}</h3>
-                    <span class="memory-role" :class="memory.roleClass">{{ memory.role }}</span>
-                    <p class="memory-description">{{ memory.description }}</p>
-                    <button type="primary" class="contact-btn text-white" @click="contactMemory(memory)">
-                      <i class="fas fa-comments"></i>
-                      Liên hệ
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Navigation Arrows -->
-            <button 
-              class="slider-nav prev" 
-              @click="prevSlide"
+          <!-- Memories Carousel -->
+          <div class="memories-carousel">
+            <carousel
+              :items-to-show="slidesPerView"
+              :wrap-around="true"
+              :autoplay="3000"
+              :transition="500"
+              :pause-on-hover="true"
             >
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button 
-              class="slider-nav next" 
-              @click="nextSlide"
-            >
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-          
-          <!-- Slider Indicators -->
-          <div class="slider-indicators">
-            <button 
-              v-for="(indicator, index) in Math.ceil(memories.length / slidesPerView)" 
-              :key="index"
-              class="indicator"
-              :class="{ active: index === getCurrentIndicatorIndex() }"
-              @click="goToSlide(index * slidesPerView)"
-            ></button>
+              <slide v-for="(memory, index) in memories" :key="index">
+                <div class="memory-card" :class="{ 'featured': memory.featured }">
+                  <div class="memory-avatar">
+                    <img :src="memory.avatar" :alt="memory.name" />
+                    <div v-if="memory.featured" class="featured-badge">
+                      <i class="fas fa-check"></i>
+                    </div>
+                  </div>
+                  <div class="memory-content">
+                    <h3 class="memory-name">{{ memory.name }}</h3>
+                    <span class="memory-role" :class="memory.roleClass">{{ memory.role }}</span>
+                    <p class="memory-description">{{ memory.description }}</p>
+                    <button type="primary" class="contact-btn text-white" @click="contactMemory(memory)">
+                      <i class="fas fa-comments"></i>
+                      Liên hệ
+                    </button>
+                  </div>
+                </div>
+              </slide>
+
+              <!-- Navigation Arrows -->
+              <template #addons>
+                <navigation>
+                  <template #prev>
+                    <button class="slider-nav prev">
+                      <i class="fas fa-chevron-left"></i>
+                    </button>
+                  </template>
+                  <template #next>
+                    <button class="slider-nav next">
+                      <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </template>
+                </navigation>
+                <pagination />
+              </template>
+            </carousel>
           </div>
         </div>
       </section>      
@@ -373,13 +385,15 @@
     <a-modal
       v-model:open="eventDetailModalVisible"
       :title="selectedEvent?.title"
-      width="900px"
+      width="50%"
       :footer="null"
       class="event-detail-modal"
     >
       <div v-if="selectedEvent" class="event-detail-content">
         <div class="detail-header">
-          <span class="detail-date">{{ selectedEvent.date }}</span>
+          <a-tag>
+            <span class="detail-date">{{ selectedEvent.date }}</span>
+          </a-tag>
         </div>
         
         <div class="detail-image" v-if="selectedEvent.images && selectedEvent.images.length > 0">
@@ -405,9 +419,9 @@
         <div v-if="selectedEvent.figures" class="detail-figures">
           <h4><i class="fas fa-crown"></i> Nhân vật liên quan:</h4>
           <div class="figures-grid">
-            <span v-for="figure in selectedEvent.figures" :key="figure" class="detail-figure-tag">
+            <a-tag v-for="figure in selectedEvent.figures" :key="figure" color="blue" class="detail-figure-tag">
               {{ figure }}
-            </span>
+            </a-tag>
           </div>
         </div>
       </div>
@@ -418,11 +432,15 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
-import 'vue3-carousel/carousel.css'
+import { message, Tag as ATag } from 'ant-design-vue'
+import 'vue3-carousel/dist/carousel.css'
+import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 
 // Router
 const router = useRouter()
+
+// Mobile menu state
+const isMobileMenuOpen = ref(false)
 
 // Reactive data
 const eventDetailModalVisible = ref(false)
@@ -431,12 +449,23 @@ const activePeriod = ref(0)
 const periodHeaders = ref([])
 const timelineItems = ref([])
 
-// Slider data
-const currentSlide = ref(0)
-const slideWidth = ref(400)
-const slidesPerView = ref(3)
-const isTransitioning = ref(false)
-const sliderContainer = ref(null)
+// Responsive slides per view
+const slidesPerView = computed(() => {
+  if (window.innerWidth <= 576) return 1
+  if (window.innerWidth <= 768) return 1
+  if (window.innerWidth <= 1024) return 2
+  return 3
+})
+
+// Images path array
+const images = {
+  'Thiệp': '/images/another/Thiệp.png',
+  'Minh_1': '/images/another/Minh_1.png',
+  'Minh_2': '/images/another/Minh_2.png',
+  'Minh_3': '/images/another/Minh_3.png',
+  'Minh_4': '/images/another/Minh_4.png',
+  'Minh_5': '/images/another/Minh_5.png',
+}
 
 // Timeline periods data
 const timelinePeriods = ref([
@@ -545,7 +574,7 @@ const timelinePeriods = ref([
       },   
     ]
   },
-    {
+  {
     period: "Năm haiiii ✌️✌️✌️",
     shortTitle: "Thức tỉnh",
     duration: "9/2022 - 8/2023",
@@ -606,9 +635,9 @@ const timelinePeriods = ref([
         date: "04/2023",
         specificDuration: "05-08/04/2023",
         images: [
-          "/images/sophomore/ToanHoc_1.png", 
-          "/images/sophomore/ToanHoc_2.png",
-          "/images/sophomore/ToanHoc_3.png",
+          "/images/sophomore/ToanHoc_1.jpg", 
+          "/images/sophomore/ToanHoc_2.jpg",
+          "/images/sophomore/ToanHoc_3.jpg",
         ],
         description: "Đội tuyển Toán TLU",
         detailedDescription: ".",
@@ -686,7 +715,7 @@ const memories = ref([
     role: 'Biên soạn',
     roleClass: 'role-editor',
     avatar: 'https://picsum.photos/200/200?random=3',
-    description: 'Tinh nguyện viên hỗ trợ biên soạn đóng góp nội dung cho website',
+    description: 'Tình nguyện viên hỗ trợ biên soạn đóng góp nội dung cho website',
     featured: false
   },
   {
@@ -709,23 +738,37 @@ const memories = ref([
   }
 ])
 
-// Computed properties
-const maxSlide = computed(() => memories.value.length - 1)
-const indicators = computed(() => Math.ceil(memories.value.length / slidesPerView.value))
-
-const firstSlides = computed(() => {
-  const count = slidesPerView.value
-  return memories.value.slice(0, count)
-})
-
-const lastSlides = computed(() => {
-  const count = slidesPerView.value
-  return memories.value.slice(-count)
-})
-
-const slideOffset = computed(() => slidesPerView.value)
-
 // Methods
+// Mobile menu methods
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+  
+  // Prevent body scroll when menu is open
+  if (isMobileMenuOpen.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = 'auto'
+  }
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+  document.body.style.overflow = 'auto'
+}
+
+const scrollToMobile = (elementId) => {
+  const element = document.getElementById(elementId)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
+  closeMobileMenu()
+}
+
+const goToSendWishesMobile = () => {
+  router.push('/graduation-yearbook')
+  closeMobileMenu()
+}
+
 const scrollTo = (elementId) => {
   const element = document.getElementById(elementId)
   if (element) {
@@ -743,8 +786,6 @@ const viewEventDetails = (event) => {
 }
 
 const scrollToPeriod = (periodIndex) => {
-  console.log('Scrolling to period:', periodIndex)
-  
   let element = periodHeaders.value[periodIndex]
   
   if (!element) {
@@ -752,22 +793,17 @@ const scrollToPeriod = (periodIndex) => {
   }
   
   if (!element) {
-    console.error('Period header element not found for index:', periodIndex)
     return
   }
   
-  console.log('Found element:', element)
-  
-  const headerHeight = 80
-  const extraOffset = 50
+  const headerHeight = 60
+  const extraOffset = 20
   
   const elementRect = element.getBoundingClientRect()
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop
   const elementTop = elementRect.top + scrollTop
   
   const targetPosition = elementTop - headerHeight - extraOffset
-  
-  console.log('Scrolling to position:', targetPosition)
   
   window.scrollTo({
     top: Math.max(0, targetPosition),
@@ -829,87 +865,6 @@ const isPeriodInView = (periodIndex) => {
   return rect.top < windowHeight && rect.bottom > 0
 }
 
-// Slider methods với infinite loop
-const nextSlide = () => {
-  if (isTransitioning.value) return
-  
-  isTransitioning.value = true
-  currentSlide.value++
-  
-  setTimeout(() => {
-    if (currentSlide.value > slideOffset.value + maxSlide.value) {
-      disableTransition()
-      currentSlide.value = slideOffset.value
-      
-      nextTick(() => {
-        enableTransition()
-      })
-    }
-    isTransitioning.value = false
-  }, 500)
-}
-
-const prevSlide = () => {
-  if (isTransitioning.value) return
-  
-  isTransitioning.value = true
-  currentSlide.value--
-  
-  setTimeout(() => {
-    if (currentSlide.value < slideOffset.value) {
-      disableTransition()
-      currentSlide.value = slideOffset.value + maxSlide.value
-      
-      nextTick(() => {
-        enableTransition()
-      })
-    }
-    isTransitioning.value = false
-  }, 500)
-}
-
-const disableTransition = () => {
-  const sliderTrack = document.querySelector('.slider-track')
-  if (sliderTrack) {
-    sliderTrack.style.transition = 'none'
-  }
-}
-
-const enableTransition = () => {
-  const sliderTrack = document.querySelector('.slider-track')
-  if (sliderTrack) {
-    sliderTrack.style.transition = 'transform 0.5s ease'
-  }
-}
-
-const goToSlide = (slideIndex) => {
-  if (isTransitioning.value) return
-  currentSlide.value = slideOffset.value + slideIndex
-}
-
-const updateSlideWidth = () => {
-  if (sliderContainer.value) {
-    const containerWidth = sliderContainer.value.offsetWidth
-    if (window.innerWidth <= 768) {
-      slidesPerView.value = 1
-      slideWidth.value = containerWidth
-    } else if (window.innerWidth <= 1024) {
-      slidesPerView.value = 2
-      slideWidth.value = containerWidth / 2
-    } else {
-      slidesPerView.value = 3
-      slideWidth.value = containerWidth / 3
-    }
-    
-    currentSlide.value = slideOffset.value
-  }
-}
-
-const getCurrentIndicatorIndex = () => {
-  const realIndex = (currentSlide.value - slideOffset.value) % memories.value.length
-  return Math.floor(Math.max(0, realIndex) / slidesPerView.value)
-}
-
 const contactMemory = (memory) => {
   message.info(`Liên hệ với ${memory.name} - ${memory.role}`)
 }
@@ -920,429 +875,15 @@ onMounted(() => {
   nextTick(() => {
     updateActivePeriod()
   })
-  updateSlideWidth()
-  window.addEventListener('resize', updateSlideWidth)
-  
-  nextTick(() => {
-    currentSlide.value = slideOffset.value
-  })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
-  window.removeEventListener('resize', updateSlideWidth)
+  document.body.style.overflow = 'auto'
 })
 </script>
 
 <style scoped>
-/* All previous styles remain the same, just adding scroll-margin-top for better scroll positioning */
-/* Memories Section */
-.memories-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  position: relative;
-}
-
-.memories-subtitle {
-  color: #666;
-  font-size: 1.1rem;
-  font-style: italic;
-  margin-bottom: 3rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Memories Slider */
-.memories-slider {
-  position: relative;
-  overflow: hidden;
-  margin: 0 60px;
-}
-
-.slider-container {
-  overflow: hidden;
-  border-radius: 15px;
-}
-
-.slider-track {
-  display: flex;
-  transition: transform 0.5s ease;
-  gap: 20px;
-}
-
-.slider-track.no-transition {
-  transition: none !important;
-}
-
-.memory-card {
-  flex: 0 0 calc(33.333% - 14px);
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  border: 2px solid #f0f0f0;
-  position: relative;
-}
-
-.memory-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.memory-card.featured {
-  border-color: #dc3545;
-  background: linear-gradient(135deg, #fff, #fff8f8);
-}
-
-.memory-card.featured::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  border-radius: 20px 20px 0 0;
-}
-
-/* Memory Avatar */
-.memory-avatar {
-  position: relative;
-  margin-bottom: 20px;
-  display: inline-block;
-}
-
-.memory-avatar img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #f0f0f0;
-  transition: all 0.3s ease;
-}
-
-.memory-card.featured .memory-avatar img {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2);
-}
-
-.featured-badge {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 30px;
-  height: 30px;
-  background: #dc3545;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.8rem;
-  border: 3px solid white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Memory Content */
-.memory-name {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.memory-role {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.role-developer {
-  background: linear-gradient(45deg, #007bff, #0056b3);
-  color: white;
-}
-
-.role-editor {
-  background: linear-gradient(45deg, #28a745, #1e7e34);
-  color: white;
-}
-
-.role-designer {
-  background: linear-gradient(45deg, #ff6b9d, #c44569);
-  color: white;
-}
-
-.role-researcher {
-  background: linear-gradient(45deg, #6f42c1, #5a2d91);
-  color: white;
-}
-
-.memory-description {
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-  min-height: 60px;
-}
-
-.contact-btn {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  border: none;
-  border-radius: 25px;
-  padding: 8px 20px;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-  transition: all 0.3s ease;
-}
-
-.contact-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-}
-
-/* Navigation Arrows */
-.slider-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: white;
-  border: 2px solid #dc3545;
-  color: #dc3545;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 2;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.slider-nav:hover {
-  background: #dc3545;
-  color: white;
-  transform: translateY(-50%) scale(1.1);
-}
-
-/* .slider-nav:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-} */
-
-.slider-nav.prev {
-  left: 10px;
-}
-
-.slider-nav.next {
-  right: 10px;
-}
-
-/* Slider Indicators */
-.slider-indicators {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 30px;
-}
-
-.indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  background: #ddd;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.indicator.active {
-  background: #dc3545;
-  transform: scale(1.2);
-}
-
-.indicator:hover {
-  background: #c82333;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .memory-card {
-    flex: 0 0 calc(50% - 10px);
-  }
-  
-  .memories-slider {
-    margin: 0 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .memory-card {
-    flex: 0 0 100%;
-  }
-  
-  .memories-slider {
-    margin: 0 20px;
-  }
-  
-  .memory-avatar img {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .memory-name {
-    font-size: 1.2rem;
-  }
-  
-  .memory-description {
-    min-height: auto;
-  }
-  
-  .slider-nav {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .slider-nav.prev {
-    left: 5px;
-  }
-  
-  .slider-nav.next {
-    right: 5px;
-  }
-}
-
-@media (max-width: 576px) {
-  .memories-subtitle {
-    font-size: 1rem;
-  }
-  
-  .memory-card {
-    padding: 20px;
-  }
-  
-  .memory-avatar img {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .memory-name {
-    font-size: 1.1rem;
-  }
-  
-  .contact-btn {
-    font-size: 0.9rem;
-    padding: 6px 16px;
-  }
-}
-/* Period Header Enhancement */
-.period-header {
-  position: relative;
-  margin: 100px 0 60px 0;
-  scroll-margin-top: 150px;
-  text-align: center;
-}
-
-.period-marker {
-  position: absolute;
-  left: 50%;
-  top: -40px; /* Dịch lên trên 40px thay vì top: 0 */
-  transform: translateX(-50%);
-  z-index: 3;
-}
-
-.period-icon {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(45deg, #B8860B, #DAA520);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 1), 0 6px 20px rgba(184, 134, 11, 0.3);
-  border: 4px solid white;
-}
-
-.period-info {
-  background: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  margin-top: 10px; /* Giảm margin-top từ 30px xuống 10px */
-  border: 2px solid #f0f0f0;
-  position: relative;
-  z-index: 1; /* Đảm bảo nội dung không bị che */
-}
-
-.period-title {
-  color: #B8860B;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.period-duration {
-  color: #dc3545;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 15px;
-  font-style: italic;
-}
-
-.period-description {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-  .period-marker {
-    left: 30px;
-    top: -30px; /* Điều chỉnh cho mobile */
-  }
-  
-  .period-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-  
-  .period-info {
-    margin-left: 70px;
-    margin-top: 5px;
-  }
-  
-  .period-title {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .period-marker {
-    top: -25px;
-  }
-  
-  .period-title {
-    font-size: 1.3rem;
-  }
-}
-
-/* Tất cả CSS khác giữ nguyên... */
 /* Global Styles */
 .landing-page {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -1367,17 +908,18 @@ onBeforeUnmount(() => {
   z-index: 1000;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar {
-  padding: 1rem 0;
+  padding: 0.8rem 0;
 }
 
 .nav-link {
   color: #333 !important;
   font-weight: 500;
-  margin: 0 1rem;
+  margin: 0 0.8rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   text-decoration: none;
 }
@@ -1390,72 +932,273 @@ onBeforeUnmount(() => {
 .send-wishes-btn {
   background: linear-gradient(45deg, #667eea, #764ba2);
   border: none;
-  border-radius: 25px;
-  padding: 8px 24px;
+  border-radius: 20px;
+  padding: 6px 20px;
   font-weight: 500;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  font-size: 0.9rem;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
 }
 
 .send-wishes-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Brand/Logo Styles */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background: #333;
+  margin: 2px 0;
+  transition: all 0.3s ease;
+  border-radius: 1px;
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile Menu Overlay and Content */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.mobile-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.mobile-menu-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 300px;
+  height: 100%;
+  background: white;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu.show .mobile-menu-content {
+  transform: translateX(0);
+}
+
+/* Mobile Menu Header */
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+}
+
+.mobile-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mobile-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.mobile-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile Navigation Links */
+.mobile-nav-links {
+  flex: 1;
+  padding: 15px 0;
+  overflow-y: auto;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.mobile-nav-link:hover {
+  background: #f8f9fa;
+  color: #667eea;
+  padding-left: 25px;
+}
+
+.mobile-nav-link i {
+  margin-right: 10px;
+  width: 18px;
+  color: #667eea;
+  font-size: 0.85rem;
+}
+
+/* Mobile Menu Footer */
+.mobile-menu-footer {
+  padding: 15px;
+  border-top: 1px solid #f0f0f0;
+  background: #f8f9fa;
+}
+
+.mobile-send-wishes-btn {
+  width: 100%;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mobile-send-wishes-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 /* Main Content */
 .main-content {
-  padding-top: 80px;
+  padding-top: 60px;
 }
 
 /* Hero Section */
 .hero-section {
-  padding: 100px 0;
+  padding: 60px 0;
   text-align: center;
   color: white;
 }
 
 .hero-title {
-  font-size: 3.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
+  font-size: 1rem;
   opacity: 0.9;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Section Styles */
 .section-padding {
-  padding: 80px 0;
+  padding: 40px 0;
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   position: relative;
 }
 
 .section-title::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -8px;
   left: 0;
-  width: 50px;
-  height: 3px;
+  width: 40px;
+  height: 2px;
   background: linear-gradient(45deg, #667eea, #764ba2);
   border-radius: 2px;
 }
 
 .section-description {
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: #666;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 /* Introduction Section */
@@ -1466,9 +1209,9 @@ onBeforeUnmount(() => {
 
 .intro-carousel .carousel-item img {
   width: 100%;
-  height: 400px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: 10px;
 }
 
 /* Invitation Section */
@@ -1478,7 +1221,7 @@ onBeforeUnmount(() => {
 }
 
 .invitation-image img {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
 
@@ -1496,54 +1239,53 @@ onBeforeUnmount(() => {
 /* Timeline Sidebar */
 .timeline-sidebar {
   background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: sticky;
-  top: 120px;
-  max-height: calc(100vh - 140px);
+  top: 80px;
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
 }
 
 .sidebar-title {
   color: #8B4513;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .timeline-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .nav-item {
-  padding: 15px;
+  padding: 10px;
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
-  position: relative;
 }
 
 .nav-item:hover {
   background: #e9ecef;
-  transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(3px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item.active {
   background: linear-gradient(45deg, #dc3545, #c82333);
   color: white;
   border-color: #dc3545;
-  transform: translateX(8px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+  transform: translateX(5px);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
 .nav-item.in-view {
@@ -1554,15 +1296,15 @@ onBeforeUnmount(() => {
 .nav-item-content {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .nav-period {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #B8860B;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .nav-item.active .nav-period {
@@ -1570,10 +1312,10 @@ onBeforeUnmount(() => {
 }
 
 .nav-title {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #333;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .nav-item.active .nav-title {
@@ -1581,7 +1323,7 @@ onBeforeUnmount(() => {
 }
 
 .nav-duration {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: #666;
   font-style: italic;
 }
@@ -1591,13 +1333,13 @@ onBeforeUnmount(() => {
 }
 
 .nav-events-count {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: #999;
   background: rgba(0, 0, 0, 0.05);
-  padding: 2px 6px;
-  border-radius: 8px;
+  padding: 2px 5px;
+  border-radius: 6px;
   text-align: center;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .nav-item.active .nav-events-count {
@@ -1608,19 +1350,19 @@ onBeforeUnmount(() => {
 /* Timeline Main Content */
 .timeline-main {
   position: relative;
-  padding-left: 20px;
+  padding: 0 15px;
 }
 
 .timeline-subtitle {
   color: #666;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-style: italic;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .timeline {
   position: relative;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -1629,7 +1371,7 @@ onBeforeUnmount(() => {
   left: 50%;
   top: 0;
   bottom: 0;
-  width: 4px;
+  width: 3px;
   background: linear-gradient(to bottom, #dc3545, #c82333);
   transform: translateX(-50%);
   border-radius: 2px;
@@ -1638,22 +1380,26 @@ onBeforeUnmount(() => {
 /* Timeline Items */
 .timeline-item {
   position: relative;
-  margin: 80px 0;
+  margin: 40px 0;
   display: flex;
   align-items: center;
-  scroll-margin-top: 150px;
+  scroll-margin-top: 100px;
 }
 
-.timeline-item-right {
-  justify-content: flex-start;
+.timeline-item-left .timeline-content {
+  width: calc(50% - 60px);
+  margin-right: 10px;
+  margin-left: auto;
 }
 
-.timeline-item-left {
-  justify-content: flex-end;
+.timeline-item-right .timeline-content {
+  width: calc(50% - 60px);
+  margin-left: 10px;
+  margin-right: auto;
 }
 
-/* Timeline Marker */
-.timeline-marker {
+.timeline-item-left .timeline-marker,
+.timeline-item-right .timeline-marker {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -1661,8 +1407,12 @@ onBeforeUnmount(() => {
 }
 
 .timeline-number {
-  width: 50px;
-  height: 50px;
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35px;
+  height: 35px;
   background: linear-gradient(45deg, #dc3545, #c82333);
   border-radius: 50%;
   display: flex;
@@ -1670,76 +1420,76 @@ onBeforeUnmount(() => {
   justify-content: center;
   color: white;
   font-weight: bold;
-  font-size: 1.2rem;
-  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.9);
-  margin: 10px 0;
+  font-size: 0.9rem;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9);
 }
 
 .timeline-date {
   background: linear-gradient(45deg, #dc3545, #c82333);
   color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.65rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-  margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+  margin-top: 8px;
 }
 
 .timeline-date-left {
-  margin-left: -20px;
+  margin-right: 10px;
+  text-align: right;
 }
 
 .timeline-date-right {
-  margin-right: -20px;
+  margin-left: 10px;
+  text-align: left;
 }
 
 .timeline-content {
-  width: 45%;
   background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  position: relative;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   border: 1px solid #f0f0f0;
+  position: relative;
 }
 
 .timeline-content:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.timeline-item-right .timeline-content::before {
-  content: '';
-  position: absolute;
-  left: -15px;
-  top: 30px;
-  width: 0;
-  height: 0;
-  border-top: 15px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-right: 15px solid white;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .timeline-item-left .timeline-content::before {
   content: '';
   position: absolute;
-  right: -15px;
-  top: 30px;
+  right: -10px;
+  top: 20px;
   width: 0;
   height: 0;
-  border-top: 15px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-left: 15px solid white;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid white;
+}
+
+.timeline-item-right .timeline-content::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid white;
 }
 
 .timeline-title {
   color: #dc3545;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   line-height: 1.3;
 }
 
@@ -1748,119 +1498,305 @@ onBeforeUnmount(() => {
   display: inline-block;
   background: linear-gradient(45deg, #B8860B, #DAA520);
   color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .timeline-images img,
-.timeline-carousel-item img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
+.timeline-carousel-item img,
 .single-image {
   width: 100%;
-  height: 200px;
+  height: 150px;
   object-fit: cover;
-  border-radius: 10px;
-}
-
-.timeline-description {
-  color: #444;
-  line-height: 1.7;
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-}
-
-/* Key Events */
-.key-events {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #dc3545;
 }
 
-.key-events h4 {
-  color: #dc3545;
-  font-size: 1rem;
-  margin-bottom: 10px;
+/* Period Header */
+.period-header {
+  position: relative;
+  margin: 60px 0 40px 0;
+  scroll-margin-top: 100px;
+  text-align: center;
+}
+
+.period-marker {
+  position: absolute;
+  left: 50%;
+  top: -20px;
+  transform: translateX(-50%);
+}
+
+.period-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #B8860B, #DAA520);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 1);
+  border: 3px solid white;
 }
 
-.key-events ul {
-  margin: 0;
-  padding-left: 20px;
+.period-info {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 600px;
+  border: 2px solid #f0f0f0;
 }
 
-.key-events li {
+.period-title {
+  color: #B8860B;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.period-duration {
+  color: #dc3545;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.period-description {
   color: #555;
-  margin-bottom: 5px;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
-/* Historical Figures */
-.historical-figures {
-  margin: 20px 0;
+/* Memories Section */
+.memories-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
-.historical-figures h4 {
-  color: #dc3545;
-  font-size: 1rem;
-  margin-bottom: 10px;
+.memories-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.memories-carousel {
+  position: relative;
+  margin: 0 30px;
+}
+
+.carousel__viewport {
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.carousel__slide {
+  padding: 0 7.5px;
+}
+
+.memory-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+}
+
+.memory-card.featured {
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff, #fff8f8);
+}
+
+.memory-avatar {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.memory-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+}
+
+.memory-card.featured .memory-avatar img {
+  border-color: #dc3545;
+}
+
+.featured-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  background: #dc3545;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.figures-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.figure-tag {
-  background: linear-gradient(45deg, #dc3545, #c82333);
+  justify-content: center;
   color: white;
-  padding: 4px 10px;
+  font-size: 0.7rem;
+  border: 2px solid white;
+}
+
+.memory-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.memory-role {
+  display: inline-block;
+  padding: 5px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-/* Event Actions */
-.event-actions {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.view-details-btn {
-  color: #dc3545;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 0;
-  height: auto;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.memory-description {
+  color: #666;
+  line-height: 1.5;
+  font-size: 0.85rem;
+  min-height: 50px;
+}
+
+.contact-btn {
+  background: linear-gradient(45deg, #dc3545, #c82333);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+}
+
+.slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid #dc3545;
+  color: #dc3545;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.slider-nav:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.slider-nav.prev {
+  left: -45px;
+}
+
+.slider-nav.next {
+  right: -45px;
+}
+
+.carousel__pagination {
+  display: flex;
+  justify-content: center;
   gap: 8px;
+  margin-top: 20px;
+}
+
+.carousel__pagination-button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.view-details-btn:hover {
-  color: #c82333;
-  transform: translateX(5px);
+.carousel__pagination-button--active {
+  background: #dc3545;
+  transform: scale(1.2);
+}
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: white;
+  padding: 40px 0 20px;
+}
+
+.footer-title {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.contact-info p {
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.contact-info i {
+  margin-right: 8px;
+  width: 18px;
+  color: #3498db;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: #3498db;
+  transform: translateY(-2px);
+  color: white;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
 }
 
 /* Event Detail Modal */
 .event-detail-modal .ant-modal-content {
-  border-radius: 15px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -1869,319 +1805,262 @@ onBeforeUnmount(() => {
 }
 
 .detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
-  flex-wrap: wrap;
-  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
 }
 
 .detail-date {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  color: white;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.detail-image {
-  margin: 20px 0;
-  border-radius: 10px;
-  overflow: hidden;
+  padding: 4px 10px;
+  font-size: 0.8rem;
 }
 
 .detail-image img {
-  width: 100%;
-  height: auto;
-  max-height: 300px;
-  object-fit: cover;
+  max-height: 200px;
 }
 
 .detail-description p {
-  color: #444;
-  line-height: 1.7;
-  margin-bottom: 15px;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .detail-key-events {
-  margin: 25px 0;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border-left: 4px solid #dc3545;
+  padding: 15px;
 }
 
 .detail-key-events h4 {
-  color: #dc3545;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-key-events ul {
-  margin: 0;
-  padding-left: 20px;
+  font-size: 0.95rem;
 }
 
 .detail-key-events li {
-  color: #555;
-  margin-bottom: 8px;
-  line-height: 1.6;
+  font-size: 0.85rem;
 }
 
 .detail-figures h4 {
-  color: #dc3545;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.figures-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  font-size: 0.95rem;
 }
 
 .detail-figure-tag {
-  background: linear-gradient(45deg, #dc3545, #c82333);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 15px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 6px 12px;
+  font-size: 0.8rem;
 }
 
-/* Footer */
-.footer {
-  background: linear-gradient(135deg, #2c3e50, #34495e);
-  color: white;
-  padding: 60px 0 20px;
-}
-
-.footer-title {
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-.contact-info p {
-  margin-bottom: 0.8rem;
-  display: flex;
-  align-items: center;
-}
-
-.contact-info i {
-  margin-right: 10px;
-  width: 20px;
-  color: #3498db;
-}
-
-.social-links {
-  display: flex;
-  gap: 15px;
-}
-
-.social-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 45px;
-  height: 45px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border-radius: 50%;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.social-link:hover {
-  background: #3498db;
-  transform: translateY(-3px);
-  color: white;
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  opacity: 0.7;
-}
-
-/* Responsive Design */
-@media (max-width: 1199px) {
-  .timeline-sidebar {
-    position: relative;
-    top: 0;
-    margin-bottom: 30px;
-    max-height: none;
-  }
-  
-  .timeline-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 15px;
-    padding-bottom: 10px;
-  }
-  
-  .nav-item {
-    min-width: 200px;
-    flex-shrink: 0;
-  }
-}
-
+/* Responsive Adjustments */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .hero-section {
+    padding: 40px 0;
+  }
+
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
   }
-  
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .section-padding {
+    padding: 30px 0;
+  }
+
   .section-title {
-    font-size: 2rem;
-  }
-  
-  .period-title {
     font-size: 1.5rem;
   }
-  
-  .period-info {
-    padding: 20px;
+
+  .section-description {
+    font-size: 0.85rem;
   }
-  
-  /* Mobile Timeline */
+
+  .intro-carousel .carousel-item img {
+    height: 150px;
+  }
+
+  .invitation-image img {
+    height: 200px;
+  }
+
+  .timeline-subtitle {
+    font-size: 0.9rem;
+  }
+
   .timeline-line {
-    left: 30px;
+    left: 20px;
+    transform: none;
   }
-  
-  .timeline-marker {
-    left: 30px;
-  }
-  
-  .period-marker {
-    left: 30px;
-  }
-  
-  .timeline-number {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-  
-  .period-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-  
-  .timeline-date {
-    font-size: 0.8rem;
-    padding: 6px 12px;
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 8px;
-  }
-  
-  .timeline-content {
-    width: calc(100% - 80px);
-    margin-left: 70px;
-    padding: 20px;
-  }
-  
+
   .timeline-item-left .timeline-content,
   .timeline-item-right .timeline-content {
-    margin-left: 70px;
+    width: calc(100% - 60px);
+    margin-left: 60px;
+    margin-right: 0;
   }
-  
-  .timeline-content::before {
-    content: '';
-    position: absolute;
-    left: -15px;
-    top: 20px;
-    width: 0;
-    height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-right: 15px solid white;
-  }
-  
-  .timeline-item-left .timeline-content::before {
-    left: -15px;
+
+  .timeline-item-left .timeline-content::before,
+  .timeline-item-right .timeline-content::before {
+    right: auto;
+    left: -10px;
+    border-right: 10px solid white;
     border-left: none;
-    border-right: 15px solid white;
   }
-  
-  .period-info {
-    margin-left: 70px;
-    margin-top: 15px;
+
+  .timeline-item-left .timeline-marker,
+  .timeline-item-right .timeline-marker {
+    left: 20px;
+    transform: none;
   }
-  
+
+  .timeline-number {
+    top: -35px;
+    left: 20px;
+    transform: none;
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+
+  .timeline-date {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    margin-top: 6px;
+  }
+
+  .timeline-date-left,
+  .timeline-date-right {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+  }
+
   .timeline-title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
-  
+
   .timeline-images img,
   .timeline-carousel-item img,
   .single-image {
-    height: 150px;
+    height: 120px;
   }
-  
-  .navbar-nav {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .nav-link {
-    margin: 0.5rem 0;
-  }
-  
-  .send-wishes-btn {
-    margin-top: 1rem;
-  }
-  
-  .section-padding {
-    padding: 60px 0;
-  }
-  
-  .intro-carousel .carousel-item img {
-    height: 250px;
-  }
-  
-  .hero-section {
-    padding: 60px 0;
-  }
-}
 
-@media (max-width: 576px) {
-  .hero-title {
-    font-size: 2rem;
+  .timeline-description {
+    font-size: 0.85rem;
   }
-  
+
+  .key-events h4,
+  .historical-figures h4 {
+    font-size: 0.9rem;
+  }
+
+  .key-events li {
+    font-size: 0.8rem;
+  }
+
+  .figure-tag {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+  }
+
+  .period-header {
+    margin: 40px 0 30px 0;
+    text-align: left;
+  }
+
+  .period-marker {
+    left: 20px;
+    transform: none;
+  }
+
+  .period-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .period-info {
+    margin-left: 50px;
+    margin-right: 15px;
+    padding: 15px;
+  }
+
   .period-title {
     font-size: 1.3rem;
   }
-  
-  .nav-item {
-    min-width: 160px;
-  }
-  
-  .nav-title {
+
+  .period-duration {
     font-size: 0.8rem;
   }
-  
-  .nav-duration {
-    font-size: 0.7rem;
+
+  .period-description {
+    font-size: 0.85rem;
   }
-  
-  .nav-events-count {
-    font-size: 0.65rem;
+
+  .memories-carousel {
+    margin: 0 15px;
+  }
+
+  .memory-card {
+    padding: 15px;
+  }
+
+  .memory-avatar img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .memory-name {
+    font-size: 1rem;
+  }
+
+  .memory-role {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .memory-description {
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  .contact-btn {
+    font-size: 0.8rem;
+    padding: 5px 14px;
+  }
+
+  .slider-nav {
+    width: 30px;
+    height: 30px;
+  }
+
+  .slider-nav.prev {
+    left: -35px;
+  }
+
+  .slider-nav.next {
+    right: -35px;
+  }
+
+  .footer {
+    padding: 30px 0 15px;
+  }
+
+  .footer-title {
+    font-size: 1.1rem;
+  }
+
+  .contact-info p {
+    font-size: 0.85rem;
+  }
+
+  .social-link {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .footer-bottom {
+    font-size: 0.8rem;
   }
 }
 </style>

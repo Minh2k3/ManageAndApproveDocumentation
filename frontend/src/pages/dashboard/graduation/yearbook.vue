@@ -183,6 +183,7 @@
               </div>
             </a-tab-pane>
             
+
             <a-tab-pane key="audio" tab="Ghi âm">
               <template #tab>
                 <i class="fas fa-microphone"></i>
@@ -233,6 +234,7 @@
                 </div>
               </div>
             </a-tab-pane>
+            
           </a-tabs>
         </a-form-item>
 
