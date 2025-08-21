@@ -85,8 +85,8 @@
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="container">
-          <h1 class="hero-title">Chào mừng đến với trang của chúng tôi</h1>
-          <p class="hero-subtitle">Hành trình tuyệt vời đang chờ đón bạn</p>
+          <h1 class="hero-title" :class="{ 'typing': isTypingTitle }">{{ displayedTitle }}</h1>
+          <p class="hero-subtitle" :class="{ 'typing': isTypingSubtitle }">{{ displayedSubtitle }}</p>
         </div>
       </section>
 
@@ -449,6 +449,14 @@ const activePeriod = ref(0)
 const periodHeaders = ref([])
 const timelineItems = ref([])
 
+// Hero typewriter effect
+const displayedTitle = ref('')
+const displayedSubtitle = ref('')
+const isTypingTitle = ref(false)
+const isTypingSubtitle = ref(false)
+const fullTitle = 'Chào cậu, tớ là Himakevolution'
+const fullSubtitle = 'Thật vui khi cậu có mặt ở đây cùng tớ'
+
 // Responsive slides per view
 const slidesPerView = computed(() => {
   if (window.innerWidth <= 576) return 1
@@ -687,68 +695,304 @@ const timelinePeriods = ref([
       },   
     ]
   },
+    {
+    period: "Năm Ba ",
+    shortTitle: "Thức tỉnh",
+    duration: "9/2022 - 8/2023",
+    shortDuration: "9/2022 - 8/2023",
+    description: "Vấp ngã và đứng dậy",
+    events: [
+      {
+        title: "Một buổi học ĐSTT",
+        date: "22/9/2022",
+        specificDuration: "22/9/2022",
+        images: ["/images/sophomore/DSTT_1.jpg"],
+        description: "Buổi gặp mặt đầu tiên sau khi nhập học lại bằng hình thức trực tuyến.",
+        detailedDescription: "Sinh hoạt đầu khóa là một trong những nội dung quan trọng khi mình bước vào môi trường đại học. Vì nó cho mình cái nhìn tổng quan về ngôi trường theo học, giúp mình giải đáp những thắc mắc trong quá trình học. Tuy vậy, thời đấy mình vẫn còn ngây ngô nên cứ treo máy chứ không thực sự tập trung. Cũng bởi thế nên mình đã bỏ phí rất nhiều thời gian để tìm hiểu chúng vào sau này.",
+        keyEvents: [
+          "Giới thiệu về trường",
+          "Bài giảng đầu tiên",
+        ],
+        figures: [
+          "Thầy Vũ Nam Phong",
+          "Nguyễn Việt Hoàng aka Gấu Bắc Cực - Lớp trưởng",
+          "Phan Thị Quỳnh - Bí thư - và là đồng hương"
+        ]
+      },
+      {
+        title: "Họp chi bộ CNTT4",
+        date: "26/9/2022",
+        specificDuration: "26/9/2022",
+        images: ["/images/sophomore/HopChiBo_1.jpg"],
+        description: "Buổi sinh hoạt chi bộ thường kỳ trực tiếp đầu tiên tại TLU",
+        detailedDescription: "Là lễ chào tân duy nhất tớ góp mặt với tư cách người tham dự. Trong 3 lần tổ chức tiếp theo, tớ luôn nằm trong BTC, và mỗi lần là một vai trò khác nhau.",
+        keyEvents: [
+          "Sinh hoạt chi bộ thường kỳ",
+        ],
+        figures: [
+          "Chi bộ CNTT4",
+          "Liên Chi đoàn khoa CNTT"
+        ]
+      },
+      {
+        title: "Tổng kết năm học 2021-2022 khối sinh viên",
+        date: "15/11/2022",
+        specificDuration: "15/11/2022",
+        images: [
+          "/images/sophomore/TongKetNamHoc_1.jpg"
+        ],
+        description: "Lần đầu gặp cô chủ nhiệm cũ",
+        detailedDescription: "Sinh hoạt đầu khóa là một trong những nội dung quan trọng khi mình bước vào môi trường đại học. Vì nó cho mình cái nhìn tổng quan về ngôi trường theo học, giúp mình giải đáp những thắc mắc trong quá trình học. Tuy vậy, thời đấy mình vẫn còn ngây ngô nên cứ treo máy chứ không thực sự tập trung. Cũng bởi thế nên mình đã bỏ phí rất nhiều thời gian để tìm hiểu chúng vào sau này.",
+        keyEvents: [
+          "Tổng kết năm học",
+          "Học bổng Nguyễn Nhung"
+        ],
+        figures: [
+          "Himakevolution"
+        ]
+      },
+      {
+        title: " Olympic Toán Sinh viên lần thứ 29 ",
+        date: "04/2023",
+        specificDuration: "05-08/04/2023",
+        images: [
+          "/images/sophomore/ToanHoc_1.jpg", 
+          "/images/sophomore/ToanHoc_2.jpg",
+          "/images/sophomore/ToanHoc_3.jpg",
+        ],
+        description: "Đội tuyển Toán TLU",
+        detailedDescription: ".",
+        keyEvents: [
+          "Olympic Toán học ",
+        ],
+        figures: [
+          "Thầy Nguyễn Hữu Thọ",
+          "Cô Nguyễn Thị Lý",
+          "Anh em đội toán"
+        ]
+      },
+      {
+        title: " OLP Triết năm 2023",
+        date: "18/05/2023",
+        specificDuration: " Tối 18/05/2023",
+        images: [
+          "/images/sophomore/OLP_Triet_1.png", 
+          "/images/sophomore/OLP_Triet_2.png",
+          "/images/sophomore/OLP_Triet_3.png",
+        ],
+        description: "Đội tuyển OLP Triết học",
+        detailedDescription: ".",
+        keyEvents: [
+          "OLP Triết ",
+          "Giải Ba "
+        ],
+        figures: [
+          "Đội tuyển….",
+        ]
+      },
+      {
+        title: "Sinh hoạt cùng SIC",
+        date: "05/12/2021",
+        specificDuration: "05/12/2021",
+        images: [
+          "/images/sophomore/SinhHoatCungSIC_1.jpg",
+        ],
+        description: "Buổi sinh hoạt cùng câu lạc bộ SIC",
+        detailedDescription: "Buổi sinh hoạt đầu tiên cùng câu lạc bộ SIC, nơi mình được làm quen với nhiều bạn mới và tìm hiểu về các hoạt động của câu lạc bộ.",
+        keyEvents: [
+          "Buổi sinh hoạt cùng SIC"
+        ],
+        figures: [
+          "SIC",
+        ]
+      },   
+    ]
+  },
+  {
+    period: "Năm cuối rồi",
+    shortTitle: "Cũng đã đến lúc nghẹn ngào",
+    duration: "9/2024 - 8/2025",
+    shortDuration: "9/2024 - 8/2025",
+    description: "Là giây phút tạm biệt, là lúc bắt đầu một hành trình mới",
+    events: [
+      {
+        title: "Đại Hội LCĐ Khoa CNTT 2024-2027",
+        date: "15/10/2024",
+        specificDuration: "Sáng 15/10/2024",
+        images: [
+          "/images/senior/DHLCDCNTT_1.png", 
+          "/images/senior/DHLCDCNTT_2.png",
+          "/images/senior/DHLCDCNTT_3.png",
+        ],
+        description: "Đây có thể là nơi mà mình hạ cánh, tuy nhiên chuyến bay cùng với BCH LCĐ Khoa CNTT vẫn đã tiếp tục.",
+        detailedDescription: "Sau Đại hội, mình vẫn là Phó Bí thư, nhưng chỉ đóng vai như một người bạn đồng hành. Những sự kiện sau đấy trong kì 1, mình vẫn thi thoảng hỗ trợ các em. Còn tới kì 2, gần như mọi việc đều do Hà Trang và Lan Anh chịu trách nhiệm chính. Hai đứa làm rất tốt, tốt hơn nhiều so với mình và H.Anh. Nhờ đó, trong khoảng thời gian này, phong trào sinh viên trong khoa có những bước nhảy vọt, sôi nổi hơn, năng lượng hơn. Mong là sau này, mọi người vẫn giữ vững được cái tinh thần ấy.",
+        keyEvents: [
+          "Đại hội"
+        ],
+        figures: [
+          "BCH LCĐ Khoa CNTT",
+          "4 Phó Bí thư"
+        ]
+      },      
+      {
+        title: "Đại Hội BCH Đoàn TNCS 24-27",
+        date: "15/12/2024",
+        specificDuration: "Sáng 15/12/2024",
+        images: [
+          "/images/senior/DHDoanTruong_1.png", 
+          "/images/senior/DHDoanTruong_2.png",
+          "/images/senior/DHDoanTruong_3.png",
+        ],
+        description: "Đại hội Đại biểu BCH Đoàn trường",
+        detailedDescription: "Thêm một nhiệm kỳ, nhưng đóng góp của mình chẳng là bao, dù mình là một UV BTV.",
+        keyEvents: [
+          "Đại hội"
+        ],
+        figures: [
+          "Đoàn Trường",
+        ]
+      },
+      {
+        title: " Đêm nhạc hội SS66",
+        date: "22/03/2025",
+        specificDuration: "Tối 22/03/2025",
+        images: [
+          "/images/senior/SS66_1.png", 
+          "/images/senior/SS66_2.png",
+          "/images/senior/SS66_3.png",
+        ],
+        description: "Đêm nhạc hội SS66 cùng lễ tổng kết tháng thanh niên tại TLU",
+        detailedDescription: "Hoàng Yến Chibi tới thăm TLU.",
+        keyEvents: [
+          "SS66",
+          "Tổng kết Đoàn - Tháng Thanh niên"
+        ],
+        figures: [
+          "Hoàng Yến Chibi",
+        ]
+      },
+
+      {
+        title: " Olympic Toán Sinh viên lần thứ 29 ",
+        date: "04/2023",
+        specificDuration: "05-08/04/2023",
+        images: [
+          "/images/sophomore/ToanHoc_1.jpg", 
+          "/images/sophomore/ToanHoc_2.jpg",
+          "/images/sophomore/ToanHoc_3.jpg",
+        ],
+        description: "Đội tuyển Toán TLU",
+        detailedDescription: ".",
+        keyEvents: [
+          "Olympic Toán học ",
+        ],
+        figures: [
+          "Thầy Nguyễn Hữu Thọ",
+          "Cô Nguyễn Thị Lý",
+          "Anh em đội toán"
+        ]
+      },
+      {
+        title: " OLP Triết năm 2023",
+        date: "18/05/2023",
+        specificDuration: " Tối 18/05/2023",
+        images: [
+          "/images/sophomore/OLP_Triet_1.png", 
+          "/images/sophomore/OLP_Triet_2.png",
+          "/images/sophomore/OLP_Triet_3.png",
+        ],
+        description: "Đội tuyển OLP Triết học",
+        detailedDescription: ".",
+        keyEvents: [
+          "OLP Triết ",
+          "Giải Ba "
+        ],
+        figures: [
+          "Đội tuyển….",
+        ]
+      },
+      {
+        title: "Sinh hoạt cùng SIC",
+        date: "05/12/2021",
+        specificDuration: "05/12/2021",
+        images: [
+          "/images/sophomore/SinhHoatCungSIC_1.jpg",
+        ],
+        description: "Buổi sinh hoạt cùng câu lạc bộ SIC",
+        detailedDescription: "Buổi sinh hoạt đầu tiên cùng câu lạc bộ SIC, nơi mình được làm quen với nhiều bạn mới và tìm hiểu về các hoạt động của câu lạc bộ.",
+        keyEvents: [
+          "Buổi sinh hoạt cùng SIC"
+        ],
+        figures: [
+          "SIC",
+        ]
+      },   
+    ]
+  },
 ])
 
-// Memories data
+// Memories data (giữ nguyên như code gốc, giả sử có sẵn)
 const memories = ref([
   {
     id: 1,
-    name: 'Hoàng Cường Thịnh',
-    role: 'Lập trình viên',
-    roleClass: 'role-developer',
-    avatar: 'https://picsum.photos/200/200?random=1',
-    description: 'Hỗ trợ xây dựng website để đưa vào hoạt động',
+    name: 'Thi toán',
+    role: 'Huế 2023',
+    roleClass: 'Test',
+    avatar: 'images/something/GiaiBaOLPToan.jpg',
+    description: 'Giải Ba OLP Toán Sinh viên',
     featured: false
   },
   {
     id: 2,
-    name: 'Tạ Thanh An',
-    role: 'Lập trình viên',
+    name: 'Giấy khen',
+    role: 'Giấy khen',
     roleClass: 'role-developer',
-    avatar: 'https://picsum.photos/200/200?random=2',
-    description: 'Tôi xây dựng website với mục đích mang lại cho người dùng dòng chảy lịch sử Việt Nam xuyên suốt, dễ dàng tìm kiếm, tìm hiểu!',
+    avatar: 'images/something/GiayKhenDaiHoiLCDKhoa.jpg',
+    description: 'Giấy khen Đại hội Liên Chi đoàn Khoa CNTT nhiệm kỳ 2024-2027',
     featured: false
   },
   {
     id: 3,
-    name: 'Trần Yến Vy',
-    role: 'Biên soạn',
+    name: 'Bằng khen HSV TP Hà Nội',
+    role: 'Bằng khen',
     roleClass: 'role-editor',
-    avatar: 'https://picsum.photos/200/200?random=3',
-    description: 'Tình nguyện viên hỗ trợ biên soạn đóng góp nội dung cho website',
+    avatar: 'images/something/HSVTPHN2324.jpg',
+    description: 'Bằng khen HSV TPHN vì có nhiều đóng góp cho hoạt động hội nhiệm kỳ 2023-2024',
     featured: false
   },
   {
     id: 4,
-    name: 'Nguyễn Minh Đức',
-    role: 'Thiết kế',
+    name: 'Giấy khen HSV',
+    role: 'Giấy khen',
     roleClass: 'role-designer',
-    avatar: 'https://picsum.photos/200/200?random=4',
-    description: 'Thiết kế giao diện và trải nghiệm người dùng cho trang web lịch sử',
+    avatar: 'images/something/HSVTruong2123.jpg',
+    description: 'Giấy khen HSV Trường vì có nhiều đóng góp nhiệm kỳ 2021-2023',
     featured: false
   },
   {
     id: 5,
-    name: 'Lê Thị Hương',
-    role: 'Nghiên cứu',
+    name: 'Có gì',
+    role: 'Khen thưởng',
     roleClass: 'role-researcher',
-    avatar: 'https://picsum.photos/200/200?random=5',
-    description: 'Nghiên cứu và sưu tầm tài liệu lịch sử Việt Nam',
+    avatar: 'images/something/SVXuatSacNhatNganh2223.jpg',
+    description: 'Sinh viên Xuất sắc nhất ngành năm học 2022-2023',
     featured: false
-  }
+  },
+  {
+    id: 6,
+    name: 'Gì gì đó',
+    role: 'Khen thưởng',
+    roleClass: 'role-researcher',
+    avatar: 'images/something/SVXuatSacToanDien2122.jpg',
+    description: 'Sinh viên Xuất sắc toàn diện năm học 2021-2022',
+    featured: false
+  },
 ])
 
-// Methods
-// Mobile menu methods
+// Functions
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
-  
-  // Prevent body scroll when menu is open
-  if (isMobileMenuOpen.value) {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = 'auto'
-  }
+  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : 'auto'
 }
 
 const closeMobileMenu = () => {
@@ -756,28 +1000,67 @@ const closeMobileMenu = () => {
   document.body.style.overflow = 'auto'
 }
 
-const scrollToMobile = (elementId) => {
-  const element = document.getElementById(elementId)
+const scrollTo = (sectionId) => {
+  const element = document.getElementById(sectionId)
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
   }
-  closeMobileMenu()
 }
 
-const goToSendWishesMobile = () => {
-  router.push('/graduation-yearbook')
+const scrollToMobile = (sectionId) => {
   closeMobileMenu()
-}
-
-const scrollTo = (elementId) => {
-  const element = document.getElementById(elementId)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-  }
+  scrollTo(sectionId)
 }
 
 const goToSendWishes = () => {
-  router.push('/graduation-yearbook')
+  router.push('/yearbook')
+}
+
+const goToSendWishesMobile = () => {
+  closeMobileMenu()
+  goToSendWishes()
+}
+
+// Typewriter effect function
+const typeText = () => {
+  displayedTitle.value = ''
+  displayedSubtitle.value = ''
+  isTypingTitle.value = true
+  isTypingSubtitle.value = false
+
+  let titleIndex = 0
+  const titleInterval = setInterval(() => {
+    if (titleIndex < fullTitle.length) {
+      displayedTitle.value += fullTitle[titleIndex]
+      titleIndex++
+    } else {
+      clearInterval(titleInterval)
+      isTypingTitle.value = false
+      isTypingSubtitle.value = true
+
+      let subtitleIndex = 0
+      const subtitleInterval = setInterval(() => {
+        if (subtitleIndex < fullSubtitle.length) {
+          displayedSubtitle.value += fullSubtitle[subtitleIndex]
+          subtitleIndex++
+        } else {
+          clearInterval(subtitleInterval)
+          isTypingSubtitle.value = false
+          // Lặp lại sau 15 giây
+          setTimeout(typeText, 15000)
+        }
+      }, 100) // Tốc độ đánh máy cho subtitle
+    }
+  }, 100) // Tốc độ đánh máy cho title
+}
+
+// Timeline functions (giữ nguyên như code gốc)
+const getEventNumber = (periodIndex, eventIndex) => {
+  let total = 1
+  for (let i = 0; i < periodIndex; i++) {
+    total += timelinePeriods.value[i].events.length
+  }
+  return total + eventIndex
 }
 
 const viewEventDetails = (event) => {
@@ -786,43 +1069,10 @@ const viewEventDetails = (event) => {
 }
 
 const scrollToPeriod = (periodIndex) => {
-  let element = periodHeaders.value[periodIndex]
-  
-  if (!element) {
-    element = document.getElementById(`period-header-${periodIndex}`)
+  const header = periodHeaders.value[periodIndex]
+  if (header) {
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
-  
-  if (!element) {
-    return
-  }
-  
-  const headerHeight = 60
-  const extraOffset = 20
-  
-  const elementRect = element.getBoundingClientRect()
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const elementTop = elementRect.top + scrollTop
-  
-  const targetPosition = elementTop - headerHeight - extraOffset
-  
-  window.scrollTo({
-    top: Math.max(0, targetPosition),
-    behavior: 'smooth'
-  })
-  
-  activePeriod.value = periodIndex
-}
-
-const getEventNumber = (periodIndex, eventIndex) => {
-  let number = 1
-  
-  for (let i = 0; i < periodIndex; i++) {
-    number += timelinePeriods.value[i].events.length
-  }
-  
-  number += eventIndex
-  
-  return number
 }
 
 const handleScroll = () => {
@@ -830,9 +1080,7 @@ const handleScroll = () => {
 }
 
 const updateActivePeriod = () => {
-  if (periodHeaders.value.length === 0) return
-  
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  const scrollTop = document.documentElement.scrollTop
   const windowHeight = window.innerHeight
   const centerPoint = scrollTop + windowHeight / 2
   
@@ -875,6 +1123,8 @@ onMounted(() => {
   nextTick(() => {
     updateActivePeriod()
   })
+  // Bắt đầu hiệu ứng đánh máy
+  typeText()
 })
 
 onBeforeUnmount(() => {
@@ -1162,12 +1412,32 @@ onBeforeUnmount(() => {
   font-weight: 700;
   margin-bottom: 0.8rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .hero-subtitle {
   font-size: 1rem;
   opacity: 0.9;
   margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Typewriter Cursor Effect */
+.typing::after {
+  content: '|';
+  animation: blink 0.7s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Section Styles */

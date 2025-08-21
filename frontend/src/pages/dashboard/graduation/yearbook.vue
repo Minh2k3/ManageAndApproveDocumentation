@@ -64,7 +64,7 @@
             v-for="wish in wishes" 
             :key="wish.id" 
             class="sticky-note"
-            :class="[
+            :class="[ 
               `note-color-${(wish.id % 6) + 1}`,
               { 'dragging': isDragging && dragNoteId === wish.id }
             ]"
@@ -183,7 +183,6 @@
               </div>
             </a-tab-pane>
             
-
             <a-tab-pane key="audio" tab="Ghi âm">
               <template #tab>
                 <i class="fas fa-microphone"></i>
@@ -192,7 +191,7 @@
               <div class="audio-section">
                 <div v-if="!isRecording && !audioBlob" class="record-start">
                   <button
-                    type="primary"
+                    type="button"
                     size="large"
                     @click="startRecording"
                     class="record-btn text-white"
@@ -200,13 +199,13 @@
                     <i class="fas fa-microphone"></i>
                     Bắt đầu ghi âm
                   </button>
-                  <p>Nhấn để bắt đầu ghi âm lời chúc của bạn</p>
+                  <p>Nhấn để bắt đầu ghi âm lời chúc của bạn (tối đa 30 giây)</p>
                 </div>
                 
                 <div v-if="isRecording" class="recording-active">
                   <div class="recording-indicator">
                     <i class="fas fa-circle recording-dot"></i>
-                    Đang ghi âm... {{ recordingTime }}s
+                    Đang ghi âm... {{ recordingTime }}s / 30s
                   </div>
                   <a-button
                     type="danger"
@@ -223,11 +222,11 @@
                   <audio :src="audioUrl" controls class="audio-player"></audio>
                   <div class="audio-actions">
                     <a-button @click="startRecording" type="default">
-                      <i class="fas fa-redo"></i>
+                      <i class="fas fa-redo me-2"></i>
                       Ghi lại
                     </a-button>
                     <a-button @click="removeAudio" type="danger">
-                      <i class="fas fa-trash"></i>
+                      <i class="fas fa-trash me-2"></i>
                       Xóa
                     </a-button>
                   </div>
@@ -359,9 +358,9 @@ const viewWishModalVisible = ref(false)
 const successModalVisible = ref(false)
 const imagePreviewVisible = ref(false)
 
-// Form data - ✅ Fixed: Use computed for currentUser
+// Form data
 const newWish = reactive({
-  senderName: '', // Will be set in resetForm
+  senderName: '',
   content: {
     text: '',
     images: [],
@@ -403,7 +402,6 @@ const DRAG_TIME_THRESHOLD = 150
 // 🌐 API Methods using store
 const submitWish = async () => {
   try {
-    // Validate required fields
     if (!newWish.content.text.trim()) {
       message.error('Vui lòng nhập lời chúc!')
       return
@@ -416,34 +414,26 @@ const submitWish = async () => {
 
     console.log('📤 Bắt đầu gửi lời chúc qua store...')
 
-    // Prepare wish data for store
     const wishData = {
       senderName: newWish.senderName.trim(),
       content: {
         text: newWish.content.text.trim(),
-        images: [...newWish.content.images], // Copy array
-        audioBlob: audioBlob.value // Pass the blob directly
+        images: [...newWish.content.images],
+        audioBlob: audioBlob.value
       },
-      position: wishStore.generateRandomPosition() // Use store method
+      position: wishStore.generateRandomPosition()
     }
 
-    // Send via store
     const result = await wishStore.sendWish(wishData)
 
     if (result.success) {
-      // Show success modal with generated code
       generatedCode.value = result.wish.code
       addWishModalVisible.value = false
       successModalVisible.value = true
       resetForm()
-
-      // ✅ No need to refresh - store already updated the list
-      
-      // Show success message
       message.success(result.message)
       console.log(`✅ Đã tạo lời chúc với mã: ${result.wish.code}`)
     } else {
-      // Handle specific errors
       let errorMessage = result.error
       if (result.error.includes('CSRF') || result.error.includes('XSRF-TOKEN')) {
         errorMessage += ' Vui lòng làm mới trang và thử lại!'
@@ -455,7 +445,6 @@ const submitWish = async () => {
     }
     
   } catch (error) {
-    // Handle unexpected errors with more detail
     const errorMessage = error.response?.status === 419 
       ? 'Lỗi CSRF token không hợp lệ, vui lòng làm mới trang!'
       : 'Có lỗi không mong muốn xảy ra khi gửi lời chúc!'
@@ -464,14 +453,13 @@ const submitWish = async () => {
   }
 }
 
-// 🔍 Search Methods (Local search in store data)
+// 🔍 Search Methods
 const searchWishById = () => {
   if (!searchId.value.trim()) {
     message.warning('Vui lòng nhập ID để tìm kiếm!')
     return
   }
   
-  // Search in store data
   const wish = wishes.value.find(w => w.id.toString() === searchId.value.trim())
   if (wish) {
     viewWishDetail(wish)
@@ -482,10 +470,10 @@ const searchWishById = () => {
   }
 }
 
-// 🔄 Refresh data manually (optional)
+// 🔄 Refresh data manually
 const refreshWishes = async () => {
   console.log('🔄 Manual refresh requested...')
-  const result = await wishStore.fetchWishes(true) // Force refresh
+  const result = await wishStore.fetchWishes(true)
   
   if (result.success) {
     if (result.fromCache) {
@@ -599,10 +587,10 @@ const viewWishDetail = (wish) => {
   viewWishModalVisible.value = true
 }
 
-// 📝 Form handling - ✅ Fixed: Proper initialization
+// 📝 Form handling
 const resetForm = () => {
   Object.assign(newWish, {
-    senderName: wishStore.currentUser || '', // ✅ Fixed: Fallback value
+    senderName: wishStore.currentUser || '',
     content: {
       text: '',
       images: [],
@@ -650,51 +638,68 @@ const previewImage = (imageUrl) => {
 }
 
 // 🎵 Audio recording
-const startRecording = async () => {
+const startRecording = async (event) => {
+  event.preventDefault();
+  event.stopPropagation();
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    mediaRecorder.value = new MediaRecorder(stream)
-    const chunks = []
-    
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder.value = new MediaRecorder(stream);
+    const chunks = [];
+
     mediaRecorder.value.ondataavailable = (e) => {
-      chunks.push(e.data)
-    }
-    
+      chunks.push(e.data);
+    };
+
     mediaRecorder.value.onstop = () => {
-      audioBlob.value = new Blob(chunks, { type: 'audio/wav' })
-      audioUrl.value = URL.createObjectURL(audioBlob.value)
-      stream.getTracks().forEach(track => track.stop())
-    }
-    
-    mediaRecorder.value.start()
-    isRecording.value = true
-    recordingTime.value = 0
-    
+      audioBlob.value = new Blob(chunks, { type: 'audio/wav' });
+      audioUrl.value = URL.createObjectURL(audioBlob.value);
+      stream.getTracks().forEach((track) => track.stop());
+    };
+
+    mediaRecorder.value.start();
+    isRecording.value = true;
+    recordingTime.value = 0;
+
     recordingTimer.value = setInterval(() => {
-      recordingTime.value++
-    }, 1000)
-    
+      recordingTime.value++;
+      if (recordingTime.value >= 30) { // Giới hạn 30 giây
+        stopRecording();
+        message.info('Đã đạt giới hạn ghi âm 30 giây!');
+      }
+    }, 1000);
+
+    // Tự động dừng sau 30 giây
+    setTimeout(() => {
+      if (isRecording.value) {
+        stopRecording();
+        message.info('Đã đạt giới hạn ghi âm 30 giây!');
+      }
+    }, 30000);
+
   } catch (error) {
-    message.error('Không thể truy cập microphone!')
+    message.error('Không thể truy cập microphone!');
+    console.error('Lỗi khi bắt đầu ghi âm:', error);
   }
-}
+};
 
 const stopRecording = () => {
   if (mediaRecorder.value && isRecording.value) {
-    mediaRecorder.value.stop()
-    isRecording.value = false
-    clearInterval(recordingTimer.value)
+    mediaRecorder.value.stop();
+    isRecording.value = false;
+    clearInterval(recordingTimer.value);
+    recordingTimer.value = null;
   }
-}
+};
 
 const removeAudio = () => {
-  audioBlob.value = null
-  audioUrl.value = ''
-  recordingTime.value = 0
+  audioBlob.value = null;
+  audioUrl.value = '';
+  recordingTime.value = 0;
   if (recordingTimer.value) {
-    clearInterval(recordingTimer.value)
+    clearInterval(recordingTimer.value);
+    recordingTimer.value = null;
   }
-}
+};
 
 // 🔧 Utility functions
 const copyCodeToClipboard = () => {
@@ -730,7 +735,7 @@ const hasMedia = (wish) => {
   return (wish.content.images && wish.content.images.length > 0) || wish.content.audio
 }
 
-// 📊 Debug methods (for development)
+// 📊 Debug methods
 const showStoreStats = () => {
   const stats = wishStore.getStats
   console.log('📊 Store Stats:', stats)
@@ -738,17 +743,14 @@ const showStoreStats = () => {
 }
 
 // 🚀 Lifecycle
-// yearbook.vue - script setup
 onMounted(async () => {
   console.log('📱 Yearbook page mounted')
   console.log(`👤 Current user: ${wishStore.currentUser}`)
   console.log(`📅 Current time: ${new Date().toLocaleString('vi-VN')}`)
   console.log(`🌐 API base URL: ${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}`)
   
-  // Initialize form with current user
   resetForm()
   
-  // Initialize store and load wishes
   const result = await wishStore.initialize()
   
   if (result.success) {
@@ -766,7 +768,6 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  // Cleanup
   if (recordingTimer.value) {
     clearInterval(recordingTimer.value)
   }
@@ -799,7 +800,6 @@ onBeforeUnmount(() => {
 .canvas-board {
   position: relative;
   background: 
-    /* Notebook paper style */
     linear-gradient(#f8f9fa 0%, #f1f3f4 100%);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -820,11 +820,8 @@ onBeforeUnmount(() => {
   right: 0;
   bottom: 0;
   background-image: 
-    /* Horizontal lines */
     linear-gradient(rgba(79, 172, 254, 0.3) 1px, transparent 1px),
-    /* Vertical lines */
     linear-gradient(90deg, rgba(79, 172, 254, 0.3) 1px, transparent 1px),
-    /* Heavier grid every 5 lines */
     linear-gradient(rgba(52, 144, 220, 0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgba(52, 144, 220, 0.5) 1px, transparent 1px);
   background-size: 
@@ -1619,7 +1616,6 @@ onBeforeUnmount(() => {
     font-size: 1.1rem;
   }
 
-  /* Hide nature decorations on mobile */
   .canvas-container::before,
   .canvas-container::after,
   .canvas-section::before,
@@ -1675,7 +1671,6 @@ onBeforeUnmount(() => {
     border-radius: 15px;
   }
 
-  /* Smaller grid on mobile */
   .canvas-grid {
     background-size: 
       20px 20px,
