@@ -98,25 +98,29 @@
               <div class="intro-content">
                 <h2 class="section-title">Giới thiệu</h2>
                 <p class="section-description">
-                  Chào mừng bạn đến với không gian đặc biệt của chúng tôi. Đây là nơi lưu giữ những kỷ niệm đẹp,
-                  những câu chuyện ý nghĩa và những khoảnh khắc quý giá trong cuộc sống. 
-                  Chúng tôi mong muốn chia sẻ với bạn hành trình tuyệt vời này.
+                  Tớ là Trần Minh, sinh viên lớp 63CNTT4, khoa Công nghệ Thông tin, Trường Đại học Thủy lợi
                 </p>
-                <p class="section-description">
+                <!-- <p class="section-description">
                   Hãy cùng chúng tôi khám phá những điều tuyệt vời và tạo nên những kỷ niệm mới.
-                </p>
+                </p> -->
               </div>
             </div>
             <div class="col-lg-6">
               <a-carousel autoplay effect="fade" class="intro-carousel">
                 <div class="carousel-item">
-                  <img src="https://picsum.photos/600/400?random=1" alt="Giới thiệu 1" />
+                  <img loading="lazy" :src="images['Minh_1']" alt="Giới thiệu 1" />
                 </div>
                 <div class="carousel-item">
-                  <img src="https://picsum.photos/600/400?random=2" alt="Giới thiệu 2" />
+                  <img loading="lazy" :src="images['Minh_2']" alt="Giới thiệu 2" />
                 </div>
                 <div class="carousel-item">
-                  <img src="https://picsum.photos/600/400?random=3" alt="Giới thiệu 3" />
+                  <img loading="lazy" :src="images['Minh_3']" alt="Giới thiệu 3" />
+                </div>
+                <div class="carousel-item">
+                  <img loading="lazy" :src="images['Minh_4']" alt="Giới thiệu 4" />
+                </div>
+                <div class="carousel-item">
+                  <img loading="lazy" :src="images['Minh_5']" alt="Giới thiệu 5" />
                 </div>
               </a-carousel>
             </div>
@@ -130,20 +134,19 @@
           <div class="row align-items-center">
             <div class="col-lg-6">
               <div class="invitation-image">
-                <img :src="images['Thiệp']" alt="Thiệp mời" class="img-fluid rounded" />
+                <img loading="lazy" :src="images['Thiệp']" alt="Thiệp mời" class="img-fluid rounded" />
               </div>
             </div>
             <div class="col-lg-6">
               <div class="invitation-content">
                 <h2 class="section-title">Thiệp mời</h2>
                 <p class="section-description">
-                  Chúng tôi trân trọng gửi đến bạn lời mời tham gia vào sự kiện đặc biệt này.
-                  Đây sẽ là một dịp tuyệt vời để chúng ta cùng nhau chia sẻ những khoảnh khắc ý nghĩa.
+                  Trân quý và biết ơn sự hiện diện của cậu ở đây. Nếu có lời nào muốn gửi gắm đến tớ hay là có những bức hình chung mà cậu chưa từng cho tớ xem, hãy nhấn nút phía dưới, tớ sẽ đón nhận mọi điều tốt đẹp từ cậu.
                 </p>
-                <p class="section-description">
+                <!-- <p class="section-description">
                   Sự hiện diện của bạn sẽ làm cho sự kiện thêm phần ý nghĩa và trọn vẹn.
                   Hãy cùng chúng tôi tạo nên những kỷ niệm đẹp.
-                </p>
+                </p> -->
                 <a-button type="primary" size="large" class="mt-3" @click="goToSendWishes">
                   Gửi lời chúc mừng
                 </a-button>
@@ -249,10 +252,10 @@
                         <div class="timeline-images mb-3" v-if="event.images && event.images.length > 0">
                           <a-carousel v-if="event.images.length > 1" autoplay>
                             <div v-for="(image, imgIndex) in event.images" :key="imgIndex" class="timeline-carousel-item">
-                              <img :src="image" :alt="`${event.title} ${imgIndex + 1}`" />
+                              <img loading="lazy" :src="image" :alt="`${event.title} ${imgIndex + 1}`" />
                             </div>
                           </a-carousel>
-                          <img v-else :src="event.images[0]" :alt="event.title" class="single-image" />
+                          <img loading="lazy" v-else :src="event.images[0]" :alt="event.title" class="single-image" />
                         </div>
                         
                         <p class="timeline-description">{{ event.description }}</p>
@@ -315,7 +318,7 @@
               <slide v-for="(memory, index) in memories" :key="index">
                 <div class="memory-card" :class="{ 'featured': memory.featured }">
                   <div class="memory-avatar">
-                    <img :src="memory.avatar" :alt="memory.name" />
+                    <img loading="lazy" :src="memory.avatar" :alt="memory.name" />
                     <div v-if="memory.featured" class="featured-badge">
                       <i class="fas fa-check"></i>
                     </div>
@@ -399,7 +402,7 @@
         <div class="detail-image" v-if="selectedEvent.images && selectedEvent.images.length > 0">
           <a-carousel autoplay>
             <div v-for="(image, imgIndex) in selectedEvent.images" :key="imgIndex">
-              <img :src="image" :alt="`${selectedEvent.title} ${imgIndex + 1}`" />
+              <img loading="lazy" :src="image" :alt="`${selectedEvent.title} ${imgIndex + 1}`" />
             </div>
           </a-carousel>
         </div>
@@ -468,11 +471,11 @@ const slidesPerView = computed(() => {
 // Images path array
 const images = {
   'Thiệp': '/images/another/Thiệp.png',
-  'Minh_1': '/images/another/Minh_1.png',
-  'Minh_2': '/images/another/Minh_2.png',
-  'Minh_3': '/images/another/Minh_3.png',
-  'Minh_4': '/images/another/Minh_4.png',
-  'Minh_5': '/images/another/Minh_5.png',
+  'Minh_1': '/images/another/Minh_1.jpg',
+  'Minh_2': '/images/another/Minh_2.jpg',
+  'Minh_3': '/images/another/Minh_3.jpg',
+  'Minh_4': '/images/another/Minh_4.jpg',
+  'Minh_5': '/images/another/Minh_5.jpg',
 }
 
 // Timeline periods data
@@ -508,7 +511,7 @@ const timelinePeriods = ref([
           "Chào tân",
         ],
         figures: [
-          "Thầy Nguyễn Thanh Tùng - Nguyên Trưởng khoa CNTT",
+          "Thầy Tùng - Nguyên Trưởng khoa CNTT",
           "Anh Nguyễn Tuấn Vũ",
           "Đặng Hải Sơn"
         ]
@@ -530,8 +533,8 @@ const timelinePeriods = ref([
       },
       {
         title: "Lễ khai giảng năm học 2021-2022",
-        date: "15/10/2021",
-        specificDuration: "Sáng 15/10/2021",
+        date: "11/10/2021",
+        specificDuration: "Sáng 11/10/2021",
         images: [
           "/images/freshman/KhaiGiang_1.png", 
           "/images/freshman/KhaiGiang_2.png"
@@ -561,7 +564,7 @@ const timelinePeriods = ref([
           "Nhập môn lập trình"
         ],
         figures: [
-          "Cô Nguyễn Quỳnh Diệp - Trưởng Bộ môn Tin học và KTTT",
+          "Cô Nguyễn Quỳnh Diệp",
         ]
       },
       {
@@ -580,6 +583,39 @@ const timelinePeriods = ref([
           "SIC",
         ]
       },   
+      {
+        title: "Đợt thi hết môn đầu tiên",
+        date: "05/12/2021",
+        specificDuration: "05/12/2021",
+        images: [
+          "/images/freshman/ThiHetMon_1.jpg",
+          "/images/freshman/ThiHetMon_2.jpg",
+        ],
+        description: "Không ngờ lần đầu thi hết môn lại thi bằng hình thức online",
+        detailedDescription: "Lần đầu thi cuối kỳ, mình thực sự còn chưa hiểu rõ về cái điểm tổng kết nó tính thế nào, GPA là gì mà cứ thế thi. Kì đầu tiên này, trừ môn Linux ra thì mình nghĩ chắc đứa nào cũng 9+. Riêng cái nhập môn lập trình thì mình làm có mỗi gần 10p, đâm ra các thầy cô giám thị nghĩ mình cheat. Nói chung, đợt đấy vừa học vừa chill.",
+        keyEvents: [
+          "Thi cuối kỳ"
+        ],
+        figures: [
+          "Himakevolution",
+        ]
+      },    
+      {
+        title: "Học bổng đầu tiên",
+        date: "05/12/2021",
+        specificDuration: "05/12/2021",
+        images: [
+          "/images/freshman/HocBongKy1.jpg",
+        ],
+        description: "Học bổng lần đầu tiên tại TLU",
+        detailedDescription: "Đợt đấy, cứ nghĩ chỉ cần điểm cao là sẽ được học bổng, còn chưa hiểu điểm rèn luyện thực chất là gì. Tuy nhiên, may mắn là mình có quen 1 anh ở trong SIC. Anh í bảo cứ điền láo lên 90+ đi. Mình nghe theo thật, và điền ",
+        keyEvents: [
+          "Học bổng"
+        ],
+        figures: [
+          "Himakevolution",
+        ]
+      },        
     ]
   },
   {
@@ -695,7 +731,7 @@ const timelinePeriods = ref([
       },   
     ]
   },
-    {
+  {
     period: "Năm Ba ",
     shortTitle: "Thức tỉnh",
     duration: "9/2022 - 8/2023",
@@ -813,16 +849,70 @@ const timelinePeriods = ref([
     shortTitle: "Cũng đã đến lúc nghẹn ngào",
     duration: "9/2024 - 8/2025",
     shortDuration: "9/2024 - 8/2025",
-    description: "Là giây phút tạm biệt, là lúc bắt đầu một hành trình mới",
+    description: "Năm của những lần cuối cùng, là thời khắc hạ cánh, Là giây phút tạm biệt, và cũng là lúc mình sẽ viết tiếp một chương mới trong cuộc đời",
     events: [
+      {
+        title: "Chào tân K66",
+        date: "21/9/2024",
+        specificDuration: "Sáng 21/9/2024",
+        images: [
+          "/images/senior/ChaoTanK66_1.png", 
+          "/images/senior/ChaoTanK66_2.png",
+        ],
+        description: "Chào tân sinh K66.",
+        detailedDescription: "Lần cuối cùng mình tham gia vào BTC chương trình chào tân, ",
+        keyEvents: [
+          "Đại hội"
+        ],
+        figures: [
+          "BCH LCĐ Khoa CNTT",
+          "4 Phó Bí thư"
+        ]
+      },   
+      {
+        title: "CSE Got Talent",
+        date: "27/9/2024",
+        specificDuration: "27/9/2024",
+        images: [
+          "/images/senior/CSEGotTalent_1.jpg",
+          "/images/senior/CSEGotTalent_2.jpg"
+        ],
+        description: "Nhóm mình được giải Ba nè olala.",
+        detailedDescription: "Bài này chúng mình tự viết trên một nền nhạc có sẵn và quả thật mình rap hay vãi ò. Mình nghe đi nghe lại mấy lần đoạn của bạn Phú.",
+        keyEvents: [
+          "Chung kết CSE Got Talent",
+          "Lời xin lỗi muộn màng",
+        ],
+        figures: [
+          "Thầy Đỗ Lân – Phó trưởng khoa",
+          "Vân Đình và Trương Huy Phú"
+        ]
+      },
+      {
+        title: "Tổng kết Khoa",
+        date: "26/10/2024",
+        specificDuration: "26/10/2024",
+        images: ["/images/senior/TKKhoa_1.jpg"],
+        description: "Buổi tổng kết năm học cuối cùng trong quãng thanh xuân sinh viên của mình.",
+        detailedDescription: "Vẫn là cảm xúc khó diễn tả bằng lời vì mình lại được nhận giấy khen như mọi năm.",
+        keyEvents: [
+          "Tổng kết ",
+          "Sinh viên xuất sắc ",
+        ],
+        figures: [
+          "Thầy Đỗ Lân – Phó trưởng khoa",
+          "Thầy Võ Tá Hoàng – Bí thư LCĐ",
+          "Các bạn sinh viên trong khoa"
+        ]
+      },
       {
         title: "Đại Hội LCĐ Khoa CNTT 2024-2027",
         date: "15/10/2024",
         specificDuration: "Sáng 15/10/2024",
         images: [
-          "/images/senior/DHLCDCNTT_1.png", 
-          "/images/senior/DHLCDCNTT_2.png",
-          "/images/senior/DHLCDCNTT_3.png",
+          "/images/senior/DHLCDCNTT_1.jpg",
+          "/images/senior/DHLCDCNTT_2.jpg",
+          "/images/senior/DHLCDCNTT_3.jpg",
         ],
         description: "Đây có thể là nơi mà mình hạ cánh, tuy nhiên chuyến bay cùng với BCH LCĐ Khoa CNTT vẫn đã tiếp tục.",
         detailedDescription: "Sau Đại hội, mình vẫn là Phó Bí thư, nhưng chỉ đóng vai như một người bạn đồng hành. Những sự kiện sau đấy trong kì 1, mình vẫn thi thoảng hỗ trợ các em. Còn tới kì 2, gần như mọi việc đều do Hà Trang và Lan Anh chịu trách nhiệm chính. Hai đứa làm rất tốt, tốt hơn nhiều so với mình và H.Anh. Nhờ đó, trong khoảng thời gian này, phong trào sinh viên trong khoa có những bước nhảy vọt, sôi nổi hơn, năng lượng hơn. Mong là sau này, mọi người vẫn giữ vững được cái tinh thần ấy.",
@@ -912,19 +1002,60 @@ const timelinePeriods = ref([
         ]
       },
       {
-        title: "Sinh hoạt cùng SIC",
-        date: "05/12/2021",
-        specificDuration: "05/12/2021",
+        title: "CSE Cup 2025",
+        date: "05/12/2025",
+        specificDuration: "05/12/2025",
         images: [
-          "/images/sophomore/SinhHoatCungSIC_1.jpg",
+          "/images/senior/CSECup_1.jpg",
+          "/images/senior/CSECup_2.jpg",
         ],
-        description: "Buổi sinh hoạt cùng câu lạc bộ SIC",
-        detailedDescription: "Buổi sinh hoạt đầu tiên cùng câu lạc bộ SIC, nơi mình được làm quen với nhiều bạn mới và tìm hiểu về các hoạt động của câu lạc bộ.",
+        description: "Tham gia giải bóng đá CSE Cup 2025",
+        detailedDescription: "Rút kinh nghiệm từ lần tham gia trước đó, giải này, đội bóng chọn những anh em thường xuyên chinh chiến cùng nhau, xây dựng lối chơi vì tập thể chứ không phụ thuộc cá nhân. Hơn nữa, đội còn được bổ sung 4 cầu chất lượng từ lớp 63TTNT. Khỏi phải nói, mình cảm giác như đây là tinh túy nhất của FC TT5. Vào giải, gặp bảng đấu khá khó nhằn, nhưng thực sự mình thấy cơ hội vào sâu là khá cao. Trận đầu gặp 63CNTT3, á quân mùa giải trước, và lịch sử đấu thì bọn mình cũng chưa bao giờ thắng. Tuy nhiên, như đã nói, ... (dài quá kể sau nhe, tóm lại không có happy ending)",
         keyEvents: [
-          "Buổi sinh hoạt cùng SIC"
+          "Giải bóng"
         ],
         figures: [
-          "SIC",
+          "63CNTT4",
+        ]
+      },       
+      {
+        title: "Bảo vệ đồ án",
+        date: "19/07/2025",
+        specificDuration: "19/07/2025",
+        images: [
+          "/images/senior/BVDA_1.jpg",
+          "/images/senior/BVDA_2.jpg",
+          "/images/senior/BVDA_3.jpg",
+          "/images/senior/BVDA_4.jpg",
+          "/images/senior/BVDA_5.jpg",
+          "/images/senior/BVDA_6.jpg",
+          "/images/senior/BVDA_7.jpg",
+          "/images/senior/BVDA_8.jpg",
+        ],
+        description: "Show diễn cuối của Himakevolution tại TLU",
+        detailedDescription: "Bảo vệ đồ án, mình muốn điểm A. Ngặt nỗi, đề tài mình chọn lại thuần web, nên càng gần ngày bảo vệ, mình lại càng thấy lo. May thay, hôm nộp quyển, mình được vào hội đồng có vẻ nhẹ nhàng nhất nên lại tự tin hơn trước. Đến ngày bảo vệ, mình có một đội cổ động đông như quân Nguyên, khá chắc là nhất nhì trường đấy. Không khí vui vẻ, mình cực thoải mái, và khi không có một chút áp lực nào thì việc trình bày đối với mình chỉ như cái búng tay. Những câu hỏi phản biện mình đều trả lời suôn sẻ, có điều đôi phần chưa sát với nghiệp vụ thực tế. Nhưng như vậy là đã đủ, mình được 8.8, thành công thực hiện lời hứa đạt A. Thực sự cảm ơn mọi người hôm đó đã tới động viên tinh thần cho mình, dù có một vài thứ mình muốn làm mà chưa làm được.",
+        keyEvents: [
+          "Bảo vệ đồ án"
+        ],
+        figures: [
+          "Himakevolution",
+        ]
+      },        
+      {
+        title: "Tổng kết lớp 63CNTT4",
+        date: "05/12/2025",
+        specificDuration: "05/12/2025",
+        images: [
+          "/images/senior/TongKetLop_1.jpg",
+          "/images/senior/TongKetLop_2.jpg",
+        ],
+        description: "Liên hoan tổng kết 4 năm đồng hành với nhau",
+        detailedDescription: "4 năm đồng hành cùng nhau, và giờ là lúc để nhìn lại.",
+        keyEvents: [
+          "Liên hoan"
+        ],
+        figures: [
+          "63CNTT4",
         ]
       },   
     ]
@@ -1405,6 +1536,9 @@ onBeforeUnmount(() => {
   padding: 60px 0;
   text-align: center;
   color: white;
+  background: linear-gradient(-45deg, #2b8edf 0%, #329acd 28%, #28b6de 67%, #00eeff 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
 }
 
 .hero-title {
@@ -1479,7 +1613,7 @@ onBeforeUnmount(() => {
 
 .intro-carousel .carousel-item img {
   width: 100%;
-  height: 200px;
+  height: 380px;
   object-fit: cover;
   border-radius: 10px;
 }

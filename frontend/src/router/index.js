@@ -11,7 +11,7 @@ import { useAuth } from "@/stores/use-auth.js";
 
 const redirectRoot = [{
     path: '/',
-    redirect: {name: 'dashboard'}
+    redirect: {name: 'graduation'}
 }];
 
 const routes = [...redirectRoot, ...admin, ...dashboard, ...login, ...register, ...creator, ...approver, ...retrieve, ...graduation];
@@ -32,20 +32,31 @@ router.beforeEach(async (to, from, next) => {
     //     return next();
     // }
 
+    // if (!authStore.isAuthenticated) {
+    //     if (to.path !== '/login' 
+    //         && to.path !== '/register' 
+    //         && to.path !== '/reset-password'
+    //         && to.path !== '/retrieve'
+    //         && to.path !== '/hoi-dong'
+    //         && to.path !== '/term'
+    //         && to.path !== '/testweb'
+    //         && to.path !== '/graduation'
+    //         && to.path !== '/graduation-yearbook'
+    //         && to.path !== '/dashboard'
+    //         && to.path !== '/'
+    //     ) {
+    //         return next('/dashboard');
+    //     } else {
+    //         return next();
+    //     }
+    // }
+
     if (!authStore.isAuthenticated) {
-        if (to.path !== '/login' 
-            && to.path !== '/register' 
-            && to.path !== '/reset-password'
-            && to.path !== '/retrieve'
-            && to.path !== '/hoi-dong'
-            && to.path !== '/term'
-            && to.path !== '/testweb'
-            && to.path !== '/graduation'
+        if (to.path !== '/graduation'
             && to.path !== '/graduation-yearbook'
-            && to.path !== '/dashboard'
             && to.path !== '/'
         ) {
-            return next('/dashboard');
+            return next('/graduation');
         } else {
             return next();
         }
